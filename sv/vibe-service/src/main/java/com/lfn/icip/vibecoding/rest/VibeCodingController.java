@@ -170,6 +170,12 @@ public class VibeCodingController {
         String originalProvider = String.valueOf(request.get("provider"));
         String originalModel = String.valueOf(request.get("model"));
 
+        // OpenCode manages its own model config — skip the Goose-specific retry loop.
+        if ("opencode".equalsIgnoreCase(framework)) {
+            logger.info("Agent update provider skipped for OpenCode (provider={}, model={})", originalProvider, originalModel);
+            return ResponseEntity.ok("{}");
+        }
+
         // Translate "litellm" → goosed's "openai" provider (LiteLLM is OpenAI-compatible).
         // The actual provider sent to goosed and the config upserts are handled below.
         String gooseProvider = "litellm".equals(originalProvider) ? "openai" : originalProvider;
@@ -333,12 +339,17 @@ public class VibeCodingController {
      */
     @GetMapping(value = "/sessions/{sessionId}/files", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GooseMinioService.FileEntry>> sessionFiles(
-            @PathVariable(value = "sessionId") String sessionId) {
-        logger.info("Session files request from MinIO, session={}", sessionId);
-                if (gooseMinioService == null) {
-                        logger.warn("Session files request rejected: Goose MinIO is not configured");
-                        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
-                }
+            @PathVariable(value = "sessionId") String sessionId,
+            @RequestHeader(value = "X-Vibe-Framework", required = false) String framework) {
+        logger.info("Session files request, session={}, framework={}", sessionId, framework);
+        if ("opencode".equalsIgnoreCase(framework)) {
+            logger.info("Session files skipped for OpenCode — files not stored in MinIO");
+            return ResponseEntity.ok(java.util.Collections.emptyList());
+        }
+        if (gooseMinioService == null) {
+            logger.warn("Session files request rejected: Goose MinIO is not configured");
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
         try {
             return ResponseEntity.ok(gooseMinioService.listSessionFiles(sessionId));
         } catch (IllegalArgumentException ex) {

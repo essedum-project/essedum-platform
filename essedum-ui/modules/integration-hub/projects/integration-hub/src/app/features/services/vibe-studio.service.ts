@@ -828,7 +828,9 @@ export class VibeStudioService implements OnDestroy {
 
     // After every reply, fetch all generated files directly from MinIO
     // (Goose uploads them under goose-apps/<session_id>/ as it writes them).
-    if (this.session.id) {
+    // OpenCode does not use MinIO — skip the poll and go idle immediately so the
+    // status$ fallback in the editor can extract code from the chat message.
+    if (this.session.id && this.currentFramework !== 'opencode') {
       const sid = this.session.id;
       this.loadFilesFromMinio(sid, () => {
         // Emit the complete file list before transitioning to idle
@@ -843,6 +845,10 @@ export class VibeStudioService implements OnDestroy {
       return;
     }
 
+    // OpenCode or no session ID: files already extracted from markdown above; go idle now.
+    if (this.files$.value.length) {
+      this.generationComplete$.next([...this.files$.value]);
+    }
     if (this.status$.value !== 'live') {
       this.status$.next('idle');
     }

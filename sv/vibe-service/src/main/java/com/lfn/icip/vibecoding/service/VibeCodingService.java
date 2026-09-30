@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -129,6 +130,22 @@ public class VibeCodingService {
     private String extractTextFromGooseBody(Map<String, Object> body) {
         if (body.containsKey("text"))    return String.valueOf(body.get("text"));
         if (body.containsKey("content")) return String.valueOf(body.get("content"));
+        // Angular sends { user_message: { role, content: [{type, text}] } }
+        if (body.containsKey("user_message")) {
+            Object userMsg = body.get("user_message");
+            if (userMsg instanceof Map) {
+                Object content = ((Map<?, ?>) userMsg).get("content");
+                if (content instanceof String) return (String) content;
+                if (content instanceof List) {
+                    for (Object part : (List<?>) content) {
+                        if (part instanceof Map) {
+                            Object t = ((Map<?, ?>) part).get("text");
+                            if (t != null) return t.toString();
+                        }
+                    }
+                }
+            }
+        }
         if (body.containsKey("messages")) {
             Object msgs = body.get("messages");
             if (msgs instanceof List) {
@@ -153,6 +170,13 @@ public class VibeCodingService {
     }
 
     private static final Pattern OC_ID_PATTERN = Pattern.compile("\"id\"\\s*:\\s*\"([^\"]+)\"");
+
+    // When OpenCode uses a tool call (e.g. "question") instead of generating code,
+    // we send this follow-up so the model proceeds — same as Goose's direct flow.
+    private static final int    OPENCODE_MAX_TOOL_RETRIES = 2;
+    private static final String OPENCODE_TOOL_FOLLOWUP    =
+            "Generate the complete Python script now. Make reasonable assumptions for any missing details " +
+            "(dataset columns, target column, etc.) and write the full production-ready code.";
 
     private String extractIdFromOpencodeJson(String json) {
         if (json == null) return null;
@@ -208,9 +232,19 @@ public class VibeCodingService {
                                 if (part instanceof Map) {
                                     Map<?, ?> p = (Map<?, ?>) part;
                                     if ("text".equals(p.get("type")) && p.get("text") != null) {
+                                        String text = p.get("text").toString().trim();
+                                        // Suppress tool-call JSON payloads — OpenCode embeds
+                                        // tool invocations as text parts inside assistant messages.
+                                        if (text.startsWith("{") && (
+                                                text.contains("\"name\"") ||
+                                                text.contains("\"tool_name\"") ||
+                                                text.contains("\"tool_args\"") ||
+                                                text.contains("\"arguments\""))) {
+                                            continue; // skip this part; real text parts pass through
+                                        }
                                         Map<String, Object> cp = new HashMap<>();
                                         cp.put("type", "text_delta");
-                                        cp.put("text", p.get("text").toString());
+                                        cp.put("text", text);
                                         contentParts.add(cp);
                                     }
                                 }
@@ -224,26 +258,67 @@ public class VibeCodingService {
                         }
                     }
                 }
+                return null; // assistant.message with no real text parts — suppress entirely
             }
 
-            // For session.next.text.ended, suppress tool-call payloads.
-            // OpenCode's agentic workflow emits tool calls ({"name":"bash",...} or
-            // {"name":"websearch",...}) as the text of intermediate steps.
-            // These are internal agent actions, not user-facing content.
-            // The SSE connection stays open; when the agent finishes its tool chain
-            // and produces actual text (code, prose), that text.ended passes through.
+            // For session.next.text.ended: suppress tool-call JSON payloads;
+            // normalize real code/prose text into the same {role, content} shape that
+            // assistant.message uses — Angular's extractText already renders that format.
             if ("session.next.text.ended".equals(type)) {
                 Object data = event.get("data");
+                logger.info("OC text.ended data type={}", data == null ? "null" : data.getClass().getSimpleName());
                 if (data instanceof Map) {
                     Object textObj = ((Map<?, ?>) data).get("text");
+                    logger.info("OC text.ended textObj type={} len={} prefix={}",
+                            textObj == null ? "null" : textObj.getClass().getSimpleName(),
+                            textObj instanceof String ? ((String) textObj).length() : -1,
+                            textObj instanceof String ? ((String) textObj).substring(0, Math.min(120, ((String) textObj).length())).replace("\n", "\\n") : "N/A");
                     if (textObj instanceof String) {
                         String text = ((String) textObj).trim();
-                        // A tool call is a JSON object with a "name" key — filter it out.
-                        if (text.startsWith("{") && text.contains("\"name\"")) {
-                            return null; // suppress; stream stays open for subsequent steps
+                        // Tool-call JSON detected — try to extract the file content
+                        // (e.g. OpenCode's "write" tool: {"name":"write","arguments":{"path":"...","content":"..."}})
+                        if (text.startsWith("{") && (
+                                text.contains("\"name\"") ||
+                                text.contains("\"tool_name\"") ||
+                                text.contains("\"tool_args\""))) {
+                            String code = extractCodeFromToolCall(text);
+                            if (code != null && !code.isEmpty()) {
+                                logger.info("OC text.ended extracted code from tool call, len={}", code.length());
+                                String display = code.contains("\n") && !code.startsWith("```")
+                                        ? "```python\n" + code + "\n```" : code;
+                                Map<String, Object> normTc = new HashMap<>();
+                                normTc.put("role", "assistant");
+                                List<Map<String, Object>> partsTc = new ArrayList<>();
+                                Map<String, Object> partTc = new HashMap<>();
+                                partTc.put("type", "text_delta");
+                                partTc.put("text", display);
+                                partsTc.add(partTc);
+                                normTc.put("content", partsTc);
+                                return objectMapper.writeValueAsString(normTc);
+                            }
+                            logger.info("OC text.ended suppressed as tool-call JSON (no extractable code)");
+                            return null;
+                        }
+                        // Real content — convert to the assistant-message shape Angular renders.
+                        // Wrap multi-line content in a Python fence so the Angular code-editor
+                        // fallback (which scans for ```python blocks) can extract and display it.
+                        if (!text.isEmpty()) {
+                            String display = (text.contains("\n") && !text.startsWith("```"))
+                                    ? "```python\n" + text + "\n```"
+                                    : text;
+                            Map<String, Object> norm = new HashMap<>();
+                            norm.put("role", "assistant");
+                            List<Map<String, Object>> parts = new ArrayList<>();
+                            Map<String, Object> part = new HashMap<>();
+                            part.put("type", "text_delta");
+                            part.put("text", display);
+                            parts.add(part);
+                            norm.put("content", parts);
+                            return objectMapper.writeValueAsString(norm);
                         }
                     }
                 }
+                return null; // empty text.ended — suppress
             }
 
         } catch (Exception ignored) {}
@@ -494,7 +569,9 @@ public class VibeCodingService {
      * <ol>
      *   <li>Resolves or creates the OpenCode session.</li>
      *   <li>Sends the user prompt via {@code POST /api/session/:id/prompt} (blocking).</li>
-     *   <li>Opens the event SSE stream at {@code GET /api/session/:id/event}.</li>
+     *   <li>Streams events; if the model calls a tool (e.g. the question tool) without producing
+     *       any renderable text, a follow-up prompt is sent automatically so the model generates
+     *       code — matching Goose's direct one-shot flow.</li>
      * </ol>
      */
     @SuppressWarnings("unchecked")
@@ -518,20 +595,165 @@ public class VibeCodingService {
             // Step 2 — send prompt (blocking, non-SSE)
             Object promptBody = opencodeBody("/sessions/" + sessionId + "/reply", body);
             post("/api/session/" + sessionId + "/prompt", promptBody, "opencode");
-            // Step 3 — open event stream
-            final String eventsPath = "/api/session/" + sessionId + "/event";
-            logger.debug("opencode SSE GET {}", eventsPath);
-            Flux<String> flux = opencodeWebClient.get()
-                    .uri(eventsPath)
-                    .accept(MediaType.TEXT_EVENT_STREAM)
-                    .retrieve()
-                    .bodyToFlux(String.class);
-            subscribeAndPipe(flux, emitter, "OpenCode SSE " + eventsPath, this::normalizeOpencodeEvent);
+            // Step 3 — stream; auto-follow-up if model uses a tool call with no code output
+            streamOpencodeEvents(emitter, sessionId, 0);
         } catch (Exception ex) {
             logger.error("OpenCode reply stream setup error: {}", ex.getMessage(), ex);
             completeWithError(emitter, ex);
         }
         return emitter;
+    }
+
+    /**
+     * Opens {@code GET /api/session/:id/event}, forwards normalized events to {@code emitter},
+     * and — if the model used a tool call without producing any renderable text — sends
+     * {@link #OPENCODE_TOOL_FOLLOWUP} and re-streams (up to {@link #OPENCODE_MAX_TOOL_RETRIES}
+     * times), matching Goose's behaviour of generating code on the first useful turn.
+     */
+    private void streamOpencodeEvents(SseEmitter emitter, String sessionId, int attempt) {
+        String eventsPath = "/api/session/" + sessionId + "/event";
+        logger.info("opencode SSE GET {} (attempt {})", eventsPath, attempt);
+
+        AtomicBoolean gotContent  = new AtomicBoolean(false);
+        AtomicBoolean hadToolCall = new AtomicBoolean(false);
+        AtomicBoolean done        = new AtomicBoolean(false);
+        // Holds the Reactor subscription so we can cancel it when the step ends.
+        // OpenCode keeps its event stream open indefinitely; we must cut it ourselves.
+        reactor.core.Disposable[] sub = {null};
+
+        Flux<String> flux = opencodeWebClient.get()
+                .uri(eventsPath)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .retrieve()
+                .bodyToFlux(String.class);
+
+        sub[0] = flux.subscribe(
+            rawData -> {
+                if (done.get()) return;
+                try {
+                    if (isOpencodeToolCallEvent(rawData)) hadToolCall.set(true);
+                    String out = normalizeOpencodeEvent(rawData);
+                    if (out != null) {
+                        if (out.contains("\"text_delta\"")) gotContent.set(true);
+                        emitter.send(SseEmitter.event().data(out, MediaType.APPLICATION_JSON));
+                    }
+                    // OpenCode never closes its event stream; finish as soon as the step ends.
+                    if (isStepEndedEvent(rawData) && done.compareAndSet(false, true)) {
+                        if (sub[0] != null) sub[0].dispose();
+                        finishOpencodeStream(emitter, sessionId, attempt, gotContent, hadToolCall);
+                    }
+                } catch (Exception sendEx) {
+                    logger.warn("OpenCode SSE {} send error: {}", eventsPath, sendEx.getMessage());
+                    emitter.completeWithError(sendEx);
+                }
+            },
+            error -> {
+                logger.error("OpenCode SSE error (attempt {}): {}", attempt, error.getMessage());
+                if (done.compareAndSet(false, true)) {
+                    completeWithError(emitter, error);
+                }
+            },
+            () -> {
+                // OpenCode closed the stream on its own (rare)
+                if (done.compareAndSet(false, true)) {
+                    finishOpencodeStream(emitter, sessionId, attempt, gotContent, hadToolCall);
+                }
+            }
+        );
+    }
+
+    /** Returns true when {@code rawEvent} is a {@code session.next.step.ended} event. */
+    @SuppressWarnings("unchecked")
+    private boolean isStepEndedEvent(String rawEvent) {
+        if (rawEvent == null) return false;
+        try {
+            Map<String, Object> ev = objectMapper.readValue(rawEvent, Map.class);
+            return "session.next.step.ended".equals(ev.getOrDefault("type", ""));
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    /** Handles auto-follow-up logic and emitter completion after an OpenCode step ends. */
+    private void finishOpencodeStream(SseEmitter emitter, String sessionId, int attempt,
+            AtomicBoolean gotContent, AtomicBoolean hadToolCall) {
+        logger.info("opencode SSE complete attempt={} gotContent={} hadToolCall={}", attempt, gotContent.get(), hadToolCall.get());
+        if (!gotContent.get() && hadToolCall.get() && attempt < OPENCODE_MAX_TOOL_RETRIES) {
+            logger.info("OpenCode tool-only step (attempt {}), sending follow-up", attempt);
+            Thread t = new Thread(() -> {
+                try {
+                    List<Map<String, String>> parts = new ArrayList<>();
+                    parts.add(Map.of("type", "text", "text", OPENCODE_TOOL_FOLLOWUP));
+                    opencodeWebClient.post()
+                            .uri("/api/session/" + sessionId + "/prompt")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(Map.of("prompt",
+                                    Map.of("text", OPENCODE_TOOL_FOLLOWUP, "parts", parts)))
+                            .retrieve().toBodilessEntity().block(blockTimeout);
+                    streamOpencodeEvents(emitter, sessionId, attempt + 1);
+                } catch (Exception ex) {
+                    logger.error("OpenCode follow-up failed: {}", ex.getMessage());
+                    completeWithError(emitter, ex);
+                }
+            }, "oc-followup-" + attempt);
+            t.setDaemon(true);
+            t.start();
+        } else {
+            emitter.complete();
+        }
+    }
+
+    /**
+     * Extracts file content from a tool-call JSON payload.
+     * OpenCode uses: {"name":"write","arguments":{"path":"...","content":"..."}}
+     */
+    @SuppressWarnings("unchecked")
+    private String extractCodeFromToolCall(String toolCallJson) {
+        try {
+            Map<String, Object> tc = objectMapper.readValue(toolCallJson, Map.class);
+            // Walk common argument wrapper keys
+            for (String argsKey : new String[]{"arguments", "args", "tool_args", "parameters", "input"}) {
+                Object argsObj = tc.get(argsKey);
+                if (argsObj instanceof Map) {
+                    Map<?, ?> args = (Map<?, ?>) argsObj;
+                    for (String contentKey : new String[]{"content", "code", "source", "text", "file_content"}) {
+                        Object val = args.get(contentKey);
+                        if (val instanceof String && ((String) val).trim().length() > 50) {
+                            return ((String) val).trim();
+                        }
+                    }
+                }
+            }
+            // Direct content field
+            for (String key : new String[]{"content", "code", "source"}) {
+                Object val = tc.get(key);
+                if (val instanceof String && ((String) val).trim().length() > 50) {
+                    return ((String) val).trim();
+                }
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    /** Returns true when {@code rawEvent} is a {@code session.next.text.ended} carrying tool-call JSON. */
+    @SuppressWarnings("unchecked")
+    private boolean isOpencodeToolCallEvent(String rawEvent) {
+        if (rawEvent == null) return false;
+        try {
+            Map<String, Object> ev = objectMapper.readValue(rawEvent, Map.class);
+            if (!"session.next.text.ended".equals(ev.getOrDefault("type", ""))) return false;
+            Object data = ev.get("data");
+            if (data instanceof Map) {
+                Object textObj = ((Map<?, ?>) data).get("text");
+                if (textObj instanceof String) {
+                    String text = ((String) textObj).trim();
+                    return text.startsWith("{") && (
+                            text.contains("\"name\"") ||
+                            text.contains("\"tool_name\"") ||
+                            text.contains("\"tool_args\""));
+                }
+            }
+        } catch (Exception ignored) {}
+        return false;
     }
 
     /**
