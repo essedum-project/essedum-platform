@@ -2,6 +2,10 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angula
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 
+const resolvedAgentDesignerUrl = environment.agentDesignerUrl?.startsWith('__FE_')
+  ? ''
+  : environment.agentDesignerUrl;
+
 @Component({
   selector: 'app-agent',
   templateUrl: './agent.component.html',
@@ -11,7 +15,7 @@ import { environment } from '../../../environments/environment';
 export class AgentComponent implements OnInit, AfterViewInit {
   // Embedded Agent Designer interface URL - loaded from environment
   currentIframeUrl: SafeResourceUrl;
-  private readonly langflowUrl = environment.langflowUrl;
+  private readonly agentDesignerUrl = resolvedAgentDesignerUrl || environment.langflowUrl || '/mfe/agent-designer/';
 
   @ViewChild('langflowIframeRef') langflowIframeRef!: ElementRef<HTMLIFrameElement>;
 
@@ -23,7 +27,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
       localStorage.getItem('aip-header-theme') === 'dark';
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
 
-    const iframeUrl = this.langflowUrl.replace(/\/?$/, '/');
+    const iframeUrl = this.agentDesignerUrl.replace(/\/?$/, '/');
     this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(iframeUrl);
   }
 
@@ -60,7 +64,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
 
     const iframeEl = this.langflowIframeRef?.nativeElement;
     const childOrigin = (() => {
-      try { return new URL(this.langflowUrl, window.location.origin).origin; } catch { return this.langflowUrl; }
+      try { return new URL(this.agentDesignerUrl, window.location.origin).origin; } catch { return this.agentDesignerUrl; }
     })();
 
     const postToIframe = () => {

@@ -22,6 +22,16 @@ spec:
           value: "${ESSEDUM_BACKEND_UPSTREAM}"
         - name: KEYCLOAK_ISSUER
           value: "${KEYCLOAK_ISSUER}"
+        - name: LANGFLOW_UPSTREAM
+          value: "${LANGFLOW_UPSTREAM}"
+        - name: LANGFUSE_UPSTREAM
+          value: "${LANGFUSE_UPSTREAM}"
+        - name: LITELLM_UPSTREAM
+          value: "${LITELLM_UPSTREAM}"
+        - name: SALUS_UPSTREAM
+          value: "${SALUS_UPSTREAM}"
+        - name: FE_AGENT_DESIGNER_URL
+          value: "${AGENT_DESIGNER_URL}"
         ports:
         - containerPort: 8084
         resources:

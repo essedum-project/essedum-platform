@@ -59,7 +59,7 @@ spec:
         - name: CONTAINER_REGISTRY_PREFIX
           value: "${CONTAINER_REGISTRY_PREFIX}"
         - name: MINIO_URL
-          value: "${MINIO_URL}"
+          value: "${K8S_MINIO_ENDPOINT}"
         - name: MINIO_ACCESS_KEY
           valueFrom:
             secretKeyRef:
