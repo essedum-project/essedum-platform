@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opencode
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opencode
+  template:
+    metadata:
+      labels:
+        app: opencode
+    spec:
+      containers:
+      - name: opencode
+        image: ${DOCKER_REGISTRY}/opencode:${IMAGE_TAG}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3282
+        env:
+        - name: OPENCODE_SERVER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: opencode-secret
+              key: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opencode-service
+  namespace: aipns
+spec:
+  selector:
+    app: opencode
+  ports:
+  - protocol: TCP
+    port: 3282
+    targetPort: 3282
+  type: ClusterIP

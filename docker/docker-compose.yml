@@ -445,6 +445,8 @@ services:
       - VIBE_AZURE_OPENAI_API_KEY=${VIBE_AZURE_OPENAI_API_KEY}
       - GOOSE_URL=http://goosed:3005
       - GOOSE_SECRET_KEY=${GOOSE_SERVER__SECRET_KEY}
+      - OPENCODE_URL=http://opencode:3282
+      - OPENCODE_SECRET_KEY=${OPENCODE_SECRET_KEY}
     expose:
       - "8084"
     depends_on:
@@ -816,6 +818,27 @@ services:
       resources:
         limits:
           memory: 1g
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  opencode:
+    build:
+      context: .
+      dockerfile: opencode.Dockerfile
+    image: essedum/opencode:latest
+    container_name: essedum-opencode
+    hostname: opencode
+    env_file: .env
+    environment:
+      - OPENCODE_SERVER_PASSWORD=${OPENCODE_SECRET_KEY}
+    ports:
+      - "${OPENCODE_PORT:-3282}:3282"
+    restart: unless-stopped
+    networks:
+      - backend-net
     logging:
       driver: json-file
       options:

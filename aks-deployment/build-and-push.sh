@@ -340,6 +340,13 @@ build_goosed_wrapper() {
     "Dockerfile"
 }
 
+build_opencode() {
+  build_and_push \
+    "${DOCKER_REGISTRY}/${OPENCODE_IMAGE:-opencode}:${IMAGE_TAG}" \
+    "${REPO_ROOT}/docker" \
+    "opencode.Dockerfile"
+}
+
 # ─── Entry point ─────────────────────────────────────────────────────────────
 command -v docker >/dev/null 2>&1 || error "docker not found in PATH."
 
@@ -416,6 +423,7 @@ case "${TARGET}" in
   adk-deployer)             build_adk_deployer           ;;
   goosed-base)              build_goosed_base            ;;
   goosed)                   build_goosed_base && build_goosed_wrapper ;;
+  opencode)                 build_opencode               ;;
   *)
     error "Unknown target '${TARGET}'. Valid: all | frontend | backend | services | \
 api-gateway | usm-service | icip-service | data-service | vibe-service | \
