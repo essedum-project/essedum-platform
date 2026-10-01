@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 public class GitHubIntegrationService {
 
     private static final Logger log = LoggerFactory.getLogger(GitHubIntegrationService.class);
+    private static final String SESSION_HISTORY_FILE_NAME = "essedum-history.md";
 
     @Autowired
     private GitStorageProvider gitStorageProvider;
@@ -63,6 +64,53 @@ public class GitHubIntegrationService {
         }
 
         return builder.build();
+    }
+
+    private String sanitizeHistoryCell(String value) {
+        if (value == null || value.isBlank()) {
+            return "-";
+        }
+        return value.replace("|", "\\|").replace("\r", " ").replace("\n", " ").trim();
+    }
+
+    private String buildSessionHistoryMarkdown(String existingContent, SessionHistoryEntry entry) {
+        String timestamp = sanitizeHistoryCell(entry.getTimestamp() != null && !entry.getTimestamp().isBlank()
+            ? entry.getTimestamp()
+            : java.time.Instant.now().toString());
+        String actor = sanitizeHistoryCell(entry.getActor());
+        String source = sanitizeHistoryCell(entry.getSource());
+        String action = sanitizeHistoryCell(entry.getAction());
+        String message = sanitizeHistoryCell(entry.getMessage());
+        String filesChanged = (entry.getFilesChanged() == null || entry.getFilesChanged().isEmpty())
+            ? "-"
+            : sanitizeHistoryCell(String.join(", ", entry.getFilesChanged()));
+
+        String row = "| " + timestamp + " | " + actor + " | " + source + " | " + action + " | " + message + " | " + filesChanged + " |";
+
+        if (existingContent == null || existingContent.isBlank()) {
+            return String.join(System.lineSeparator(),
+                "# Essedum History",
+                "",
+                "| Timestamp | Actor | Source | Action | Message | Files Changed |",
+                "| --- | --- | --- | --- | --- | --- |",
+                row,
+                "");
+        }
+
+        String normalized = existingContent.trim();
+        return normalized + System.lineSeparator() + row + System.lineSeparator();
+    }
+
+    private String resolveSessionHistoryMarkdown(GHRepository repo, String branch, SessionHistoryEntry entry) {
+        try {
+            GHContent existing = repo.getFileContent(SESSION_HISTORY_FILE_NAME, branch);
+            return buildSessionHistoryMarkdown(existing != null ? existing.getContent() : null, entry);
+        } catch (GHFileNotFoundException e) {
+            return buildSessionHistoryMarkdown(null, entry);
+        } catch (Exception e) {
+            log.warn("Could not read existing session history file for {} on branch {}: {}", repo.getFullName(), branch, e.getMessage());
+            return buildSessionHistoryMarkdown(null, entry);
+        }
     }
 
     /**
@@ -238,6 +286,35 @@ public class GitHubIntegrationService {
         GitHub github = createGitHubInstance(token);
         GHRepository repo = github.getRepository(request.getRepoName());
         String remoteUrl = repo.getHttpTransportUrl();
+
+        if (request.getSessionHistoryEntry() != null) {
+            java.util.List<FileContent> files = request.getFiles() != null
+                ? new java.util.ArrayList<>(request.getFiles())
+                : new java.util.ArrayList<>();
+
+            FileContent historyFile = new FileContent();
+            historyFile.setPath(SESSION_HISTORY_FILE_NAME);
+            historyFile.setFileName(SESSION_HISTORY_FILE_NAME);
+            historyFile.setId(SESSION_HISTORY_FILE_NAME);
+            historyFile.setContent(resolveSessionHistoryMarkdown(repo, request.getBranch(), request.getSessionHistoryEntry()));
+
+            boolean replacedHistoryFile = false;
+            for (int i = 0; i < files.size(); i++) {
+                FileContent file = files.get(i);
+                String path = file.getPath() != null ? file.getPath() : file.getFileName();
+                if (SESSION_HISTORY_FILE_NAME.equals(path) || SESSION_HISTORY_FILE_NAME.equals(file.getFileName())) {
+                    files.set(i, historyFile);
+                    replacedHistoryFile = true;
+                    break;
+                }
+            }
+
+            if (!replacedHistoryFile) {
+                files.add(historyFile);
+            }
+
+            request.setFiles(files);
+        }
 
         if (request.getFiles() != null && !request.getFiles().isEmpty()) {
             log.info("Pushing {} files directly from content", request.getFiles().size());
