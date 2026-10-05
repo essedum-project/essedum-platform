@@ -23,6 +23,12 @@ import archiver from 'archiver';
 import { PipelineAgentCard } from '../../interfaces/pipeline-agent.interface';
 import * as ExtensionUtils from '../../utils/extension-utils';
 import { EssedumFileSystemProvider } from '../../providers/essedum-file-provider';
+import { GitHubAuthService } from '../../auth/services/github-auth.service';
+import { GitHubService } from '../../services/github.service';
+import { SessionBranchManager } from '../../services/session-branch.manager';
+import { pickRepository, pickRepositoryByUrl, pickBranch } from '../git/git-quick-picks';
+import { GITHUB_STORAGE_KEYS, GITHUB_COMMANDS } from '../../constants/github-constants';
+import { MESSAGES } from '../../messages/extension-messages';
 
 const logger = ExtensionUtils.createLogger('PipelineAgent');
 
@@ -192,6 +198,15 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     /** File system provider for ADK files */
     private _fileSystemProvider?: EssedumFileSystemProvider;
 
+    /** GitHub auth service — optional, wired after construction */
+    private _githubAuthService?: GitHubAuthService;
+
+    /** GitHub API service — optional, wired after construction */
+    private _githubService?: GitHubService;
+
+    /** Session branch manager — optional, wired after construction */
+    private _sessionBranchManager?: SessionBranchManager;
+
     /** ADK Tree Data Provider */
     private _adkTreeDataProvider?: AdkTreeDataProvider;
 
@@ -323,6 +338,20 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         logger.info(`${this.logPrefix} Pipeline Agent Provider initialized independently`);
         logger.info(`${this.logPrefix} Organization: ${this.organization}, Page size: ${this.pageSize}`);
         logger.info(`${this.logPrefix} Cache directory: ${this.cacheDir}`);
+    }
+
+    /**
+     * Wires the GitHub services into this provider.
+     * Called from service-manager after the services are created.
+     */
+    setGitHubServices(
+        githubAuth: GitHubAuthService,
+        githubService: GitHubService,
+        sessionBranchManager: SessionBranchManager
+    ): void {
+        this._githubAuthService = githubAuth;
+        this._githubService     = githubService;
+        this._sessionBranchManager = sessionBranchManager;
     }
 
     /**
@@ -461,6 +490,58 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                     case CONSTANTS.WEBVIEW_COMMANDS.TRIGGER_LOGIN:
                         await this.handleLogin();
                         break;
+                    // ── GitHub integration commands ──────────────────────────
+                    case CONSTANTS.WEBVIEW_COMMANDS.CLONE_FROM_GITHUB:
+                        // cloneFromGitHub — routes to the same handler as uploadFromGitHub
+                        await this.handleUploadFromGitHub(message.pipelineId);
+                        break;
+                    case CONSTANTS.WEBVIEW_COMMANDS.COMMIT_AND_PUSH:
+                        if (this._sessionBranchManager && message.pipelineId) {
+                            const card2 = this.allCards.find(c => c.pipelineId === message.pipelineId);
+                            const key2  = card2?.name || card2?.alias || message.pipelineId;
+                            await this._sessionBranchManager.commitAndPush(key2);
+                        }
+                        break;
+                    case CONSTANTS.WEBVIEW_COMMANDS.RAISE_PR:
+                        if (this._sessionBranchManager && message.pipelineId) {
+                            const card3 = this.allCards.find(c => c.pipelineId === message.pipelineId);
+                            const key3  = card3?.name || card3?.alias || message.pipelineId;
+                            await this._sessionBranchManager.raisePullRequest(key3);
+                        }
+                        break;
+                    case CONSTANTS.WEBVIEW_COMMANDS.VIEW_PR: {
+                        const card4 = this.allCards.find(c => c.pipelineId === message.pipelineId);
+                        const key4  = card4?.name || card4?.alias || message.pipelineId;
+                        const state4 = this._sessionBranchManager?.getState(key4);
+                        if (state4?.prUrl) { vscode.env.openExternal(vscode.Uri.parse(state4.prUrl)); }
+                        break;
+                    }
+                    case CONSTANTS.WEBVIEW_COMMANDS.END_SESSION:
+                        if (this._sessionBranchManager && message.pipelineId) {
+                            const card5 = this.allCards.find(c => c.pipelineId === message.pipelineId);
+                            const key5  = card5?.name || card5?.alias || message.pipelineId;
+                            await this._sessionBranchManager.endSession(key5, 'explicit');
+                        }
+                        break;
+                    case CONSTANTS.WEBVIEW_COMMANDS.GITHUB_SIGN_IN:
+                        if (this._githubAuthService) {
+                            const ok = await this._githubAuthService.signIn();
+                            if (ok) { vscode.window.showInformationMessage(MESSAGES.GITHUB.TOKEN_VERIFIED); }
+                            this.postGitHubAuthStatus();
+                        }
+                        break;
+                    case CONSTANTS.WEBVIEW_COMMANDS.GITHUB_SIGN_OUT:
+                        if (this._githubAuthService) {
+                            await this._githubAuthService.signOut();
+                            this.postGitHubAuthStatus();
+                        }
+                        break;
+                    case CONSTANTS.WEBVIEW_COMMANDS.REQUEST_GIT_STATUS: {
+                        const card6 = this.allCards.find(c => c.pipelineId === message.pipelineId);
+                        const key6  = card6?.name || card6?.alias || message.pipelineId;
+                        this.postGitStatus(key6, message.pipelineId);
+                        break;
+                    }
                     case 'switchTab':
                         await this.handleTabSwitch(message.tab);
                         break;
@@ -2121,111 +2202,163 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             const pipelineName = card.name || card.alias || pipelineId;
 
-            // Prompt for GitHub repository URL
-            const repoUrl = await vscode.window.showInputBox({
-                prompt: 'Enter GitHub Repository URL',
-                placeHolder: 'https://github.com/owner/repository',
-                validateInput: (value) => {
-                    if (!value) { return 'Repository URL is required'; }
-                    // Use URL parser only — no substring checks to avoid incomplete sanitization
+            // ── Repo selection: picker (signed in) or URL input (fallback) ──
+            let repoUrl: string;
+            let repoName: string;
+
+            // Ensure GitHub sign-in before proceeding. The backend's /api/github/*
+            // endpoints require a valid X-GitHub-Token header.
+            let githubSignedIn = this._githubService
+                ? await this._githubAuthService?.isSignedIn()
+                : false;
+            if (this._githubService && !githubSignedIn) {
+                this._githubAuthService?.invalidateCachedSession();
+                githubSignedIn = (await this._githubAuthService?.signIn()) ?? false;
+                if (!githubSignedIn) {
+                    this.sendMessageToWebview({
+                        command: 'actionError',
+                        message: 'GitHub sign-in is required to upload from GitHub.'
+                    });
+                    return;
+                }
+            }
+
+            if (this._githubService && githubSignedIn) {
+                // Prefer existing git config for the last-used branch hint
+                const existingConfig = await this._githubService.getGitConfig(pipelineName, this.organization).catch(() => null);
+                const picked = await pickRepository(this._githubService);
+                if (!picked) { return; }
+
+                const selectedBranch = await pickBranch(
+                    this._githubService,
+                    picked.repoName,
+                    existingConfig?.bname,
+                    this._githubAuthService
+                );
+                if (!selectedBranch) { return; }
+
+                repoUrl  = picked.repoUrl;
+                repoName = picked.repoName;
+
+                // Pull files from GitHub and upload
+                await vscode.window.withProgress({
+                    location: vscode.ProgressLocation.Notification,
+                    title: `Uploading from GitHub: ${repoName}...`,
+                    cancellable: false
+                }, async (progress) => {
+                    progress.report({ increment: 0, message: 'Pulling files from GitHub...' });
+                    // Use GitHubService (not PipelineAgentService) so the X-GitHub-Token
+                    // header is attached — required by the backend's stateless auth path.
+                    const pulledFiles = await this._githubService!.pull(repoUrl, selectedBranch);
+
+                    progress.report({ increment: 40, message: 'Creating ZIP archive...' });
+                    const zipFileName = `${repoName.split('/')[1]}-${selectedBranch}-${Date.now()}.zip`;
+                    const zipBuffer = await this.createZipFromGitHubFiles(pulledFiles.files);
+
+                    progress.report({ increment: 70, message: 'Uploading to server...' });
+                    const uploadType = this.getUploadType(card);
+                    await this._pipelineAgentService.uploadFolderZip(pipelineName, zipBuffer, zipFileName, undefined, true, uploadType);
+
+                    // KEY: save git config so session-branch can start on next "Edit Code"
+                    if (this._githubService) {
+                        const gitUser = await this._githubAuthService?.getUsername() || '';
+                        await this._githubService.saveGitConfig({
+                            id: null,
+                            cname: pipelineName,
+                            org: this.organization,
+                            repo: repoName,
+                            bname: selectedBranch,
+                            gituser: gitUser,
+                            createdby: gitUser,
+                            createdat: new Date().toISOString(),
+                            updatedby: gitUser,
+                            updatedat: new Date().toISOString(),
+                        }).catch(e => logger.warn('saveGitConfig failed (non-fatal):', e?.message));
+
+                        await this._context.globalState.update(GITHUB_STORAGE_KEYS.LAST_REPO, repoName);
+                        await this._context.globalState.update(GITHUB_STORAGE_KEYS.LAST_BRANCH, selectedBranch);
+                    }
+
+                    progress.report({ increment: 100, message: 'Complete!' });
+                    const sizeMB = (zipBuffer.length / (1024 * 1024)).toFixed(2);
+                    vscode.window.showInformationMessage(`✓ Files uploaded successfully from GitHub (${sizeMB} MB)`);
+                    this.sendMessageToWebview({ command: 'actionComplete', message: `✓ Uploaded from ${repoName} (${selectedBranch})` });
+
                     try {
-                        const parsed = new URL(value);
-                        if (parsed.protocol !== 'https:') {
-                            return 'Please enter a valid HTTPS GitHub repository URL';
+                        const adkFiles = await this._pipelineAgentService.listAdkFiles(pipelineName);
+                        if (this._view) {
+                            this._view.webview.postMessage({
+                                command: CONSTANTS.CLIENT_COMMANDS.ADK_FILES_STATUS,
+                                hasFiles: adkFiles && adkFiles.length > 0,
+                                fileCount: adkFiles?.length || 0
+                            });
                         }
-                        if (parsed.username || parsed.password) {
-                            return 'URL should not contain credentials';
-                        }
-                        if (parsed.hostname !== 'github.com') {
-                            return 'Please enter a valid GitHub repository URL';
-                        }
-                    } catch {
-                        return 'Please enter a valid GitHub repository URL';
-                    }
-                    return null;
-                }
-            });
-
-            if (!repoUrl) {
-                return; // User cancelled
-            }
-
-            // Extract owner/repo from URL
-            const repoName = this.extractRepoFromUrl(repoUrl);
-            if (!repoName) {
-                vscode.window.showErrorMessage('Invalid GitHub repository URL');
-                return;
-            }
-
-            // Get branches
-            this.sendMessageToWebview({ command: 'actionStatus', message: 'Fetching branches...' });
-            const branches = await this._pipelineAgentService.getGitHubBranches(repoName);
-
-            if (!branches || branches.length === 0) {
-                vscode.window.showErrorMessage('No branches found or repository is not accessible');
-                return;
-            }
-
-            // Prompt for branch selection
-            const selectedBranch = await vscode.window.showQuickPick(branches, {
-                placeHolder: 'Select a branch to pull from',
-                canPickMany: false
-            });
-
-            if (!selectedBranch) {
-                return; // User cancelled
-            }
-
-            // Pull files from GitHub and upload
-            await vscode.window.withProgress({
-                location: vscode.ProgressLocation.Notification,
-                title: `Uploading from GitHub: ${repoName}...`,
-                cancellable: false
-            }, async (progress) => {
-                progress.report({ increment: 0, message: 'Pulling files from GitHub...' });
-
-                // Pull files from GitHub
-                const pulledFiles = await this._pipelineAgentService.pullFromGitHub({
-                    repoUrl: repoUrl,
-                    branch: selectedBranch
+                    } catch { /* non-fatal */ }
                 });
 
-                progress.report({ increment: 40, message: 'Creating ZIP archive...' });
-
-                // Create ZIP from pulled files
-                const zipFileName = `${repoName.split('/')[1]}-${selectedBranch}-${Date.now()}.zip`;
-                const zipBuffer = await this.createZipFromGitHubFiles(pulledFiles.files);
-
-                progress.report({ increment: 70, message: 'Uploading to server...' });
-
-                // Upload ZIP to server — 'type' is required by the server: Agent | MCP | Application
-                // isVibeStudio=true bypasses metadata.json validation (extension uploads won't have it)
-                const uploadType = this.getUploadType(card);
-                await this._pipelineAgentService.uploadFolderZip(pipelineName, zipBuffer, zipFileName, undefined, true, uploadType);
-
-                progress.report({ increment: 100, message: 'Complete!' });
-
-                const sizeMB = (zipBuffer.length / (1024 * 1024)).toFixed(2);
-                vscode.window.showInformationMessage(`✓ Files uploaded successfully from GitHub (${sizeMB} MB)`);
-                this.sendMessageToWebview({ 
-                    command: 'actionComplete', 
-                    message: `✓ Uploaded from ${repoName} (${selectedBranch})` 
-                });
-
-                // Refresh ADK files status
-                try {
-                    const adkFiles = await this._pipelineAgentService.listAdkFiles(pipelineName);
-                    if (this._view) {
-                        this._view.webview.postMessage({
-                            command: CONSTANTS.CLIENT_COMMANDS.ADK_FILES_STATUS,
-                            hasFiles: adkFiles && adkFiles.length > 0,
-                            fileCount: adkFiles?.length || 0
-                        });
+            } else {
+                // ── Fallback: existing URL-input path (unchanged) ──────────────
+                const inputUrl = await vscode.window.showInputBox({
+                    prompt: 'Enter GitHub Repository URL',
+                    placeHolder: 'https://github.com/owner/repository',
+                    validateInput: (value) => {
+                        if (!value) { return 'Repository URL is required'; }
+                        try {
+                            const parsed = new URL(value);
+                            if (parsed.protocol !== 'https:') { return 'Please enter a valid HTTPS GitHub repository URL'; }
+                            if (parsed.username || parsed.password) { return 'URL should not contain credentials'; }
+                            if (parsed.hostname !== 'github.com') { return 'Please enter a valid GitHub repository URL'; }
+                        } catch { return 'Please enter a valid GitHub repository URL'; }
+                        return null;
                     }
-                } catch (statusError) {
-                    console.warn(`${this.logPrefix} Could not check ADK files status:`, statusError);
-                }
-            });
+                });
+                if (!inputUrl) { return; }
+
+                const parsedName = this.extractRepoFromUrl(inputUrl);
+                if (!parsedName) { vscode.window.showErrorMessage('Invalid GitHub repository URL'); return; }
+                repoUrl  = inputUrl;
+                repoName = parsedName;
+
+                this.sendMessageToWebview({ command: 'actionStatus', message: 'Fetching branches...' });
+                const branches = await this._pipelineAgentService.getGitHubBranches(repoName);
+                if (!branches || branches.length === 0) { vscode.window.showErrorMessage('No branches found or repository is not accessible'); return; }
+
+                const selectedBranch = await vscode.window.showQuickPick(branches, { placeHolder: 'Select a branch to pull from', canPickMany: false });
+                if (!selectedBranch) { return; }
+
+                await vscode.window.withProgress({
+                    location: vscode.ProgressLocation.Notification,
+                    title: `Uploading from GitHub: ${repoName}...`,
+                    cancellable: false
+                }, async (progress) => {
+                    progress.report({ increment: 0, message: 'Pulling files from GitHub...' });
+                    const pulledFiles = await this._pipelineAgentService.pullFromGitHub({ repoUrl, branch: selectedBranch });
+
+                    progress.report({ increment: 40, message: 'Creating ZIP archive...' });
+                    const zipFileName = `${repoName.split('/')[1]}-${selectedBranch}-${Date.now()}.zip`;
+                    const zipBuffer = await this.createZipFromGitHubFiles(pulledFiles.files);
+
+                    progress.report({ increment: 70, message: 'Uploading to server...' });
+                    const uploadType = this.getUploadType(card);
+                    await this._pipelineAgentService.uploadFolderZip(pipelineName, zipBuffer, zipFileName, undefined, true, uploadType);
+
+                    progress.report({ increment: 100, message: 'Complete!' });
+                    const sizeMB = (zipBuffer.length / (1024 * 1024)).toFixed(2);
+                    vscode.window.showInformationMessage(`✓ Files uploaded successfully from GitHub (${sizeMB} MB)`);
+                    this.sendMessageToWebview({ command: 'actionComplete', message: `✓ Uploaded from ${repoName} (${selectedBranch})` });
+
+                    try {
+                        const adkFiles = await this._pipelineAgentService.listAdkFiles(pipelineName);
+                        if (this._view) {
+                            this._view.webview.postMessage({
+                                command: CONSTANTS.CLIENT_COMMANDS.ADK_FILES_STATUS,
+                                hasFiles: adkFiles && adkFiles.length > 0,
+                                fileCount: adkFiles?.length || 0
+                            });
+                        }
+                    } catch { /* non-fatal */ }
+                });
+            }
 
         } catch (error: any) {
             console.error(`${this.logPrefix} Error uploading from GitHub:`, error);
@@ -2456,6 +2589,11 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 // Context is already stored before workspace update (to survive extension reload)
                 // Just setup the file watcher now
                 this.setupAdkFolderWatcher(adkFolderPath, pipelineName);
+
+                // Start GitHub session branch manager (no-op when agent has no git config)
+                if (this._sessionBranchManager) {
+                    void this._sessionBranchManager.startSession(pipelineName, this.organization);
+                }
 
                 progress.report({ increment: 100, message: 'Complete!' });
             });
@@ -3012,6 +3150,11 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             logger.info(`${this.logPrefix} API call completed successfully`);
 
+            // GitHub session branch: notify manager only after a successful DB save
+            if (this._sessionBranchManager) {
+                this._sessionBranchManager.onFileSavedToServer(pipelineName, relativePath);
+            }
+
             // Update cache
             const cachedFiles = this.adkFilesCache.get(pipelineName);
             if (cachedFiles) {
@@ -3148,6 +3291,42 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         if (this._view) {
             this._view.webview.postMessage(message);
         }
+    }
+
+    /** Posts the current GitHub auth state to the webview. */
+    private async postGitHubAuthStatus(): Promise<void> {
+        if (!this._view) { return; }
+        const signedIn = this._githubAuthService
+            ? await this._githubAuthService.isSignedIn()
+            : false;
+        const username = signedIn
+            ? await this._githubAuthService?.getUsername()
+            : undefined;
+        this._view.webview.postMessage({
+            command: CONSTANTS.CLIENT_COMMANDS.GITHUB_AUTH_STATUS,
+            signedIn,
+            username,
+        });
+    }
+
+    /** Posts the git session status for a pipeline to the webview. */
+    private postGitStatus(pipelineKey: string, pipelineId: string): void {
+        if (!this._view) { return; }
+        const state = this._sessionBranchManager?.getState(pipelineKey);
+        this._view.webview.postMessage({
+            command: CONSTANTS.CLIENT_COMMANDS.GIT_STATUS,
+            pipelineId,
+            linked:        !!state,
+            repoName:      state?.repoName,
+            mainBranch:    state?.mainBranch,
+            sessionBranch: state?.sessionBranch,
+            prStatus:      state?.prStatus,
+            prNumber:      state?.prNumber,
+            prUrl:         state?.prUrl,
+            pendingChanges: state ? (this._sessionBranchManager as any)
+                ?.pendingSaves?.get(pipelineKey)?.size ?? 0 : 0,
+            busy: state?.branchCreationStatus === 'creating',
+        });
     }
 
     // /**
@@ -3431,6 +3610,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                     // Refresh auth data and service
                     this.refreshAuthData();
                     this._pipelineAgentService.refreshAuthData();
+                    this._githubService?.refreshAuthData();
 
                     return true;
                 } catch (error: any) {
@@ -3451,6 +3631,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             // Refresh auth data to ensure latest values
             this.refreshAuthData();
             this._pipelineAgentService.refreshAuthData();
+            this._githubService?.refreshAuthData();
             return true;
 
         } catch (error: any) {
