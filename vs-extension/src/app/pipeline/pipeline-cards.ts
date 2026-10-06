@@ -1503,7 +1503,8 @@ if __name__ == "__main__":
         // Find the pipeline for auto-save + wizard checks below.
         const pipeline = this.allCards.find((card: PipelineCard) =>
             this._currentPipelineName === card.name || this._currentPipelineName === card.alias);
-        const isWizardScript = pipeline?.type === 'DataPipeline' || pipeline?.type === 'TrainingPipeline';
+        const pipelineTypeUpper = pipeline?.type?.toUpperCase() || '';
+        const isWizardScript = this.currentTab === 'data-wizard' || this.currentTab === 'training-wizard' || pipelineTypeUpper === 'DATAPIPELINE' || pipelineTypeUpper === 'TRAININGPIPELINE';
 
         // Wizard-only: close any tab/buffer still holding the previous version of this
         // file BEFORE we overwrite it. Without this, `openTextDocument` returns the
@@ -2616,6 +2617,7 @@ if __name__ == "__main__":
      * "can't open file 'a.py,b.py'".
      */
     private async syncWizardScriptToStreamingService(pipelineName: string, fileName: string, content: string): Promise<void> {
+        vscode.window.showInformationMessage(`📤 WIZARD SYNC: Syncing ${fileName} to streaming service...`);
         const resp = await this._pipelineService.getStreamingService(pipelineName);
         const streamItem = resp?.data;
         if (!streamItem) {
@@ -2664,15 +2666,25 @@ if __name__ == "__main__":
             || jsonContent.elements[0];
         if (!target.attributes) { target.attributes = {}; }
         target.attributes.script = content.split('\n');
+        target.attributes.generatedCode = content;
 
         const updatedStreamItem = {
-            ...streamItem,
+            cid: streamItem.cid,
+            alias: streamItem.alias,
+            name: streamItem.name,
+            description: streamItem.description,
+            job_id: streamItem.job_id,
             json_content: JSON.stringify(jsonContent),
+            type: streamItem.type,
             organization: streamItem.organization || this.organization,
+            created_date: streamItem.created_date,
+            created_by: streamItem.created_by,
+            tags: streamItem.tags,
+            version: streamItem.version,
+            interfacetype: streamItem.interfacetype,
+            is_template: streamItem.is_template,
+            is_app: streamItem.is_app,
         };
-        if ('jsonContent' in updatedStreamItem) {
-            updatedStreamItem.jsonContent = updatedStreamItem.json_content;
-        }
 
         await this._pipelineService.updateStreamingService(updatedStreamItem);
 
@@ -2689,9 +2701,11 @@ if __name__ == "__main__":
         const normalize = (s: string) => s.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         if (normalize(serverJoined) !== normalize(content)) {
             logger.error(`❌ Wizard sync verification failed. server=${serverJoined.length} bytes, expected=${content.length} bytes, filesRepaired=${filesRepaired}`);
+            vscode.window.showErrorMessage('❌ Wizard sync verification failed. Old code still in place.');
             throw new Error('Streaming service did not accept the updated script. Old code is still in place.');
         }
         logger.info(`✅ Wizard streaming service updated and verified (filesRepaired=${filesRepaired})`);
+        vscode.window.showInformationMessage(`✅ WIZARD SYNC: ${fileName} successfully synced to streaming service!`);
     }
 
     /**
