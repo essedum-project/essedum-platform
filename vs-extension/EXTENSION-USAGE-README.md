@@ -426,7 +426,7 @@ After confirming, a notification message displays **"Files are uploaded successf
 
 On page 2 of the pipeline agents list, view details of an agent like **"Telecom-service-qualification-agent-copy"**. Agents without an ADK **(Agent Development Kit)** display different action buttons: **"Open Copilot"** and **"Upload From Github"** instead of "View Code" and "Download Code".
 
-### Upload From Github Button
+### Clone From Github Button
 
 ![URL input field](media/screenshots/64-github-url-input.png)
 

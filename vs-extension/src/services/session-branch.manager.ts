@@ -13,6 +13,8 @@
  */
 
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 import {
   SessionBranchState,
   PrStatus,
@@ -25,6 +27,7 @@ import { GitStatusBarItem } from '../app/git/git-status-bar';
 import {
   buildSessionBranchName,
   buildSessionStateKey,
+  buildSimpleStateKey,
   parseCommitShaFromPushResponse,
   generateSessionId,
   sanitizeCommitMessage,
@@ -59,6 +62,19 @@ export class SessionBranchManager implements vscode.Disposable {
   // PR polling interval handle
   private prPollHandle: NodeJS.Timeout | undefined;
 
+  // Accumulated push log for the session history markdown file (keyed by pipelineKey)
+  private sessionPushLog = new Map<string, Array<{
+    index: number;
+    timestamp: string;
+    actor: string;
+    action: string;
+    commitMessage: string;
+    filesChanged: string[];
+    commitSha: string;
+  }>>();
+
+  private static readonly SESSION_HISTORY_FILE = 'ESSEDUM_PLUGIN_SESSION_HISTORY.md';
+
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly github: GitHubService,
@@ -83,27 +99,36 @@ export class SessionBranchManager implements vscode.Disposable {
 
   private persistState(state: SessionBranchState): void {
     state.updatedAt = new Date().toISOString();
-    const key = buildSessionStateKey(state.gitUsername, state.sessionId, state.pipelineKey);
+    // Use pipeline-key-only key so restores work regardless of auth method / username.
+    const key = buildSimpleStateKey(state.pipelineKey);
     this.context.workspaceState.update(key, state);
+    // Keep the session ID pointer so the old key format can still be tried as a fallback.
+    this.context.workspaceState.update(
+      `${GITHUB_STORAGE_KEYS.SESSION_ID}:${state.pipelineKey}`,
+      state.sessionId
+    );
     this.sessions.set(state.pipelineKey, state);
     this.updateContextKeys(state);
     this.statusBar.update(state, this.pendingCount(state.pipelineKey));
   }
 
   private restoreState(pipelineKey: string): SessionBranchState | undefined {
-    // Check in-memory first
+    // 1. In-memory
     const cached = this.sessions.get(pipelineKey);
     if (cached) { return cached; }
-    // Scan workspaceState for a matching key
-    const prefix = `${GITHUB_STORAGE_KEYS.SESSION_BRANCH_STATE_PREFIX}:`;
-    // workspaceState keys() is not available in all VS Code versions — use a known key pattern
+    // 2. Simple pipeline-key-only workspaceState key (written by persistState from v19+)
+    const fromSimple = this.context.workspaceState.get<SessionBranchState>(
+      buildSimpleStateKey(pipelineKey)
+    );
+    if (fromSimple) { return fromSimple; }
+    // 3. Legacy username+sessionId key (backwards compatibility)
     const sessionId = this.context.workspaceState.get<string>(
       `${GITHUB_STORAGE_KEYS.SESSION_ID}:${pipelineKey}`
     );
     if (!sessionId) { return undefined; }
     const gitUser = this.context.globalState.get<string>(GITHUB_STORAGE_KEYS.LAST_GIT_USERNAME) || 'user';
-    const stateKey = buildSessionStateKey(gitUser, sessionId, pipelineKey);
-    return this.context.workspaceState.get<SessionBranchState>(stateKey);
+    const legacyKey = buildSessionStateKey(gitUser, sessionId, pipelineKey);
+    return this.context.workspaceState.get<SessionBranchState>(legacyKey);
   }
 
   private updateContextKeys(state: SessionBranchState): void {
@@ -164,6 +189,14 @@ export class SessionBranchManager implements vscode.Disposable {
           branchCreationStatus: 'pending',
           updatedAt: new Date().toISOString(),
         };
+
+        // If the backend has a session branch (created by web editor or a previous VS Code
+        // session), adopt it directly so both clients work on the same branch.
+        if (gitConfig.sessionBranch) {
+          state.sessionBranch = gitConfig.sessionBranch;
+          state.branchCreationStatus = 'ready';
+          logger.info(`Adopted session branch from backend: ${gitConfig.sessionBranch}`);
+        }
       }
 
       this.persistState(state);
@@ -261,6 +294,22 @@ export class SessionBranchManager implements vscode.Disposable {
       this.persistState(state);
       vscode.window.setStatusBarMessage(MESSAGES.GITHUB.SESSION_BRANCH_READY(resp.branchName), 5000);
 
+      // Persist the session branch to the backend so the web editor can adopt
+      // the same branch — both clients then push to one shared session branch.
+      void this.github.saveGitConfig({
+        id: null,
+        cname: state.pipelineKey,
+        org: state.org,
+        repo: state.repoName,
+        bname: state.mainBranch,
+        sessionBranch: state.sessionBranch,
+        gituser: state.gitUsername,
+        createdby: state.gitUsername,
+        createdat: new Date().toISOString(),
+        updatedby: state.gitUsername,
+        updatedat: new Date().toISOString(),
+      }).catch(e => logger.warn('Failed to sync session branch to backend:', e?.message));
+
       if (!resp.alreadyExisted && this.cfg.autoRaisePr) {
         void this.seedSessionHistoryAndAutoRaisePr(state.pipelineKey);
       } else {
@@ -273,6 +322,69 @@ export class SessionBranchManager implements vscode.Disposable {
       this.persistState(state);
       vscode.window.showErrorMessage(MESSAGES.GITHUB.BRANCH_CREATE_FAILED + (err?.message || ''));
       return false;
+    }
+  }
+
+  // ─── Session history markdown ─────────────────────────────────────────────
+
+  /**
+   * Builds the content of ESSEDUM Plugin Session History.md from the in-memory
+   * push log. Returns the markdown string to be committed alongside code files.
+   */
+  private buildSessionHistoryMarkdown(state: SessionBranchState): string {
+    const log = this.sessionPushLog.get(state.pipelineKey) ?? [];
+    const now = new Date().toISOString();
+
+    const header = [
+      `# ESSEDUM Plugin Session History`,
+      ``,
+      `| Property | Value |`,
+      `|----------|-------|`,
+      `| **Pipeline** | ${state.pipelineKey} |`,
+      `| **Repository** | ${state.repoName} |`,
+      `| **Main Branch** | ${state.mainBranch} |`,
+      `| **Session Branch** | ${state.sessionBranch} |`,
+      `| **Session ID** | ${state.sessionId} |`,
+      `| **GitHub User** | ${state.gitUsername || 'unknown'} |`,
+      `| **Organisation** | ${state.org} |`,
+      `| **Last Updated** | ${now} |`,
+      ``,
+      `---`,
+      ``,
+      `## Push History`,
+      ``,
+    ].join('\n');
+
+    if (log.length === 0) {
+      return header + `_No pushes recorded yet._\n\n---\n\n*Generated by Essedum VS Code Extension.*\n`;
+    }
+
+    const tableHeader = `| # | Timestamp (UTC) | Actor | Action | Commit | Files Changed | Message |\n|---|-----------------|-------|--------|--------|---------------|---------|\n`;
+
+    const rows = log.map(e => {
+      const files = e.filesChanged.join(', ') || '—';
+      const sha = e.commitSha ? `\`${e.commitSha.slice(0, 7)}\`` : '—';
+      const msg = e.commitMessage.replace(/\|/g, '\\|');
+      return `| ${e.index} | ${e.timestamp} | ${e.actor} | ${e.action} | ${sha} | ${files} | ${msg} |`;
+    }).join('\n');
+
+    return `${header}${tableHeader}${rows}\n\n---\n\n*Generated by Essedum VS Code Extension — updated on every push.*\n`;
+  }
+
+  /**
+   * Writes the session history markdown file to the local ADK folder so VS Code
+   * Explorer shows it alongside the pipeline's code files.
+   * Non-fatal — swallows errors so a disk failure never blocks a push.
+   */
+  private writeHistoryFileLocally(content: string): void {
+    try {
+      const adkContext = this.context.globalState.get<any>('adkContext');
+      const folderPath = adkContext?.folderPath;
+      if (!folderPath) { return; }
+      const filePath = path.join(folderPath, SessionBranchManager.SESSION_HISTORY_FILE);
+      fs.writeFileSync(filePath, content, 'utf-8');
+    } catch (err: any) {
+      logger.warn('writeHistoryFileLocally failed (non-fatal):', err?.message);
     }
   }
 
@@ -315,30 +427,62 @@ export class SessionBranchManager implements vscode.Disposable {
       customMessage || `${MESSAGES.GITHUB.AUTO_PUSH_PREFIX} [${changed.join(', ')}]`
     );
 
+    const pushTimestamp = new Date().toISOString();
+
     const sessionHistoryEntry: SessionHistoryEntry = {
       actor,
       source: 'vscode',
       action: SESSION_HISTORY_ACTIONS.FILE_SAVE as 'file-save',
       message: commitMessage,
       filesChanged: changed,
-      timestamp: new Date().toISOString(),
+      timestamp: pushTimestamp,
     };
+
+    // ── Session history markdown ───────────────────────────────────────────
+    // Append this push to the in-memory log and inject the updated markdown
+    // file into every commit so the history is always current on the branch.
+    const log = this.sessionPushLog.get(pipelineKey) ?? [];
+    const logEntry = {
+      index: log.length + 1,
+      timestamp: pushTimestamp,
+      actor,
+      action: 'file-save',
+      commitMessage,
+      filesChanged: changed,
+      commitSha: '',           // filled after a successful push
+    };
+    log.push(logEntry);
+    this.sessionPushLog.set(pipelineKey, log);
+
+    const historyContent = this.buildSessionHistoryMarkdown(state);
+    const historyFile = {
+      path: SessionBranchManager.SESSION_HISTORY_FILE,
+      fileName: SessionBranchManager.SESSION_HISTORY_FILE,
+      content: historyContent,
+    };
+    // Place the history file first so it is always present in the commit tree
+    const filesWithHistory = [historyFile, ...files];
 
     try {
       const rawResult = await this.github.push({
         repoName: state.repoName,
         branch: state.sessionBranch,
         commitMessage,
-        files,
+        files: filesWithHistory,
         sessionHistoryEntry,
       });
 
       const sha = parseCommitShaFromPushResponse(rawResult) ?? '';
+      logEntry.commitSha = sha;      // back-fill SHA into the log entry
       state.lastCommitId = sha || state.lastCommitId;
       this.persistState(state);
 
+      // Rebuild the markdown with the now-known SHA and write it locally so
+      // VS Code Explorer shows the file alongside the pipeline's code files.
+      this.writeHistoryFileLocally(this.buildSessionHistoryMarkdown(state));
+
       vscode.window.showInformationMessage(
-        MESSAGES.GITHUB.PUSH_SUCCESS(files.length, state.sessionBranch, sha.slice(0, 7) || '?'),
+        MESSAGES.GITHUB.PUSH_SUCCESS(changed.length, state.sessionBranch, sha.slice(0, 7) || '?'),
         ...(state.prStatus !== 'open' ? [MESSAGES.GITHUB.RAISE_PR] : [MESSAGES.GITHUB.VIEW_PR])
       ).then(choice => {
         if (choice === MESSAGES.GITHUB.RAISE_PR) { void this.raisePullRequest(pipelineKey); }
@@ -411,20 +555,48 @@ export class SessionBranchManager implements vscode.Disposable {
       const files = await this.buildPushFiles(pipelineKey);
       if (files && files.length > 0) {
         const actor = state.gitUsername || 'vscode';
-        await this.github.push({
+        const startTimestamp = new Date().toISOString();
+
+        // Seed the push log with the session-start entry and build the history file
+        const log = this.sessionPushLog.get(pipelineKey) ?? [];
+        const logEntry = {
+          index: 1,
+          timestamp: startTimestamp,
+          actor,
+          action: 'session-start',
+          commitMessage: MESSAGES.GITHUB.SESSION_START_COMMIT,
+          filesChanged: files.map(f => f.path),
+          commitSha: '',
+        };
+        log.push(logEntry);
+        this.sessionPushLog.set(pipelineKey, log);
+
+        const historyContent = this.buildSessionHistoryMarkdown(state);
+        const historyFile = {
+          path: SessionBranchManager.SESSION_HISTORY_FILE,
+          fileName: SessionBranchManager.SESSION_HISTORY_FILE,
+          content: historyContent,
+        };
+
+        const rawResult = await this.github.push({
           repoName: state.repoName,
           branch: state.sessionBranch,
           commitMessage: MESSAGES.GITHUB.SESSION_START_COMMIT,
-          files,
+          files: [historyFile, ...files],
           sessionHistoryEntry: {
             actor,
             source: 'vscode',
             action: SESSION_HISTORY_ACTIONS.SESSION_START as 'session-start',
             message: MESSAGES.GITHUB.SESSION_START_COMMIT,
             filesChanged: files.map(f => f.path),
-            timestamp: new Date().toISOString(),
+            timestamp: startTimestamp,
           },
         });
+
+        logEntry.commitSha = parseCommitShaFromPushResponse(rawResult) ?? '';
+
+        // Write locally so VS Code Explorer shows the file from the first commit
+        this.writeHistoryFileLocally(this.buildSessionHistoryMarkdown(state));
       }
 
       const resp = await this.github.createPullRequest({

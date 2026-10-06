@@ -99,6 +99,8 @@ export interface GitHubInfoDTO {
   bname: string;
   repo: string;
   gituser: string;
+  /** Active session branch — persisted so VS Code and web editor share the same branch. */
+  sessionBranch?: string;
   createdby: string;
   createdat: string;
   updatedby: string;

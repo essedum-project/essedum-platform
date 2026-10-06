@@ -2180,7 +2180,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
      * Handle Upload ADK action
      */
     /**
-     * Handle Upload from GitHub action
+     * Handle Clone from GitHub action
      */
     private async handleUploadFromGitHub(pipelineId: string): Promise<void> {
         try {
@@ -2217,7 +2217,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 if (!githubSignedIn) {
                     this.sendMessageToWebview({
                         command: 'actionError',
-                        message: 'GitHub sign-in is required to upload from GitHub.'
+                        message: 'GitHub sign-in is required to clone from GitHub.'
                     });
                     return;
                 }
@@ -2277,6 +2277,12 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
                         await this._context.globalState.update(GITHUB_STORAGE_KEYS.LAST_REPO, repoName);
                         await this._context.globalState.update(GITHUB_STORAGE_KEYS.LAST_BRANCH, selectedBranch);
+
+                        // Start session immediately so auto-push works without
+                        // requiring the user to click "Edit Code" first.
+                        if (this._sessionBranchManager) {
+                            void this._sessionBranchManager.startSession(pipelineName, this.organization);
+                        }
                     }
 
                     progress.report({ increment: 100, message: 'Complete!' });

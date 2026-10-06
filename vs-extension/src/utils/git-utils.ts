@@ -47,6 +47,8 @@ export function parseCommitShaFromPushResponse(response: string): string | undef
 
 /**
  * Builds the workspaceState key for a SessionBranchState entry.
+ * @deprecated Use buildSimpleStateKey — the username-in-key approach breaks when
+ * the auth method changes (e.g. PAT vs OAuth). Kept for backwards compatibility.
  */
 export function buildSessionStateKey(
   gitUser: string,
@@ -54,6 +56,14 @@ export function buildSessionStateKey(
   pipelineKey: string
 ): string {
   return `${GITHUB_STORAGE_KEYS.SESSION_BRANCH_STATE_PREFIX}:${gitUser}:${sessionId}:${pipelineKey}`;
+}
+
+/**
+ * Pipeline-key-only storage key. Survives username/auth-method changes and is
+ * the canonical key written by persistState from VS Code extension v19+.
+ */
+export function buildSimpleStateKey(pipelineKey: string): string {
+  return `${GITHUB_STORAGE_KEYS.SESSION_BRANCH_STATE_PREFIX}:${pipelineKey}`;
 }
 
 /**
