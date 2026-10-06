@@ -103,6 +103,12 @@ export interface SessionHistoryEntry {
   message: string;
   filesChanged: string[];
   timestamp?: string;
+  commitSha?: string;
+  pipelineName?: string;
+  sessionId?: string;
+  org?: string;
+  mainBranch?: string;
+  sessionBranch?: string;
 }
 
 export interface SessionBranchState {

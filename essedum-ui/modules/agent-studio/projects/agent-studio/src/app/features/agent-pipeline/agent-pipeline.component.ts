@@ -5369,6 +5369,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
           message: `Session branch created from ${mainBranch}`,
           filesChanged: [],
           timestamp: new Date().toISOString(),
+          pipelineName: this.currentCname || '',
+          sessionId: this.getCurrentGitSessionId() || '',
+          org: this.organisation || this.getConsistentOrganization() || '',
+          mainBranch,
+          sessionBranch: branchName,
         },
       }).subscribe({
         next: () => {
@@ -5468,6 +5473,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
             message: commitMessage,
             filesChanged: fetchedFiles.map(file => file.filePath),
             timestamp: new Date().toISOString(),
+            pipelineName: this.currentCname || '',
+            sessionId: this.getCurrentGitSessionId() || '',
+            org: this.organisation || this.getConsistentOrganization() || '',
+            mainBranch: this.lastPulledBranch || 'main',
+            sessionBranch: this.activeSessionBranch || '',
           }
         };
 
