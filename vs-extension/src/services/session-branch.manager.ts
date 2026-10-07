@@ -811,7 +811,12 @@ export class SessionBranchManager implements vscode.Disposable {
   // ─── Getters for external use ─────────────────────────────────────────────
 
   getState(pipelineKey: string): SessionBranchState | undefined {
-    return this.sessions.get(pipelineKey);
+    // Check in-memory first, then fall back to persisted workspaceState so
+    // linked state is returned even after an extension host restart.
+    if (this.sessions.has(pipelineKey)) { return this.sessions.get(pipelineKey); }
+    const restored = this.restoreState(pipelineKey);
+    if (restored) { this.sessions.set(pipelineKey, restored); }
+    return restored;
   }
 
   hasActiveSession(pipelineKey: string): boolean {

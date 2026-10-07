@@ -364,7 +364,9 @@ export class GitHubService implements vscode.Disposable {
       );
       return (res.data as GitHubInfoDTO) || null;
     } catch (err: any) {
-      if (err?.response?.status === 404) { return null; }
+      const status = err?.response?.status;
+      // 404 = never configured; 400 = backend "not found" variant — both are expected
+      if (status === 404 || status === 400) { return null; }
       logger.warn('getGitConfig error (returning null):', err?.message);
       return null;
     }

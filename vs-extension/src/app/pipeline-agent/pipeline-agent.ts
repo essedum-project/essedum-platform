@@ -272,6 +272,9 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     /** Which pipeline's generation target (workspace folder / adkContext) was last prepared by "Add Skill", to avoid redundant re-preparation on every skill toggle */
     private lastSkillGenerationPreparedPipelineId?: string;
 
+    /** Deferred startSession call set by restoreAdkFolderWatcher when services aren't wired yet */
+    private pendingSessionStart?: { pipelineName: string; org: string };
+
     /** Quiet period after the last file change before an auto-upload fires */
     private static readonly AUTO_UPLOAD_DEBOUNCE_MS = 3000;
 
@@ -352,6 +355,14 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         this._githubAuthService = githubAuth;
         this._githubService     = githubService;
         this._sessionBranchManager = sessionBranchManager;
+
+        // If restoreAdkFolderWatcher() queued a startSession call (post-reload,
+        // services weren't wired yet at constructor time), run it now.
+        if (this.pendingSessionStart) {
+            const { pipelineName, org } = this.pendingSessionStart;
+            this.pendingSessionStart = undefined;
+            void this._sessionBranchManager.startSession(pipelineName, org || this.organization);
+        }
     }
 
     /**
@@ -539,7 +550,17 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                     case CONSTANTS.WEBVIEW_COMMANDS.REQUEST_GIT_STATUS: {
                         const card6 = this.allCards.find(c => c.pipelineId === message.pipelineId);
                         const key6  = card6?.name || card6?.alias || message.pipelineId;
+                        // Post immediately with whatever state is already in memory / workspaceState
                         this.postGitStatus(key6, message.pipelineId);
+                        // If no session exists yet, try to load from backend git config.
+                        // This covers: first open after web-app setup, extension host restart,
+                        // and any pipeline that has a git config but no local session state.
+                        // startSession() only reads config — it never creates a branch.
+                        if (!this._sessionBranchManager?.getState(key6) && this._sessionBranchManager) {
+                            void this._sessionBranchManager
+                                .startSession(key6, this.organization)
+                                .then(() => this.postGitStatus(key6, message.pipelineId));
+                        }
                         break;
                     }
                     case 'switchTab':
@@ -1613,6 +1634,17 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             // a failure here should never prevent the detail view from showing)
             await this.fetchAndSendSkills();
 
+            // Load git config from backend so the webview shows repo/branch/session
+            // info in the git panel immediately when "View Details" is opened —
+            // even before the user has clicked "Edit Code" or "Clone from GitHub".
+            // startSession() only reads config; it never creates a branch.
+            if (this._sessionBranchManager) {
+                const pipelineKey = pipelineName;
+                void this._sessionBranchManager
+                    .startSession(pipelineKey, this.organization)
+                    .then(() => this.postGitStatus(pipelineKey, pipelineId));
+            }
+
             progress.report({ increment: 100, message: 'Complete!' });
         });
     }
@@ -2280,8 +2312,12 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
                         // Start session immediately so auto-push works without
                         // requiring the user to click "Edit Code" first.
+                        // After startSession resolves, update the git panel so
+                        // the repo/branch appear without a manual refresh.
                         if (this._sessionBranchManager) {
-                            void this._sessionBranchManager.startSession(pipelineName, this.organization);
+                            void this._sessionBranchManager
+                                .startSession(pipelineName, this.organization)
+                                .then(() => this.postGitStatus(pipelineName, pipelineId));
                         }
                     }
 
@@ -2598,7 +2634,8 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
                 // Start GitHub session branch manager (no-op when agent has no git config)
                 if (this._sessionBranchManager) {
-                    void this._sessionBranchManager.startSession(pipelineName, this.organization);
+                    void this._sessionBranchManager.startSession(pipelineName, this.organization)
+                        .then(() => this.postGitStatus(pipelineName, pipelineId));
                 }
 
                 progress.report({ increment: 100, message: 'Complete!' });
@@ -2964,6 +3001,13 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             if (fs.existsSync(adkContext.folderPath)) {
                 this.setupAdkFolderWatcher(adkContext.folderPath, adkContext.pipelineName);
                 logger.info(`${this.logPrefix} ✓ ADK folder watcher restored successfully`);
+                // Re-initialise the session branch state after reload.
+                // setGitHubServices() hasn't been called yet at this point, so
+                // defer the call; setGitHubServices() will consume it.
+                this.pendingSessionStart = {
+                    pipelineName: adkContext.pipelineName,
+                    org: adkContext.organization || '',
+                };
             } else {
                 logger.warn(`${this.logPrefix} ADK folder no longer exists: ${adkContext.folderPath}`);
             }
