@@ -1,7 +1,6 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -43,7 +42,9 @@ import java.util.stream.Collectors;
 public class GitHubIntegrationService {
 
     private static final Logger log = LoggerFactory.getLogger(GitHubIntegrationService.class);
-    private static final String SESSION_HISTORY_FILE_NAME = "ESSEDUM_PLUGIN_SESSION_HISTORY.md";
+
+    @Value("${github.session-history.file-name}")
+    private String sessionHistoryFileName;
 
     @Autowired
     private GitStorageProvider gitStorageProvider;
@@ -148,7 +149,7 @@ public class GitHubIntegrationService {
 
     private String resolveSessionHistoryMarkdown(GHRepository repo, String branch, SessionHistoryEntry entry) {
         try {
-            GHContent existing = repo.getFileContent(SESSION_HISTORY_FILE_NAME, branch);
+            GHContent existing = repo.getFileContent(sessionHistoryFileName, branch);
             return buildSessionHistoryMarkdown(existing != null ? existing.getContent() : null, entry);
         } catch (GHFileNotFoundException e) {
             return buildSessionHistoryMarkdown(null, entry);
@@ -344,21 +345,21 @@ public class GitHubIntegrationService {
                 request.getSessionHistoryEntry().getSource());
             boolean hasHistoryFile = files.stream().anyMatch(f -> {
                 String p = f.getPath() != null ? f.getPath() : f.getFileName();
-                return SESSION_HISTORY_FILE_NAME.equals(p) || SESSION_HISTORY_FILE_NAME.equals(f.getFileName());
+                return sessionHistoryFileName.equals(p) || sessionHistoryFileName.equals(f.getFileName());
             });
 
             if (!hasHistoryFile || !isVsCode) {
                 FileContent historyFile = new FileContent();
-                historyFile.setPath(SESSION_HISTORY_FILE_NAME);
-                historyFile.setFileName(SESSION_HISTORY_FILE_NAME);
-                historyFile.setId(SESSION_HISTORY_FILE_NAME);
+                historyFile.setPath(sessionHistoryFileName);
+                historyFile.setFileName(sessionHistoryFileName);
+                historyFile.setId(sessionHistoryFileName);
                 historyFile.setContent(resolveSessionHistoryMarkdown(repo, request.getBranch(), request.getSessionHistoryEntry()));
 
                 if (hasHistoryFile) {
                     for (int i = 0; i < files.size(); i++) {
                         FileContent file = files.get(i);
                         String path = file.getPath() != null ? file.getPath() : file.getFileName();
-                        if (SESSION_HISTORY_FILE_NAME.equals(path) || SESSION_HISTORY_FILE_NAME.equals(file.getFileName())) {
+                        if (sessionHistoryFileName.equals(path) || sessionHistoryFileName.equals(file.getFileName())) {
                             files.set(i, historyFile);
                             break;
                         }
