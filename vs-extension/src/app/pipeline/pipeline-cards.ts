@@ -1437,8 +1437,20 @@ if __name__ == "__main__":
         const jsUri = webview.asWebviewUri(jsPath);
 
         // Replace placeholders with actual URIs
-        htmlTemplate = htmlTemplate.replace('{{CSS_URI}}', cssUri.toString());
-        htmlTemplate = htmlTemplate.replace('{{JS_URI}}', jsUri.toString());
+        const cssUriStr = cssUri.toString();
+        const jsUriStr = jsUri.toString();
+        console.log('CSS URI:', cssUriStr);
+        console.log('JS URI:', jsUriStr);
+
+        htmlTemplate = htmlTemplate.replace('{{CSS_URI}}', cssUriStr);
+        htmlTemplate = htmlTemplate.replace('{{JS_URI}}', jsUriStr);
+
+        // Verify replacement worked
+        if (htmlTemplate.includes('{{JS_URI}}')) {
+            console.error('WARNING: {{JS_URI}} placeholder still present in HTML!');
+        } else {
+            console.log('✓ JS URI replacement successful');
+        }
 
         return htmlTemplate;
     }
@@ -3562,11 +3574,15 @@ if __name__ == "__main__":
             this.containerDeploymentState.status = 'deploying';
             this.containerDeploymentState.message = `Deployment prepared: ${deploymentName}`;
 
+            vscode.window.showInformationMessage(`🐳 DEPLOYMENT NAME SET: ${deploymentName}`);
+
             // Add initial log entries
             this.containerDeploymentState.logs.push(`📦 Pipeline packaged: ${deploymentName}`);
             this.containerDeploymentState.logs.push(`🚀 Starting container deployment...`);
 
             await this.saveDeploymentState();
+
+            vscode.window.showInformationMessage(`📢 Updating webview...`);
             this.updateWebviewDeploymentStatus();
             vscode.window.showInformationMessage(`✅ Deployment prepared: ${deploymentName}`);
 
@@ -3749,51 +3765,131 @@ if __name__ == "__main__":
     }
 
     /**
-     * Delete deployment
+     * Delete deployment (matches UI - uses Socket.IO emit, not API)
      */
     private async deleteDeployment(): Promise<void> {
-        if (!this.containerDeploymentState.deploymentName) return;
+        if (!this.containerDeploymentState.deploymentName) {
+            vscode.window.showWarningMessage('No active deployment to delete');
+            return;
+        }
 
+        const deploymentName = this.containerDeploymentState.deploymentName;
+        const namespace = 'vibe-pipelines'; // Default namespace, same as UI
+
+        vscode.window.showInformationMessage(`🗑️ Deleting deployment: ${deploymentName}...`);
         this.containerDeploymentState.message = 'Deleting deployment...';
+        this.containerDeploymentState.logs = [];
         this.updateWebviewDeploymentStatus();
 
         try {
-            await this._pipelineService.deleteDeployment(
-                this.containerDeploymentState.deploymentName
-            );
+            // Use Socket.IO to delete (matches UI implementation)
+            vscode.window.showInformationMessage(`📡 Connecting to builder service for deletion...`);
 
-            this.containerDeploymentState.status = 'idle';
-            this.containerDeploymentState.message = '';
-            this.containerDeploymentState.logs = [];
-            this.containerDeploymentState.deploymentName = undefined;
-            await this.removeDeploymentState();
+            import('socket.io-client').then((socketIO) => {
+                const io = socketIO.io;
+                const baseUrl = getBaseUrl();
 
-            vscode.window.showInformationMessage(`✅ Deployment deleted!`);
+                const deleteSocket = io(baseUrl, {
+                    path: '/apps/builder-service/socket.io',
+                    transports: ['websocket', 'polling'],
+                    timeout: 600000,
+                    forceNew: true,
+                    rejectUnauthorized: false,
+                    withCredentials: true,
+                    reconnection: true,
+                    reconnectionAttempts: 50,
+                    reconnectionDelay: 2000,
+                    reconnectionDelayMax: 10000,
+                } as any);
+
+                deleteSocket.on('connect', () => {
+                    vscode.window.showInformationMessage(`✅ Connected. Emitting delete command...`);
+                    this.containerDeploymentState.logs.push(`Deleting deployment: ${deploymentName} from namespace: ${namespace}`);
+
+                    // EMIT delete_deployment command (matches UI line 513)
+                    deleteSocket.emit('delete_deployment', {
+                        deployment_name: deploymentName,
+                        namespace: namespace,
+                    });
+
+                    this.updateWebviewDeploymentStatus();
+                });
+
+                // Listen for delete_status response (matches UI line 518)
+                deleteSocket.on('delete_status', (data: any) => {
+                    const status = (data.status || '').toString().toUpperCase();
+                    vscode.window.showInformationMessage(`📊 Delete status: ${status}`);
+
+                    if (status === 'SUCCESS' || status === 'NOT_FOUND') {
+                        this.containerDeploymentState.status = 'idle';
+                        this.containerDeploymentState.message = data.message || (status === 'SUCCESS' ? 'Deployment deleted' : 'No deployment found');
+                        this.containerDeploymentState.logs.push(`FINAL STATUS: ${status}${data.message ? ' - ' + data.message : ''}`);
+
+                        // Clear deployment state
+                        this.containerDeploymentState.deploymentName = undefined;
+                        this.removeDeploymentState().catch(err => console.error('Failed to remove:', err));
+
+                        vscode.window.showInformationMessage(`🎉 Deployment deleted successfully!`);
+                    } else {
+                        this.containerDeploymentState.status = 'error';
+                        this.containerDeploymentState.message = data.message || 'Failed to delete deployment';
+                        this.containerDeploymentState.logs.push(`FINAL STATUS: ${status}${data.message ? ' - ' + data.message : ''}`);
+
+                        vscode.window.showErrorMessage(`❌ Delete failed: ${data.message || status}`);
+                    }
+
+                    deleteSocket.disconnect();
+                    this.updateWebviewDeploymentStatus();
+                });
+
+                deleteSocket.on('connect_error', (err: any) => {
+                    vscode.window.showErrorMessage(`❌ Connection error: ${err?.message || err}`);
+                    this.containerDeploymentState.logs.push(`Connection error: ${err?.message || err}`);
+                    this.updateWebviewDeploymentStatus();
+                });
+
+            }).catch((err: any) => {
+                vscode.window.showErrorMessage(`❌ Failed to load Socket.IO: ${err.message}`);
+            });
 
         } catch (err: any) {
+            vscode.window.showErrorMessage(`❌ Delete failed: ${err.message || JSON.stringify(err)}`);
             this.containerDeploymentState.status = 'error';
-            this.containerDeploymentState.message = `Delete failed: ${err.message}`;
-            vscode.window.showErrorMessage(`❌ Delete failed: ${err.message}`);
+            this.containerDeploymentState.message = `Delete failed: ${err.message || err}`;
+            this.updateWebviewDeploymentStatus();
         }
-
-        this.updateWebviewDeploymentStatus();
     }
 
     /**
-     * Load deployment state from json_content
+     * Load deployment state from database (fetch fresh data from server)
      */
     private async loadDeploymentState(): Promise<void> {
         try {
-            const pipeline = this.allCards.find(c => c.name === this._currentPipelineName);
-            if (!pipeline) return;
+            const currentPipelineName = this._currentPipelineName;
+            if (!currentPipelineName) return;
 
-            const parsed = JSON.parse(pipeline.json_content || '{}');
+            vscode.window.showInformationMessage(`📥 Loading deployment state for: ${currentPipelineName}`);
+
+            // IMPORTANT: Fetch fresh data from server (not local cache) to get UI's changes
+            const response = await this._pipelineService.getStreamingServicesByName(currentPipelineName);
+            const freshPipeline = response?.data || response;
+            if (!freshPipeline) {
+                vscode.window.showInformationMessage(`📭 No pipeline data found`);
+                return;
+            }
+
+            vscode.window.showInformationMessage(`✅ Fetched fresh pipeline data from server`);
+
+            const parsed = JSON.parse(freshPipeline.json_content || '{}');
             const deployment = parsed.containerDeployment;
 
-            if (deployment) {
+            if (deployment && deployment.deploymentName) {
+                // Deployment found in database
+                vscode.window.showInformationMessage(`🐳 Found deployment: ${deployment.deploymentName} (status: ${deployment.status})`);
+
                 this.containerDeploymentState = {
                     status: deployment.status || 'idle',
-                    message: deployment.status === 'deploying' ? 'Reconnecting...' : '',
+                    message: deployment.message || deployment.status || 'Deployment ready',
                     logs: deployment.buildLogs || [],
                     deploymentName: deployment.deploymentName
                 };
@@ -3803,9 +3899,19 @@ if __name__ == "__main__":
                 }
 
                 this.updateWebviewDeploymentStatus();
+            } else {
+                // No deployment - clear state
+                vscode.window.showInformationMessage(`✅ No active deployment`);
+                this.containerDeploymentState = {
+                    status: 'idle',
+                    message: '',
+                    logs: [],
+                    deploymentName: undefined
+                };
+                this.updateWebviewDeploymentStatus();
             }
-        } catch (err) {
-            console.error('Failed to load deployment state:', err);
+        } catch (err: any) {
+            vscode.window.showErrorMessage(`❌ Failed to load deployment: ${err.message || err}`);
         }
     }
 
@@ -3832,8 +3938,11 @@ if __name__ == "__main__":
         if (!this._currentPipelineName) return;
 
         try {
-            const pipeline = this.allCards.find(c => c.name === this._currentPipelineName);
-            if (!pipeline) return;
+            // Fetch fresh data from server (like UI does)
+            const freshData = await this._pipelineService.getStreamingServicesByName(this._currentPipelineName);
+            if (!freshData || !freshData.data) return;
+
+            const pipeline = freshData.data;
 
             const parsed = JSON.parse(pipeline.json_content || '{}');
             parsed.containerDeployment = {
@@ -3844,6 +3953,7 @@ if __name__ == "__main__":
             };
 
             pipeline.json_content = JSON.stringify(parsed);
+            // Use standard updateStreamingService which works
             await this.updateStreamingService(pipeline);
 
         } catch (err) {

@@ -58,6 +58,7 @@ interface ApiEndpoints {
     PIPELINE_RUN: string;
     STREAMING_SERVICES: string;
     STREAMING_SERVICES_UPDATE: string;
+    STREAMING_SERVICES_SAVE: string;
     JOB_RUNTIME_TYPES: string;
     DATASOURCES_RUNTIME: string;
     FILE_READ: string;
@@ -101,6 +102,7 @@ export function getApiEndpoints(): ApiEndpoints {
         // Streaming services
         STREAMING_SERVICES: `${apiBaseUrl}/streamingServices`,
         STREAMING_SERVICES_UPDATE: `${baseUrl}/api/aip/service/v1/streamingServices/update`,
+        STREAMING_SERVICES_SAVE: `${baseUrl}/service/v1/streamingServices/update`,
 
         // Job and runtime endpoints
         JOB_RUNTIME_TYPES: `${apiBaseUrl}/jobs/runtime/types`,

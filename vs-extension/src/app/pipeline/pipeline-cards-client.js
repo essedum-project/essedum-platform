@@ -1,6 +1,6 @@
 /**
  * Pipeline Cards Client-Side JavaScript
- * 
+ *
  * This file contains the client-side JavaScript logic for the pipeline cards
  * webview interface. It handles:
  * - User interface interactions
@@ -8,7 +8,7 @@
  * - Dynamic content rendering
  * - Form handling and validation
  * - Event management
- * 
+ *
  * @fileoverview Client-side JavaScript for pipeline cards webview
  * @author Essedum AI Platform Team
  * @version 1.0.21
@@ -406,15 +406,8 @@ class PipelineCardsClient {
             this.vscode.postMessage({ command: 'lastPage' });
         });
 
-        // Deployment functionality
         this.deployContainerBtn?.addEventListener('click', () => {
             this.vscode.postMessage({ command: 'deployContainer' });
-        });
-
-        this.deleteDeploymentBtn?.addEventListener('click', () => {
-            if (confirm('Are you sure you want to delete this deployment?')) {
-                this.vscode.postMessage({ command: 'deleteDeployment' });
-            }
         });
 
         // Listen for messages from extension
@@ -1088,6 +1081,17 @@ class PipelineCardsClient {
                 });
             };
         }
+
+        // Delete Deployment button
+        if (this.deleteDeploymentBtn) {
+            this.deleteDeploymentBtn.onclick = () => {
+                if (confirm('Are you sure you want to delete this deployment?')) {
+                    this.vscode.postMessage({
+                        command: 'deleteDeployment'
+                    });
+                }
+            };
+        }
     }
 
     openScript(fileIndex) {
@@ -1288,13 +1292,17 @@ class PipelineCardsClient {
     }
 }
 
+
 // Initialize when DOM is loaded
 // Initialize only once when DOM is ready
+let client;
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        new PipelineCardsClient();
+        client = new PipelineCardsClient();
+        window.pipelineClient = client;
     });
 } else {
     // DOM is already loaded, initialize immediately
-    new PipelineCardsClient();
+    client = new PipelineCardsClient();
+    window.pipelineClient = client;
 }
