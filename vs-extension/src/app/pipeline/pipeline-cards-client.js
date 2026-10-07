@@ -410,6 +410,10 @@ class PipelineCardsClient {
             this.vscode.postMessage({ command: 'deployContainer' });
         });
 
+        this.deleteDeploymentBtn?.addEventListener('click', () => {
+            this.vscode.postMessage({ command: 'deleteDeployment' });
+        });
+
         // Listen for messages from extension
         window.addEventListener('message', event => {
             const message = event.data;
@@ -1082,16 +1086,6 @@ class PipelineCardsClient {
             };
         }
 
-        // Delete Deployment button
-        if (this.deleteDeploymentBtn) {
-            this.deleteDeploymentBtn.onclick = () => {
-                if (confirm('Are you sure you want to delete this deployment?')) {
-                    this.vscode.postMessage({
-                        command: 'deleteDeployment'
-                    });
-                }
-            };
-        }
     }
 
     openScript(fileIndex) {
