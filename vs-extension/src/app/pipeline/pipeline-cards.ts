@@ -101,6 +101,19 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private filteredCards: PipelineCard[] = [];
     private currentTab: 'native' | 'data-wizard' | 'training-wizard' = 'native';
 
+    // ================================
+    // CONTAINER DEPLOYMENT STATE
+    // ================================
+
+    private containerDeploymentState = {
+        status: 'idle' as 'idle' | 'deploying' | 'success' | 'error',
+        message: '',
+        logs: [] as string[],
+        deploymentName: undefined as string | undefined,
+    };
+    private containerSocket: any = null;
+    private deploymentPollInterval: any = null;
+
     /** Pipeline service instance */
     private _pipelineService: PipelineService;
 
@@ -321,6 +334,12 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                         break;
                     case 'saveScript':
                         await this.saveScript(message.cardId, message.fileName, message.content);
+                        break;
+                    case 'deployContainer':
+                        await this.deployAsContainer();
+                        break;
+                    case 'deleteDeployment':
+                        await this.deleteDeployment();
                         break;
                     case 'logout':
                         await this.handleLogout();
@@ -930,6 +949,9 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
         // Track current pipeline for file system operations
         this._currentPipelineName = card.alias || card.name;
+
+        // Load any existing deployment state
+        await this.loadDeploymentState();
 
         // Show loading message
         vscode.window.withProgress({
@@ -3489,5 +3511,381 @@ if __name__ == "__main__":
             }
         }
     }
+
+    // ================================
+    // CONTAINER DEPLOYMENT METHODS
+    // ================================
+
+    /**
+     * Deploy pipeline as container
+     */
+    private async deployAsContainer(): Promise<void> {
+        if (!this._currentPipelineName) return;
+
+        const pipeline = this.allCards.find(c => c.name === this._currentPipelineName);
+        if (!pipeline) return;
+
+        this.containerDeploymentState.status = 'deploying';
+        this.containerDeploymentState.message = 'Starting deployment...';
+        this.containerDeploymentState.logs = [];
+        this.updateWebviewDeploymentStatus();
+
+        try {
+            vscode.window.showInformationMessage(`🐳 Deploying ${pipeline.alias || pipeline.name} as container...`);
+
+            // Call the deploy API - returns response string containing JSON config
+            const response = await this._pipelineService.deployContainer(pipeline.name);
+
+            // Parse response - backend returns JSON string
+            let config: any = {};
+            if (typeof response === 'string') {
+                try {
+                    config = JSON.parse(response);
+                } catch (parseErr) {
+                    throw new Error(`Failed to parse deployment response: ${response}`);
+                }
+            } else if (response && typeof response === 'object') {
+                config = response;
+            }
+
+            // Validate response has required fields
+            if (config.status !== 'prepared') {
+                throw new Error(config.error || 'Deployment preparation failed');
+            }
+
+            const deploymentName = config.deployment_name || config.deploymentName;
+            if (!deploymentName) {
+                throw new Error('No deployment name in response');
+            }
+
+            this.containerDeploymentState.deploymentName = deploymentName;
+            this.containerDeploymentState.status = 'deploying';
+            this.containerDeploymentState.message = `Deployment prepared: ${deploymentName}`;
+
+            // Add initial log entries
+            this.containerDeploymentState.logs.push(`📦 Pipeline packaged: ${deploymentName}`);
+            this.containerDeploymentState.logs.push(`🚀 Starting container deployment...`);
+
+            await this.saveDeploymentState();
+            this.updateWebviewDeploymentStatus();
+            vscode.window.showInformationMessage(`✅ Deployment prepared: ${deploymentName}`);
+
+            // Connect to WebSocket for live logs
+            this.connectToDeploymentWebSocket(config);
+
+        } catch (err: any) {
+            this.containerDeploymentState.status = 'error';
+            this.containerDeploymentState.message = `Deployment failed: ${err.message}`;
+            this.updateWebviewDeploymentStatus();
+            vscode.window.showErrorMessage(`❌ Deployment failed: ${err.message}`);
+        }
+
+        this.updateWebviewDeploymentStatus();
+    }
+
+    /**
+     * Connect to Socket.IO for deployment logs (matches UI implementation)
+     */
+    private connectToDeploymentWebSocket(config: any): void {
+        try {
+            // Dynamic import of socket.io-client
+            import('socket.io-client').then((socketIO) => {
+                const io = socketIO.io;
+                const baseUrl = getBaseUrl();
+
+                this.containerDeploymentState.logs.push(`📡 Connecting to builder service for live logs...`);
+                this.updateWebviewDeploymentStatus();
+
+                // Configure Socket.IO exactly like UI does
+                this.containerSocket = io(baseUrl, {
+                    path: '/apps/builder-service/socket.io',
+                    transports: ['websocket', 'polling'],
+                    timeout: 600000,
+                    forceNew: true,
+                    rejectUnauthorized: false,
+                    withCredentials: true,
+                    reconnection: true,
+                    reconnectionAttempts: 50,
+                    reconnectionDelay: 2000,
+                    reconnectionDelayMax: 10000,
+                } as any);
+
+                // On connection, EMIT the start_pipeline command (CRITICAL!)
+                this.containerSocket.on('connect', () => {
+                    this.containerDeploymentState.logs.push(`✅ Connected. Starting pipeline build & deploy...`);
+
+                    // Build payload from config (matches UI line 437-450)
+                    const payload: any = {
+                        bucket_name: config.bucket_name,
+                        file_path: config.file_path,
+                        target_image_tag: config.target_image_tag,
+                        deployment_name: config.deployment_name,
+                        namespace: config.namespace,
+                        minio_endpoint: config.minio_endpoint,
+                        env_vars: config.env_vars || [],
+                        secrets: config.secrets || [],
+                    };
+                    if (config.node_selector) {
+                        payload.node_selector = config.node_selector;
+                    }
+
+                    // EMIT to start the build (this is what triggers the backend)
+                    this.containerSocket.emit('start_pipeline', payload);
+                    this.updateWebviewDeploymentStatus();
+                });
+
+                // Listen for build logs (matches UI line 458-460)
+                this.containerSocket.on('build_log', (data: any) => {
+                    const logMsg = (data.log || '').toString();
+                    if (logMsg) {
+                        this.containerDeploymentState.logs.push(logMsg);
+                        this.containerDeploymentState.message = logMsg;
+                        this.updateWebviewDeploymentStatus();
+                    }
+                });
+
+                // Listen for pipeline updates (matches UI line 453-456)
+                this.containerSocket.on('pipeline_update', (data: any) => {
+                    const step = (data.step || 'UPDATE').toString();
+                    const msg = (data.message || '').toString();
+                    const logLine = `[${step}] ${msg}`;
+                    this.containerDeploymentState.logs.push(logLine);
+                    this.containerDeploymentState.message = logLine;
+                    this.updateWebviewDeploymentStatus();
+                });
+
+                // Listen for final status (matches UI line 462-479)
+                this.containerSocket.on('pipeline_status', (data: any) => {
+                    const status = (data.status || '').toString().toUpperCase();
+                    if (status === 'SUCCESS') {
+                        this.containerDeploymentState.status = 'success';
+                        this.containerDeploymentState.message = 'Deployment successful';
+                        this.containerDeploymentState.logs.push('FINAL STATUS: SUCCESS');
+                    } else {
+                        this.containerDeploymentState.status = 'error';
+                        this.containerDeploymentState.message = data.message || 'Deployment failed';
+                        this.containerDeploymentState.logs.push(`FINAL STATUS: ${status}${data.message ? ' - ' + data.message : ''}`);
+                    }
+                    this.saveDeploymentState().catch(err => console.error('Failed to save:', err));
+                    this.containerSocket?.disconnect();
+                    this.updateWebviewDeploymentStatus();
+                });
+
+                // Handle connection errors
+                this.containerSocket.on('connect_error', (err: any) => {
+                    const errMsg = err && err.message ? err.message : String(err);
+                    this.containerDeploymentState.logs.push(`⚠️ Connection error: ${errMsg}`);
+                    this.updateWebviewDeploymentStatus();
+                });
+
+                // Handle disconnect
+                this.containerSocket.on('disconnect', () => {
+                    if (this.containerDeploymentState.status === 'deploying') {
+                        this.containerDeploymentState.logs.push(`📭 Connection closed`);
+                    }
+                });
+
+            }).catch((err: any) => {
+                // Socket.IO not available
+                this.containerDeploymentState.logs.push(`⚠️ Failed to load Socket.IO client`);
+                this.containerDeploymentState.logs.push(`💡 Deployment running in background. Check Essedum UI for logs.`);
+                this.updateWebviewDeploymentStatus();
+            });
+
+        } catch (err: any) {
+            this.containerDeploymentState.logs.push(`❌ Failed to connect: ${err.message}`);
+            this.updateWebviewDeploymentStatus();
+        }
+    }
+
+    /**
+     * Connect to WebSocket for deployment logs (legacy)
+     */
+    private connectToDeploymentLogs(socketUrl: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.containerSocket = new WebSocket(socketUrl);
+
+                this.containerSocket.onmessage = (event: any) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        const logLine = `[${data.step}] ${data.message}`;
+                        this.containerDeploymentState.logs.push(logLine);
+                        this.containerDeploymentState.message = logLine;
+
+                        if (data.status === 'SUCCESS') {
+                            this.containerDeploymentState.status = 'success';
+                            this.containerSocket?.close();
+                            this.saveDeploymentState().catch(err => console.error('Failed to save deployment state:', err));
+                            vscode.window.showInformationMessage(`✅ Deployment successful!`);
+                            resolve();
+                        } else if (data.status === 'FAILED') {
+                            this.containerDeploymentState.status = 'error';
+                            this.containerSocket?.close();
+                            reject(new Error(data.message));
+                        }
+
+                        this.updateWebviewDeploymentStatus();
+                    } catch (parseErr) {
+                        console.error('Failed to parse log message:', parseErr);
+                    }
+                };
+
+                this.containerSocket.onerror = (err: any) => {
+                    this.containerDeploymentState.status = 'error';
+                    this.containerDeploymentState.message = 'WebSocket connection failed';
+                    this.updateWebviewDeploymentStatus();
+                    reject(err);
+                };
+
+                this.containerSocket.onopen = () => {
+                    vscode.window.showInformationMessage(`📤 Connected to deployment stream...`);
+                };
+
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Delete deployment
+     */
+    private async deleteDeployment(): Promise<void> {
+        if (!this.containerDeploymentState.deploymentName) return;
+
+        this.containerDeploymentState.message = 'Deleting deployment...';
+        this.updateWebviewDeploymentStatus();
+
+        try {
+            await this._pipelineService.deleteDeployment(
+                this.containerDeploymentState.deploymentName
+            );
+
+            this.containerDeploymentState.status = 'idle';
+            this.containerDeploymentState.message = '';
+            this.containerDeploymentState.logs = [];
+            this.containerDeploymentState.deploymentName = undefined;
+            await this.removeDeploymentState();
+
+            vscode.window.showInformationMessage(`✅ Deployment deleted!`);
+
+        } catch (err: any) {
+            this.containerDeploymentState.status = 'error';
+            this.containerDeploymentState.message = `Delete failed: ${err.message}`;
+            vscode.window.showErrorMessage(`❌ Delete failed: ${err.message}`);
+        }
+
+        this.updateWebviewDeploymentStatus();
+    }
+
+    /**
+     * Load deployment state from json_content
+     */
+    private async loadDeploymentState(): Promise<void> {
+        try {
+            const pipeline = this.allCards.find(c => c.name === this._currentPipelineName);
+            if (!pipeline) return;
+
+            const parsed = JSON.parse(pipeline.json_content || '{}');
+            const deployment = parsed.containerDeployment;
+
+            if (deployment) {
+                this.containerDeploymentState = {
+                    status: deployment.status || 'idle',
+                    message: deployment.status === 'deploying' ? 'Reconnecting...' : '',
+                    logs: deployment.buildLogs || [],
+                    deploymentName: deployment.deploymentName
+                };
+
+                if (deployment.inProgress && deployment.deploymentName) {
+                    await this.reconnectToDeployment(deployment.deploymentName);
+                }
+
+                this.updateWebviewDeploymentStatus();
+            }
+        } catch (err) {
+            console.error('Failed to load deployment state:', err);
+        }
+    }
+
+    /**
+     * Reconnect to active deployment
+     */
+    private async reconnectToDeployment(deploymentName: string): Promise<void> {
+        try {
+            vscode.window.showInformationMessage(`📤 Reconnecting to deployment: ${deploymentName}...`);
+            // Update UI to show we're reconnected
+            this.containerDeploymentState.message = `Reconnected to deployment: ${deploymentName}`;
+            this.updateWebviewDeploymentStatus();
+        } catch (err: any) {
+            this.containerDeploymentState.status = 'error';
+            this.containerDeploymentState.message = 'Failed to reconnect to deployment';
+            this.updateWebviewDeploymentStatus();
+        }
+    }
+
+    /**
+     * Save deployment state to json_content
+     */
+    private async saveDeploymentState(): Promise<void> {
+        if (!this._currentPipelineName) return;
+
+        try {
+            const pipeline = this.allCards.find(c => c.name === this._currentPipelineName);
+            if (!pipeline) return;
+
+            const parsed = JSON.parse(pipeline.json_content || '{}');
+            parsed.containerDeployment = {
+                deploymentName: this.containerDeploymentState.deploymentName,
+                buildLogs: this.containerDeploymentState.logs.slice(-500),
+                status: this.containerDeploymentState.status,
+                inProgress: false
+            };
+
+            pipeline.json_content = JSON.stringify(parsed);
+            await this.updateStreamingService(pipeline);
+
+        } catch (err) {
+            console.error('Failed to save deployment state:', err);
+        }
+    }
+
+    /**
+     * Remove deployment state from json_content
+     */
+    private async removeDeploymentState(): Promise<void> {
+        if (!this._currentPipelineName) return;
+
+        try {
+            const pipeline = this.allCards.find(c => c.name === this._currentPipelineName);
+            if (!pipeline) return;
+
+            const parsed = JSON.parse(pipeline.json_content || '{}');
+            delete parsed.containerDeployment;
+
+            pipeline.json_content = JSON.stringify(parsed);
+            await this.updateStreamingService(pipeline);
+
+        } catch (err) {
+            console.error('Failed to remove deployment state:', err);
+        }
+    }
+
+    /**
+     * Send deployment status to webview
+     */
+    private updateWebviewDeploymentStatus(): void {
+        if (!this._view) return;
+
+        this._view.webview.postMessage({
+            command: 'updateDeploymentStatus',
+            status: this.containerDeploymentState.status,
+            message: this.containerDeploymentState.message,
+            logs: this.containerDeploymentState.logs,
+            hasDeployment: !!this.containerDeploymentState.deploymentName
+        });
+    }
+
 }
 

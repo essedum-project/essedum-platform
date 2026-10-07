@@ -334,9 +334,15 @@ class PipelineCardsClient {
         this.scriptsContainer = document.getElementById('scriptsContainer');
         this.runTypesContainer = document.getElementById('runTypesContainer');
         this.runPipelineBtn = document.getElementById('runPipelineBtn');
+        this.deployContainerBtn = document.getElementById('deployContainerBtn');
+        this.deleteDeploymentBtn = document.getElementById('deleteDeploymentBtn');
         this.viewLogsBtn = document.getElementById('viewLogsBtn');
         this.refreshScriptsBtn = document.getElementById('refreshScriptsBtn');
         this.openCopilotBtn = document.getElementById('openCopilotBtn');
+        this.deploymentSection = document.getElementById('deploymentSection');
+        this.deploymentStatus = document.getElementById('deploymentStatus');
+        this.deploymentStatusText = document.getElementById('deploymentStatusText');
+        this.deploymentLogs = document.getElementById('deploymentLogs');
 
         // Track current view state
         this.currentView = 'list'; // 'list' or 'details'
@@ -400,6 +406,17 @@ class PipelineCardsClient {
             this.vscode.postMessage({ command: 'lastPage' });
         });
 
+        // Deployment functionality
+        this.deployContainerBtn?.addEventListener('click', () => {
+            this.vscode.postMessage({ command: 'deployContainer' });
+        });
+
+        this.deleteDeploymentBtn?.addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete this deployment?')) {
+                this.vscode.postMessage({ command: 'deleteDeployment' });
+            }
+        });
+
         // Listen for messages from extension
         window.addEventListener('message', event => {
             const message = event.data;
@@ -410,6 +427,9 @@ class PipelineCardsClient {
                     break;
                 case 'showPipelineDetails':
                     this.showPipelineDetails(message.pipeline, message.scripts, message.runTypes);
+                    break;
+                case 'updateDeploymentStatus':
+                    this.updateDeploymentUI(message);
                     break;
                 case 'showLoginProgress':
                     this.showLoginProgress(message.message);
@@ -1196,6 +1216,75 @@ class PipelineCardsClient {
                 loginMessage.textContent = 'Please run the "Login to Essedum" command to authenticate again.';
             }
         }, 5000);
+    }
+
+    updateDeploymentUI(message) {
+        if (!this.deploymentSection) return;
+
+        // Show/hide deployment section
+        this.deploymentSection.style.display = message.status === 'idle' && !message.hasDeployment ? 'none' : 'block';
+
+        // Update status
+        if (this.deploymentStatus) {
+            this.deploymentStatus.className = `deployment-status ${message.status}`;
+        }
+
+        if (this.deploymentStatusText) {
+            this.deploymentStatusText.textContent = message.message || 'Ready to deploy';
+        }
+
+        // Update delete button visibility
+        if (this.deleteDeploymentBtn) {
+            this.deleteDeploymentBtn.style.display = message.hasDeployment ? 'inline-block' : 'none';
+        }
+
+        // Update logs
+        if (this.deploymentLogs && message.logs && message.logs.length > 0) {
+            this.displayDeploymentLogs(message.logs);
+        }
+    }
+
+    displayDeploymentLogs(logs) {
+        if (!this.deploymentLogs) return;
+
+        this.deploymentLogs.innerHTML = '';
+
+        logs.forEach(log => {
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+
+            // Parse log line for level and content
+            let level = 'info';
+            let content = log;
+
+            if (log.includes('[ERROR]')) {
+                level = 'error';
+                content = log.replace('[ERROR]', '').trim();
+            } else if (log.includes('[SUCCESS]')) {
+                level = 'success';
+                content = log.replace('[SUCCESS]', '').trim();
+            } else if (log.includes('[WARNING]')) {
+                level = 'warning';
+                content = log.replace('[WARNING]', '').trim();
+            }
+
+            logLine.classList.add(level);
+
+            const timestamp = document.createElement('span');
+            timestamp.className = 'log-timestamp';
+            timestamp.textContent = new Date().toLocaleTimeString();
+
+            const contentSpan = document.createElement('span');
+            contentSpan.className = 'log-content';
+            contentSpan.textContent = content;
+
+            logLine.appendChild(timestamp);
+            logLine.appendChild(contentSpan);
+            this.deploymentLogs.appendChild(logLine);
+        });
+
+        // Auto-scroll to bottom
+        this.deploymentLogs.scrollTop = this.deploymentLogs.scrollHeight;
     }
 }
 

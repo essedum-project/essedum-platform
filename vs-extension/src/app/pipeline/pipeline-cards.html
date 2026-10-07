@@ -106,9 +106,21 @@
                         <h4>Actions</h4>
                         <div class="action-buttons">
                             <button class="btn btn-primary" id="runPipelineBtn">▶ Run Pipeline</button>
+                            <button class="btn btn-primary" id="deployContainerBtn">🐳 Deploy as Container</button>
+                            <button class="btn btn-danger" id="deleteDeploymentBtn" style="display:none;">🗑️ Delete Deployment</button>
                             <button class="btn btn-secondary" id="viewLogsBtn">📄 View Logs</button>
                             <button class="btn btn-secondary" id="refreshScriptsBtn">🔄 Refresh Scripts</button>
                             <button class="btn btn-secondary" id="openCopilotBtn" style="display:none;">Open Copilot</button>
+                        </div>
+                    </div>
+
+                    <div class="deployment-section" id="deploymentSection" style="display:none;">
+                        <h4>🐳 Container Deployment</h4>
+                        <div id="deploymentStatus" class="deployment-status">
+                            <span id="deploymentStatusText">Ready to deploy</span>
+                        </div>
+                        <div id="deploymentLogs" class="deployment-logs">
+                            <!-- Deployment logs will be displayed here -->
                         </div>
                     </div>
                 </div>
