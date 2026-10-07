@@ -3968,8 +3968,11 @@ if __name__ == "__main__":
         if (!this._currentPipelineName) return;
 
         try {
-            const pipeline = this.allCards.find(c => c.name === this._currentPipelineName);
-            if (!pipeline) return;
+            // Fetch fresh data from server (like saveDeploymentState does)
+            const freshData = await this._pipelineService.getStreamingServicesByName(this._currentPipelineName);
+            if (!freshData || !freshData.data) return;
+
+            const pipeline = freshData.data;
 
             const parsed = JSON.parse(pipeline.json_content || '{}');
             delete parsed.containerDeployment;
