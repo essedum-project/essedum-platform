@@ -3532,10 +3532,22 @@ if __name__ == "__main__":
      * Deploy pipeline as container
      */
     private async deployAsContainer(): Promise<void> {
-        if (!this._currentPipelineName) return;
+        if (!this._currentPipelineName) {
+            vscode.window.showErrorMessage('❌ No pipeline selected for deployment');
+            return;
+        }
 
-        const pipeline = this.allCards.find(c => c.name === this._currentPipelineName);
-        if (!pipeline) return;
+        // Try finding by name first, then by alias (for native pipelines)
+        let pipeline = this.allCards.find(c => c.name === this._currentPipelineName);
+        if (!pipeline) {
+            pipeline = this.allCards.find(c => c.alias === this._currentPipelineName);
+        }
+
+        if (!pipeline) {
+            vscode.window.showErrorMessage(`❌ Pipeline not found: ${this._currentPipelineName}`);
+            console.log('[Deploy] Available pipelines:', this.allCards.map(c => ({ name: c.name, alias: c.alias, type: c.type })));
+            return;
+        }
 
         this.containerDeploymentState.status = 'deploying';
         this.containerDeploymentState.message = 'Starting deployment...';
@@ -3543,10 +3555,13 @@ if __name__ == "__main__":
         this.updateWebviewDeploymentStatus();
 
         try {
-            vscode.window.showInformationMessage(`🐳 Deploying ${pipeline.alias || pipeline.name} as container...`);
+            const pipelineType = pipeline.type || 'UNKNOWN';
+            vscode.window.showInformationMessage(`🐳 Deploying ${pipeline.alias || pipeline.name} (Type: ${pipelineType}) as container...`);
+            console.log(`[Deploy] Pipeline details:`, { name: pipeline.name, alias: pipeline.alias, type: pipelineType });
 
             // Call the deploy API - returns response string containing JSON config
             const response = await this._pipelineService.deployContainer(pipeline.name);
+            console.log(`[Deploy] API Response:`, response);
 
             // Parse response - backend returns JSON string
             let config: any = {};
@@ -3562,7 +3577,8 @@ if __name__ == "__main__":
 
             // Validate response has required fields
             if (config.status !== 'prepared') {
-                throw new Error(config.error || 'Deployment preparation failed');
+                const errorMsg = config.error || config.message || 'Deployment preparation failed';
+                throw new Error(errorMsg);
             }
 
             const deploymentName = config.deployment_name || config.deploymentName;
@@ -3580,6 +3596,10 @@ if __name__ == "__main__":
             this.containerDeploymentState.logs.push(`📦 Pipeline packaged: ${deploymentName}`);
             this.containerDeploymentState.logs.push(`🚀 Starting container deployment...`);
 
+            // IMPORTANT: Use actual pipeline name (not alias) for saving to database
+            this._currentPipelineName = pipeline.name;
+            console.log(`[Deploy] Updated _currentPipelineName to actual name: ${pipeline.name}`);
+
             await this.saveDeploymentState();
 
             vscode.window.showInformationMessage(`📢 Updating webview...`);
@@ -3590,10 +3610,13 @@ if __name__ == "__main__":
             this.connectToDeploymentWebSocket(config);
 
         } catch (err: any) {
+            const errorMsg = err?.message || err?.toString() || 'Unknown error';
+            console.error(`[Deploy] Error during deployment:`, err);
             this.containerDeploymentState.status = 'error';
-            this.containerDeploymentState.message = `Deployment failed: ${err.message}`;
+            this.containerDeploymentState.message = `Deployment failed: ${errorMsg}`;
+            this.containerDeploymentState.logs.push(`❌ Error: ${errorMsg}`);
             this.updateWebviewDeploymentStatus();
-            vscode.window.showErrorMessage(`❌ Deployment failed: ${err.message}`);
+            vscode.window.showErrorMessage(`❌ Deployment failed: ${errorMsg}`);
         }
 
         this.updateWebviewDeploymentStatus();
@@ -3866,25 +3889,33 @@ if __name__ == "__main__":
     private async loadDeploymentState(): Promise<void> {
         try {
             const currentPipelineName = this._currentPipelineName;
-            if (!currentPipelineName) return;
+            if (!currentPipelineName) {
+                console.log('[LoadState] No pipeline name set');
+                return;
+            }
 
+            console.log(`[LoadState] Loading deployment state for: ${currentPipelineName}`);
             vscode.window.showInformationMessage(`📥 Loading deployment state for: ${currentPipelineName}`);
 
             // IMPORTANT: Fetch fresh data from server (not local cache) to get UI's changes
             const response = await this._pipelineService.getStreamingServicesByName(currentPipelineName);
             const freshPipeline = response?.data || response;
             if (!freshPipeline) {
+                console.log('[LoadState] No pipeline data found from server');
                 vscode.window.showInformationMessage(`📭 No pipeline data found`);
                 return;
             }
 
+            console.log(`[LoadState] ✅ Fetched fresh pipeline data, version: ${freshPipeline.version}`);
             vscode.window.showInformationMessage(`✅ Fetched fresh pipeline data from server`);
 
             const parsed = JSON.parse(freshPipeline.json_content || '{}');
             const deployment = parsed.containerDeployment;
+            console.log(`[LoadState] Parsed json_content, containerDeployment:`, deployment);
 
             if (deployment && deployment.deploymentName) {
                 // Deployment found in database
+                console.log(`[LoadState] 🐳 Found deployment: ${deployment.deploymentName}`);
                 vscode.window.showInformationMessage(`🐳 Found deployment: ${deployment.deploymentName} (status: ${deployment.status})`);
 
                 this.containerDeploymentState = {
@@ -3901,6 +3932,7 @@ if __name__ == "__main__":
                 this.updateWebviewDeploymentStatus();
             } else {
                 // No deployment - clear state
+                console.log('[LoadState] ✅ No active deployment found');
                 vscode.window.showInformationMessage(`✅ No active deployment`);
                 this.containerDeploymentState = {
                     status: 'idle',
@@ -3935,14 +3967,23 @@ if __name__ == "__main__":
      * Save deployment state to json_content
      */
     private async saveDeploymentState(): Promise<void> {
-        if (!this._currentPipelineName) return;
+        if (!this._currentPipelineName) {
+            console.error('[SaveState] No pipeline name set');
+            return;
+        }
 
         try {
+            console.log(`[SaveState] Saving deployment state for: ${this._currentPipelineName}`);
+
             // Fetch fresh data from server (like UI does)
             const freshData = await this._pipelineService.getStreamingServicesByName(this._currentPipelineName);
-            if (!freshData || !freshData.data) return;
+            if (!freshData || !freshData.data) {
+                console.error('[SaveState] No pipeline data returned from server');
+                return;
+            }
 
             const pipeline = freshData.data;
+            console.log(`[SaveState] Fetched pipeline data, version: ${pipeline.version}`);
 
             const parsed = JSON.parse(pipeline.json_content || '{}');
             parsed.containerDeployment = {
@@ -3953,11 +3994,15 @@ if __name__ == "__main__":
             };
 
             pipeline.json_content = JSON.stringify(parsed);
+            console.log(`[SaveState] Calling updateStreamingService with deployment state`);
+
             // Use standard updateStreamingService which works
-            await this.updateStreamingService(pipeline);
+            const result = await this.updateStreamingService(pipeline);
+            console.log(`[SaveState] ✅ Successfully saved deployment state`, result);
 
         } catch (err) {
-            console.error('Failed to save deployment state:', err);
+            console.error('[SaveState] ❌ Failed to save deployment state:', err);
+            vscode.window.showErrorMessage(`Failed to save deployment state: ${err}`);
         }
     }
 
