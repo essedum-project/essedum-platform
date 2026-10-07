@@ -336,6 +336,16 @@ export class PipelineService {
     return this.requestWithRetry<any>('put', this.API.STREAMING_SERVICES_UPDATE, config, payload);
   }
 
+  async saveDeploymentState(payload: any, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+
+    const config = await this.buildAxiosConfig(undefined, {
+      validateStatus: (status) => status >= 200 && status < 300,
+    }, signal);
+
+    return this.requestWithRetry<any>('put', this.API.STREAMING_SERVICES_SAVE, config, payload);
+  }
+
   async getPipelineByName(pipelineName: string, signal?: AbortSignal): Promise<AxiosResponse<any>> {
     this.refreshAuthData();
 
