@@ -12,9 +12,9 @@ if __name__ == "__main__":
     import uvicorn
     root_path = os.environ.get("ROOT_PATH", "")
 
-    # Use loop_factory to force SelectorEventLoop — required on Windows where
-    # aiosqlite deadlocks under the default ProactorEventLoop. SelectorEventLoop
-    # is the default on Linux/macOS so this is a no-op there.
+    # Use SelectorEventLoop — required on Windows where aiosqlite deadlocks
+    # under the default ProactorEventLoop. SelectorEventLoop is the default on
+    # Linux/macOS so this is a no-op there.
     async def _serve() -> None:
         config = uvicorn.Config(
             "app.main:app",
@@ -25,4 +25,4 @@ if __name__ == "__main__":
         server = uvicorn.Server(config)
         await server.serve()
 
-    asyncio.run(_serve(), loop_factory=asyncio.SelectorEventLoop)
+    asyncio.run(_serve())
