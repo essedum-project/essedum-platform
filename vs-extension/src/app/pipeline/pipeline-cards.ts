@@ -4018,6 +4018,8 @@ if __name__ == "__main__":
         try {
             await new Promise<void>((resolve, reject) => {
                 let pollTimer: any;
+                let waitingLogs = 0;
+                const startedAt = Date.now();
                 const deadline = setTimeout(
                     () => finish(new Error(`Timed out after ${timeoutMs / 1000}s waiting for ${deploymentName} to be deleted`)),
                     timeoutMs
@@ -4042,8 +4044,17 @@ if __name__ == "__main__":
                         this.updateWebviewDeploymentStatus();
                         finish();
                     } else if (status === 'SUCCESS') {
-                        this.containerDeploymentState.logs.push(`⏳ Waiting for ${deploymentName} to terminate...`);
-                        this.updateWebviewDeploymentStatus();
+                        // Polling stays at pollMs; only surface the first wait and one more after 15s
+                        const elapsed = Date.now() - startedAt;
+                        if (waitingLogs === 0 || (waitingLogs === 1 && elapsed >= 15000)) {
+                            waitingLogs++;
+                            this.containerDeploymentState.logs.push(
+                                waitingLogs === 1
+                                    ? `⏳ Waiting for ${deploymentName} to terminate...`
+                                    : `⏳ Still terminating...`
+                            );
+                            this.updateWebviewDeploymentStatus();
+                        }
                         clearTimeout(pollTimer);
                         pollTimer = setTimeout(emitDelete, pollMs);
                     } else {
