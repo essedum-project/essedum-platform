@@ -803,11 +803,63 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.scriptEditorReady = true;
     this.codeModifiedSinceDeployed = false;
     this.savedAfterModify = false;
+
+    // Redeploy: delete existing deployment first, then deploy fresh
+    const existingDeployment = this.containerLastDeploymentName;
+    if (existingDeployment) {
+      this.containerDeployStatus = 'deploying';
+      this.containerDeployMessage = `Removing existing deployment ${existingDeployment}...`;
+      this.containerDeployLogs = [`🗑️ Redeploy: removing existing deployment ${existingDeployment}...`];
+      this.cdr.detectChanges();
+
+      const socket = this.openContainerSocket();
+      socket.on('connect', () => {
+        this.addContainerLog(
+          `Deleting deployment: ${existingDeployment} from namespace: ${this.containerLastNamespace}`
+        );
+        socket.emit('delete_deployment', {
+          deployment_name: existingDeployment,
+          namespace: this.containerLastNamespace,
+        });
+        this.cdr.detectChanges();
+      });
+
+      socket.on('delete_status', (data: any) => {
+        const status = (data.status || '').toString().toUpperCase();
+        if (status === 'SUCCESS' || status === 'NOT_FOUND') {
+          this.containerLastDeploymentName = '';
+          this.addContainerLog('✓ Old deployment removed. Starting new deployment...');
+          socket.disconnect();
+          this.proceedWithNewDeploy();
+        } else {
+          this.containerDeployStatus = 'error';
+          this.containerDeployMessage = data.message || 'Failed to delete existing deployment';
+          this.addContainerLog(`❌ ${data.message || 'Failed to delete existing deployment'}`);
+          socket.disconnect();
+          this.cdr.detectChanges();
+        }
+      });
+
+      socket.on('connect_error', (err: any) => {
+        this.addContainerLog(`Connection error: ${err && err.message ? err.message : err}`);
+        this.cdr.detectChanges();
+      });
+
+      return;
+    }
+
+    // No existing deployment, proceed directly
+    this.proceedWithNewDeploy();
+  }
+
+  private proceedWithNewDeploy(): void {
+    if (!this.streamItem) return;
     this.containerDeployStatus = 'deploying';
     this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';
-    this.containerDeployLogs = [];
-    this.addContainerLog('Preparing pipeline package...');
+    if (!this.containerDeployLogs.some(l => l.includes('Preparing pipeline package'))) {
+      this.addContainerLog('Preparing pipeline package...');
+    }
     // Show snackbar and navigate to Container tab immediately
     this.service.message('Deployment started', 'success');
     this.activeTabIndex = this.containerTabIndex;
