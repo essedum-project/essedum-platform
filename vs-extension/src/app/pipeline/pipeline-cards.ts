@@ -3118,9 +3118,59 @@ if __name__ == "__main__":
 
         try {
             await this.viewScriptDetails(cardId);
+            await this.syncLocalCopiesWithServer(card);
             vscode.window.showInformationMessage('Scripts refreshed successfully!');
         } catch (error: any) {
             vscode.window.showErrorMessage(`Failed to refresh scripts: ${error.message}`);
+        }
+    }
+
+    /**
+     * Overwrite already-downloaded local copies (and their open tabs) with the server
+     * version, so edits made in the web UI show up after Refresh. Tabs with unsaved
+     * edits are left alone.
+     */
+    private async syncLocalCopiesWithServer(card: PipelineCard): Promise<void> {
+        const scripts = await this.fetchPipelineScripts(card.name);
+        const baseDir = vscode.Uri.joinPath(this._context.globalStorageUri, 'pipeline-scripts');
+        const dirNames = Array.from(new Set([card.name, card.alias].filter(Boolean) as string[]));
+        const skippedDirty: string[] = [];
+
+        for (const file of scripts?.files || []) {
+            // fetchPipelineScripts returns a placeholder when the server read fails
+            if (file.content.includes('This script was not found on the server')) {
+                continue;
+            }
+            for (const dirName of dirNames) {
+                const localUri = vscode.Uri.joinPath(baseDir, dirName, file.fileName);
+                if (!fs.existsSync(localUri.fsPath)) {
+                    continue;
+                }
+
+                const openDoc = vscode.workspace.textDocuments.find(
+                    d => d.uri.fsPath.toLowerCase() === localUri.fsPath.toLowerCase()
+                );
+                if (openDoc?.isDirty) {
+                    skippedDirty.push(file.fileName);
+                    continue;
+                }
+
+                if (fs.readFileSync(localUri.fsPath, 'utf8') !== file.content) {
+                    fs.writeFileSync(localUri.fsPath, file.content, 'utf8');
+                    console.log(`[Refresh] Updated local copy from server: ${localUri.fsPath}`);
+                }
+
+                if (openDoc && openDoc.getText() !== file.content) {
+                    await vscode.window.showTextDocument(openDoc, { preview: false, preserveFocus: true });
+                    await vscode.commands.executeCommand('workbench.action.files.revert');
+                }
+            }
+        }
+
+        if (skippedDirty.length) {
+            vscode.window.showWarningMessage(
+                `Not refreshed because of unsaved changes in the editor: ${Array.from(new Set(skippedDirty)).join(', ')}`
+            );
         }
     }
 
