@@ -160,6 +160,130 @@ public class GitHubIntegrationService {
     }
 
     /**
+     * Determine which of the incoming files represent an ACTUAL content change
+     * compared to what currently exists on the target branch.
+     * <p>
+     * Some callers (e.g. the Pipeline UI) include the full set of pipeline files
+     * on every save/push instead of just the file(s) the user edited. If we
+     * blindly trust that full list for the "Files Changed" column in the session
+     * history markdown, it ends up listing every file in the repo instead of the
+     * one or two files that were actually modified.
+     * <p>
+     * Optimization: instead of calling {@code repo.getFileContent(path, branch)}
+     * once per file (an N+1 API-call pattern that is slow and burns into GitHub's
+     * rate limits for pushes with many files), this fetches the ENTIRE branch
+     * tree in a single API call and compares each incoming file's locally
+     * computed git blob SHA against the tree's recorded blob SHA. No per-file
+     * network round-trips and no re-downloading of unchanged file content.
+     *
+     * @param repo   Already-resolved GitHub repository
+     * @param branch Branch to compare against
+     * @param files  Files included in this push request
+     * @return List of file paths that represent a real addition/modification
+     */
+    private List<String> computeActuallyChangedFiles(GHRepository repo, String branch, List<FileContent> files) {
+        List<String> changed = new java.util.ArrayList<>();
+        if (files == null || files.isEmpty()) {
+            return changed;
+        }
+
+        // Single API call to snapshot every existing blob SHA on the branch,
+        // instead of one getFileContent() call per incoming file.
+        java.util.Map<String, String> existingBlobShas = fetchExistingBlobShas(repo, branch);
+        boolean treeAvailable = existingBlobShas != null;
+
+        for (FileContent file : files) {
+            String path = resolveFilePath(file);
+            if (path == null || path.isEmpty()) {
+                continue;
+            }
+            // The auto-generated session history file is metadata, not a user change
+            if (sessionHistoryFileName.equals(path) || sessionHistoryFileName.equals(file.getFileName())) {
+                continue;
+            }
+
+            String newContent = file.getContent() != null ? file.getContent() : "";
+
+            if (!treeAvailable) {
+                // Could not fetch the tree at all (e.g., branch doesn't exist yet) -
+                // be conservative and report every file so nothing is silently dropped.
+                changed.add(path);
+                continue;
+            }
+
+            String existingSha = existingBlobShas.get(path);
+            if (existingSha == null) {
+                // Not present in the tree -> new file
+                changed.add(path);
+                continue;
+            }
+
+            try {
+                String computedSha = computeGitBlobSha(newContent);
+                if (!existingSha.equals(computedSha)) {
+                    changed.add(path);
+                }
+                // else: SHA matches existing blob -> content identical, not a real change
+            } catch (Exception e) {
+                log.warn("Could not compute blob SHA for {}: {}. Treating as changed.", path, e.getMessage());
+                changed.add(path);
+            }
+        }
+        return changed;
+    }
+
+    /**
+     * Fetch a map of path -> blob SHA for every file currently on the given branch,
+     * using a single recursive tree API call.
+     *
+     * @return Map of existing file paths to their git blob SHA, or {@code null} if
+     *         the branch/tree could not be resolved (e.g., branch does not exist yet)
+     */
+    private java.util.Map<String, String> fetchExistingBlobShas(GHRepository repo, String branch) {
+        try {
+            GHBranch ghBranch = repo.getBranch(branch);
+            String branchSha = ghBranch.getSHA1();
+            GHTree tree = repo.getTreeRecursive(branchSha, 1);
+
+            java.util.Map<String, String> shas = new java.util.HashMap<>();
+            for (GHTreeEntry entry : tree.getTree()) {
+                if ("blob".equals(entry.getType())) {
+                    shas.put(entry.getPath(), entry.getSha());
+                }
+            }
+            return shas;
+        } catch (Exception e) {
+            log.warn("Could not fetch existing tree for branch {} on {}: {}. Will treat all pushed files as changed.",
+                branch, repo.getFullName(), e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Compute the git blob SHA-1 for the given UTF-8 text content, matching the
+     * algorithm GitHub/git itself uses: sha1("blob " + byteLength + "\0" + content).
+     */
+    private String computeGitBlobSha(String content) throws java.security.NoSuchAlgorithmException {
+        byte[] contentBytes = content.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        String header = "blob " + contentBytes.length + "\0";
+
+        java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-1");
+        digest.update(header.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        digest.update(contentBytes);
+
+        byte[] hash = digest.digest();
+        StringBuilder sb = new StringBuilder(hash.length * 2);
+        for (byte b : hash) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+    private String resolveFilePath(FileContent file) {
+        return (file.getPath() != null && !file.getPath().isEmpty()) ? file.getPath() : file.getFileName();
+    }
+
+    /**
      * Centralized exception handler that properly handles GitHub API exceptions
      * Re-throws HttpException for proper status code handling in controller
      * Wraps other exceptions in GitOperationException
@@ -337,6 +461,14 @@ public class GitHubIntegrationService {
             java.util.List<FileContent> files = request.getFiles() != null
                 ? new java.util.ArrayList<>(request.getFiles())
                 : new java.util.ArrayList<>();
+
+            // Compute the real set of changed files server-side instead of trusting
+            // whatever the caller put in sessionHistoryEntry.filesChanged. Some callers
+            // (e.g. the Pipeline UI) include the FULL file snapshot on every push, which
+            // previously caused the "Files Changed" column to list every file in the
+            // repository instead of just the file(s) the user actually edited.
+            List<String> actuallyChangedFiles = computeActuallyChangedFiles(repo, request.getBranch(), files);
+            request.getSessionHistoryEntry().setFilesChanged(actuallyChangedFiles);
 
             // VS Code builds the full history file client-side and includes it in `files`.
             // Trust that content and skip server-side regeneration to preserve the richer

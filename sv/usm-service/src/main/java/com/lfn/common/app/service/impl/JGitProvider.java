@@ -419,20 +419,17 @@ public class JGitProvider implements GitStorageProvider {
                     }
                 }
 
-                // Clean existing files (except .git folder) to ensure clean state
-                if (branchExists) {
-                    log.info("Cleaning existing files from working directory...");
-                    File[] existingFiles = repoDir.listFiles();
-                    if (existingFiles != null) {
-                        for (File file : existingFiles) {
-                            if (!file.getName().equals(".git")) {
-                                deleteDirectory(file);
-                            }
-                        }
-                    }
-                }
+                // NOTE: Do NOT wipe the working directory here. The branch checkout above
+                // (origin/<branch> or the detected base branch) already populates the working
+                // tree with the FULL set of existing repository files. The `files` list passed
+                // into this method is typically only the changed/new files (e.g. the edited
+                // file + the auto-generated session history markdown) - it is NOT a full
+                // repository snapshot. Deleting everything first and writing back only those
+                // few files would stage deletions for every other tracked file and the
+                // resulting commit would erase the rest of the repository content.
+                log.info("Branch exists: {}. Preserving existing working directory contents; only touched files will be overwritten.", branchExists);
 
-                // Write all new files to the directory
+                // Write/overwrite only the files included in this push
                 for (FileContent file : files) {
                     Path filePath;
                     try {
