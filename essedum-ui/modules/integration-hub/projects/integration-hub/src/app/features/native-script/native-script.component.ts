@@ -673,11 +673,26 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
             this.data.arguments = this.treeData;
             this.data.usedSecrets = this.dynamicSecretsArray;
             // Include generatedCode so the deploy endpoint reads the latest script directly from DB
-            this.streamItem.json_content = JSON.stringify({
+            // Preserve any existing containerDeployment state
+            let existingContainerDeployment: any = null;
+            try {
+              const currentContent = JSON.parse(this.streamItem.json_content || '{}');
+              if (currentContent.containerDeployment) {
+                existingContainerDeployment = currentContent.containerDeployment;
+              }
+            } catch {}
+
+            const newContent: any = {
               elements: [{ attributes: { ...this.data, generatedCode: scriptContent } }],
               environment: this.dynamicEnvArray,
               default_runtime: this.selectedRunType
-            });
+            };
+
+            if (existingContainerDeployment) {
+              newContent.containerDeployment = existingContainerDeployment;
+            }
+
+            this.streamItem.json_content = JSON.stringify(newContent);
             
             this.service.update(this.streamItem).subscribe({
               next: (updateResponse) => {
@@ -1235,6 +1250,15 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
         current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
       }
       current.default_runtime = this.selectedRunType;
+      // Preserve containerDeployment state if it exists
+      if (!current.containerDeployment && this.containerLastDeploymentName) {
+        current.containerDeployment = {
+          deploymentName: this.containerLastDeploymentName,
+          namespace: this.containerLastNamespace,
+          internalDnsUrl: this.containerInternalDnsUrl,
+          buildLogs: this.containerDeployLogs.slice(-500),
+        };
+      }
       this.streamItem.json_content = JSON.stringify(current);
       this.service.update(this.streamItem).subscribe({
         next: () => {
@@ -1458,16 +1482,16 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
       this.buildFileStructureFromCurrentData();
       return;
     }
-    
+
     // Re-fetch the streaming service data to get updated file list
     this.service.getStreamingServicesByName(this.streamItem.name).subscribe({
       next: (serviceData) => {
         if (serviceData && serviceData.json_content) {
           this.streamItem = serviceData;
-          
+
           try {
             const jsonContent = JSON.parse(serviceData.json_content);
-            
+
             if (jsonContent.elements && jsonContent.elements[0]?.attributes) {
               this.data = jsonContent.elements[0].attributes;
               this.dynamicEnvArray = jsonContent.environment || [];
@@ -1475,9 +1499,24 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
               if (!this.selectedRunType) {
                 this.selectedRunType = this.defaultRuntimeFromDB;
               }
-              
+
+              // Restore containerDeployment state from refreshed data
+              if (jsonContent.containerDeployment) {
+                const cd = jsonContent.containerDeployment;
+                this.containerLastDeploymentName = cd.deploymentName || '';
+                this.containerLastNamespace = cd.namespace || 'vibe-pipelines';
+                this.containerInternalDnsUrl = cd.internalDnsUrl || '';
+                if (cd.buildLogs && cd.buildLogs.length > 0) {
+                  this.containerDeployLogs = cd.buildLogs;
+                }
+                if (this.containerLastDeploymentName) {
+                  this.containerDeployStatus = 'success';
+                  this.containerDeployMessage = 'Deployment active';
+                }
+              }
+
               this.buildFileStructure();
-              
+
             } else {
               console.warn('No attributes found in refreshed data');
               this.buildFileStructureFromCurrentData();
