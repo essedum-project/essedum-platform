@@ -3413,9 +3413,22 @@ if __name__ == "__main__":
     }
 
     private async openScriptFromDetails(cardId: string, fileIndex: number): Promise<void> {
-        const card = this.cards.find(c => c.id === cardId);
+        console.log(`[OpenScript] Looking for card with ID: ${cardId}, currentTab: ${this.currentTab}`);
+
+        // Try original lookup by ID (works for data/native)
+        let card = this.cards.find(c => c.id === cardId);
+
+        // Fallback: For training wizard ONLY, try searching by name/alias
+        // Training wizard cards may have different ID format
+        if (!card && this.currentTab === 'training-wizard') {
+            console.warn(`[OpenScript] Card not found by ID in training-wizard tab, trying fallback lookup`);
+            card = this.cards.find(c => c.name === cardId || c.alias === cardId);
+        }
+
         if (!card) {
-            vscode.window.showErrorMessage('Pipeline not found');
+            vscode.window.showErrorMessage(`Pipeline not found: ${cardId}`);
+            console.error(`[OpenScript] ❌ Pipeline not found with ID: ${cardId}, Available:`,
+                this.cards.map(c => ({ id: c.id, name: c.name, alias: c.alias, type: c.type })));
             return;
         }
 
@@ -3529,6 +3542,67 @@ if __name__ == "__main__":
     // ================================
 
     /**
+     * Upload the current .py content (open editor buffer > local file > server copy)
+     * to the server before deploying, mirroring the Ctrl+S save flow.
+     */
+    private async pushLocalScriptsBeforeDeploy(pipeline: PipelineCard): Promise<void> {
+        const typeUpper = (pipeline.type || '').toUpperCase();
+        const isWizard = typeUpper === 'DATAPIPELINE' || typeUpper === 'TRAININGPIPELINE';
+
+        vscode.window.showInformationMessage(`📤 Pushing latest code before deployment...`);
+
+        const scripts = await this.fetchPipelineScripts(pipeline.name);
+        const pyFiles = (scripts?.files || []).filter(f => f.fileName.toLowerCase().endsWith('.py'));
+        if (pyFiles.length === 0) {
+            throw new Error('No .py scripts found for this pipeline');
+        }
+
+        const baseDir = vscode.Uri.joinPath(this._context.globalStorageUri, 'pipeline-scripts');
+        const dirNames = Array.from(new Set([pipeline.name, pipeline.alias].filter(Boolean) as string[]));
+
+        for (const file of pyFiles) {
+            const candidates = dirNames.map(d => vscode.Uri.joinPath(baseDir, d, file.fileName).fsPath.toLowerCase());
+
+            let content: string | undefined;
+            let source = 'server';
+
+            const openDoc = vscode.workspace.textDocuments.find(d => candidates.includes(d.uri.fsPath.toLowerCase()));
+            if (openDoc) {
+                content = openDoc.getText();
+                source = openDoc.isDirty ? 'editor (unsaved)' : 'editor';
+            } else {
+                for (const dirName of dirNames) {
+                    const diskPath = vscode.Uri.joinPath(baseDir, dirName, file.fileName).fsPath;
+                    if (fs.existsSync(diskPath)) {
+                        content = fs.readFileSync(diskPath, 'utf8');
+                        source = 'local file';
+                        break;
+                    }
+                }
+            }
+            if (content === undefined) {
+                content = file.content;
+            }
+            if (isWizard) {
+                content = this.stripMarkdownCodeFence(content);
+            }
+
+            console.log(`[Deploy] Pushing ${file.fileName} from ${source} (${content.length} chars)`);
+            await this.createNativeFileWithFormData(pipeline.name, file.fileName, content);
+
+            if (isWizard) {
+                await this.syncWizardScriptToStreamingService(pipeline.name, file.fileName, content);
+                const verified = await this.verifyServerFileContent(pipeline.name, file.fileName, content);
+                if (!verified) {
+                    throw new Error(`Server did not persist the new content of ${file.fileName}`);
+                }
+            }
+        }
+
+        vscode.window.showInformationMessage(`✅ Latest code pushed (${pyFiles.length} file(s)), starting deployment...`);
+    }
+
+    /**
      * Deploy pipeline as container
      */
     private async deployAsContainer(): Promise<void> {
@@ -3549,9 +3623,43 @@ if __name__ == "__main__":
             return;
         }
 
+        // The deploy endpoint zips whatever is in ICIPNativeScript, so upload the
+        // editor/disk copy first; otherwise a redeploy ships the last-uploaded code.
+        try {
+            await this.pushLocalScriptsBeforeDeploy(pipeline);
+        } catch (err: any) {
+            console.error(`[Deploy] ❌ Failed to push scripts before deploy:`, err);
+            vscode.window.showErrorMessage(`Failed to push latest code before deploy: ${err?.message || err}`);
+            return;
+        }
+
+        // Redeploy: patching a live deployment leaves the old pod serving logs during
+        // the rollout, so remove it completely and deploy fresh.
+        const existingDeployment = this.containerDeploymentState.deploymentName;
+        if (existingDeployment) {
+            const namespace = (pipeline.type || '').toUpperCase() === 'TRAININGPIPELINE' ? 'vibe-training' : 'vibe-pipelines';
+            this.containerDeploymentState.status = 'deploying';
+            this.containerDeploymentState.message = `Removing existing deployment ${existingDeployment}...`;
+            this.containerDeploymentState.logs = [`🗑️ Redeploy: removing existing deployment ${existingDeployment} (${namespace})...`];
+            this.updateWebviewDeploymentStatus();
+            try {
+                await this.deleteDeploymentAndWait(existingDeployment, namespace);
+                this.containerDeploymentState.deploymentName = undefined;
+                this._currentPipelineName = pipeline.name;
+                await this.removeDeploymentState();
+            } catch (err: any) {
+                this.containerDeploymentState.status = 'error';
+                this.containerDeploymentState.message = `Redeploy aborted: ${err?.message || err}`;
+                this.containerDeploymentState.logs.push(`❌ ${err?.message || err}`);
+                this.updateWebviewDeploymentStatus();
+                vscode.window.showErrorMessage(`❌ Redeploy aborted, old deployment could not be removed: ${err?.message || err}`);
+                return;
+            }
+        }
+
         this.containerDeploymentState.status = 'deploying';
         this.containerDeploymentState.message = 'Starting deployment...';
-        this.containerDeploymentState.logs = [];
+        this.containerDeploymentState.logs = existingDeployment ? this.containerDeploymentState.logs : [];
         this.updateWebviewDeploymentStatus();
 
         try {
@@ -3880,6 +3988,75 @@ if __name__ == "__main__":
             this.containerDeploymentState.status = 'error';
             this.containerDeploymentState.message = `Delete failed: ${err.message || err}`;
             this.updateWebviewDeploymentStatus();
+        }
+    }
+
+    /**
+     * Delete a deployment and resolve only once Kubernetes no longer has it.
+     * The deployer answers SUCCESS as soon as the (foreground) delete is accepted, while
+     * the deployment is still terminating; re-issuing the delete returns NOT_FOUND only
+     * after it and its pods are gone, so poll until then.
+     */
+    private async deleteDeploymentAndWait(deploymentName: string, namespace: string): Promise<void> {
+        const { io } = await import('socket.io-client');
+        const socket = io(getBaseUrl(), {
+            path: '/apps/builder-service/socket.io',
+            transports: ['websocket', 'polling'],
+            timeout: 600000,
+            forceNew: true,
+            rejectUnauthorized: false,
+            withCredentials: true,
+            reconnection: true,
+            reconnectionAttempts: 50,
+            reconnectionDelay: 2000,
+            reconnectionDelayMax: 10000,
+        } as any);
+
+        const timeoutMs = 180000;
+        const pollMs = 3000;
+
+        try {
+            await new Promise<void>((resolve, reject) => {
+                let pollTimer: any;
+                const deadline = setTimeout(
+                    () => finish(new Error(`Timed out after ${timeoutMs / 1000}s waiting for ${deploymentName} to be deleted`)),
+                    timeoutMs
+                );
+                const finish = (err?: Error) => {
+                    clearTimeout(deadline);
+                    clearTimeout(pollTimer);
+                    err ? reject(err) : resolve();
+                };
+                const emitDelete = () => socket.emit('delete_deployment', { deployment_name: deploymentName, namespace });
+
+                socket.on('connect', emitDelete);
+
+                socket.on('delete_status', (data: any) => {
+                    // delete_status is broadcast to every connected client
+                    if (data?.deployment_name && data.deployment_name !== deploymentName) {
+                        return;
+                    }
+                    const status = String(data?.status || '').toUpperCase();
+                    if (status === 'NOT_FOUND') {
+                        this.containerDeploymentState.logs.push(`✅ Old deployment ${deploymentName} fully removed`);
+                        this.updateWebviewDeploymentStatus();
+                        finish();
+                    } else if (status === 'SUCCESS') {
+                        this.containerDeploymentState.logs.push(`⏳ Waiting for ${deploymentName} to terminate...`);
+                        this.updateWebviewDeploymentStatus();
+                        clearTimeout(pollTimer);
+                        pollTimer = setTimeout(emitDelete, pollMs);
+                    } else {
+                        finish(new Error(data?.message || `Delete failed (${status || 'unknown status'})`));
+                    }
+                });
+
+                socket.on('connect_error', (err: any) => {
+                    console.warn('[Redeploy] Builder service connection error, retrying:', err?.message || err);
+                });
+            });
+        } finally {
+            socket.disconnect();
         }
     }
 
