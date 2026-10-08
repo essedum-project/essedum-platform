@@ -764,8 +764,16 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
 
   get appLogs(): string[] {
     const logs = this.containerDeployLogs;
-    const startIdx = logs.findIndex(l => l.includes('[APP_LOG]') && l.toLowerCase().includes('application logs') && !l.toLowerCase().includes('end of'));
+    // Find the LAST (most recent) [APP_LOG] start marker, not the first
+    let startIdx = -1;
+    for (let i = logs.length - 1; i >= 0; i--) {
+      if (logs[i].includes('[APP_LOG]') && logs[i].toLowerCase().includes('application logs') && !logs[i].toLowerCase().includes('end of')) {
+        startIdx = i;
+        break;
+      }
+    }
     if (startIdx < 0) return [];
+    // Find the end marker after the start
     const endIdx = logs.findIndex((l, i) => i > startIdx && l.includes('[APP_LOG]') && l.toLowerCase().includes('end of application'));
     return logs.slice(startIdx + 1, endIdx >= 0 ? endIdx : undefined).filter(l => l.trim());
   }
