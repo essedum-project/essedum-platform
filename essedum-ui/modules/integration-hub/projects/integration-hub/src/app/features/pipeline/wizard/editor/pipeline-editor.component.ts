@@ -390,7 +390,9 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     if (existingDeployment) {
       this.containerDeployStatus = 'deploying';
       this.containerDeployMessage = `Removing existing deployment ${existingDeployment}...`;
-      this.containerDeployLogs = [`🗑️ Redeploy: removing existing deployment ${existingDeployment}...`];
+      // Preserve existing logs and append redeploy logs
+      const preservedLogs = [...this.containerDeployLogs];
+      this.containerDeployLogs = [...preservedLogs, `\n🗑️ Redeploy: removing existing deployment ${existingDeployment}...`];
 
       const socket = io(window.location.origin, {
         path: '/apps/builder-service/socket.io',

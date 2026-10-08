@@ -809,7 +809,9 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     if (existingDeployment) {
       this.containerDeployStatus = 'deploying';
       this.containerDeployMessage = `Removing existing deployment ${existingDeployment}...`;
-      this.containerDeployLogs = [`🗑️ Redeploy: removing existing deployment ${existingDeployment}...`];
+      // Preserve existing logs and append redeploy logs
+      const preservedLogs = [...this.containerDeployLogs];
+      this.containerDeployLogs = [...preservedLogs, `\n🗑️ Redeploy: removing existing deployment ${existingDeployment}...`];
       this.cdr.detectChanges();
 
       const socket = this.openContainerSocket();

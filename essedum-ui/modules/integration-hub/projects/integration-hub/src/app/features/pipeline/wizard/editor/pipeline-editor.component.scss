@@ -207,8 +207,9 @@
   ::ng-deep .mat-mdc-tab-body         { background: #ffffff !important; }
   ::ng-deep .mat-mdc-tab-body-wrapper { background: #ffffff !important; }
   .ct-applogs-status {
-    &.ct-applogs-error { background: #2d2000; color: #fcd34d; mat-icon { color: #f59e0b; } }
-    &.ct-applogs-ok   { background: #0d2818; color: #86efac; mat-icon { color: #4ade80; } }
+    // Light theme: use bright/visible colors
+    &.ct-applogs-error { background: #fef3c7; color: #92400e; mat-icon { color: #d97706; } }
+    &.ct-applogs-ok   { background: #dcfce7; color: #15803d; mat-icon { color: #16a34a; } }
   }
 }
 
@@ -251,4 +252,10 @@
   ::ng-deep .mat-mdc-tab-body-content { background: #0d1117 !important; }
   ::ng-deep .mat-mdc-tab-body         { background: #0d1117 !important; }
   ::ng-deep .mat-mdc-tab-body-wrapper { background: #0d1117 !important; }
+
+  .ct-applogs-status {
+    // Dark theme: use dark amber/green backgrounds for visibility
+    &.ct-applogs-error { background: #2d2000; color: #fcd34d; mat-icon { color: #f59e0b; } }
+    &.ct-applogs-ok   { background: #0d2818; color: #86efac; mat-icon { color: #4ade80; } }
+  }
 }
