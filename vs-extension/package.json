@@ -2,7 +2,7 @@
   "name": "essedum",
   "displayName": "Essedum",
   "description": "VS Code extension for Essedum AI Platform",
-  "version": "1.1.6",
+  "version": "1.5.0",
   "publisher": "essedum",
   "license": "MIT",
   "engines": {
@@ -104,6 +104,60 @@
       {
         "command": "essedum.uploadAgentFolder",
         "title": "Upload Code to ESSEDUM"
+      },
+      {
+        "command": "essedum.github.signIn",
+        "title": "Essedum: Sign in to GitHub",
+        "category": "Essedum",
+        "icon": "$(github)"
+      },
+      {
+        "command": "essedum.github.signOut",
+        "title": "Essedum: Sign out of GitHub",
+        "category": "Essedum"
+      },
+      {
+        "command": "essedum.github.cloneRepository",
+        "title": "Essedum: Clone Code from GitHub",
+        "category": "Essedum",
+        "icon": "$(repo-clone)"
+      },
+      {
+        "command": "essedum.github.linkRepository",
+        "title": "Essedum: Link GitHub Repository…",
+        "category": "Essedum"
+      },
+      {
+        "command": "essedum.github.commitAndPush",
+        "title": "Essedum: Commit & Push to Session Branch",
+        "category": "Essedum",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "essedum.github.raisePullRequest",
+        "title": "Essedum: Raise Pull Request",
+        "category": "Essedum",
+        "icon": "$(git-pull-request)"
+      },
+      {
+        "command": "essedum.github.openPullRequest",
+        "title": "Essedum: Open Pull Request in Browser",
+        "category": "Essedum"
+      },
+      {
+        "command": "essedum.github.refreshPrStatus",
+        "title": "Essedum: Refresh Pull Request Status",
+        "category": "Essedum"
+      },
+      {
+        "command": "essedum.github.endSession",
+        "title": "Essedum: End GitHub Edit Session",
+        "category": "Essedum"
+      },
+      {
+        "command": "essedum.github.showSessionActions",
+        "title": "Essedum: GitHub Session Actions",
+        "category": "Essedum"
       }
     ],
     "menus": {
@@ -127,6 +181,38 @@
         {
           "command": "essedum.showJobLogsInTerminal",
           "when": "true"
+        },
+        {
+          "command": "essedum.github.signIn",
+          "when": "!essedum.githubSignedIn && essedum.isAuthenticated"
+        },
+        {
+          "command": "essedum.github.signOut",
+          "when": "essedum.githubSignedIn && essedum.isAuthenticated"
+        },
+        {
+          "command": "essedum.github.commitAndPush",
+          "when": "essedum.sessionBranchActive"
+        },
+        {
+          "command": "essedum.github.raisePullRequest",
+          "when": "essedum.sessionBranchActive && !essedum.prOpen"
+        },
+        {
+          "command": "essedum.github.openPullRequest",
+          "when": "essedum.prOpen"
+        },
+        {
+          "command": "essedum.github.refreshPrStatus",
+          "when": "essedum.sessionBranchActive"
+        },
+        {
+          "command": "essedum.github.endSession",
+          "when": "essedum.sessionBranchActive"
+        },
+        {
+          "command": "essedum.github.showSessionActions",
+          "when": "essedum.sessionBranchActive"
         }
       ],
       "view/title": [
@@ -237,6 +323,48 @@
           "type": "boolean",
           "default": false,
           "description": "Automatically attempt login when the extension starts (requires network to be pre-selected)"
+        },
+        "essedum.github.autoPushOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically push to session branch after each successful save to the Essedum server"
+        },
+        "essedum.github.autoRaisePr": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically raise a PR when a session branch is first created"
+        },
+        "essedum.github.autoPushDebounceMs": {
+          "type": "number",
+          "default": 1500,
+          "minimum": 500,
+          "maximum": 30000,
+          "description": "Debounce delay (ms) before auto-push fires after a file save"
+        },
+        "essedum.github.prPollIntervalMs": {
+          "type": "number",
+          "default": 60000,
+          "description": "How often (ms) to poll for PR status updates. Set to 0 to disable polling."
+        },
+        "essedum.github.sessionBranchPrefix": {
+          "type": "string",
+          "default": "session",
+          "description": "Prefix used when generating session branch names"
+        },
+        "essedum.github.promptOnSessionEnd": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask to raise a PR when a session ends with unmerged commits"
+        },
+        "essedum.github.promptForCommitMessage": {
+          "type": "boolean",
+          "default": false,
+          "description": "Prompt for a custom commit message before each auto-push fires. When disabled, a message is generated automatically from the saved file names."
+        },
+        "essedum.github.useBuiltInAuthProvider": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use the VS Code built-in GitHub auth provider. When false, always prompts for a PAT."
         }
       }
     }

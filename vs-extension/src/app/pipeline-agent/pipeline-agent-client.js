@@ -596,13 +596,16 @@ class PipelineAgentClient {
         const STATUS = this.constants.STATUS_TYPES;
         this.actionStatus.textContent = message;
         this.actionStatus.style.display = DISP.BLOCK;
+        this.actionStatus.style.border = '';
 
         if (type === STATUS.SUCCESS) {
-            this.actionStatus.style.backgroundColor = 'var(--vscode-testing-iconPassed)';
-            this.actionStatus.style.color = 'var(--vscode-editor-foreground)';
+            this.actionStatus.style.backgroundColor = 'var(--vscode-notifications-background, var(--vscode-sideBar-background))';
+            this.actionStatus.style.color = 'var(--vscode-testing-iconPassed)';
+            this.actionStatus.style.border = '1px solid var(--vscode-testing-iconPassed)';
         } else if (type === STATUS.ERROR) {
-            this.actionStatus.style.backgroundColor = 'var(--vscode-testing-iconFailed)';
-            this.actionStatus.style.color = 'var(--vscode-editor-foreground)';
+            this.actionStatus.style.backgroundColor = 'var(--vscode-notifications-background, var(--vscode-sideBar-background))';
+            this.actionStatus.style.color = 'var(--vscode-testing-iconFailed)';
+            this.actionStatus.style.border = '1px solid var(--vscode-testing-iconFailed)';
         }
 
         setTimeout(() => {
