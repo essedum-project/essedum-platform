@@ -2,7 +2,7 @@
   "name": "essedum",
   "displayName": "Essedum",
   "description": "VS Code extension for Essedum AI Platform",
-  "version": "1.1.6",
+  "version": "1.5.0",
   "publisher": "essedum",
   "license": "MIT",
   "engines": {
@@ -355,6 +355,11 @@
           "type": "boolean",
           "default": true,
           "description": "Ask to raise a PR when a session ends with unmerged commits"
+        },
+        "essedum.github.promptForCommitMessage": {
+          "type": "boolean",
+          "default": false,
+          "description": "Prompt for a custom commit message before each auto-push fires. When disabled, a message is generated automatically from the saved file names."
         },
         "essedum.github.useBuiltInAuthProvider": {
           "type": "boolean",

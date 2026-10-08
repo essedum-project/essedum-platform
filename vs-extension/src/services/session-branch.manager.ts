@@ -201,9 +201,10 @@ export class SessionBranchManager implements vscode.Disposable {
 
       this.persistState(state);
 
-      // If we already have a branch, refresh the PR status
+      // If we already have a branch, refresh PR status and switch the local repo
       if (state.sessionBranch && state.branchCreationStatus === 'ready') {
         void this.refreshPrStatus(pipelineKey);
+        void this.checkoutSessionBranchLocally(state);
       }
 
       logger.info(`Session started for ${pipelineName}: branch=${state.sessionBranch || '(pending)'}`);
@@ -239,6 +240,137 @@ export class SessionBranchManager implements vscode.Disposable {
       void this.flushPush(pipelineName);
     }, this.cfg.debounceMs);
     this.debounceTimers.set(pipelineName, timer);
+  }
+
+  // ─── Local git checkout ───────────────────────────────────────────────────
+
+  /**
+   * Uses VS Code's built-in git extension to checkout the session branch in any
+   * locally-cloned repository whose remote URL contains the pipeline's repo name.
+   * Non-fatal — a missing local clone or offline git never blocks a push.
+   */
+  /**
+   * Creates the session branch locally in the ADK pipeline folder and checks it out,
+   * making VS Code's Source Control panel show the correct session branch.
+   *
+   * No network access required: this environment cannot reach github.com from a local
+   * git subprocess (corporate proxy). All actual commits go via the Essedum backend API.
+   * The local repo is purely so VS Code's Source Control reflects the right branch name.
+   */
+  private async checkoutSessionBranchLocally(state: SessionBranchState): Promise<void> {
+    const { execFile } = require('child_process') as typeof import('child_process');
+    const { promisify }  = require('util')         as typeof import('util');
+    const run = promisify(execFile);
+
+    try {
+      // Work in the ADK pipeline folder that VS Code has as a workspace root.
+      const adkContext = this.context.globalState.get<any>('adkContext');
+      const cwd: string | undefined = adkContext?.folderPath;
+      if (!cwd) { return; }
+
+      // ── 1. Initialize git if the folder does not have a repo yet ───────────────
+      let isGitRepo = false;
+      try {
+        await run('git', ['rev-parse', '--git-dir'], { cwd });
+        isGitRepo = true;
+      } catch { /* not a git repo */ }
+
+      if (!isGitRepo) {
+        await run('git', ['init'], { cwd });
+        logger.info(`git init at ${cwd}`);
+      }
+
+      // ── 2. Set a local git identity so any git operation does not prompt ────────
+      const gitUser = state.gitUsername || 'essedum';
+      await run('git', ['config', 'user.email', `${gitUser}@essedum`], { cwd }).catch(() => {});
+      await run('git', ['config', 'user.name',  gitUser],                 { cwd }).catch(() => {});
+
+      // ── 3. Create an empty initial commit if the repo has no commits yet ────────
+      // git requires at least one commit before branch switching works.
+      let hasCommits = false;
+      try {
+        await run('git', ['rev-parse', 'HEAD'], { cwd });
+        hasCommits = true;
+      } catch { /* no commits yet */ }
+
+      if (!hasCommits) {
+        await run('git', ['commit', '--allow-empty',
+          '-m', 'chore: initialize Essedum session workspace'], { cwd });
+      }
+
+      // ── 4. Skip if already on the session branch ────────────────────────────────
+      try {
+        const { stdout } = await run('git', ['branch', '--show-current'], { cwd });
+        if ((stdout as string).trim() === state.sessionBranch) { return; }
+      } catch { /* ignore */ }
+
+      // ── 5. Create (or switch to) the local session branch ──────────────────────
+      // No remote / no network needed — we just need the branch name to match so
+      // VS Code's Source Control shows the right branch. All pushes go via the API.
+      let localExists = false;
+      try {
+        const { stdout } = await run('git', ['branch', '--list', state.sessionBranch], { cwd });
+        localExists = (stdout as string).trim().length > 0;
+      } catch { /* treat as not found */ }
+
+      if (localExists) {
+        await run('git', ['checkout', state.sessionBranch], { cwd });
+      } else {
+        await run('git', ['checkout', '-b', state.sessionBranch], { cwd });
+      }
+
+      // ── 5b. Suppress VS Code "Publish Branch" dialog ────────────────────────────
+      // VS Code checks branch.<name>.remote to decide whether to show "Publish Branch"
+      // or "Sync Changes". Using "." (local self-reference) as the remote means git
+      // considers the branch tracked without requiring any real remote or network call.
+      // All actual GitHub pushes continue to go through the Essedum backend API.
+      await run('git', ['config', `branch.${state.sessionBranch}.remote`, '.'], { cwd }).catch(() => {});
+      await run('git', ['config', `branch.${state.sessionBranch}.merge`, `refs/heads/${state.sessionBranch}`], { cwd }).catch(() => {});
+
+      // ── 5c. Disable VS Code post-commit auto-sync for this workspace ────────────
+      // When the upstream is "." (self-reference) VS Code's "Commit & Sync" shows a
+      // confusing "pull and push to './session/...'" dialog that misleads the user
+      // into thinking a GitHub push happened. Setting git.postCommitCommand = "none"
+      // in the workspace .vscode/settings.json stops the auto-sync; GitHub pushes
+      // happen via the Essedum backend API (auto-push on save), not local git.
+      try {
+        const nodePath = require('path') as typeof import('path');
+        const nodeFs   = require('fs')   as typeof import('fs');
+        const vscodeDir   = nodePath.join(cwd, '.vscode');
+        const settingsPath = nodePath.join(vscodeDir, 'settings.json');
+        let wsSettings: Record<string, unknown> = {};
+        if (nodeFs.existsSync(settingsPath)) {
+          try { wsSettings = JSON.parse(nodeFs.readFileSync(settingsPath, 'utf8')); } catch { /* malformed */ }
+        } else if (!nodeFs.existsSync(vscodeDir)) {
+          nodeFs.mkdirSync(vscodeDir, { recursive: true });
+        }
+        if (wsSettings['git.postCommitCommand'] !== 'none') {
+          wsSettings['git.postCommitCommand'] = 'none';
+          nodeFs.writeFileSync(settingsPath, JSON.stringify(wsSettings, null, 2) + '\n', 'utf8');
+          logger.info(`Wrote git.postCommitCommand=none to ${settingsPath}`);
+        }
+      } catch { /* non-fatal */ }
+
+      // ── 6. Refresh VS Code's Source Control panel ───────────────────────────────
+      try {
+        const gitExt = vscode.extensions.getExtension('vscode.git');
+        if (gitExt) {
+          const gitApi = (gitExt.isActive ? gitExt.exports : await gitExt.activate()).getAPI(1);
+          const repo = (gitApi.repositories ?? []).find(
+            (r: any) => r.rootUri?.fsPath?.toLowerCase() === cwd.toLowerCase()
+          );
+          if (repo) { await repo.status(); }
+        }
+      } catch { /* non-fatal */ }
+
+      vscode.window.setStatusBarMessage(`$(git-branch) Switched to ${state.sessionBranch}`, 5000);
+      logger.info(`Local branch switched to ${state.sessionBranch} at ${cwd}`);
+
+    } catch (err: any) {
+      const detail = (err as any)?.stderr?.trim() || err?.message || String(err);
+      logger.warn('checkoutSessionBranchLocally failed (non-fatal):', detail);
+      vscode.window.showWarningMessage(`Could not switch local branch: ${detail}`);
+    }
   }
 
   // ─── Branch creation ──────────────────────────────────────────────────────
@@ -309,6 +441,10 @@ export class SessionBranchManager implements vscode.Disposable {
         updatedby: state.gitUsername,
         updatedat: new Date().toISOString(),
       }).catch(e => logger.warn('Failed to sync session branch to backend:', e?.message));
+
+      // Switch the local repo to the new session branch so VS Code Source Control
+      // reflects the correct branch. Non-blocking — do after persisting state.
+      void this.checkoutSessionBranchLocally(state);
 
       if (!resp.alreadyExisted && this.cfg.autoRaisePr) {
         void this.seedSessionHistoryAndAutoRaisePr(state.pipelineKey);
