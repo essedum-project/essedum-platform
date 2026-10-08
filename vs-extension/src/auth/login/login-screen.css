@@ -101,6 +101,29 @@ input[type="text"].readonly {
     cursor: not-allowed;
 }
 
+.field-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+}
+
+#advancedSection {
+    margin-top: 4px;
+    margin-bottom: 16px;
+}
+
+#advancedSection summary {
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--vscode-textLink-foreground);
+    margin-bottom: 10px;
+}
+
+#advancedSection[open] summary {
+    margin-bottom: 14px;
+}
+
 #configFields {
     margin-top: 10px;
     padding-top: 10px;
