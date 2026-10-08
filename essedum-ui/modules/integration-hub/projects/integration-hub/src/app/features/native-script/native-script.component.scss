@@ -1191,6 +1191,15 @@ button[mat-button], button[mat-stroked-button] {
   span { color: inherit !important; }
 }
 
+.ct-applogs-status {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border-radius: 5px; font-size: 13px; font-weight: 500;
+  margin: 8px 0 4px;
+  mat-icon { font-size: 16px; height: 16px; width: 16px; }
+  &.ct-applogs-error { background: #fffbeb; color: #92400e; mat-icon { color: #d97706; } }
+  &.ct-applogs-ok   { background: #f0fdf4; color: #15803d; mat-icon { color: #16a34a; } }
+}
+
 // ── Container tab: light theme ────────────────────────────────────────────────
 :host-context(body.header-light-theme) {
   .cdeploy-title { color: #1f2328 !important; }
@@ -1230,4 +1239,8 @@ button[mat-button], button[mat-stroked-button] {
   .console-text { color: #24292e !important; }
   .console-loading { color: #d29922 !important; }
   .console-empty { color: #656d76 !important; }
+  .ct-applogs-status {
+    &.ct-applogs-error { background: #2d2000; color: #fcd34d; mat-icon { color: #f59e0b; } }
+    &.ct-applogs-ok   { background: #0d2818; color: #86efac; mat-icon { color: #4ade80; } }
+  }
 }

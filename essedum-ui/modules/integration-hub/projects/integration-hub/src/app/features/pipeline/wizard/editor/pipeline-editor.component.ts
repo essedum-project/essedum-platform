@@ -357,6 +357,18 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     return this.containerDeployStatus === 'success' && this.codeModifiedSinceDeployed;
   }
 
+  get appLogs(): string[] {
+    const logs = this.containerDeployLogs;
+    const startIdx = logs.findIndex(l => l.includes('[APP_LOG]') && l.toLowerCase().includes('application logs') && !l.toLowerCase().includes('end of'));
+    if (startIdx < 0) return [];
+    const endIdx = logs.findIndex((l, i) => i > startIdx && l.includes('[APP_LOG]') && l.toLowerCase().includes('end of application'));
+    return logs.slice(startIdx + 1, endIdx >= 0 ? endIdx : undefined).filter(l => l.trim());
+  }
+
+  get appLogHasError(): boolean {
+    return this.appLogs.some(l => /traceback|syntaxerror|nameerror|typeerror|valueerror|importerror|\berror\b|\bexception\b/i.test(l));
+  }
+
   deployAsContainer(): void {
     if (!this.model) return;
     if (this.codeModifiedSinceDeployed) {
