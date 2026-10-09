@@ -214,7 +214,10 @@ public class ICIPJobServiceUtilBinary extends ICIPCommonJobServiceUtil implement
 
 		String arguments;
 		try {
-			arguments = binary.get("arguments").getAsString();
+			JsonElement argumentsElement = binary.get("arguments");
+			arguments = (argumentsElement != null && !argumentsElement.isJsonNull())
+					? argumentsElement.getAsString() : "";
+
 		} catch (Exception ex) {
 			String msg = "Error in getting arguments : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);

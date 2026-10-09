@@ -77,8 +77,8 @@ public class ICIPDatasetTopicServiceImpl implements ICIPDatasetTopicService {
 			iCIPTopic.setTopicname(mlTopics.getTopicName());
 			iCIPTopic.setOrganization(mlTopics.getOrganization());
 			iCIPTopic.setAdapterinstance(mlTopics.getAdapterInstance());
-			if (mlTopics.getAdapterInstance() != null && !mlTopics.getAdapterInstance().isEmpty())
-				iCIPTopic = iCIPTopicRepository.save(iCIPTopic);
+			// adapterInstance is optional metadata — always persist so getId() is non-null
+			iCIPTopic = iCIPTopicRepository.save(iCIPTopic);
 		}
 		ICIPDatasetTopic iCIPDatasetTopic = new ICIPDatasetTopic();
 		ICIPDataset2 datasetFromDb = datasetRepository2.findDatasetByNameAndOrganization(mlTopics.getDatasetId(),
