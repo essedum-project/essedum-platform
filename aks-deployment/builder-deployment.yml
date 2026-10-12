@@ -18,8 +18,8 @@ spec:
       imagePullSecrets: []
       containers:
         - name: builder
-          image: ${DOCKER_REGISTRY}/${ADK_DEPLOYER_IMAGE:-adk-code-builder-deployer}:${IMAGE_TAG}
-          imagePullPolicy: IfNotPresent
+          image: ${DOCKER_REGISTRY}/${ADK_DEPLOYER_IMAGE}:${IMAGE_TAG}
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000
           envFrom:
@@ -29,11 +29,21 @@ spec:
                 name: essedum-config
           env:
             - name: BUILDKIT_ADDR
-              value: "tcp://buildkitd:1234"   # Points to your buildkitd Service
+              value: "${VIBE_BUILDKIT_ADDR}"
             - name: PYTHONUNBUFFERED
               value: "1"
-            - name: DOCKER_CONFIG
-              value: "/root/.docker"
+            - name: MINIO_ENDPOINT
+              value: "${MINIO_ENDPOINT}"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-minio-secret
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-minio-secret
+                  key: secret-key
           volumeMounts:
             - name: docker-config
               mountPath: /root/.docker
