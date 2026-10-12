@@ -36,7 +36,7 @@ import {
 } from '../../constants/pipeline-constants';
 
 import { STORAGE_KEYS } from '../../constants/extension-constants';
-import { getBaseUrl } from '../../constants/api-config';
+import { getBaseUrl, makeSecureRequest } from '../../constants/api-config';
 import * as ExtensionUtils from '../../utils/extension-utils';
 
 // ================================
@@ -4122,11 +4122,54 @@ if __name__ == "__main__":
     }
 
     /**
+     * Name to read/write deployment state under. Native pipelines are stored under their
+     * real name while _currentPipelineName may hold the display alias; wizards pass through.
+     */
+    private getDeploymentRecordName(): string | undefined {
+        const current = this._currentPipelineName;
+        if (!current) {
+            return current;
+        }
+        const nativeCard = [...this.allCards, ...this.cards].find(c =>
+            (c.name === current || c.alias === current) && (c.type || '').toUpperCase() === 'NATIVESCRIPT');
+        return nativeCard ? nativeCard.name : current;
+    }
+
+    /**
+     * Ask the deployer whether a native pipeline's deployment is running.
+     * Returns the k8s deployment name, or undefined if absent or the check fails.
+     */
+    private async findLiveNativeDeployment(alias: string): Promise<string | undefined> {
+        // Same normalisation the job executor applies to deployment_name
+        const k8sName = String(alias).toLowerCase()
+            .replace(/[^a-z0-9-]+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+        if (!k8sName) {
+            return undefined;
+        }
+        try {
+            const url = `${getBaseUrl()}/apps/builder-service/api/list-deployments?namespace=vibe-pipelines`;
+            const res = await makeSecureRequest('GET', url, this._context, {
+                headers: { Authorization: `Bearer ${this._token}` },
+                timeout: 15000,
+            });
+            const deployments: any[] = res?.data?.deployments || [];
+            const found = deployments.some(d => d?.name === k8sName);
+            console.log(`[LoadState] Deployer lookup for ${k8sName}: ${found ? 'running' : 'not found'}`);
+            return found ? k8sName : undefined;
+        } catch (err: any) {
+            console.warn('[LoadState] Could not query deployer for live deployments:', err?.message || err);
+            return undefined;
+        }
+    }
+
+    /**
      * Load deployment state from database (fetch fresh data from server)
      */
     private async loadDeploymentState(): Promise<void> {
         try {
-            const currentPipelineName = this._currentPipelineName;
+            const currentPipelineName = this.getDeploymentRecordName();
             if (!currentPipelineName) {
                 console.log('[LoadState] No pipeline name set');
                 return;
@@ -4148,8 +4191,28 @@ if __name__ == "__main__":
             vscode.window.showInformationMessage(`✅ Fetched fresh pipeline data from server`);
 
             const parsed = JSON.parse(freshPipeline.json_content || '{}');
-            const deployment = parsed.containerDeployment;
+            let deployment = parsed.containerDeployment;
             console.log(`[LoadState] Parsed json_content, containerDeployment:`, deployment);
+
+            // Native only: the web UI saves containerDeployment without a status (it treats
+            // presence as active), and json_content can lose the entry altogether when another
+            // client saves over it. Mirror the web UI, and fall back to asking the deployer.
+            const isNativePipeline = (freshPipeline.type || '').toUpperCase() === 'NATIVESCRIPT';
+            if (isNativePipeline) {
+                if (deployment?.deploymentName && !deployment.status) {
+                    deployment = { ...deployment, status: 'success', message: 'Deployment active' };
+                } else if (!deployment?.deploymentName) {
+                    const liveName = await this.findLiveNativeDeployment(freshPipeline.alias || freshPipeline.name);
+                    if (liveName) {
+                        deployment = {
+                            deploymentName: liveName,
+                            status: 'success',
+                            message: 'Deployment active',
+                            buildLogs: ['ℹ️ Active deployment found on the cluster (build logs from the original deploy are not available).'],
+                        };
+                    }
+                }
+            }
 
             if (deployment && deployment.deploymentName) {
                 // Deployment found in database
@@ -4211,10 +4274,11 @@ if __name__ == "__main__":
         }
 
         try {
-            console.log(`[SaveState] Saving deployment state for: ${this._currentPipelineName}`);
+            const recordName = this.getDeploymentRecordName()!;
+            console.log(`[SaveState] Saving deployment state for: ${recordName}`);
 
             // Fetch fresh data from server (like UI does)
-            const freshData = await this._pipelineService.getStreamingServicesByName(this._currentPipelineName);
+            const freshData = await this._pipelineService.getStreamingServicesByName(recordName);
             if (!freshData || !freshData.data) {
                 console.error('[SaveState] No pipeline data returned from server');
                 return;
@@ -4252,7 +4316,7 @@ if __name__ == "__main__":
 
         try {
             // Fetch fresh data from server (like saveDeploymentState does)
-            const freshData = await this._pipelineService.getStreamingServicesByName(this._currentPipelineName);
+            const freshData = await this._pipelineService.getStreamingServicesByName(this.getDeploymentRecordName()!);
             if (!freshData || !freshData.data) return;
 
             const pipeline = freshData.data;
