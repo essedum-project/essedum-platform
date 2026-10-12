@@ -28,10 +28,10 @@
     // DOM elements
     const networkSelect = document.getElementById('networkSelect');
     const configFields = document.getElementById('configFields');
+    const issuerUri = document.getElementById('issuerUri');
+    const jwkSetUri = document.getElementById('jwkSetUri');
     const clientId = document.getElementById('clientId');
     const baseURL = document.getElementById('baseURL');
-    const advancedSection = document.getElementById('advancedSection');
-    const issuerUriOverride = document.getElementById('issuerUriOverride');
     const networkInfo = document.getElementById('networkInfo');
     const lfnInfo = document.getElementById('lfnInfo');
     const loginBtn = document.getElementById('loginBtn');
@@ -40,19 +40,6 @@
     const loadingSection = document.getElementById('loadingSection');
     const formSection = document.getElementById('formSection');
     const loadingMessage = document.getElementById('loadingMessage');
-
-    // Default realm used by Essedum Keycloak instances
-    const DEFAULT_REALM = 'ESSEDUM';
-
-    // Issuer URI follows the Keycloak convention of {baseURL}/realms/{realm}
-    function deriveIssuerUri(base) {
-        return base ? `${base.replace(/\/+$/, '')}/realms/${DEFAULT_REALM}` : '';
-    }
-
-    // JWK Set URI is always derived from the issuer URI using the Keycloak convention
-    function deriveJwkSetUri(issuer) {
-        return issuer ? `${issuer.replace(/\/+$/, '')}/protocol/openid-connect/certs` : '';
-    }
 
     // Network configurations (should match environment.ts)
     const networkConfigs = {
@@ -93,11 +80,10 @@
 
             // Populate fields with readonly values
             const config = networkConfigs[selectedNetwork];
+            issuerUri.value = config.issuerUri;
+            jwkSetUri.value = config.jwkSetUri;
             clientId.value = config.clientId;
             baseURL.value = config.baseURL;
-            issuerUriOverride.value = '';
-            advancedSection.open = false;
-            advancedSection.style.display = 'none';
 
             // Make fields readonly
             setFieldsReadonly(true);
@@ -111,13 +97,12 @@
         } else if (selectedNetwork === 'other') {
             // Other option selected - allow editing
             configFields.style.display = 'block';
-            advancedSection.style.display = 'block';
             
-            // Clear fields, pre-filling Client ID with the common default
-            clientId.value = 'essedum-45';
+            // Clear fields
+            issuerUri.value = '';
+            jwkSetUri.value = '';
+            clientId.value = '';
             baseURL.value = '';
-            issuerUriOverride.value = '';
-            advancedSection.open = false;
 
             // Make fields editable
             setFieldsReadonly(false);
@@ -145,9 +130,10 @@
 
     // Helper function to set readonly state of config fields
     function setFieldsReadonly(readonly) {
+        issuerUri.readOnly = readonly;
+        jwkSetUri.readOnly = readonly;
         clientId.readOnly = readonly;
         baseURL.readOnly = readonly;
-        issuerUriOverride.readOnly = readonly;
 
         // Update visual styling
         configInputs.forEach(input => {
@@ -161,9 +147,10 @@
 
     // Helper function to clear all config fields
     function clearFields() {
+        issuerUri.value = '';
+        jwkSetUri.value = '';
         clientId.value = '';
         baseURL.value = '';
-        issuerUriOverride.value = '';
     }
 
     // Helper function to update login button state
@@ -176,12 +163,17 @@
         }
 
         if (selectedNetwork === 'other') {
-            // Only Base URL and Client ID are required; Issuer URI override is optional
-            const overrideValue = issuerUriOverride.value.trim();
-            const allFieldsFilled = clientId.value.trim() && baseURL.value.trim();
-            const allUrlsValid =
-                isValidUrl(baseURL.value.trim()) &&
-                (!overrideValue || isValidUrl(overrideValue));
+            // For custom config, all fields must be filled and valid
+            const allFieldsFilled = 
+                issuerUri.value.trim() && 
+                jwkSetUri.value.trim() && 
+                clientId.value.trim() && 
+                baseURL.value.trim();
+            
+            const allUrlsValid = 
+                isValidUrl(issuerUri.value.trim()) &&
+                isValidUrl(jwkSetUri.value.trim()) &&
+                isValidUrl(baseURL.value.trim());
 
             loginBtn.disabled = !(allFieldsFilled && allUrlsValid);
         } else {
@@ -208,18 +200,15 @@
         }
 
         if (selectedNetwork === 'other') {
-            // Send custom configuration; derive Issuer/JWK URIs from Base URL unless overridden
-            const trimmedBaseURL = baseURL.value.trim();
-            const issuerUri = issuerUriOverride.value.trim() || deriveIssuerUri(trimmedBaseURL);
-
+            // Send custom configuration
             vscode.postMessage({
                 command: COMMANDS.LOGIN,
                 network: 'custom',
                 config: {
-                    issuerUri: issuerUri,
-                    jwkSetUri: deriveJwkSetUri(issuerUri),
+                    issuerUri: issuerUri.value.trim(),
+                    jwkSetUri: jwkSetUri.value.trim(),
                     clientId: clientId.value.trim(),
-                    baseURL: trimmedBaseURL
+                    baseURL: baseURL.value.trim()
                 }
             });
         } else {
@@ -283,11 +272,8 @@
     function reset() {
         networkSelect.value = '';
         configFields.style.display = 'none';
-        advancedSection.style.display = 'none';
-        advancedSection.open = false;
         clearFields();
         setFieldsReadonly(true);
-
         networkInfo.style.display = 'none';
         lfnInfo.style.display = 'none';
         loginBtn.disabled = true;
