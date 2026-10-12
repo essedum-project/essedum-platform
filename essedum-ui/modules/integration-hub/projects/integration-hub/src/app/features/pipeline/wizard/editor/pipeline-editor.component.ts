@@ -197,6 +197,10 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     if (!this.model) return;
     let parsed: any = {};
     try { parsed = JSON.parse(this.model.raw.json_content || '{}'); } catch {}
+
+    // Preserve existing containerDeployment state if present
+    const existingContainerDeployment = parsed.containerDeployment;
+
     parsed.elements = parsed.elements?.length ? parsed.elements : [{ attributes: {} }];
     parsed.elements[0].attributes = {
       ...(parsed.elements[0].attributes || {}),
@@ -211,6 +215,12 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     if (this.model.pipelineAttrs) {
       this.model.pipelineAttrs.freshlyCreated = false;
     }
+
+    // Restore containerDeployment if it existed
+    if (existingContainerDeployment) {
+      parsed.containerDeployment = existingContainerDeployment;
+    }
+
     this.model.raw.json_content = JSON.stringify(parsed);
     this.services.update(this.model.raw).subscribe({
       next: () => {
