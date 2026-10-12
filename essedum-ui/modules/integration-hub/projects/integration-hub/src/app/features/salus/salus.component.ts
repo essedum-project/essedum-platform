@@ -91,8 +91,10 @@ export class SalusComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.load();
-    this.refreshTimer = setInterval(() => this.load(true), 30000);
+    // Guard against unsubstituted build-time placeholders (e.g. __FE_SALUS_URL__).
+    this.isUrlConfigured = !!(this.salusUrl && (this.salusUrl.startsWith('http') || this.salusUrl.startsWith('/')));
+    const url = this.isUrlConfigured ? this.salusUrl : 'about:blank';
+    this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   ngOnDestroy(): void {

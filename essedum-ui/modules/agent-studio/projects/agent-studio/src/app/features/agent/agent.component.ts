@@ -151,6 +151,18 @@ export class AgentComponent implements OnInit, AfterViewInit {
       if (msg.type === 'PARENT_SESSION_RECEIVED') {
         console.log('Parent received PARENT_SESSION_RECEIVED from child:', msg.status || 'ok');
       }
+
+      if (msg.type === 'NAVIGATE_TO_PIPELINE' && msg.card) {
+        const card = msg.card;
+        // Store card so AgentPipelineComponent can read it (same pattern as seclevelroute)
+        sessionStorage.setItem('agentDesignerNavigationCard', JSON.stringify({
+          card,
+          cardTitle: 'Agent Pipelines',
+          pipelineMode: 'agent',
+        }));
+        // Changing location.hash triggers Angular's HashLocationStrategy router navigation
+        window.location.hash = `#/landing/agent/pipeline/view/${card.name}`;
+      }
     };
     window.addEventListener('message', ackHandler);
 
