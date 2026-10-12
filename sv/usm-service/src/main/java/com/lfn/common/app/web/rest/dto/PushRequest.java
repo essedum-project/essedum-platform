@@ -26,6 +26,7 @@ public class PushRequest {
     private String commitMessage;
     private String localPath; // Kept for backward compatibility
     private List<FileContent> files; // New: list of files with content
+    private SessionHistoryEntry sessionHistoryEntry;
 
     public PushRequest() {
     }
@@ -68,6 +69,14 @@ public class PushRequest {
 
     public void setFiles(List<FileContent> files) {
         this.files = files;
+    }
+
+    public SessionHistoryEntry getSessionHistoryEntry() {
+        return sessionHistoryEntry;
+    }
+
+    public void setSessionHistoryEntry(SessionHistoryEntry sessionHistoryEntry) {
+        this.sessionHistoryEntry = sessionHistoryEntry;
     }
 }
 

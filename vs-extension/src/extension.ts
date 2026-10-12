@@ -133,6 +133,14 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
             pipelineCardsProvider = services.pipelineCardsProvider;
             pipelineAgentService = services.pipelineAgentService;
             pipelineAgentProvider = services.pipelineAgentProvider;
+
+            // Initialize GitHub services (non-fatal if unavailable)
+            ServiceManager.initializeGitHubServices(context, {
+                pipelineCardsProvider,
+                pipelineAgentProvider,
+                essedumFileProvider: fileSystemProvider,
+                pipelineService,
+            });
         }
 
         // Step 7: Register commands
@@ -309,7 +317,7 @@ function registerCommands(): void {
                 CommandHandlers.handleDebugUserData(context)
         },
 
-        // Pipeline Agent       
+        // Pipeline Agent
         {
             id: 'essedum.uploadAgentFolder', handler: (uri?: vscode.Uri) =>
                 CommandHandlers.handleUploadAgentFolder(context, pipelineAgentProvider, uri)
@@ -319,6 +327,81 @@ function registerCommands(): void {
     commands.forEach(({ id, handler }) => {
         ExtensionUtils.registerCommand(context, id, handler);
     });
+
+    // GitHub commands — commands are registered immediately but delegate to
+    // pipelineAgentProvider's injected services so they work whenever auth completes.
+    context.subscriptions.push(
+        vscode.commands.registerCommand('essedum.github.signIn', async () => {
+            if ((ServiceManager as any)._githubAuth) {
+                await (ServiceManager as any)._githubAuth.signIn();
+                return;
+            }
+            // Access via pipelineAgentProvider's injected service
+            const provider = pipelineAgentProvider as any;
+            if (provider?._githubAuthService) {
+                const ok = await provider._githubAuthService.signIn();
+                if (ok) { vscode.window.showInformationMessage(MSG.GITHUB.TOKEN_VERIFIED); }
+            } else {
+                vscode.window.showWarningMessage('GitHub services not yet initialized. Please try after authentication.');
+            }
+        }),
+        vscode.commands.registerCommand('essedum.github.signOut', async () => {
+            const provider = pipelineAgentProvider as any;
+            if (provider?._githubAuthService) { await provider._githubAuthService.signOut(); }
+        }),
+        vscode.commands.registerCommand('essedum.github.commitAndPush', async () => {
+            const provider = pipelineAgentProvider as any;
+            const mgr = provider?._sessionBranchManager;
+            if (!mgr) { vscode.window.showWarningMessage(MSG.GITHUB.NO_SESSION_BRANCH); return; }
+            const keys = [...mgr.sessions.keys()];
+            if (!keys.length) { vscode.window.showWarningMessage(MSG.GITHUB.NO_SESSION_BRANCH); return; }
+            const key = keys.length === 1 ? keys[0] : await vscode.window.showQuickPick(keys, { placeHolder: 'Select pipeline' });
+            if (key) { await mgr.commitAndPush(key); }
+        }),
+        vscode.commands.registerCommand('essedum.github.raisePullRequest', async () => {
+            const provider = pipelineAgentProvider as any;
+            const mgr = provider?._sessionBranchManager;
+            if (!mgr) { vscode.window.showWarningMessage(MSG.GITHUB.NO_SESSION_BRANCH); return; }
+            const keys = [...mgr.sessions.keys()];
+            if (!keys.length) { vscode.window.showWarningMessage(MSG.GITHUB.NO_SESSION_BRANCH); return; }
+            const key = keys.length === 1 ? keys[0] : await vscode.window.showQuickPick(keys, { placeHolder: 'Select pipeline' });
+            if (key) { await mgr.raisePullRequest(key); }
+        }),
+        vscode.commands.registerCommand('essedum.github.openPullRequest', async () => {
+            const provider = pipelineAgentProvider as any;
+            const mgr = provider?._sessionBranchManager;
+            for (const [, s] of (mgr?.sessions ?? new Map())) {
+                if ((s as any)?.prUrl) { vscode.env.openExternal(vscode.Uri.parse((s as any).prUrl)); return; }
+            }
+            vscode.window.showInformationMessage('No open pull request found.');
+        }),
+        vscode.commands.registerCommand('essedum.github.refreshPrStatus', async () => {
+            const provider = pipelineAgentProvider as any;
+            const mgr = provider?._sessionBranchManager;
+            if (mgr) { for (const k of mgr.sessions.keys()) { await mgr.refreshPrStatus(k); } }
+            vscode.window.setStatusBarMessage('PR status refreshed', 3000);
+        }),
+        vscode.commands.registerCommand('essedum.github.endSession', async () => {
+            const provider = pipelineAgentProvider as any;
+            const mgr = provider?._sessionBranchManager;
+            if (!mgr) { vscode.window.showInformationMessage('No active GitHub session.'); return; }
+            const keys = [...mgr.sessions.keys()];
+            const key = keys.length === 1 ? keys[0] : await vscode.window.showQuickPick(keys, { placeHolder: 'Select pipeline' });
+            if (key) { await mgr.endSession(key, 'explicit'); }
+        }),
+        vscode.commands.registerCommand('essedum.github.showSessionActions', async () => {
+            const items = [
+                { label: '$(cloud-upload) Commit & Push…',         cmd: 'essedum.github.commitAndPush' },
+                { label: '$(git-pull-request) Raise Pull Request…', cmd: 'essedum.github.raisePullRequest' },
+                { label: '$(link-external) Open Pull Request',      cmd: 'essedum.github.openPullRequest' },
+                { label: '$(refresh) Refresh PR Status',            cmd: 'essedum.github.refreshPrStatus' },
+                { label: '$(stop-circle) End Session…',             cmd: 'essedum.github.endSession' },
+                { label: '$(sign-out) Sign out of GitHub',          cmd: 'essedum.github.signOut' },
+            ];
+            const pick = await vscode.window.showQuickPick(items, { placeHolder: 'GitHub Session Actions' });
+            if (pick) { vscode.commands.executeCommand(pick.cmd); }
+        })
+    );
 
     logger.info(MSG.COMMAND.REGISTERED);
 }

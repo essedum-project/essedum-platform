@@ -87,40 +87,40 @@ public class JGitProvider implements GitStorageProvider {
         try (Git git = Git.init().setDirectory(repoDir).call()) {
             // Configure credentials
             UsernamePasswordCredentialsProvider credentials =
-                new UsernamePasswordCredentialsProvider(username, token);
+                    new UsernamePasswordCredentialsProvider(username, token);
 
             // Check if remote 'origin' exists
             List<RemoteConfig> remoteConfigs = git.remoteList().call();
             boolean originExists = remoteConfigs.stream()
-                .anyMatch(remote -> remote.getName().equals("origin"));
+                    .anyMatch(remote -> remote.getName().equals("origin"));
 
             if (!originExists) {
                 // Add remote if it doesn't exist
                 git.remoteAdd()
-                   .setName("origin")
-                   .setUri(new URIish(remoteUrl))
-                   .call();
+                        .setName("origin")
+                        .setUri(new URIish(remoteUrl))
+                        .call();
                 log.info("Added remote origin: {}", remoteUrl);
             } else {
                 // Update remote URL if it exists
                 git.remoteSetUrl()
-                   .setRemoteName("origin")
-                   .setRemoteUri(new URIish(remoteUrl))
-                   .call();
+                        .setRemoteName("origin")
+                        .setRemoteUri(new URIish(remoteUrl))
+                        .call();
                 log.info("Updated remote origin: {}", remoteUrl);
             }
 
             // Create orphan branch (fresh start)
             git.checkout()
-               .setOrphan(true)
-               .setName(branch)
-               .call();
+                    .setOrphan(true)
+                    .setName(branch)
+                    .call();
             log.info("Created orphan branch: {}", branch);
 
             // Add all files
             git.add()
-               .addFilepattern(".")
-               .call();
+                    .addFilepattern(".")
+                    .call();
             log.info("Added all files to staging");
 
             // Check status to see what's staged
@@ -131,10 +131,10 @@ public class JGitProvider implements GitStorageProvider {
 
             // Commit all files
             org.eclipse.jgit.revwalk.RevCommit commit = git.commit()
-               .setMessage(commitMessage)
-               .setAuthor(username, username + "@github.com")
-               .setAll(true)
-               .call();
+                    .setMessage(commitMessage)
+                    .setAuthor(username, username + "@github.com")
+                    .setAll(true)
+                    .call();
             log.info("Created commit with message: {}, SHA: {}", commitMessage, commit.getName());
 
             // Verify commit has files
@@ -157,28 +157,28 @@ public class JGitProvider implements GitStorageProvider {
 
             // Push to remote with force
             log.info("Attempting to push to remote: origin, branch: {}, refSpec: refs/heads/{}:refs/heads/{}",
-                     branch, branch, branch);
+                    branch, branch, branch);
 
             Iterable<org.eclipse.jgit.transport.PushResult> pushResults = git.push()
-               .setRemote("origin")
-               .setRefSpecs(new RefSpec("refs/heads/" + branch + ":refs/heads/" + branch))
-               .setCredentialsProvider(credentials)
-               .setForce(true) // Force push since we're overwriting
-               .call();
+                    .setRemote("origin")
+                    .setRefSpecs(new RefSpec("refs/heads/" + branch + ":refs/heads/" + branch))
+                    .setCredentialsProvider(credentials)
+                    .setForce(true) // Force push since we're overwriting
+                    .call();
 
             // Log push results
             for (org.eclipse.jgit.transport.PushResult pushResult : pushResults) {
                 log.info("Push result for remote: {}", pushResult.getURI());
                 for (org.eclipse.jgit.transport.RemoteRefUpdate update : pushResult.getRemoteUpdates()) {
                     log.info("Remote update - Ref: {}, Status: {}, Message: {}",
-                             update.getRemoteName(),
-                             update.getStatus(),
-                             update.getMessage());
+                            update.getRemoteName(),
+                            update.getStatus(),
+                            update.getMessage());
 
                     if (update.getStatus() != org.eclipse.jgit.transport.RemoteRefUpdate.Status.OK
-                        && update.getStatus() != org.eclipse.jgit.transport.RemoteRefUpdate.Status.UP_TO_DATE) {
+                            && update.getStatus() != org.eclipse.jgit.transport.RemoteRefUpdate.Status.UP_TO_DATE) {
                         log.error("Push failed for ref {} with status: {}, message: {}",
-                                  update.getRemoteName(), update.getStatus(), update.getMessage());
+                                update.getRemoteName(), update.getStatus(), update.getMessage());
                         throw new RuntimeException("Push failed: " + update.getStatus() + " - " + update.getMessage());
                     }
                 }
@@ -251,7 +251,7 @@ public class JGitProvider implements GitStorageProvider {
                         ObjectId headCommit = ref.getObjectId();
                         for (Ref branchRef : git.getRepository().getRefDatabase().getRefs()) {
                             if (branchRef.getName().startsWith("refs/remotes/origin/")
-                                && !branchRef.getName().equals("refs/remotes/origin/HEAD")) {
+                                    && !branchRef.getName().equals("refs/remotes/origin/HEAD")) {
                                 if (branchRef.getObjectId().equals(headCommit)) {
                                     String branchName = branchRef.getName().substring("refs/remotes/origin/".length());
                                     log.info("Detected default branch from HEAD commit: {}", branchName);
@@ -344,22 +344,22 @@ public class JGitProvider implements GitStorageProvider {
 
                 // Configure credentials
                 UsernamePasswordCredentialsProvider credentials =
-                    new UsernamePasswordCredentialsProvider(username, token);
+                        new UsernamePasswordCredentialsProvider(username, token);
 
                 // Add remote
                 git.remoteAdd()
-                   .setName("origin")
-                   .setUri(new URIish(remoteUrl))
-                   .call();
+                        .setName("origin")
+                        .setUri(new URIish(remoteUrl))
+                        .call();
                 log.info("Added remote origin: {}", remoteUrl);
 
                 // Fetch remote branches to get history
                 try {
                     log.info("Fetching remote branches to maintain commit history...");
                     git.fetch()
-                       .setRemote("origin")
-                       .setCredentialsProvider(credentials)
-                       .call();
+                            .setRemote("origin")
+                            .setCredentialsProvider(credentials)
+                            .call();
                     log.info("Successfully fetched remote branches");
                 } catch (Exception e) {
                     log.warn("Could not fetch remote branches (repository might be empty): {}", e.getMessage());
@@ -370,10 +370,10 @@ public class JGitProvider implements GitStorageProvider {
                 try {
                     // Try to checkout the existing branch
                     git.checkout()
-                       .setName(branch)
-                       .setCreateBranch(true)
-                       .setStartPoint("origin/" + branch)
-                       .call();
+                            .setName(branch)
+                            .setCreateBranch(true)
+                            .setStartPoint("origin/" + branch)
+                            .call();
                     log.info("Checked out existing branch: {}", branch);
                     branchExists = true;
                 } catch (Exception e) {
@@ -387,52 +387,51 @@ public class JGitProvider implements GitStorageProvider {
                         try {
                             // Create from detected base branch to maintain history
                             git.checkout()
-                               .setName(baseBranch)
-                               .setCreateBranch(true)
-                               .setStartPoint("origin/" + baseBranch)
-                               .call();
+                                    .setName(baseBranch)
+                                    .setCreateBranch(true)
+                                    .setStartPoint("origin/" + baseBranch)
+                                    .call();
                             log.info("Checked out base branch: {}", baseBranch);
 
                             // Now create target branch from base branch
                             git.checkout()
-                               .setName(branch)
-                               .setCreateBranch(true)
-                               .setStartPoint(baseBranch)
-                               .call();
+                                    .setName(branch)
+                                    .setCreateBranch(true)
+                                    .setStartPoint(baseBranch)
+                                    .call();
                             log.info("Created branch '{}' from detected base branch '{}' to maintain commit history", branch, baseBranch);
                         } catch (Exception ex) {
                             log.warn("Failed to create branch from detected base '{}': {}", baseBranch, ex.getMessage());
                             // Fall back to orphan branch
                             git.checkout()
-                               .setOrphan(true)
-                               .setName(branch)
-                               .call();
+                                    .setOrphan(true)
+                                    .setName(branch)
+                                    .call();
                             log.info("Created orphan branch '{}' as fallback", branch);
                         }
                     } else {
                         // Repository is empty, create orphan branch
                         git.checkout()
-                           .setOrphan(true)
-                           .setName(branch)
-                           .call();
+                                .setOrphan(true)
+                                .setName(branch)
+                                .call();
                         log.info("Created orphan branch '{}' (repository is empty)", branch);
                     }
                 }
 
-                // Clean existing files (except .git folder) to ensure clean state
-                if (branchExists) {
-                    log.info("Cleaning existing files from working directory...");
-                    File[] existingFiles = repoDir.listFiles();
-                    if (existingFiles != null) {
-                        for (File file : existingFiles) {
-                            if (!file.getName().equals(".git")) {
-                                deleteDirectory(file);
-                            }
-                        }
-                    }
-                }
+                // NOTE: Do NOT wipe the working directory here. The branch checkout above
+                // (origin/<branch> or the detected base branch) already populates the working
+                // tree with the FULL set of existing repository files. The `files` list passed
+                // into this method is typically only the changed/new files (e.g. the edited
+                // file + the auto-generated session history markdown) - it is NOT a full
+                // repository snapshot. Deleting everything first and writing back only those
+                // few files would stage deletions for every other tracked file and the
+                // resulting commit would erase the rest of the repository content.
+                log.info("Branch exists: {}. Preserving existing working directory contents; only touched files will be overwritten.", branchExists);
 
-                // Write all new files to the directory
+                // Write/overwrite only the files included in this push
+                Path repoRoot = tempDir.toFile().getCanonicalFile().toPath();
+                List<String> writtenPaths = new ArrayList<>();
                 for (FileContent file : files) {
                     Path filePath;
                     try {
@@ -450,14 +449,22 @@ public class JGitProvider implements GitStorageProvider {
                     // Write file content
                     Files.write(filePath, file.getContent().getBytes(StandardCharsets.UTF_8));
                     log.debug("Created file: {}", file.getPath());
+
+                    // Use the path relative to the repo root (not the raw, possibly
+                    // malformed request path) so the git add pattern below matches
+                    // exactly what was just written to the working tree.
+                    String relativePath = repoRoot.relativize(filePath).toString().replace(File.separatorChar, '/');
+                    writtenPaths.add(relativePath);
                 }
                 log.info("Wrote {} files to working directory", files.size());
 
-                // Add all files
-                git.add()
-                   .addFilepattern(".")
-                   .call();
-                log.info("Added all files to staging");
+                // Stage only the files we actually wrote — not the whole working tree.
+                for (String path : writtenPaths) {
+                    git.add()
+                            .addFilepattern(path)
+                            .call();
+                }
+                log.info("Added {} file(s) to staging", writtenPaths.size());
 
                 // Check status to see what's staged
                 org.eclipse.jgit.api.Status status = git.status().call();
@@ -465,12 +472,12 @@ public class JGitProvider implements GitStorageProvider {
                         status.getAdded().size(), status.getChanged().size(),
                         status.getModified().size(), status.getUntracked().size());
 
-                // Commit all files
+                // Commit only the staged files — do NOT use setAll(true), which would also
+                // stage deletions for any tracked file missing from the working copy.
                 org.eclipse.jgit.revwalk.RevCommit commit = git.commit()
-                   .setMessage(commitMessage)
-                   .setAuthor(username, username + "@github.com")
-                   .setAll(true)
-                   .call();
+                        .setMessage(commitMessage)
+                        .setAuthor(username, username + "@github.com")
+                        .call();
                 log.info("Created commit with message: {}, SHA: {}", commitMessage, commit.getName());
 
                 // Verify commit has files
@@ -493,28 +500,28 @@ public class JGitProvider implements GitStorageProvider {
 
                 // Push to remote with force
                 log.info("Attempting to push to remote: origin, branch: {}, refSpec: refs/heads/{}:refs/heads/{}",
-                         branch, branch, branch);
+                        branch, branch, branch);
 
                 Iterable<org.eclipse.jgit.transport.PushResult> pushResults = git.push()
-                   .setRemote("origin")
-                   .setRefSpecs(new RefSpec("refs/heads/" + branch + ":refs/heads/" + branch))
-                   .setCredentialsProvider(credentials)
-                   .setForce(true) // Force push since we're overwriting
-                   .call();
+                        .setRemote("origin")
+                        .setRefSpecs(new RefSpec("refs/heads/" + branch + ":refs/heads/" + branch))
+                        .setCredentialsProvider(credentials)
+                        .setForce(true) // Force push since we're overwriting
+                        .call();
 
                 // Log push results
                 for (org.eclipse.jgit.transport.PushResult pushResult : pushResults) {
                     log.info("Push result for remote: {}", pushResult.getURI());
                     for (org.eclipse.jgit.transport.RemoteRefUpdate update : pushResult.getRemoteUpdates()) {
                         log.info("Remote update - Ref: {}, Status: {}, Message: {}",
-                                 update.getRemoteName(),
-                                 update.getStatus(),
-                                 update.getMessage());
+                                update.getRemoteName(),
+                                update.getStatus(),
+                                update.getMessage());
 
                         if (update.getStatus() != org.eclipse.jgit.transport.RemoteRefUpdate.Status.OK
-                            && update.getStatus() != org.eclipse.jgit.transport.RemoteRefUpdate.Status.UP_TO_DATE) {
+                                && update.getStatus() != org.eclipse.jgit.transport.RemoteRefUpdate.Status.UP_TO_DATE) {
                             log.error("Push failed for ref {} with status: {}, message: {}",
-                                      update.getRemoteName(), update.getStatus(), update.getMessage());
+                                    update.getRemoteName(), update.getStatus(), update.getMessage());
                             throw new RuntimeException("Push failed: " + update.getStatus() + " - " + update.getMessage());
                         }
                     }
@@ -539,7 +546,7 @@ public class JGitProvider implements GitStorageProvider {
 
     @Override
     public PullResponse pull(String remoteUrl, String branch, String localPath,
-                            String username, String token, boolean verifySsl) throws Exception {
+                             String username, String token, boolean verifySsl) throws Exception {
         Path targetDir;
         boolean isTemporary = false;
 
@@ -572,15 +579,15 @@ public class JGitProvider implements GitStorageProvider {
 
             // Configure credentials
             UsernamePasswordCredentialsProvider credentials =
-                new UsernamePasswordCredentialsProvider(username, token);
+                    new UsernamePasswordCredentialsProvider(username, token);
 
             // Clone the repository
             Git git = Git.cloneRepository()
-                .setURI(remoteUrl)
-                .setBranch(branch)
-                .setDirectory(repoDir)
-                .setCredentialsProvider(credentials)
-                .call();
+                    .setURI(remoteUrl)
+                    .setBranch(branch)
+                    .setDirectory(repoDir)
+                    .setCredentialsProvider(credentials)
+                    .call();
 
             log.info("Successfully cloned repository to: {}", targetDir);
 

@@ -9,6 +9,7 @@ from threading import Thread, Lock, Event
 from flask_swagger_ui import get_swaggerui_blueprint
 import json
 import logging
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import atexit
 import psutil
@@ -654,6 +655,33 @@ def _ensure_buildable_zip(raw_bytes):
     return out.getvalue()
 
 
+def _normalize_k8s_name(name):
+    """Lowercase and sanitize a name so it is a valid RFC 1123 Kubernetes object name.
+
+    Pipeline aliases are free-form (e.g. "Test", "My_Pipeline"), but Kubernetes
+    object names and Docker repository names only allow lowercase alphanumerics
+    and '-'. Without this, the build/deploy fails on an invalid reference.
+    """
+    sanitized = re.sub(r'[^a-z0-9-]+', '-', str(name).lower()).strip('-')
+    return sanitized[:253] or 'pipeline'
+
+
+def _normalize_image_ref(image_ref):
+    """Lowercase/sanitize the repository name in a `registry/repo:tag` reference.
+
+    The registry host (and any path prefix) and the tag are preserved as-is; only
+    the final repository segment is normalized, using the same rules as
+    `_normalize_k8s_name` so the image name matches the deployment name.
+    """
+    ref = str(image_ref)
+    repo_part, sep, tag = ref.rpartition(':')
+    # No tag present when the last ':' belongs to a registry host:port.
+    if not sep or '/' in tag:
+        repo_part, sep, tag = ref, '', ''
+    prefix, slash, name = repo_part.rpartition('/')
+    return f"{prefix}{slash}{_normalize_k8s_name(name)}{sep}{tag}"
+
+
 @app.route('/container-deploy-with-zip', methods=['POST'])
 def container_deploy_with_zip():
     """Accept a zip file from Java, upload to MinIO, then trigger container deployment."""
@@ -668,8 +696,8 @@ def container_deploy_with_zip():
 
     zip_file = request.files['zip_file']
     deployer_url = request.form['deployer_url']
-    target_image_tag = request.form['target_image_tag']
-    deployment_name = request.form['deployment_name']
+    target_image_tag = _normalize_image_ref(request.form['target_image_tag'])
+    deployment_name = _normalize_k8s_name(request.form['deployment_name'])
     namespace = request.form.get('namespace', 'vibe-pipelines')
     minio_endpoint = request.form['minio_endpoint']
     minio_access_key = request.form['minio_access_key']
