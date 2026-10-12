@@ -336,6 +336,16 @@ export class PipelineService {
     return this.requestWithRetry<any>('put', this.API.STREAMING_SERVICES_UPDATE, config, payload);
   }
 
+  async saveDeploymentState(payload: any, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+
+    const config = await this.buildAxiosConfig(undefined, {
+      validateStatus: (status) => status >= 200 && status < 300,
+    }, signal);
+
+    return this.requestWithRetry<any>('put', this.API.STREAMING_SERVICES_SAVE, config, payload);
+  }
+
   async getPipelineByName(pipelineName: string, signal?: AbortSignal): Promise<AxiosResponse<any>> {
     this.refreshAuthData();
 
@@ -496,6 +506,34 @@ export class PipelineService {
 
     const body = { name: pipelineName, organization: this.organization };
     return this.requestWithRetry<any>('post', this.API.PIPELINES_SAVE_JSON, await this.buildAxiosConfig(undefined, { timeout: 30000 }, signal), body);
+  }
+
+  // ================================
+  // CONTAINER DEPLOYMENT METHODS
+  // ================================
+
+  async deployContainer(pipelineName: string, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+    // Deploy endpoint uses /api/aip/service/v1/pipeline/deploy/ (same as UI)
+    const url = `${getBaseUrl()}/api/aip/service/v1/pipeline/deploy/${pipelineName}/${this.organization}`;
+    const config = await this.buildAxiosConfig(undefined, { timeout: 60000 }, signal);
+
+    const response = await this.requestWithRetry<any>('get', url, config);
+
+    // Extract just the data to avoid circular structure issues
+    return response.data;
+  }
+
+  async getDeploymentLogs(deploymentName: string, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+    const url = `${getBaseUrl()}/api/aip/service/v1/deployment/logs/${deploymentName}/${this.organization}`;
+    return this.requestWithRetry<any>('get', url, await this.buildAxiosConfig(undefined, { timeout: 30000 }, signal));
+  }
+
+  async deleteDeployment(deploymentName: string, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+    const url = `${getBaseUrl()}/api/aip/service/v1/deployment/delete/${deploymentName}/${this.organization}`;
+    return this.requestWithRetry<any>('delete', url, await this.buildAxiosConfig(undefined, { timeout: 30000 }, signal));
   }
 }
 

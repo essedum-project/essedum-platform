@@ -273,6 +273,35 @@ export const JSON_MESSAGES = {
 } as const;
 
 /**
+ * GitHub integration messages
+ */
+export const GITHUB_MESSAGES = {
+  SIGN_IN_PROMPT:           'Sign in to GitHub to enable session branch and PR features.',
+  TOKEN_VERIFIED:           'GitHub token verified.',
+  TOKEN_INVALID:            'GitHub token is invalid. Please sign in again.',
+  SESSION_BRANCH_CREATING:  'Creating session branch…',
+  SESSION_BRANCH_READY:     (branch: string) => `Session branch ready: ${branch}`,
+  PUSH_SUCCESS:             (n: number, branch: string, sha: string) => `✓ Pushed ${n} file(s) to ${branch} (${sha})`,
+  PR_RAISED:                (n: number) => `Pull Request #${n} created.`,
+  PR_ALREADY_OPEN:          'A pull request is already open for this session.',
+  SESSION_START_COMMIT:     'chore: start Essedum VS Code edit session',
+  AUTO_PUSH_PREFIX:         'chore: auto-push after save',
+  AUTO_PR_BODY:             (agent: string, client: string) =>
+    `Automated PR for Essedum agent **${agent}** opened from ${client}.\n\nChanges will be pushed here as you edit and save.`,
+  END_SESSION_PROMPT:       (branch: string) => `You have unmerged commits on ${branch}. What would you like to do?`,
+  PAT_PROMPT:               'Paste a GitHub Personal Access Token (repo scope required)',
+  SIGN_OUT_DONE:            'Signed out of GitHub.',
+  COMMIT_MSG_PLACEHOLDER:   (pipeline: string) => `Update ${pipeline} - ${new Date().toLocaleDateString()}`,
+  NO_SESSION_BRANCH:        'No active session branch. Save a file first.',
+  REPO_NOT_LINKED:          'This agent is not linked to a GitHub repository. Use "Clone from GitHub" first.',
+  PUSH_FAILED:              'Failed to push to GitHub: ',
+  BRANCH_CREATE_FAILED:     'Failed to create session branch: ',
+  PR_OPEN_IN_BROWSER:       'Open in Browser',
+  VIEW_PR:                  'View PR',
+  RAISE_PR:                 'Raise PR',
+} as const;
+
+/**
  * Extension deactivation messages
  */
 export const DEACTIVATION_MESSAGES = {
@@ -321,4 +350,5 @@ export const MESSAGES = {
     JSON: JSON_MESSAGES,
     DEACTIVATION: DEACTIVATION_MESSAGES,
     DEBUG: DEBUG_MESSAGES,
+    GITHUB: GITHUB_MESSAGES,
 } as const;

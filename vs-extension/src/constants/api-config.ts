@@ -58,6 +58,7 @@ interface ApiEndpoints {
     PIPELINE_RUN: string;
     STREAMING_SERVICES: string;
     STREAMING_SERVICES_UPDATE: string;
+    STREAMING_SERVICES_SAVE: string;
     JOB_RUNTIME_TYPES: string;
     DATASOURCES_RUNTIME: string;
     FILE_READ: string;
@@ -76,6 +77,15 @@ interface ApiEndpoints {
     AUTH_BASE: string;
     GITHUB_BRANCHES: string;
     GITHUB_PULL: string;
+    GITHUB_REPOS: string;
+    GITHUB_PUSH: string;
+    GITHUB_CREATE_BRANCH: string;
+    GITHUB_CREATE_PR: string;
+    GITHUB_PR_STATUS: string;
+    GITHUB_VERIFY_TOKEN: string;
+    GITHUB_COLLABORATORS: string;
+    GIT_CONFIGS: string;
+    GIT_CONFIGS_SAVE: string;
     SKILLS_LIST: string;
 }
 
@@ -101,6 +111,7 @@ export function getApiEndpoints(): ApiEndpoints {
         // Streaming services
         STREAMING_SERVICES: `${apiBaseUrl}/streamingServices`,
         STREAMING_SERVICES_UPDATE: `${baseUrl}/api/aip/service/v1/streamingServices/update`,
+        STREAMING_SERVICES_SAVE: `${baseUrl}/service/v1/streamingServices/update`,
 
         // Job and runtime endpoints
         JOB_RUNTIME_TYPES: `${apiBaseUrl}/jobs/runtime/types`,
@@ -131,8 +142,17 @@ export function getApiEndpoints(): ApiEndpoints {
         AUTH_BASE: `${baseUrl}/realms/essedum/protocol/openid-connect`,
 
         // GitHub integration
-        GITHUB_BRANCHES: `${baseUrl}/api/github/branches`,
-        GITHUB_PULL: `${baseUrl}/api/github/pull`,
+        GITHUB_BRANCHES:      `${baseUrl}/api/github/branches`,
+        GITHUB_PULL:          `${baseUrl}/api/github/pull`,
+        GITHUB_REPOS:         `${baseUrl}/api/github/repos`,
+        GITHUB_PUSH:          `${baseUrl}/api/github/push`,
+        GITHUB_CREATE_BRANCH: `${baseUrl}/api/github/create-branch`,
+        GITHUB_CREATE_PR:     `${baseUrl}/api/github/create-pull-request`,
+        GITHUB_PR_STATUS:     `${baseUrl}/api/github/pull-request-status`,
+        GITHUB_VERIFY_TOKEN:  `${baseUrl}/api/github/verify-token`,
+        GITHUB_COLLABORATORS: `${baseUrl}/api/github/collaborators`,
+        GIT_CONFIGS:          `${baseUrl}/api/aip/git-configs`,
+        GIT_CONFIGS_SAVE:     `${baseUrl}/api/aip/git-configs/save`,
 
         // Skills (attach-a-skill feature)
         SKILLS_LIST: `${baseUrl}/api/aip/skills`

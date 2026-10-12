@@ -673,11 +673,26 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
             this.data.arguments = this.treeData;
             this.data.usedSecrets = this.dynamicSecretsArray;
             // Include generatedCode so the deploy endpoint reads the latest script directly from DB
-            this.streamItem.json_content = JSON.stringify({
+            // Preserve any existing containerDeployment state
+            let existingContainerDeployment: any = null;
+            try {
+              const currentContent = JSON.parse(this.streamItem.json_content || '{}');
+              if (currentContent.containerDeployment) {
+                existingContainerDeployment = currentContent.containerDeployment;
+              }
+            } catch {}
+
+            const newContent: any = {
               elements: [{ attributes: { ...this.data, generatedCode: scriptContent } }],
               environment: this.dynamicEnvArray,
               default_runtime: this.selectedRunType
-            });
+            };
+
+            if (existingContainerDeployment) {
+              newContent.containerDeployment = existingContainerDeployment;
+            }
+
+            this.streamItem.json_content = JSON.stringify(newContent);
             
             this.service.update(this.streamItem).subscribe({
               next: (updateResponse) => {
@@ -747,6 +762,26 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     return this.containerDeployStatus === 'success' && this.codeModifiedSinceDeployed;
   }
 
+  get appLogs(): string[] {
+    const logs = this.containerDeployLogs;
+    // Find the LAST (most recent) [APP_LOG] start marker, not the first
+    let startIdx = -1;
+    for (let i = logs.length - 1; i >= 0; i--) {
+      if (logs[i].includes('[APP_LOG]') && logs[i].toLowerCase().includes('application logs') && !logs[i].toLowerCase().includes('end of')) {
+        startIdx = i;
+        break;
+      }
+    }
+    if (startIdx < 0) return [];
+    // Find the end marker after the start
+    const endIdx = logs.findIndex((l, i) => i > startIdx && l.includes('[APP_LOG]') && l.toLowerCase().includes('end of application'));
+    return logs.slice(startIdx + 1, endIdx >= 0 ? endIdx : undefined).filter(l => l.trim());
+  }
+
+  get appLogHasError(): boolean {
+    return this.appLogs.some(l => /traceback|syntaxerror|nameerror|typeerror|valueerror|importerror|\berror\b|\bexception\b/i.test(l));
+  }
+
   /** Mirrors the sanitisation the deployer applies to deployment names. */
   private get containerDeploymentName(): string {
     const source =
@@ -776,11 +811,65 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.scriptEditorReady = true;
     this.codeModifiedSinceDeployed = false;
     this.savedAfterModify = false;
+
+    // Redeploy: delete existing deployment first, then deploy fresh
+    const existingDeployment = this.containerLastDeploymentName;
+    if (existingDeployment) {
+      this.containerDeployStatus = 'deploying';
+      this.containerDeployMessage = `Removing existing deployment ${existingDeployment}...`;
+      // Preserve existing logs and append redeploy logs
+      const preservedLogs = [...this.containerDeployLogs];
+      this.containerDeployLogs = [...preservedLogs, `\n🗑️ Redeploy: removing existing deployment ${existingDeployment}...`];
+      this.cdr.detectChanges();
+
+      const socket = this.openContainerSocket();
+      socket.on('connect', () => {
+        this.addContainerLog(
+          `Deleting deployment: ${existingDeployment} from namespace: ${this.containerLastNamespace}`
+        );
+        socket.emit('delete_deployment', {
+          deployment_name: existingDeployment,
+          namespace: this.containerLastNamespace,
+        });
+        this.cdr.detectChanges();
+      });
+
+      socket.on('delete_status', (data: any) => {
+        const status = (data.status || '').toString().toUpperCase();
+        if (status === 'SUCCESS' || status === 'NOT_FOUND') {
+          this.containerLastDeploymentName = '';
+          this.addContainerLog('✓ Old deployment removed. Starting new deployment...');
+          socket.disconnect();
+          this.proceedWithNewDeploy();
+        } else {
+          this.containerDeployStatus = 'error';
+          this.containerDeployMessage = data.message || 'Failed to delete existing deployment';
+          this.addContainerLog(`❌ ${data.message || 'Failed to delete existing deployment'}`);
+          socket.disconnect();
+          this.cdr.detectChanges();
+        }
+      });
+
+      socket.on('connect_error', (err: any) => {
+        this.addContainerLog(`Connection error: ${err && err.message ? err.message : err}`);
+        this.cdr.detectChanges();
+      });
+
+      return;
+    }
+
+    // No existing deployment, proceed directly
+    this.proceedWithNewDeploy();
+  }
+
+  private proceedWithNewDeploy(): void {
+    if (!this.streamItem) return;
     this.containerDeployStatus = 'deploying';
     this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';
-    this.containerDeployLogs = [];
-    this.addContainerLog('Preparing pipeline package...');
+    if (!this.containerDeployLogs.some(l => l.includes('Preparing pipeline package'))) {
+      this.addContainerLog('Preparing pipeline package...');
+    }
     // Show snackbar and navigate to Container tab immediately
     this.service.message('Deployment started', 'success');
     this.activeTabIndex = this.containerTabIndex;
@@ -1235,6 +1324,15 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
         current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
       }
       current.default_runtime = this.selectedRunType;
+      // Preserve containerDeployment state if it exists
+      if (!current.containerDeployment && this.containerLastDeploymentName) {
+        current.containerDeployment = {
+          deploymentName: this.containerLastDeploymentName,
+          namespace: this.containerLastNamespace,
+          internalDnsUrl: this.containerInternalDnsUrl,
+          buildLogs: this.containerDeployLogs.slice(-500),
+        };
+      }
       this.streamItem.json_content = JSON.stringify(current);
       this.service.update(this.streamItem).subscribe({
         next: () => {
@@ -1458,16 +1556,16 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
       this.buildFileStructureFromCurrentData();
       return;
     }
-    
+
     // Re-fetch the streaming service data to get updated file list
     this.service.getStreamingServicesByName(this.streamItem.name).subscribe({
       next: (serviceData) => {
         if (serviceData && serviceData.json_content) {
           this.streamItem = serviceData;
-          
+
           try {
             const jsonContent = JSON.parse(serviceData.json_content);
-            
+
             if (jsonContent.elements && jsonContent.elements[0]?.attributes) {
               this.data = jsonContent.elements[0].attributes;
               this.dynamicEnvArray = jsonContent.environment || [];
@@ -1475,9 +1573,24 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
               if (!this.selectedRunType) {
                 this.selectedRunType = this.defaultRuntimeFromDB;
               }
-              
+
+              // Restore containerDeployment state from refreshed data
+              if (jsonContent.containerDeployment) {
+                const cd = jsonContent.containerDeployment;
+                this.containerLastDeploymentName = cd.deploymentName || '';
+                this.containerLastNamespace = cd.namespace || 'vibe-pipelines';
+                this.containerInternalDnsUrl = cd.internalDnsUrl || '';
+                if (cd.buildLogs && cd.buildLogs.length > 0) {
+                  this.containerDeployLogs = cd.buildLogs;
+                }
+                if (this.containerLastDeploymentName) {
+                  this.containerDeployStatus = 'success';
+                  this.containerDeployMessage = 'Deployment active';
+                }
+              }
+
               this.buildFileStructure();
-              
+
             } else {
               console.warn('No attributes found in refreshed data');
               this.buildFileStructureFromCurrentData();

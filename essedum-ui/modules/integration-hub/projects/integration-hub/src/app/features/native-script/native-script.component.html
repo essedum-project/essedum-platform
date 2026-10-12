@@ -614,6 +614,14 @@
                             </div>
                           </div>
                         </mat-tab>
+                        <mat-tab *ngIf="appLogs.length > 0">
+                          <ng-template mat-tab-label>App Logs</ng-template>
+                          <div class="ct-applogs-status" [class.ct-applogs-error]="appLogHasError" [class.ct-applogs-ok]="!appLogHasError">
+                            <mat-icon>{{ appLogHasError ? 'cancel' : 'check_circle' }}</mat-icon>
+                            <span>{{ appLogHasError ? 'Script exited with errors' : 'Script completed successfully' }}</span>
+                          </div>
+                          <pre>{{ appLogs.join('\n') }}</pre>
+                        </mat-tab>
                       </mat-tab-group>
                     </div>
                   </div>

@@ -357,6 +357,26 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     return this.containerDeployStatus === 'success' && this.codeModifiedSinceDeployed;
   }
 
+  get appLogs(): string[] {
+    const logs = this.containerDeployLogs;
+    // Find the LAST (most recent) [APP_LOG] start marker, not the first
+    let startIdx = -1;
+    for (let i = logs.length - 1; i >= 0; i--) {
+      if (logs[i].includes('[APP_LOG]') && logs[i].toLowerCase().includes('application logs') && !logs[i].toLowerCase().includes('end of')) {
+        startIdx = i;
+        break;
+      }
+    }
+    if (startIdx < 0) return [];
+    // Find the end marker after the start
+    const endIdx = logs.findIndex((l, i) => i > startIdx && l.includes('[APP_LOG]') && l.toLowerCase().includes('end of application'));
+    return logs.slice(startIdx + 1, endIdx >= 0 ? endIdx : undefined).filter(l => l.trim());
+  }
+
+  get appLogHasError(): boolean {
+    return this.appLogs.some(l => /traceback|syntaxerror|nameerror|typeerror|valueerror|importerror|\berror\b|\bexception\b/i.test(l));
+  }
+
   deployAsContainer(): void {
     if (!this.model) return;
     if (this.codeModifiedSinceDeployed) {
@@ -372,13 +392,74 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     if (!this.model) return;
     this.codeModifiedSinceDeployed = false;
     this.savedAfterModify = false;
-    // Show snackbar and navigate to Container tab immediately
-    this.services.message('Deployment started', 'success');
-    this.activeTab = this.containerTabIndex;
+
+    // Redeploy: delete existing deployment first, then deploy fresh
+    const existingDeployment = this.containerLastDeploymentName;
+    if (existingDeployment) {
+      this.containerDeployStatus = 'deploying';
+      this.containerDeployMessage = `Removing existing deployment ${existingDeployment}...`;
+      // Preserve existing logs and append redeploy logs
+      const preservedLogs = [...this.containerDeployLogs];
+      this.containerDeployLogs = [...preservedLogs, `\n🗑️ Redeploy: removing existing deployment ${existingDeployment}...`];
+
+      const socket = io(window.location.origin, {
+        path: '/apps/builder-service/socket.io',
+        transports: ['websocket', 'polling'],
+        timeout: 600000,
+        forceNew: true,
+        rejectUnauthorized: false,
+        withCredentials: true,
+        reconnection: true,
+        reconnectionAttempts: 50,
+        reconnectionDelay: 2000,
+        reconnectionDelayMax: 10000,
+      } as any);
+
+      socket.on('connect', () => {
+        this.addContainerLog(`Deleting deployment: ${existingDeployment} from namespace: ${this.containerLastNamespace}`);
+        socket.emit('delete_deployment', {
+          deployment_name: existingDeployment,
+          namespace: this.containerLastNamespace,
+        });
+      });
+
+      socket.on('delete_status', (data: any) => {
+        const status = (data.status || '').toString().toUpperCase();
+        if (status === 'SUCCESS' || status === 'NOT_FOUND') {
+          this.containerLastDeploymentName = '';
+          this.addContainerLog('✓ Old deployment removed. Starting new deployment...');
+          socket.disconnect();
+          this.proceedWithNewDeploy();
+        } else {
+          this.containerDeployStatus = 'error';
+          this.containerDeployMessage = data.message || 'Failed to delete existing deployment';
+          this.addContainerLog(`❌ ${data.message || 'Failed to delete existing deployment'}`);
+          socket.disconnect();
+        }
+      });
+
+      socket.on('connect_error', (err: any) => {
+        this.addContainerLog(`Connection error: ${err && err.message ? err.message : err}`);
+      });
+
+      return;
+    }
+
+    // No existing deployment, proceed directly
+    this.proceedWithNewDeploy();
+  }
+
+  private proceedWithNewDeploy(): void {
+    if (!this.model) return;
     this.containerDeployStatus = 'deploying';
     this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';
-    this.containerDeployLogs = [];
+    if (!this.containerDeployLogs.some(l => l.includes('Preparing pipeline package'))) {
+      this.addContainerLog('Preparing pipeline package...');
+    }
+    // Show snackbar and navigate to Container tab immediately
+    this.services.message('Deployment started', 'success');
+    this.activeTab = this.containerTabIndex;
     // Backend zips + uploads scripts to MinIO and returns the prepared config;
     // the browser then streams the build/deploy directly from the deployer's
     // WebSocket (sandbox approach, same as agent/mcp pipelines).
