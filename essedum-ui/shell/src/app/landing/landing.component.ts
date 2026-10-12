@@ -149,6 +149,15 @@ export class LandingComponent implements OnInit, AfterViewInit {
     { label: 'App List',       description: 'Browse & launch applications' },
   ];
   get ADVANCED_MENU_LABELS(): string[] { return this.advancedMenuItems.map(i => i.label); }
+  // Routes for advanced items that have no backend (DashConsts) menu row.
+  private readonly ADVANCED_ITEM_FALLBACK_URLS: { [label: string]: string } = {
+    'Salus':          './integration/salus',
+    'Lite LLM':       './agent/litellm',
+    'Langfuse':       './agent/langfuse',
+    'Agent Designer': './agent/studio',
+    'Apps':           './integration/apps',
+    'App List':       './integration/apps',
+  };
   customMenuState: { [label: string]: boolean } = {};
   showMenuCustomizer: boolean = false;
 
@@ -3817,6 +3826,12 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       this.showTabs(item);
     } else {
       this.viewtabsonload();
+      // Angular 20's RouterLink skips navigation when event.defaultPrevented is true
+      // (toggleActive calls event.preventDefault()). Navigate imperatively for leaf items.
+      if (item.url) {
+        const raw = item.url.startsWith('./') ? item.url.slice(2) : item.url.replace(/^\/+/, '');
+        this.router.navigate(['/landing/' + raw]);
+      }
     }
     this.sidebarMenuPopupWidth = "130px";
     this.sidebarMenuToggle = true;

@@ -996,7 +996,9 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 	 */
 	private JsonArray getLatestArgument(JsonObject binary, String params, Gson gson) throws EssedumException {
 		try {
-			JsonArray binaryArray = binary.get("arguments").getAsJsonArray();
+			JsonElement argumentsElement = binary.get("arguments");
+			JsonArray binaryArray = (argumentsElement != null && !argumentsElement.isJsonNull())
+					? argumentsElement.getAsJsonArray() : new JsonArray();
 			if (!(params == null || params.trim().isEmpty() || params.trim().equals("{}"))) {
 				JsonObject paramsObject = gson.fromJson(params, JsonElement.class).getAsJsonObject();
 				for (JsonElement binaryElement : binaryArray) {

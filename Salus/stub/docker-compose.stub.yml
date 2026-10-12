@@ -1,6 +1,7 @@
 # Salus STUB services — use during development when real Salus is not deployed.
-# Implements the exact API contract with regex-based PII detection (no ML models).
-# Image size: ~80 MB each.  RAM: ~40 MB each.
+# Moderation: regex/keyword based (~80 MB image, ~40 MB RAM).
+# Privacy: Microsoft Presidio + spaCy en_core_web_sm (~340 MB image, ~350 MB RAM),
+#          same detection core as salus-rai/Salus responsible-ai-privacy.
 #
 # Usage:
 #   docker compose -f /home/engne2/essedum/essedum-platform/docker/docker-compose.yml \
@@ -63,14 +64,17 @@ services:
     environment:
       - PORT=30002
       - LOG_LEVEL=INFO
-    mem_limit: 64m
-    cpus: "0.25"
+      # Set PRESIDIO_ENABLED=false for the tiny regex-only fallback.
+      - PRESIDIO_ENABLED=${SALUS_PRESIDIO_ENABLED:-true}
+      - PRESIDIO_NLP_MODEL=${SALUS_PRESIDIO_NLP_MODEL:-en_core_web_sm}
+    mem_limit: 768m
+    cpus: "1.0"
     healthcheck:
       test: ["CMD-SHELL", "python3 -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:30002/health\", timeout=3)' 2>/dev/null || exit 1"]
       interval: 20s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 40s
     logging:
       driver: json-file
       options:

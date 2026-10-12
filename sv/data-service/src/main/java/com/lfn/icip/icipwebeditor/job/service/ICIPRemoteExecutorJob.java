@@ -197,7 +197,11 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
     @EssedumProperty("icip.certificateCheck")
     private String certificateCheck;
 
-    @EssedumProperty("icip.ssrf.allowedHosts")
+    // NOTE: This class is a Quartz job. Quartz job instances are created via
+    // AutowiringSpringBeanJobFactory, which only calls beanFactory.autowireBean(job)
+    // and therefore does NOT run custom BeanPostProcessors like the one backing
+    // @EssedumProperty. Use @Value here so the value is injected by autowireBean.
+    @Value("${icip.ssrf.allowedHosts:}")
     private String ssrfAllowedHosts;
 
     /** The resolver. */
@@ -1063,7 +1067,8 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
             OkHttpClient client = newBuilder.build();
             // MediaType mediaType = MediaType.parse("application/json");
             // JSONObject bodyObject = new JSONObject();
-            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts))).addHeader("accept", "application/json").build();
+            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, resolveSsrfAllowedHosts())).addHeader("accept", "application/json").build();
+
             logger.info("getStatus request " + requestokHttp);
             try {
                 Response response = client.newCall(requestokHttp).execute();
@@ -1095,7 +1100,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
             newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
             newBuilder.hostnameVerifier(com.lfn.ai.comm.lib.util.SafeHostnameVerifier.INSTANCE);
             OkHttpClient client = newBuilder.build();
-            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts))).addHeader("accept", "application/json").build();
+            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, resolveSsrfAllowedHosts())).addHeader("accept", "application/json").build();
             logger.info("getLog request " + requestokHttp.toString());
             Response response = null;
 
@@ -1161,6 +1166,22 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
         }
 
         return content; // Return original content if prefix not found
+    }
+
+    /**
+     * Resolves the SSRF allow-list for this Quartz job. Quartz job instances are
+     * created via AutowiringSpringBeanJobFactory, which only runs
+     * beanFactory.autowireBean(job) and therefore does NOT inject @Value /
+     * @EssedumProperty fields. Fall back to the SSRF_ALLOWED_HOSTS environment
+     * variable so internal cluster executor hosts (e.g. pyjob-executor-service)
+     * are always allow-listed.
+     */
+    private List<String> resolveSsrfAllowedHosts() {
+        String hosts = ssrfAllowedHosts;
+        if (hosts == null || hosts.trim().isEmpty()) {
+            hosts = System.getenv("SSRF_ALLOWED_HOSTS");
+        }
+        return SsrfProtectionUtil.parseAllowedHosts(hosts);
     }
 
     private String executeScript(Integer version, JSONObject connDetails, List<ICIPNativeJobDetails> nativeJobDetails,
@@ -1624,7 +1645,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
      */
     private JsonArray getLatestArgument(JsonObject binary, String params, Gson gson) throws EssedumException {
         try {
-            JsonArray binaryArray = binary.get("arguments").getAsJsonArray();
+            JsonElement argumentsElement = binary.get("arguments");
+            JsonArray binaryArray = (argumentsElement != null && !argumentsElement.isJsonNull())
+                    ? argumentsElement.getAsJsonArray() : new JsonArray();
             if (!(params == null || params.trim().isEmpty() || params.trim().equals("{}"))) {
                 JsonObject paramsObject = gson.fromJson(params, JsonElement.class).getAsJsonObject();
                 for (JsonElement binaryElement : binaryArray) {
