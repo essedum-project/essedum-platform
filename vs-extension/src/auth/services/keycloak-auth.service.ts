@@ -6,6 +6,7 @@ import { initializeSSLBypass } from '../../constants/api-config';
 import { createHTTPSAgent, shouldBypassSSL, configureSSLEnvironment } from '../../utils/ssl-config.util';
 import { NetworkConfig } from '../constants/auth-constants';
 import * as ExtensionUtils from '../../utils/extension-utils';
+import { STORAGE_KEYS } from '../../constants/extension-constants';
 import {
     TokenResponse,
     KeycloakConfig,
@@ -481,7 +482,13 @@ export class KeycloakAuthService {
             timestamp: Date.now()
         };
         await this.context.secrets.store(KeycloakAuthService.TOKEN_KEY, JSON.stringify(tokenData));
-        logger.info('Tokens stored securely');
+        // Keep globalState in sync so all services (GitHubService, PipelineAgentService, etc.)
+        // that read globalState.ACCESS_TOKEN immediately pick up the refreshed token.
+        await Promise.all([
+            this.context.globalState.update(STORAGE_KEYS.ACCESS_TOKEN, tokens.access_token),
+            this.context.globalState.update(STORAGE_KEYS.JWT_TOKEN, tokens.access_token),
+        ]);
+        logger.info('Tokens stored securely and globalState synced');
     }
 
     /**
@@ -507,11 +514,15 @@ export class KeycloakAuthService {
                 if (now < expirationTime) {
                     return tokens;
                 } else {
-                    // Try to refresh the token only if user has authenticated in this session
-                    if (tokens.refresh_token && this.hasAuthenticatedThisSession) {
+                    // Always try to refresh if a refresh token is present — the
+                    // hasAuthenticatedThisSession flag is in-memory only and resets
+                    // on every extension reload, so gating refresh on it causes
+                    // "session expired" errors even when a valid refresh token exists.
+                    if (tokens.refresh_token) {
                         try {
                             logger.info('Token expired or expiring soon, attempting refresh...');
                             const refreshedTokens = await this.refreshToken(tokens.refresh_token);
+                            this.hasAuthenticatedThisSession = true;
                             logger.info('Token refreshed successfully');
                             return refreshedTokens;
                         } catch (error) {
@@ -531,20 +542,17 @@ export class KeycloakAuthService {
                             return null;
                         }
                     } else {
-                        logger.info('Token expired. User needs to authenticate.');
+                        logger.info('Token expired and no refresh token available.');
                         await this.clearStoredTokens();
 
-                        // Only show notification if user was authenticated in this session
-                        if (this.hasAuthenticatedThisSession) {
-                            vscode.window.showWarningMessage(
-                                'Your session has expired. Please login again.',
-                                'Login'
-                            ).then(selection => {
-                                if (selection === 'Login') {
-                                    vscode.commands.executeCommand('essedum.authenticate');
-                                }
-                            });
-                        }
+                        vscode.window.showWarningMessage(
+                            'Your session has expired. Please login again.',
+                            'Login'
+                        ).then(selection => {
+                            if (selection === 'Login') {
+                                vscode.commands.executeCommand('essedum.authenticate');
+                            }
+                        });
 
                         return null;
                     }
@@ -692,10 +700,11 @@ export class KeycloakAuthService {
             
             // If token is expired or will expire soon, refresh it proactively
             if (now >= refreshThreshold) {
-                if (tokens.refresh_token && this.hasAuthenticatedThisSession) {
+                if (tokens.refresh_token) {
                     logger.info(`Token expires in ${timeUntilExpiry}s, refreshing proactively...`);
                     try {
                         const refreshedTokens = await this.refreshToken(tokens.refresh_token);
+                        this.hasAuthenticatedThisSession = true;
                         logger.info('✓ Proactive token refresh successful');
                         return refreshedTokens.access_token;
                     } catch (error) {
@@ -703,7 +712,7 @@ export class KeycloakAuthService {
                         throw new Error('Session expired and could not be refreshed. Please login again.');
                     }
                 } else {
-                    logger.info('Token expired and no valid refresh token available');
+                    logger.info('Token expired and no refresh token available');
                     throw new Error('Session expired. Please login again.');
                 }
             }
@@ -984,20 +993,32 @@ export class KeycloakAuthService {
             async (error) => {
                 // Check if this is a 401 error
                 if (error.response?.status === 401) {
-                    logger.warn('Received 401 Unauthorized - token expired or invalid');
+                    const requestUrl: string = error.config?.url || '';
 
-                    // Clear stored tokens since they're invalid
-                    await this.clearStoredTokens();
+                    // GitHub API endpoints use a separate X-GitHub-Token header.
+                    // A 401 from /api/github/* means the GitHub token was rejected —
+                    // NOT that the Keycloak session expired. Never clear Keycloak
+                    // credentials or show a "session expired" banner for these URLs.
+                    const isGitHubEndpoint = requestUrl.includes('/api/github/');
 
-                    // Show user-friendly notification
-                    vscode.window.showErrorMessage(
-                        'Session expired. Please login again to continue.',
-                        'Login'
-                    ).then(selection => {
-                        if (selection === 'Login') {
-                            vscode.commands.executeCommand('essedum.authenticate');
-                        }
-                    });
+                    if (!isGitHubEndpoint) {
+                        logger.warn('Received 401 Unauthorized on Keycloak endpoint - session expired');
+
+                        // Clear stored tokens since they're invalid
+                        await this.clearStoredTokens();
+
+                        // Show user-friendly notification
+                        vscode.window.showErrorMessage(
+                            'Session expired. Please login again to continue.',
+                            'Login'
+                        ).then(selection => {
+                            if (selection === 'Login') {
+                                vscode.commands.executeCommand('essedum.authenticate');
+                            }
+                        });
+                    } else {
+                        logger.warn('Received 401 from GitHub endpoint — GitHub token rejected (Keycloak session unaffected)');
+                    }
                 }
 
                 // For all errors (including 401), reject immediately without retry
