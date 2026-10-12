@@ -4,6 +4,7 @@ from app.models.knowledge_base import KnowledgeBase
 from app.models.document import Document, DocumentStatus
 from app.models.document_chunk import DocumentChunk
 from app.models.memory import Memory
+from app.models.pipeline import Pipeline
 
 __all__ = [
     "Flow",
@@ -16,4 +17,5 @@ __all__ = [
     "DocumentStatus",
     "DocumentChunk",
     "Memory",
+    "Pipeline",
 ]

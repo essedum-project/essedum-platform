@@ -206,3 +206,8 @@ quartz:
     minimumIdle: 1
     idleTimeout: 30000
 
+#File Name for Github Integration updates
+github:
+  session-history:
+    file-name: ESSEDUM_PLUGIN_SESSION_HISTORY.md
+

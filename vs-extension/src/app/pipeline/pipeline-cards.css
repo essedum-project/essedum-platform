@@ -941,6 +941,110 @@ body::-webkit-scrollbar {
 }
 
 /* ================================
+   DEPLOYMENT SECTION STYLES
+   ================================ */
+
+.deployment-section {
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--vscode-badge-background);
+    border-radius: var(--radius-lg);
+    background-color: var(--vscode-inputValidation-informationBackground);
+}
+
+.deployment-section h4 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+    color: var(--vscode-foreground);
+    font-size: var(--font-size-lg);
+}
+
+.deployment-status {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--radius-md);
+    background-color: var(--vscode-editor-background);
+    border-left: 3px solid var(--vscode-badge-background);
+}
+
+.deployment-status.deploying {
+    border-left-color: var(--vscode-gitDecoration-modifiedResourceForeground);
+}
+
+.deployment-status.success {
+    border-left-color: var(--vscode-testing-message-pass-decorationForeground);
+}
+
+.deployment-status.error {
+    border-left-color: var(--vscode-testing-message-error-decorationForeground);
+}
+
+#deploymentStatusText {
+    font-size: var(--font-size-md);
+    color: var(--vscode-foreground);
+    font-weight: var(--font-weight-medium);
+}
+
+.deployment-logs {
+    background-color: #1e1e1e;
+    border: 1px solid var(--vscode-badge-background);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+}
+
+.log-line {
+    padding: 2px 0;
+    word-break: break-word;
+    color: #d4d4d4;
+    display: flex;
+    align-items: flex-start;
+}
+
+.log-line.error {
+    color: #f48771;
+}
+
+.log-line.success {
+    color: #6a9955;
+}
+
+.log-line.warning {
+    color: #dcdcaa;
+}
+
+.log-line.info {
+    color: #569cd6;
+}
+
+.log-timestamp {
+    color: #858585;
+    margin-right: var(--spacing-sm);
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.log-content {
+    flex: 1;
+    white-space: pre-wrap;
+}
+
+.btn-danger {
+    background-color: var(--vscode-statusBarItem-errorBackground);
+    color: var(--vscode-statusBarItem-errorForeground);
+    border-color: var(--vscode-statusBarItem-errorBackground);
+}
+
+.btn-danger:hover {
+    background-color: var(--vscode-statusBarItem-errorBackground);
+    opacity: 0.8;
+}
+
+/* ================================
    RESPONSIVE DESIGN
    ================================ */
 

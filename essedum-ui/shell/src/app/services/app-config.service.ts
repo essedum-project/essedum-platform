@@ -18,22 +18,24 @@ export class AppConfigService {
    }
 
    public getAppConfig(): Observable<Config> {
-      return Observable.create((observer) => {
+      return new Observable((observer) => {
          this.https.get<Config>(sessionStorage.getItem("contextPath") + 'assets/json/app-config.json').subscribe((response) => {
             this.appConfiguration.next(response);
-            return observer.next(response);
+            observer.next(response);
+            observer.complete();
          });
       });
    }
 
-   public getMfeAppConfig(): Observable<CustomManifest> {  
-      return Observable.create((observer) => {  
+   public getMfeAppConfig(): Observable<CustomManifest> {
+      return new Observable((observer) => {
          const contextPath = sessionStorage.getItem("contextPath") || '/';
          const manifestUrl = contextPath + 'assets/json/mf.manifest.json?v=' + Date.now();
-         this.https.get<CustomManifest>(manifestUrl).subscribe((response) => {  
-            this.mfeappConfiguration.next(response);  
-            return observer.next(response);  
-         });  
-      });  
-    }  
+         this.https.get<CustomManifest>(manifestUrl).subscribe((response) => {
+            this.mfeappConfiguration.next(response);
+            observer.next(response);
+            observer.complete();
+         });
+      });
+   }
 } 

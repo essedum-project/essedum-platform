@@ -34,6 +34,16 @@ export const WEBVIEW_COMMANDS = {
     LOGOUT: 'logout',
     OPEN_COPILOT: 'openCopilot',
     UPLOAD_FROM_GITHUB: 'uploadFromGitHub',
+    // Alias kept for backward compat — routes to cloneFromGitHub
+    CLONE_FROM_GITHUB:  'cloneFromGitHub',
+    LINK_GITHUB_REPO:   'linkGitHubRepo',
+    COMMIT_AND_PUSH:    'commitAndPush',
+    RAISE_PR:           'raisePr',
+    VIEW_PR:            'viewPr',
+    END_SESSION:        'endSession',
+    GITHUB_SIGN_IN:     'githubSignIn',
+    GITHUB_SIGN_OUT:    'githubSignOut',
+    REQUEST_GIT_STATUS: 'requestGitStatus',
     VIEW_ADK: 'viewAdk',
     DOWNLOAD_ADK: 'downloadAdk',
     REFRESH_JSON: 'refreshJson',
@@ -51,7 +61,10 @@ export const CLIENT_COMMANDS = {
     AUTHENTICATION_PROGRESS: 'authenticationProgress',
     AUTHENTICATION_ERROR: 'authenticationError',
     AUTHENTICATION_SUCCESS: 'authenticationSuccess',
-    SKILLS_LOADED: 'skillsLoaded'
+    SKILLS_LOADED: 'skillsLoaded',
+    // GitHub integration
+    GIT_STATUS: 'gitStatus',
+    GITHUB_AUTH_STATUS: 'githubAuthStatus',
 } as const;
 
 /**

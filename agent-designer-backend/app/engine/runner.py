@@ -27,6 +27,12 @@ from app.models.execution import Execution, ExecutionLog, ExecutionStatus, LogLe
 
 logger = logging.getLogger(__name__)
 
+
+def _utcnow() -> datetime:
+    """Naive UTC: the execution columns are TIMESTAMP WITHOUT TIME ZONE, and
+    asyncpg rejects an aware datetime for them."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
 # ---------------------------------------------------------------------------
 # WebSocket connection manager (in-process asyncio.Queue fan-out)
 # ---------------------------------------------------------------------------
@@ -97,14 +103,14 @@ async def run_flow(
         if execution is None:
             raise ValueError(f"Execution '{execution_id}' not found.")
         execution.status = ExecutionStatus.running
-        execution.started_at = datetime.now(timezone.utc)
+        execution.started_at = _utcnow()
         await db.flush()
     else:
         execution = Execution(
             id=str(uuid.uuid4()),
             flow_id=flow_id,
             status=ExecutionStatus.running,
-            started_at=datetime.now(timezone.utc),
+            started_at=_utcnow(),
             input=input_data,
         )
         db.add(execution)
@@ -198,7 +204,7 @@ async def run_flow(
 
     # ── Mark completed ─────────────────────────────────────────────────────
     execution.status = ExecutionStatus.completed
-    execution.completed_at = datetime.now(timezone.utc)
+    execution.completed_at = _utcnow()
     execution.output = final_output
     await db.commit()
 
@@ -237,7 +243,7 @@ async def _log(
         level=level,
         message=message,
         detail=detail or {},
-        timestamp=datetime.now(timezone.utc),
+        timestamp=_utcnow(),
     )
     db.add(log)
     # Do NOT flush here — the session is shared across concurrent LangGraph node
@@ -258,7 +264,7 @@ async def _fail_execution(
     except Exception:
         pass
     execution.status = ExecutionStatus.error
-    execution.completed_at = datetime.now(timezone.utc)
+    execution.completed_at = _utcnow()
     execution.error = error
     try:
         await db.commit()

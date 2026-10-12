@@ -282,4 +282,3 @@ public final class SsrfProtectionUtil {
                 .collect(Collectors.toList());
     }
 }
-

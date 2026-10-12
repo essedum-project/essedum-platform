@@ -17,7 +17,7 @@ RUN if [ -n "${NPM_REGISTRY_URL}" ] && [ -n "${NPM_AUTH_TOKEN}" ]; then \
 WORKDIR /app
 
 # .npmrc is optional — present only when building against an internal registry.
-COPY package.json package-lock.json .npmrc* ./
+COPY package.json .npmrc* ./
 
 RUN npm install
 
