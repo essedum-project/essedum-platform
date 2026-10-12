@@ -149,6 +149,15 @@ export class LandingComponent implements OnInit, AfterViewInit {
     { label: 'App List',       description: 'Browse & launch applications' },
   ];
   get ADVANCED_MENU_LABELS(): string[] { return this.advancedMenuItems.map(i => i.label); }
+  // Routes for advanced items that have no backend (DashConsts) menu row.
+  private readonly ADVANCED_ITEM_FALLBACK_URLS: { [label: string]: string } = {
+    'Salus':          './integration/salus',
+    'Lite LLM':       './agent/litellm',
+    'Langfuse':       './agent/langfuse',
+    'Agent Designer': './agent/studio',
+    'Apps':           './integration/apps',
+    'App List':       './integration/apps',
+  };
   customMenuState: { [label: string]: boolean } = {};
   showMenuCustomizer: boolean = false;
 
@@ -1197,6 +1206,12 @@ export class LandingComponent implements OnInit, AfterViewInit {
     } else {
       this.hoveredLabel = '';
       this.viewtabsonload();
+      // Angular 20's RouterLink skips navigation when event.defaultPrevented is true
+      // (toggleActive calls event.preventDefault()). Navigate imperatively for leaf items.
+      if (item.url) {
+        const raw = item.url.startsWith('./') ? item.url.slice(2) : item.url.replace(/^\/+/, '');
+        this.router.navigate(['/landing/' + raw]);
+      }
     }
   }
 
@@ -3814,6 +3829,12 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       this.showTabs(item);
     } else {
       this.viewtabsonload();
+      // Angular 20's RouterLink skips navigation when event.defaultPrevented is true
+      // (toggleActive calls event.preventDefault()). Navigate imperatively for leaf items.
+      if (item.url) {
+        const raw = item.url.startsWith('./') ? item.url.slice(2) : item.url.replace(/^\/+/, '');
+        this.router.navigate(['/landing/' + raw]);
+      }
     }
     this.sidebarMenuPopupWidth = "130px";
     this.sidebarMenuToggle = true;
@@ -3834,7 +3855,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   /** Returns the sidebarMenu with advanced items hidden unless the user has opted in. */
   get visibleSidebarMenu(): any[] {
     const seen = new Set<string>();
-    return this.sidebarMenu.filter(
+    const visible = this.sidebarMenu.filter(
       (item) => {
         // Deduplicate items with the same label (e.g. renamed "Pipelines")
         if (seen.has(item.label)) return false;
@@ -3843,13 +3864,27 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
           this.customMenuState[item.label] === true);
       }
     );
+
+    // Advanced items the backend menu doesn't know about (no DashConsts row)
+    // are injected from the fallback URL map once the user enables them.
+    for (const advanced of this.advancedMenuItems) {
+      if (seen.has(advanced.label) || this.customMenuState[advanced.label] !== true) continue;
+      const url = this.ADVANCED_ITEM_FALLBACK_URLS[advanced.label];
+      if (url) visible.push({ label: advanced.label, url, children: [] });
+    }
+    return visible;
   }
 
   /** Items from sidebarMenu that belong to the advanced/optional group. */
   getAdvancedMenuItems(): any[] {
-    return this.sidebarMenu.filter((item) =>
+    const fromMenu = this.sidebarMenu.filter((item) =>
       this.ADVANCED_MENU_LABELS.includes(item.label)
     );
+    const known = new Set(fromMenu.map((i: any) => i.label));
+    const injected = this.advancedMenuItems
+      .filter((i) => !known.has(i.label) && this.ADVANCED_ITEM_FALLBACK_URLS[i.label])
+      .map((i) => ({ label: i.label, url: this.ADVANCED_ITEM_FALLBACK_URLS[i.label], children: [] }));
+    return [...fromMenu, ...injected];
   }
 
   /** Count how many advanced items are currently enabled. */
