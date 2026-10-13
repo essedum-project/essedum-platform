@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { finalize } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GuardrailEvent, RaiservicesService } from '../services/raiservices.service';
@@ -82,10 +83,13 @@ export class SalusComponent implements OnInit, OnDestroy {
   resultFilter = 'all';
   expanded = new Set<number>();
 
+  isUrlConfigured = false;
+  currentIframeUrl: SafeResourceUrl | null = null;
+
   private readonly salusUrl: string;
   private refreshTimer: any = null;
 
-  constructor(private raiService: RaiservicesService) {
+  constructor(private raiService: RaiservicesService, private sanitizer: DomSanitizer) {
     const configured = (environment as any).salusUrl as string | undefined;
     this.salusUrl = !configured || configured.startsWith('__FE_') ? '/salus/' : configured;
   }
