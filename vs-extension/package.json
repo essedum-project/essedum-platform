@@ -2,7 +2,7 @@
   "name": "essedum",
   "displayName": "Essedum",
   "description": "VS Code extension for Essedum AI Platform",
-  "version": "1.5.0",
+  "version": "1.6.2",
   "publisher": "essedum",
   "license": "MIT",
   "engines": {
@@ -406,6 +406,7 @@
     "axios": "^1.6.7",
     "crypto-js": "^4.2.0",
     "form-data": "^4.0.4",
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^2.7.0",
+    "socket.io-client": "^4.8.4"
   }
 }
