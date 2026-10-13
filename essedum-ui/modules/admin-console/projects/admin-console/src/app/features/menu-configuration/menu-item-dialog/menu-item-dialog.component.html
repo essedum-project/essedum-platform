@@ -1,0 +1,34 @@
+<h2 mat-dialog-title>{{ label ? 'Edit' : 'Add' }} Menu Item</h2>
+<div mat-dialog-content>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Label</mat-label>
+    <input matInput [(ngModel)]="label" name="label" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Route</mat-label>
+    <input matInput [(ngModel)]="route" name="route" placeholder="/admin-console/..." />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Parent</mat-label>
+    <mat-select [(ngModel)]="parentId" name="parentId">
+      <mat-option [value]="null">None (top-level)</mat-option>
+      <mat-option *ngFor="let item of candidateParents" [value]="item.id">{{ item.label }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Minimum role rank</mat-label>
+    <input matInput type="number" min="0" max="4" [(ngModel)]="minRoleRank" name="minRoleRank" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Display order</mat-label>
+    <input matInput type="number" min="1" [(ngModel)]="displayOrder" name="displayOrder" />
+  </mat-form-field>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="save()">Save</button>
+</div>

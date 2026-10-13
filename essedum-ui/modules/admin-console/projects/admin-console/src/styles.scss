@@ -1,0 +1,44 @@
+@use '@angular/material' as mat;
+
+.admin-console-page {
+  padding: 24px;
+}
+
+.admin-console-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.admin-console-table {
+  width: 100%;
+}
+
+.status-chip-active,
+.status-chip-synced,
+.status-chip-published,
+.status-chip-approved {
+  background-color: #e6f4ea !important;
+  color: #1e7e34 !important;
+}
+
+.status-chip-pending,
+.status-chip-in_review,
+.status-chip-submitted,
+.status-chip-draft {
+  background-color: #fff4e5 !important;
+  color: #b06000 !important;
+}
+
+.status-chip-failed,
+.status-chip-rejected,
+.status-chip-archived,
+.status-chip-suspended {
+  background-color: #fdecea !important;
+  color: #c62828 !important;
+}

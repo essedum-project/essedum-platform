@@ -1,0 +1,39 @@
+<div class="admin-console-page">
+  <div class="admin-console-toolbar">
+    <h2>Approvals</h2>
+  </div>
+
+  <table mat-table [dataSource]="pending" class="admin-console-table">
+    <ng-container matColumnDef="assetName">
+      <th mat-header-cell *matHeaderCellDef>Asset</th>
+      <td mat-cell *matCellDef="let row">{{ row.assetName }}</td>
+    </ng-container>
+    <ng-container matColumnDef="versionNo">
+      <th mat-header-cell *matHeaderCellDef>Version</th>
+      <td mat-cell *matCellDef="let row">v{{ row.versionNo }}</td>
+    </ng-container>
+    <ng-container matColumnDef="gate">
+      <th mat-header-cell *matHeaderCellDef>Gate</th>
+      <td mat-cell *matCellDef="let row">{{ row.gate }}</td>
+    </ng-container>
+    <ng-container matColumnDef="actorName">
+      <th mat-header-cell *matHeaderCellDef>Submitted by</th>
+      <td mat-cell *matCellDef="let row">{{ row.actorName }}</td>
+    </ng-container>
+    <ng-container matColumnDef="occurredAt">
+      <th mat-header-cell *matHeaderCellDef>Submitted</th>
+      <td mat-cell *matCellDef="let row">{{ row.occurredAt | date: 'medium' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let row">
+        <button mat-button color="primary" (click)="decide(row, 'approved')">Approve</button>
+        <button mat-button color="warn" (click)="decide(row, 'rejected')">Reject</button>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+  </table>
+
+  <p *ngIf="pending.length === 0" class="empty-state">Nothing pending at your gates.</p>
+</div>

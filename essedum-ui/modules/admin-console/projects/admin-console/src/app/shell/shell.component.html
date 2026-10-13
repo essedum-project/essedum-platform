@@ -1,0 +1,25 @@
+<div class="admin-console-shell">
+  <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+    <a
+      mat-tab-link
+      *ngFor="let link of navLinks"
+      [routerLink]="link.path"
+      routerLinkActive
+      #rla="routerLinkActive"
+      [active]="rla.isActive"
+    >
+      {{ link.label }}
+    </a>
+    <span class="acting-as">
+      Acting as User ID
+      <input
+        type="number"
+        [value]="userContext.userId$.value"
+        (change)="setUserId($any($event.target).value)"
+      />
+    </span>
+  </nav>
+  <mat-tab-nav-panel #tabPanel>
+    <router-outlet></router-outlet>
+  </mat-tab-nav-panel>
+</div>

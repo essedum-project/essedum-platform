@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<!-- Role & Access Management replatform — docs/RBAC_Admin_Replatform_Plan.md §3/§9.
+	     MySQL-only for now; mssql/postgresql changelogs to follow once this is verified. -->
+
+	<changeSet author="Essedum (rbac)" id="rbac-1">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_role" /></not>
+		</preConditions>
+		<createTable tableName="rbac_role">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(64)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="rank" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-1-seed">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT COUNT(*) FROM rbac_role</sqlCheck>
+		</preConditions>
+		<insert tableName="rbac_role">
+			<column name="name" value="viewer" />
+			<column name="rank" valueNumeric="0" />
+		</insert>
+		<insert tableName="rbac_role">
+			<column name="name" value="developer" />
+			<column name="rank" valueNumeric="1" />
+		</insert>
+		<insert tableName="rbac_role">
+			<column name="name" value="project_admin" />
+			<column name="rank" valueNumeric="2" />
+		</insert>
+		<insert tableName="rbac_role">
+			<column name="name" value="org_admin" />
+			<column name="rank" valueNumeric="3" />
+		</insert>
+		<insert tableName="rbac_role">
+			<column name="name" value="platform_admin" />
+			<column name="rank" valueNumeric="4" />
+		</insert>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-2">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_role_assignment" /></not>
+		</preConditions>
+		<createTable tableName="rbac_role_assignment">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="user_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="role_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="organization_id" type="INT" />
+			<column name="project_id" type="INT" />
+			<column name="granted_at" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="revoked_at" type="datetime(6)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-3">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_asset" /></not>
+		</preConditions>
+		<createTable tableName="rbac_asset">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="asset_type" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="scope" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="current_version_id" type="INT" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-4">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_asset_version" /></not>
+		</preConditions>
+		<createTable tableName="rbac_asset_version">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="asset_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="environment_id" type="INT" />
+			<column name="version_no" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="status" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="content_digest" type="VARCHAR(255)" />
+			<column name="payload_ref" type="VARCHAR(500)" />
+			<column name="updated_at" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-5">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_promotion_event" /></not>
+		</preConditions>
+		<createTable tableName="rbac_promotion_event">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="asset_version_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="gate" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="action" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="actor_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="actor_name" type="VARCHAR(255)" />
+			<column name="note" type="VARCHAR(1000)" />
+			<column name="occurred_at" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-6">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_menu_item" /></not>
+		</preConditions>
+		<createTable tableName="rbac_menu_item">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="parent_id" type="INT" />
+			<column name="label" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="route" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="min_role_rank" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="display_order" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<!-- Seed the admin-console's own menu tree so the Menu Configuration screen
+	     isn't empty on first run. No role_assignment seed here on purpose —
+	     granting platform_admin via migration would be a silent privilege
+	     escalation; the first platform_admin must be granted manually. -->
+	<changeSet author="Essedum (rbac)" id="rbac-6-seed">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT COUNT(*) FROM rbac_menu_item</sqlCheck>
+		</preConditions>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="1" />
+			<column name="label" value="Admin Console" />
+			<column name="route" value="/admin-console" />
+			<column name="min_role_rank" valueNumeric="0" />
+			<column name="display_order" valueNumeric="1" />
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="2" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Organizations &amp; Projects" />
+			<column name="route" value="/admin-console/tenancy" />
+			<column name="min_role_rank" valueNumeric="2" />
+			<column name="display_order" valueNumeric="1" />
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="3" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Members &amp; Roles" />
+			<column name="route" value="/admin-console/access" />
+			<column name="min_role_rank" valueNumeric="2" />
+			<column name="display_order" valueNumeric="2" />
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="4" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="My Drafts" />
+			<column name="route" value="/admin-console/publishing" />
+			<column name="min_role_rank" valueNumeric="1" />
+			<column name="display_order" valueNumeric="3" />
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="5" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Approvals" />
+			<column name="route" value="/admin-console/approvals" />
+			<column name="min_role_rank" valueNumeric="2" />
+			<column name="display_order" valueNumeric="4" />
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="6" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Audit Log" />
+			<column name="route" value="/admin-console/audit" />
+			<column name="min_role_rank" valueNumeric="3" />
+			<column name="display_order" valueNumeric="5" />
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="7" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Menu Configuration" />
+			<column name="route" value="/admin-console/menu-configuration" />
+			<column name="min_role_rank" valueNumeric="4" />
+			<column name="display_order" valueNumeric="6" />
+		</insert>
+	</changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,19 @@
+.admin-console-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.acting-as {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.6);
+
+  input {
+    width: 64px;
+  }
+}

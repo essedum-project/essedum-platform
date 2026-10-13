@@ -1,0 +1,59 @@
+<div class="admin-console-page">
+  <div class="admin-console-toolbar">
+    <h2>Organizations &amp; Projects</h2>
+  </div>
+
+  <mat-tab-group>
+    <mat-tab label="Organizations">
+      <table mat-table [dataSource]="organizations" class="admin-console-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let row">
+            <mat-chip [ngClass]="'status-chip-' + row.status">{{ row.status }}</mat-chip>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="orgColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: orgColumns"></tr>
+      </table>
+    </mat-tab>
+
+    <mat-tab label="Projects">
+      <table mat-table [dataSource]="projects" class="admin-console-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+        </ng-container>
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let row">{{ row.description || '—' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="projectColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: projectColumns"></tr>
+      </table>
+    </mat-tab>
+
+    <mat-tab label="Environments">
+      <p class="mock-note">Preview data — no Environment entity exists in the backend yet.</p>
+      <table mat-table [dataSource]="environmentRows" class="admin-console-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+        </ng-container>
+        <ng-container matColumnDef="projectName">
+          <th mat-header-cell *matHeaderCellDef>Project</th>
+          <td mat-cell *matCellDef="let row">{{ row.projectName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="configRef">
+          <th mat-header-cell *matHeaderCellDef>Config Ref</th>
+          <td mat-cell *matCellDef="let row">{{ row.configRef }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="environmentColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: environmentColumns"></tr>
+      </table>
+    </mat-tab>
+  </mat-tab-group>
+</div>

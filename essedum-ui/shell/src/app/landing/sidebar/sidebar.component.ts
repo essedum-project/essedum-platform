@@ -1000,6 +1000,12 @@ export class SidebarComponent implements OnInit {
         { label: "Mapping", icon: "map-signs", url: "./iamp-usm/dashconstant" }
       );
     }
+
+    // Additive-only: new admin-console RBAC replatform (docs/RBAC_Admin_Replatform_Plan.md).
+    // Appended after the branches above so none of their logic is touched.
+    if (this.role && (this.role.roleadmin || this.role.name == "Admin")) {
+      this.sidebarMenu.push({ label: "Role & Access Management (new)", icon: "shield", url: "./admin-console/tenancy" });
+    }
   }
 
   FirstLetterWord(str) {
