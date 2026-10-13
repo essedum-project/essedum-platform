@@ -239,4 +239,81 @@
 		</insert>
 	</changeSet>
 
+	<changeSet author="Essedum (rbac)" id="rbac-7">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_audit_event" /></not>
+		</preConditions>
+		<createTable tableName="rbac_audit_event">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="correlation_id" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="entity" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="action" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="actor_id" type="INT" />
+			<column name="actor_name" type="VARCHAR(255)" />
+			<column name="occurred_at" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="details" type="VARCHAR(1000)" />
+		</createTable>
+	</changeSet>
+
+	<!-- §11 phase-2 migration, pulled forward: closes the Project<->Organisation
+	     FK gap (plan Appendix A) that was blocking org-scoped visibility (§4). -->
+	<changeSet author="Essedum (rbac)" id="rbac-8">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="usm_project" columnName="organisation_id" /></not>
+		</preConditions>
+		<addColumn tableName="usm_project">
+			<column name="organisation_id" type="INT" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-9">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_environment" /></not>
+		</preConditions>
+		<createTable tableName="rbac_environment">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="name" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="config_ref" type="VARCHAR(500)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-10">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_identity_projection_target" /></not>
+		</preConditions>
+		<createTable tableName="rbac_identity_projection_target">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="target_type" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="external_ref" type="VARCHAR(255)" />
+			<column name="sync_status" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_attempt_at" type="datetime(6)" />
+		</createTable>
+	</changeSet>
+
 </databaseChangeLog>

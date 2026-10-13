@@ -291,6 +291,17 @@ export class ApisService {
     } catch (error) { return this.handleAPIError(error); }
   }
 
+  /**
+   * §7 data-driven navigation: MenuService.menuFor(userId), filtered server-side
+   * by role rank. Only covers this feature's own rbac_menu_item rows — doesn't
+   * replace the legacy DashConsts-driven sidebar.
+   */
+  getRbacMenu(userId: number): Observable<any[]> {
+    return this.http.get<any[]>("/api/usm/menu", { params: { userId } }).pipe(
+      catchError(() => of([])),
+    );
+  }
+
   /* *************DST API *********** */
   DSTService(): Observable<any> {
     return this.https

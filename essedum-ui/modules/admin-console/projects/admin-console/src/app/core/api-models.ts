@@ -67,10 +67,7 @@ export interface MenuItem {
 }
 
 // Shapes from the existing OrganisationResource/ProjectResource APIs
-// (/api/organisations, /api/projects) — not the new rbac_* tables. Project
-// has no FK to Organisation and no status field in the current schema (see
-// AccessContextService's comment on the same gap), so these are sparser
-// than the mock Organization/Project models they replace in Tenancy.
+// (/api/organisations, /api/projects) — not the new rbac_* tables.
 export interface LegacyOrganisation {
   id: number;
   name: string;
@@ -81,5 +78,24 @@ export interface LegacyProject {
   id: number;
   name: string;
   description: string | null;
+  organisationId: number | null;
+}
+
+export interface RbacEnvironment {
+  id: number;
+  projectId: number;
+  name: string;
+  configRef: string | null;
+}
+
+export interface AuditEvent {
+  id: number;
+  correlationId: string;
+  entity: string;
+  action: string;
+  actorId: number | null;
+  actorName: string | null;
+  occurredAt: string;
+  details: string | null;
 }
 

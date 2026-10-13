@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { forkJoin, of, switchMap } from 'rxjs';
 import { ApiService } from '../../core/api.service';
-import { MockDataService } from '../../core/mock-data.service';
-import { LegacyOrganisation, LegacyProject } from '../../core/api-models';
-import { Environment } from '../../core/models';
+import { LegacyOrganisation, LegacyProject, RbacEnvironment } from '../../core/api-models';
 
-interface EnvironmentRow extends Environment {
+interface EnvironmentRow extends RbacEnvironment {
   projectName: string;
 }
 
@@ -23,22 +22,30 @@ export class TenancyComponent implements OnInit {
   readonly projectColumns = ['name', 'description'];
   readonly environmentColumns = ['name', 'projectName', 'configRef'];
 
-  constructor(
-    private readonly api: ApiService,
-    // Environments has no backend endpoint yet (no Environment entity exists
-    // in sv/usm-service) — stays mock until §11 adds one.
-    private readonly mockData: MockDataService,
-  ) {}
+  constructor(private readonly api: ApiService) {}
 
   ngOnInit(): void {
     this.api.getOrganisations().subscribe(orgs => (this.organizations = orgs));
-    this.api.getProjects().subscribe(projects => (this.projects = projects));
 
-    this.mockData.environments$.subscribe(envs => {
-      this.environmentRows = envs.map(e => ({
-        ...e,
-        projectName: this.mockData.projects$.value.find(p => p.id === e.projectId)?.name ?? 'Unknown',
-      }));
-    });
+    this.api
+      .getProjects()
+      .pipe(
+        switchMap(projects => {
+          this.projects = projects;
+          if (projects.length === 0) {
+            return of([] as EnvironmentRow[]);
+          }
+          return forkJoin(
+            projects.map(project =>
+              this.api.getEnvironments(project.id).pipe(
+                switchMap(envs =>
+                  of(envs.map(e => ({ ...e, projectName: project.name }))),
+                ),
+              ),
+            ),
+          ).pipe(switchMap(rows => of(rows.flat())));
+        }),
+      )
+      .subscribe(rows => (this.environmentRows = rows));
   }
 }

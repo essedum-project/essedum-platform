@@ -231,28 +231,94 @@ export class SidebarComponent implements OnInit {
         if (!this.sidebarMenu.some((it: any) => it && it.label === 'Dashboard')) {
           this.sidebarMenu.unshift({ label: 'Dashboard', icon: 'tachometer', url: './dashboard' });
         }
-        // Remap legacy DashConsts URLs to new MFE routes so clicking AI-Brain/AIP
-        // sidebar entries loads our federated MFEs (modules/data-ops, modules/agent-studio,
-        // modules/integration-hub, modules/vibe-studio) instead of the buggy icip_app/aip_app
-        // cross-remote chain that fails with "Cannot access 'AipModule' before init".
-        this.remapLegacyUrls(this.sidebarMenu);
 
-        // Remap legacy "Agent MCP Pipelines" label to "Pipelines"
-        // (kept for backward-compat with older DB entries)
-        this.sidebarMenu.forEach((item: any) => {
-          if (item && item.label === 'Agent MCP Pipelines') {
-            item.label = 'Pipelines';
-          }
-          if (item && Array.isArray(item.children)) {
-            item.children.forEach((child: any) => {
-              if (child && child.label === 'Agent MCP Pipelines') {
-                child.label = 'Pipelines';
-              }
-            });
-          }
-        });
+        // §7 data-driven navigation: ask MenuService for this user's rbac_menu_item
+        // tree instead of hardcoding one entry. Runs regardless of whether
+        // sidebarMenu came from DashConstant or populateDefaultSidebarMenu() —
+        // a push inside either path alone gets discarded when the other path runs.
+        this.appendRbacMenu(() => this.relabelLegacyPipelines());
       });
     }
+  }
+
+  /**
+   * Fetches /api/usm/menu?userId=... and appends the resulting tree (filtered
+   * server-side by the caller's role rank) to sidebarMenu — unless it's
+   * already there, or the user id / API call isn't available, in which case
+   * it falls back to a single static entry so the feature stays reachable.
+   */
+  private appendRbacMenu(done: () => void): void {
+    let userId: number | null = null;
+    try {
+      userId = Number(JSON.parse(sessionStorage.getItem("user") || "null"));
+    } catch (e) {
+      userId = null;
+    }
+    const fallback = () => {
+      if (
+        this.role &&
+        (this.role.roleadmin || this.role.name == "Admin") &&
+        !this.sidebarMenu.some((it: any) => it && it.url === './admin-console/tenancy')
+      ) {
+        this.sidebarMenu.push({ label: "Role & Access Management (new)", icon: "shield", url: "./admin-console/tenancy" });
+      }
+      done();
+    };
+    if (!userId || !Number.isFinite(userId)) {
+      fallback();
+      return;
+    }
+    this.apisService.getRbacMenu(userId).subscribe({
+      next: (items: any[]) => {
+        if (!items || items.length === 0) {
+          fallback();
+          return;
+        }
+        const roots = items.filter((it) => it.parentId == null);
+        const buildNode = (item: any): any => ({
+          label: item.label,
+          icon: item.parentId == null ? "shield" : "",
+          url: `.${item.route}`,
+          children: items
+            .filter((child) => child.parentId === item.id)
+            .sort((a, b) => a.displayOrder - b.displayOrder)
+            .map(buildNode),
+        });
+        roots
+          .sort((a, b) => a.displayOrder - b.displayOrder)
+          .forEach((root) => {
+            const node = buildNode(root);
+            if (!this.sidebarMenu.some((it: any) => it && it.label === node.label)) {
+              this.sidebarMenu.push(node);
+            }
+          });
+        done();
+      },
+      error: () => fallback(),
+    });
+  }
+
+  private relabelLegacyPipelines(): void {
+    // Remap legacy DashConsts URLs to new MFE routes so clicking AI-Brain/AIP
+    // sidebar entries loads our federated MFEs (modules/data-ops, modules/agent-studio,
+    // modules/integration-hub, modules/vibe-studio) instead of the buggy icip_app/aip_app
+    // cross-remote chain that fails with "Cannot access 'AipModule' before init".
+    this.remapLegacyUrls(this.sidebarMenu);
+
+    // Remap legacy "Agent MCP Pipelines" label to "Pipelines"
+    // (kept for backward-compat with older DB entries)
+    this.sidebarMenu.forEach((item: any) => {
+      if (item && item.label === 'Agent MCP Pipelines') {
+        item.label = 'Pipelines';
+      }
+      if (item && Array.isArray(item.children)) {
+        item.children.forEach((child: any) => {
+          if (child && child.label === 'Agent MCP Pipelines') {
+            child.label = 'Pipelines';
+          }
+        });
+      }
+    });
   }
 
   fetchCredentials(): boolean {
@@ -999,12 +1065,6 @@ export class SidebarComponent implements OnInit {
         { label: "User Management", icon: "users", url: "./iamp-usm/manageUsers" },
         { label: "Mapping", icon: "map-signs", url: "./iamp-usm/dashconstant" }
       );
-    }
-
-    // Additive-only: new admin-console RBAC replatform (docs/RBAC_Admin_Replatform_Plan.md).
-    // Appended after the branches above so none of their logic is touched.
-    if (this.role && (this.role.roleadmin || this.role.name == "Admin")) {
-      this.sidebarMenu.push({ label: "Role & Access Management (new)", icon: "shield", url: "./admin-console/tenancy" });
     }
   }
 

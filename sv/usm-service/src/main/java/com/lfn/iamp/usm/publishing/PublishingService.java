@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lfn.iamp.usm.access.AccessContextService;
+import com.lfn.iamp.usm.audit.AuditService;
 
 /**
  * Submit/approve/reject drive the §5 state machine. The serving version
@@ -25,13 +26,16 @@ public class PublishingService {
 	private final AssetVersionRepository assetVersionRepository;
 	private final PromotionEventRepository promotionEventRepository;
 	private final AccessContextService accessContextService;
+	private final AuditService auditService;
 
 	public PublishingService(AssetRepository assetRepository, AssetVersionRepository assetVersionRepository,
-			PromotionEventRepository promotionEventRepository, AccessContextService accessContextService) {
+			PromotionEventRepository promotionEventRepository, AccessContextService accessContextService,
+			AuditService auditService) {
 		this.assetRepository = assetRepository;
 		this.assetVersionRepository = assetVersionRepository;
 		this.promotionEventRepository = promotionEventRepository;
 		this.accessContextService = accessContextService;
+		this.auditService = auditService;
 	}
 
 	public List<AssetVersion> listDraftsForUser(Integer userId) {
@@ -44,10 +48,22 @@ public class PublishingService {
 				.collect(Collectors.toList());
 	}
 
-	/** All assets reachable by the user's projects — lets the frontend join asset name onto a version. */
+	/**
+	 * Assets reachable by the user's projects, plus every publicly-scoped
+	 * asset regardless of project reach — the §4 visibleAssets query, minus
+	 * the "only published current version" filter (that's applied by callers
+	 * that care, e.g. a future public asset directory; drafts/approvals want
+	 * all statuses).
+	 */
 	public List<Asset> listAssetsForUser(Integer userId) {
 		List<Integer> projectIds = accessContextService.resolve(userId).getReachableProjectIds();
-		return assetRepository.findByProjectIdIn(projectIds);
+		List<Asset> reachable = new ArrayList<>(assetRepository.findByProjectIdIn(projectIds));
+		for (Asset publicAsset : assetRepository.findByScope("public")) {
+			if (reachable.stream().noneMatch(a -> a.getId().equals(publicAsset.getId()))) {
+				reachable.add(publicAsset);
+			}
+		}
+		return reachable;
 	}
 
 	/** All versions reachable by the user's projects — lets the frontend join versionNo onto a promotion event. */
@@ -64,7 +80,10 @@ public class PublishingService {
 		assetVersionRepository.save(version);
 
 		PromotionEvent event = newEvent(versionId, gate, "submitted", actorId, actorName, note);
-		return promotionEventRepository.save(event);
+		PromotionEvent saved = promotionEventRepository.save(event);
+		auditService.record("promotion_event", "submitted", actorId, actorName,
+				"version " + versionId + " submitted at gate " + gate);
+		return saved;
 	}
 
 	/** Approve moves the serving pointer; reject sends the version back to draft. §5. */
@@ -92,7 +111,10 @@ public class PublishingService {
 		}
 
 		PromotionEvent event = newEvent(versionId, gate, action, actorId, actorName, note);
-		return promotionEventRepository.save(event);
+		PromotionEvent saved = promotionEventRepository.save(event);
+		auditService.record("promotion_event", action, actorId, actorName,
+				"version " + versionId + " " + action + " at gate " + gate);
+		return saved;
 	}
 
 	/**

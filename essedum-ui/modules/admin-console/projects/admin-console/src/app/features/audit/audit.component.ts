@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { MockDataService } from '../../core/mock-data.service';
-import { AuditEvent } from '../../core/models';
+import { ApiService } from '../../core/api.service';
+import { AuditEvent } from '../../core/api-models';
 
 @Component({
   selector: 'app-audit',
@@ -14,10 +14,10 @@ export class AuditComponent implements OnInit {
 
   readonly columns = ['occurredAt', 'entity', 'action', 'actorName', 'details', 'correlationId'];
 
-  constructor(private readonly data: MockDataService) {}
+  constructor(private readonly api: ApiService) {}
 
   ngOnInit(): void {
-    this.data.auditEvents$.subscribe(events => (this.events = events));
+    this.api.getAuditEvents().subscribe(events => (this.events = events));
   }
 
   get filteredEvents(): AuditEvent[] {
@@ -29,8 +29,8 @@ export class AuditComponent implements OnInit {
       e =>
         e.entity.toLowerCase().includes(term) ||
         e.action.toLowerCase().includes(term) ||
-        e.actorName.toLowerCase().includes(term) ||
-        e.details.toLowerCase().includes(term),
+        (e.actorName ?? '').toLowerCase().includes(term) ||
+        (e.details ?? '').toLowerCase().includes(term),
     );
   }
 }

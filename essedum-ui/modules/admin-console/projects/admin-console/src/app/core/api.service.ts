@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   AccessContext, RbacRole, RoleAssignment, Asset, AssetVersion, PromotionEvent, MenuItem,
-  LegacyOrganisation, LegacyProject,
+  LegacyOrganisation, LegacyProject, RbacEnvironment, AuditEvent,
 } from './api-models';
 
 // Thin HTTP client over the sv/usm-service RBAC endpoints
@@ -93,5 +93,15 @@ export class ApiService {
 
   getProjects(): Observable<LegacyProject[]> {
     return this.http.get<LegacyProject[]>('/api/projects');
+  }
+
+  // ---- environments (rbac_environment) ----
+  getEnvironments(projectId: number): Observable<RbacEnvironment[]> {
+    return this.http.get<RbacEnvironment[]>(`${this.base}/environments`, { params: { projectId } });
+  }
+
+  // ---- audit (rbac_audit_event, NFR-O2) ----
+  getAuditEvents(): Observable<AuditEvent[]> {
+    return this.http.get<AuditEvent[]>(`${this.base}/audit`);
   }
 }

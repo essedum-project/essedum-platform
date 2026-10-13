@@ -1,15 +1,31 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-// Stand-in for real auth until the shell passes a JWT-derived caller through
-// (§4 — no JWT wiring yet, per the backend README gap list). Lets a demo
-// user declare "I am user #N" so the access/publishing/menu endpoints, which
-// all take a caller id, have someone to act as.
+// Resolves the caller id from the shell's session (sessionStorage "user" —
+// the same mechanism shell/src/app/services/apis.service.ts and
+// sidebar.component.ts already use), since module federation shares the
+// host origin's sessionStorage. Falls back to manual override (the "Acting
+// as User ID" field) when running standalone / not logged in — there's
+// still no server-side JWT verification of this id (§4's NFR-SEC2/SEC7
+// gap), it's just no longer a guess when a real session exists.
 @Injectable({ providedIn: 'root' })
 export class UserContextService {
-  readonly userId$ = new BehaviorSubject<number>(1);
+  readonly userId$ = new BehaviorSubject<number>(this.resolveFromSession() ?? 1);
 
   setUserId(userId: number): void {
     this.userId$.next(userId);
+  }
+
+  private resolveFromSession(): number | null {
+    try {
+      const raw = sessionStorage.getItem('user');
+      if (!raw) {
+        return null;
+      }
+      const parsed = Number(JSON.parse(raw));
+      return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+    } catch {
+      return null;
+    }
   }
 }
