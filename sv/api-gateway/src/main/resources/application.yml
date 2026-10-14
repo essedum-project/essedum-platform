@@ -66,6 +66,12 @@ spring:
           uri: ${USM_SERVICE_URL:http://localhost:8081}
           predicates:
             - Path=/api/getConfigDetails,/api/essedum/logout,/api/essedum/authorize,/api/get-startup-constants,/api/get-startup-constants/**
+        # RBAC Admin Console endpoints (com.lfn.iamp.usm.access/.publishing/.menu/
+        # .audit/.tenancy/provisioning — all @RequestMapping("/api/usm")).
+        - id: usm-rbac
+          uri: ${USM_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/usm/**
         # ============================================================
         # Data Service - Files, Datasets & Data Adapters (Port 8083)
         # ============================================================
@@ -270,4 +276,6 @@ gateway:
 # ---- Service-to-Service Access Token ----
 config:
   service-auth:
-    access-token: ${SERVICE_ACCESS_TOKEN}
+    # Default to empty so the gateway starts in local/dev without the env var
+    # (matches the defaulted pattern of every other placeholder in this file).
+    access-token: ${SERVICE_ACCESS_TOKEN:}

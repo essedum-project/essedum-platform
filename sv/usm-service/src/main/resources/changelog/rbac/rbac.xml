@@ -316,4 +316,49 @@
 		</createTable>
 	</changeSet>
 
+	<!-- Configurable icon, per-role override (CSV of role names), and project
+	     scope for menu items. Drives the sidebar icon rail and the "rank-based
+	     + role override" visibility, and lets legacy per-role menus be migrated
+	     into rbac_menu_item. -->
+	<changeSet author="Essedum (rbac)" id="rbac-11">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="rbac_menu_item" columnName="icon" /></not>
+		</preConditions>
+		<addColumn tableName="rbac_menu_item">
+			<column name="icon" type="VARCHAR(64)" />
+			<column name="roles" type="VARCHAR(512)" />
+			<column name="project" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+
+	<!-- Admin overview landing entry (first item under Admin Console). -->
+	<changeSet author="Essedum (rbac)" id="rbac-12">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT COUNT(*) FROM rbac_menu_item WHERE route = '/admin-console/overview'</sqlCheck>
+		</preConditions>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="8" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Overview" />
+			<column name="route" value="/admin-console/overview" />
+			<column name="min_role_rank" valueNumeric="2" />
+			<column name="display_order" valueNumeric="0" />
+			<column name="icon" value="tachometer" />
+		</insert>
+	</changeSet>
+
+	<!-- Seed Font-Awesome icons for the admin-console menu items. -->
+	<changeSet author="Essedum (rbac)" id="rbac-13">
+		<preConditions onFail="MARK_RAN">
+			<columnExists tableName="rbac_menu_item" columnName="icon" />
+		</preConditions>
+		<update tableName="rbac_menu_item"><column name="icon" value="shield" /><where>route = '/admin-console'</where></update>
+		<update tableName="rbac_menu_item"><column name="icon" value="sitemap" /><where>route = '/admin-console/tenancy'</where></update>
+		<update tableName="rbac_menu_item"><column name="icon" value="users" /><where>route = '/admin-console/access'</where></update>
+		<update tableName="rbac_menu_item"><column name="icon" value="file-text-o" /><where>route = '/admin-console/publishing'</where></update>
+		<update tableName="rbac_menu_item"><column name="icon" value="check-square-o" /><where>route = '/admin-console/approvals'</where></update>
+		<update tableName="rbac_menu_item"><column name="icon" value="history" /><where>route = '/admin-console/audit'</where></update>
+		<update tableName="rbac_menu_item"><column name="icon" value="th-list" /><where>route = '/admin-console/menu-configuration'</where></update>
+	</changeSet>
+
 </databaseChangeLog>
