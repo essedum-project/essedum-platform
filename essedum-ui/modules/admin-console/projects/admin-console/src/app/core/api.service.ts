@@ -77,9 +77,43 @@ export class ApiService {
     return this.http.get<AssetVersion[]>(`${this.base}/assets/versions/drafts`, { params: { userId } });
   }
 
+  // §4 marketplace — published assets visible in the caller's scope.
+  getCatalog(userId: number): Observable<Asset[]> {
+    return this.http.get<Asset[]>(`${this.base}/assets/catalog`, { params: { userId } });
+  }
+
+  // Create an asset + its first draft version. §5.
+  createAsset(payload: {
+    projectId: number; assetType: string; name: string; payloadRef: string;
+    actorId: number; actorName: string;
+  }): Observable<AssetVersion> {
+    return this.http.post<AssetVersion>(`${this.base}/assets`, payload);
+  }
+
+  // Edit a draft/rejected version in place.
+  editVersion(
+    versionId: number,
+    payload: { name: string; payloadRef: string; actorId: number; actorName: string },
+  ): Observable<AssetVersion> {
+    return this.http.put<AssetVersion>(`${this.base}/assets/versions/${versionId}`, payload);
+  }
+
+  // Open a fresh draft version on a published asset (live keeps serving).
+  createNewVersion(
+    assetId: number,
+    payload: { payloadRef: string; actorId: number; actorName: string },
+  ): Observable<AssetVersion> {
+    return this.http.post<AssetVersion>(`${this.base}/assets/${assetId}/versions`, payload);
+  }
+
+  // The gate a version must clear next ('project_admin' | 'org_admin' | 'platform_admin' | null).
+  getNextGate(versionId: number): Observable<{ gate: string | null }> {
+    return this.http.get<{ gate: string | null }>(`${this.base}/assets/versions/${versionId}/next-gate`);
+  }
+
   submitVersion(
     versionId: number,
-    payload: { gate: string; actorId: number; actorName: string; note: string },
+    payload: { actorId: number; actorName: string; note: string },
   ): Observable<PromotionEvent> {
     return this.http.post<PromotionEvent>(`${this.base}/assets/versions/${versionId}/submit`, payload);
   }

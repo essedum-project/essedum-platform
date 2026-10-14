@@ -1,0 +1,31 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit Draft' : 'New Asset Draft' }}</h2>
+<div mat-dialog-content>
+  <mat-form-field appearance="outline" class="full-width" *ngIf="!isEdit">
+    <mat-label>Project</mat-label>
+    <mat-select [(ngModel)]="projectId" name="projectId">
+      <mat-option *ngFor="let p of projects" [value]="p.id">{{ p.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Name</mat-label>
+    <input matInput [(ngModel)]="name" name="name" placeholder="Asset name" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Type</mat-label>
+    <input matInput [(ngModel)]="assetType" name="assetType" placeholder="e.g. pipeline, model, dataset" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Content reference</mat-label>
+    <input matInput [(ngModel)]="payloadRef" name="payloadRef"
+           placeholder="URI / id of the underlying artifact" />
+  </mat-form-field>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" [disabled]="!valid" (click)="save()">
+    {{ isEdit ? 'Save' : 'Create Draft' }}
+  </button>
+</div>

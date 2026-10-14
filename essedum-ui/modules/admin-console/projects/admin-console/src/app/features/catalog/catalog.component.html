@@ -1,0 +1,26 @@
+<div class="admin-console-page">
+  <div class="admin-console-toolbar">
+    <h2>Asset Catalog</h2>
+  </div>
+
+  <div class="catalog-grid">
+    <mat-card *ngFor="let asset of assets" class="catalog-card">
+      <mat-card-header>
+        <mat-card-title>{{ asset.name }}</mat-card-title>
+        <mat-card-subtitle>{{ asset.assetType }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <span class="scope-badge" [ngClass]="'scope-' + asset.scope">
+          {{ scopeLabel(asset.scope) }}
+        </span>
+        <span class="serving-version" *ngIf="asset.servingVersionNo !== null">
+          serving v{{ asset.servingVersionNo }}
+        </span>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <p *ngIf="assets.length === 0" class="empty-state">
+    Nothing published in your scope yet.
+  </p>
+</div>

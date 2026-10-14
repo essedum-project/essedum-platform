@@ -1,0 +1,33 @@
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.catalog-card {
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+  }
+}
+
+.scope-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+
+  &.scope-project { background: #2563eb; }
+  &.scope-organization { background: #7c3aed; }
+  &.scope-public { background: #16a34a; }
+}
+
+.serving-version {
+  font-size: 0.8rem;
+  color: var(--ac-text-muted, #94a3b8);
+}

@@ -183,3 +183,8 @@ UPDATE rbac_menu_item SET icon='th-list'        WHERE route='/admin-console/menu
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order, icon)
 SELECT 9, 1, 'Identity Sync', '/admin-console/identity-sync', 3, 7, 'refresh'
 WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/identity-sync');
+
+-- rbac-15: Asset Catalog (marketplace) menu entry
+INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order, icon)
+SELECT 10, 1, 'Asset Catalog', '/admin-console/catalog', 1, 8, 'shopping-bag'
+WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/catalog');

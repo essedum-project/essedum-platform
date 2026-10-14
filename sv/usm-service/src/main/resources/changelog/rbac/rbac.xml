@@ -377,4 +377,20 @@
 		</insert>
 	</changeSet>
 
+	<!-- Asset Catalog / marketplace (§4 visibility query) — published assets within scope. -->
+	<changeSet author="Essedum (rbac)" id="rbac-15">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT COUNT(*) FROM rbac_menu_item WHERE route = '/admin-console/catalog'</sqlCheck>
+		</preConditions>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="10" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Asset Catalog" />
+			<column name="route" value="/admin-console/catalog" />
+			<column name="min_role_rank" valueNumeric="1" />
+			<column name="display_order" valueNumeric="8" />
+			<column name="icon" value="shopping-bag" />
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>

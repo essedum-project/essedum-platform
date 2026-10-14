@@ -6,6 +6,7 @@ import { OverviewComponent } from '../features/overview/overview.component';
 import { TenancyComponent } from '../features/tenancy/tenancy.component';
 import { AccessComponent } from '../features/access/access.component';
 import { PublishingComponent } from '../features/publishing/publishing.component';
+import { CatalogComponent } from '../features/catalog/catalog.component';
 import { ApprovalsComponent } from '../features/approvals/approvals.component';
 import { AuditComponent } from '../features/audit/audit.component';
 import { IdentitySyncComponent } from '../features/identity-sync/identity-sync.component';
@@ -22,6 +23,7 @@ const routes: Routes = [
       { path: 'tenancy', component: TenancyComponent },
       { path: 'access', component: AccessComponent },
       { path: 'publishing', component: PublishingComponent },
+      { path: 'catalog', component: CatalogComponent },
       { path: 'approvals', component: ApprovalsComponent },
       { path: 'audit', component: AuditComponent },
       { path: 'identity-sync', component: IdentitySyncComponent },

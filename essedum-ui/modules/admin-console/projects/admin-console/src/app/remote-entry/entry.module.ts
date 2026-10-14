@@ -30,6 +30,8 @@ import { ProvisionDialogComponent } from '../features/tenancy/provision-dialog/p
 import { AccessComponent } from '../features/access/access.component';
 import { GrantRoleDialogComponent } from '../features/access/grant-role-dialog/grant-role-dialog.component';
 import { PublishingComponent } from '../features/publishing/publishing.component';
+import { DraftDialogComponent } from '../features/publishing/draft-dialog/draft-dialog.component';
+import { CatalogComponent } from '../features/catalog/catalog.component';
 import { ApprovalsComponent } from '../features/approvals/approvals.component';
 import { AuditComponent } from '../features/audit/audit.component';
 import { IdentitySyncComponent } from '../features/identity-sync/identity-sync.component';
@@ -45,6 +47,8 @@ import { MenuItemDialogComponent } from '../features/menu-configuration/menu-ite
     AccessComponent,
     GrantRoleDialogComponent,
     PublishingComponent,
+    DraftDialogComponent,
+    CatalogComponent,
     ApprovalsComponent,
     AuditComponent,
     IdentitySyncComponent,

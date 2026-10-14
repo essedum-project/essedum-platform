@@ -30,7 +30,7 @@ export interface Asset {
   projectId: number;
   assetType: string;
   name: string;
-  scope: 'project' | 'organization' | 'public';
+  scope: 'draft' | 'project' | 'organization' | 'public';
   currentVersionId: number | null;
 }
 

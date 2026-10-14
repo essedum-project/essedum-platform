@@ -1,6 +1,9 @@
 <div class="admin-console-page">
   <div class="admin-console-toolbar">
     <h2>My Drafts</h2>
+    <button mat-raised-button color="primary" (click)="newDraft()">
+      <mat-icon>add</mat-icon> New Draft
+    </button>
   </div>
 
   <table mat-table [dataSource]="versions" class="admin-console-table">
@@ -18,6 +21,14 @@
         <mat-chip [ngClass]="'status-chip-' + row.status">{{ row.status }}</mat-chip>
       </td>
     </ng-container>
+    <ng-container matColumnDef="nextGate">
+      <th mat-header-cell *matHeaderCellDef>Next stage</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="next-gate" [matTooltip]="'Submitting sends this version to the ' + gateLabel(row.id) + ' gate'">
+          {{ gateLabel(row.id) }}
+        </span>
+      </td>
+    </ng-container>
     <ng-container matColumnDef="updatedAt">
       <th mat-header-cell *matHeaderCellDef>Updated</th>
       <td mat-cell *matCellDef="let row">{{ row.updatedAt | date: 'medium' }}</td>
@@ -25,6 +36,7 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let row">
+        <button mat-button [disabled]="!canEdit(row)" (click)="edit(row)">Edit</button>
         <button mat-button color="primary" [disabled]="!canSubmit(row)" (click)="submit(row)">
           Submit
         </button>
@@ -33,4 +45,8 @@
     <tr mat-header-row *matHeaderRowDef="columns"></tr>
     <tr mat-row *matRowDef="let row; columns: columns"></tr>
   </table>
+
+  <p *ngIf="versions.length === 0" class="empty-state">
+    No drafts yet. Click <strong>New Draft</strong> to create an asset.
+  </p>
 </div>
