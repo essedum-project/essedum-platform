@@ -40,6 +40,11 @@
     </mat-select>
     <mat-hint>Leave empty for rank-based default; pick roles to override.</mat-hint>
   </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Project (optional)</mat-label>
+    <input matInput [(ngModel)]="project" name="project" placeholder="blank = all projects; e.g. Core, leo1311" />
+  </mat-form-field>
 </div>
 <div mat-dialog-actions align="end">
   <button mat-button (click)="cancel()">Cancel</button>

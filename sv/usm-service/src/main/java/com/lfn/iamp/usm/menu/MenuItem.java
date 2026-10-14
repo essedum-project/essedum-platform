@@ -60,4 +60,12 @@ public class MenuItem implements Serializable {
 	 */
 	@Size(max = 512)
 	private String roles;
+
+	/**
+	 * Optional project scope (project_name). Legacy per-role menus differ per
+	 * project, so migrated role-override items carry the project they belong to;
+	 * blank = applies to every project.
+	 */
+	@Size(max = 255)
+	private String project;
 }

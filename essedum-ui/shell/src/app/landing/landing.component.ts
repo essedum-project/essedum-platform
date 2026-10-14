@@ -3911,7 +3911,11 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
             .map(buildNode),
         });
         const roots = menuItems
-          .filter((it) => it.parentId == null)
+          // Only the admin-console root (no role tag). Migrated legacy per-role
+          // menus are also top-level rows but carry a `roles` tag — they are
+          // managed in Menu Configuration and rendered via their own role path,
+          // not folded into the admin-console sidebar.
+          .filter((it) => it.parentId == null && !it.roles)
           .sort((a, b) => a.displayOrder - b.displayOrder)
           .map(buildNode)
           // The "Admin Console" root is seeded at min_role_rank 0, so the API

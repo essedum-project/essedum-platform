@@ -21,6 +21,7 @@ export class MenuItemDialogComponent implements OnInit {
     .map(r => r.trim())
     .filter(r => r);
   roleOptions: string[] = [];
+  project = this.existing?.project ?? '';
 
   candidateParents: MenuItem[] = [];
 
@@ -49,6 +50,7 @@ export class MenuItemDialogComponent implements OnInit {
       displayOrder: this.displayOrder,
       icon: this.icon?.trim() || null,
       roles: this.selectedRoles.length ? this.selectedRoles.join(',') : null,
+      project: this.project?.trim() || null,
     });
   }
 

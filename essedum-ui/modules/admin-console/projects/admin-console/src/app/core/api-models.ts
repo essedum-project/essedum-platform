@@ -73,6 +73,8 @@ export interface MenuItem {
   icon?: string | null;
   // Optional comma-separated role-override (§7). Blank = rank-based default.
   roles?: string | null;
+  // Optional project scope (project_name). Blank = all projects.
+  project?: string | null;
 }
 
 // Shapes from the existing OrganisationResource/ProjectResource APIs
