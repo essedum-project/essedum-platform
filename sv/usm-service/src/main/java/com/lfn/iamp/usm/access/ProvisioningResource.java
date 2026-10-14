@@ -83,6 +83,8 @@ public class ProvisioningResource {
 		require(actorUserId, ORG_ADMIN, "create a project");
 		Project p = new Project();
 		p.setName(req.name());
+		// project_display_name is NOT NULL in usm_project — default it to the name.
+		p.setProjectdisplayname(req.name());
 		p.setDescription(req.description());
 		p.setOrganisationId(req.organisationId());
 		Project saved = projectRepository.save(p);
