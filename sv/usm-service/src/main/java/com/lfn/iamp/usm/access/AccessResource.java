@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -28,6 +31,8 @@ import com.lfn.iamp.usm.repository.UsersRepository;
 @RequestMapping("/api/usm")
 @Tag(name = "Access", description = "Role assignment & access resolution")
 public class AccessResource {
+
+	private static final int ORG_ADMIN = 3;
 
 	private final AccessContextService accessContextService;
 	private final UsersRepository usersRepository;
@@ -94,14 +99,35 @@ public class AccessResource {
 
 	@PostMapping("/access/role-assignments")
 	public ResponseEntity<RoleAssignment> grant(@RequestBody GrantRoleRequest request) {
+		// NFR-SEC2: only org_admin+ may manage assignments, and no one may grant a
+		// role higher than their own rank (no self-escalation).
+		int actorRank = requireActorRank(request.getActorUserId(), ORG_ADMIN, "grant a role");
+		int grantedRank = accessContextService.rankOfRole(request.getRoleId());
+		if (actorRank < grantedRank) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"Cannot grant a role above your own rank (granting rank " + grantedRank + ", have " + actorRank + ")");
+		}
 		RoleAssignment saved = accessContextService.grant(request.getUserId(), request.getRoleId(),
 				request.getOrganizationId(), request.getProjectId());
 		return ResponseEntity.ok(saved);
 	}
 
 	@DeleteMapping("/access/role-assignments/{id}")
-	public ResponseEntity<Void> revoke(@PathVariable Integer id) {
+	public ResponseEntity<Void> revoke(@PathVariable Integer id, @RequestParam Integer actorUserId) {
+		requireActorRank(actorUserId, ORG_ADMIN, "revoke a role assignment");
 		accessContextService.revoke(id);
 		return ResponseEntity.noContent().build();
+	}
+
+	private int requireActorRank(Integer actorUserId, int minRank, String action) {
+		if (actorUserId == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "actorUserId required");
+		}
+		int rank = accessContextService.highestRank(actorUserId);
+		if (rank < minRank) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"Insufficient role to " + action + " (needs rank " + minRank + ", have " + rank + ")");
+		}
+		return rank;
 	}
 }

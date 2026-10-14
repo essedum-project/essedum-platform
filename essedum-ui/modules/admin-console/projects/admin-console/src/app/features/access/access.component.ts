@@ -79,12 +79,13 @@ export class AccessComponent implements OnInit {
       if (!result) {
         return;
       }
-      this.api.grantRole(result).subscribe(() => this.load());
+      // The acting admin is rank-checked server-side (NFR-SEC2).
+      this.api.grantRole({ ...result, actorUserId: this.userContext.userId$.value }).subscribe(() => this.load());
     });
   }
 
   revoke(row: RoleAssignmentRow): void {
-    this.api.revokeRoleAssignment(row.id).subscribe(() => this.load());
+    this.api.revokeRoleAssignment(row.id, this.userContext.userId$.value).subscribe(() => this.load());
   }
 }
 

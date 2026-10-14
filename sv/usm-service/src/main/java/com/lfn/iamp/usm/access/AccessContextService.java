@@ -102,6 +102,14 @@ public class AccessContextService {
 		return resolve(userId).getHighestRank();
 	}
 
+	/** Rank of a given rbac_role (0 = viewer … 4 = platform_admin), 0 if unknown. */
+	public int rankOfRole(Integer roleId) {
+		if (roleId == null) {
+			return 0;
+		}
+		return rbacRoleRepository.findById(roleId).map(RbacRole::getRank).orElse(0);
+	}
+
 	public RoleAssignment grant(Integer userId, Integer roleId, Integer organizationId, Integer projectId) {
 		if (organizationId != null && projectId != null) {
 			throw new IllegalArgumentException("A role assignment scopes to at most one of organization/project");

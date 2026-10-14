@@ -39,12 +39,13 @@ export class ApiService {
 
   grantRole(payload: {
     userId: number; roleId: number; organizationId: number | null; projectId: number | null;
+    actorUserId: number;
   }): Observable<RoleAssignment> {
     return this.http.post<RoleAssignment>(`${this.base}/access/role-assignments`, payload);
   }
 
-  revokeRoleAssignment(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/access/role-assignments/${id}`);
+  revokeRoleAssignment(id: number, actorUserId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/access/role-assignments/${id}`, { params: { actorUserId } });
   }
 
   // ---- provisioning (rank-gated creation; server re-checks) ----

@@ -7,6 +7,16 @@ public class GrantRoleRequest {
 	private Integer roleId;
 	private Integer organizationId;
 	private Integer projectId;
+	/** The acting admin — rank-checked server-side before the grant is applied. */
+	private Integer actorUserId;
+
+	public Integer getActorUserId() {
+		return actorUserId;
+	}
+
+	public void setActorUserId(Integer actorUserId) {
+		this.actorUserId = actorUserId;
+	}
 
 	public Integer getUserId() {
 		return userId;
