@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   AccessContext, RbacRole, RoleAssignment, Asset, AssetVersion, PromotionEvent, MenuItem,
-  LegacyOrganisation, LegacyProject, RbacEnvironment, AuditEvent, UserOption, IdentityTarget,
+  LegacyOrganisation, LegacyProject, RbacEnvironment, AuditEvent, UserOption, IdentityTarget, RoleMenu,
 } from './api-models';
 
 // Thin HTTP client over the sv/usm-service RBAC endpoints
@@ -144,6 +144,35 @@ export class ApiService {
 
   deleteMenuItem(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/menu-items/${id}`);
+  }
+
+  // ---- role menus (live per-role sidebars in usm_constant) ----
+  getRoleMenuRoles(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.base}/role-menus/roles`);
+  }
+
+  getRoleMenuProjects(role: string): Observable<string[]> {
+    return this.http.get<string[]>(`${this.base}/role-menus/projects`, { params: { role } });
+  }
+
+  getRoleMenus(role: string, project: string): Observable<RoleMenu[]> {
+    return this.http.get<RoleMenu[]>(`${this.base}/role-menus`, { params: { role, project } });
+  }
+
+  createRoleMenu(body: {
+    role: string; project: string; label: string; icon: string | null; url: string | null;
+  }): Observable<RoleMenu> {
+    return this.http.post<RoleMenu>(`${this.base}/role-menus`, body);
+  }
+
+  updateRoleMenu(id: number, body: {
+    label: string; icon: string | null; url: string | null;
+  }): Observable<RoleMenu> {
+    return this.http.put<RoleMenu>(`${this.base}/role-menus/${id}`, body);
+  }
+
+  deleteRoleMenu(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/role-menus/${id}`);
   }
 
   // ---- legacy tenancy (existing OrganisationResource/ProjectResource, under /api not /api/usm) ----

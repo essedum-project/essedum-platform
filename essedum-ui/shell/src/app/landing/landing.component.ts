@@ -2440,19 +2440,18 @@ export class LandingComponent implements OnInit, AfterViewInit {
           }
         }
 
-// Add this code around line 2218, after all sidebar menu processing
-// Check if user is admin and portfolio is Core
+// After all sidebar menu processing: land admins on the new Admin Console
+// Overview (the old iamp-usm/portfoliolist screen is retired — §7/§10 cutover).
 const isAdmin = this.role21.toLowerCase() === "admin";
-const isCorePortfolio = JSON.parse(sessionStorage.getItem("portfoliodata") || "{}").portfolioName === "Core";
 const currentUrl = this.router.url;
 const isAtMainLanding = currentUrl === "/landing" || currentUrl === "/landing/";
 const isNavigatingToSpecificRoute = sessionStorage.getItem("navigatingToRoute");
 
-// Only navigate to portfoliolist if admin is on landing page and not actively navigating elsewhere
+// Only redirect if admin is on the bare landing page and not navigating elsewhere.
 if (isAdmin && isAtMainLanding && !isNavigatingToSpecificRoute) {
   // Set flag to indicate navigation is in progress to prevent interference
   sessionStorage.setItem("navigatingInProgress", "true");
-  this.router.navigate(["/landing/iamp-usm/portfoliolist"]).then(() => {
+  this.router.navigate(["/landing/admin-console/overview"]).then(() => {
     // Clear the flag after navigation is complete
     setTimeout(() => {
       sessionStorage.removeItem("navigatingInProgress");

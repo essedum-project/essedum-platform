@@ -86,6 +86,18 @@ export interface MenuItem {
   project?: string | null;
 }
 
+// One live per-role sidebar item from usm_constant ("<Role> Side"). Editing
+// these keeps Menu Configuration in sync with what each role actually sees.
+export interface RoleMenu {
+  id: number;
+  role: string;
+  project: string;
+  label: string;
+  icon: string | null;
+  url: string | null;
+  hasChildren: boolean;
+}
+
 // Shapes from the existing OrganisationResource/ProjectResource APIs
 // (/api/organisations, /api/projects) — not the new rbac_* tables.
 export interface LegacyOrganisation {

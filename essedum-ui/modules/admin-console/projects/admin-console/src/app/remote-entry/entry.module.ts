@@ -37,6 +37,7 @@ import { AuditComponent } from '../features/audit/audit.component';
 import { IdentitySyncComponent } from '../features/identity-sync/identity-sync.component';
 import { MenuConfigurationComponent } from '../features/menu-configuration/menu-configuration.component';
 import { MenuItemDialogComponent } from '../features/menu-configuration/menu-item-dialog/menu-item-dialog.component';
+import { RoleMenuDialogComponent } from '../features/menu-configuration/role-menu-dialog/role-menu-dialog.component';
 
 @NgModule({
   declarations: [
@@ -54,6 +55,7 @@ import { MenuItemDialogComponent } from '../features/menu-configuration/menu-ite
     IdentitySyncComponent,
     MenuConfigurationComponent,
     MenuItemDialogComponent,
+    RoleMenuDialogComponent,
   ],
   imports: [
     CommonModule,
