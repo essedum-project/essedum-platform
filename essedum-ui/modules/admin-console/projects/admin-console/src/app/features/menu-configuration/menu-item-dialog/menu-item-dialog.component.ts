@@ -15,7 +15,12 @@ export class MenuItemDialogComponent implements OnInit {
   minRoleRank = this.existing?.minRoleRank ?? 0;
   displayOrder = this.existing?.displayOrder ?? 1;
   icon = this.existing?.icon ?? '';
-  roles = this.existing?.roles ?? '';
+  // Role-override held as an array for the multi-select; serialized to CSV on save.
+  selectedRoles: string[] = (this.existing?.roles ?? '')
+    .split(',')
+    .map(r => r.trim())
+    .filter(r => r);
+  roleOptions: string[] = [];
 
   candidateParents: MenuItem[] = [];
 
@@ -29,6 +34,7 @@ export class MenuItemDialogComponent implements OnInit {
     this.api.getMenuItems().subscribe(items => {
       this.candidateParents = items.filter(item => item.id !== this.existing?.id);
     });
+    this.api.getRoleNames().subscribe(names => (this.roleOptions = names));
   }
 
   save(): void {
@@ -42,7 +48,7 @@ export class MenuItemDialogComponent implements OnInit {
       minRoleRank: this.minRoleRank,
       displayOrder: this.displayOrder,
       icon: this.icon?.trim() || null,
-      roles: this.roles?.trim() || null,
+      roles: this.selectedRoles.length ? this.selectedRoles.join(',') : null,
     });
   }
 

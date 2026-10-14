@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   AccessContext, RbacRole, RoleAssignment, Asset, AssetVersion, PromotionEvent, MenuItem,
-  LegacyOrganisation, LegacyProject, RbacEnvironment, AuditEvent,
+  LegacyOrganisation, LegacyProject, RbacEnvironment, AuditEvent, UserOption,
 } from './api-models';
 
 // Thin HTTP client over the sv/usm-service RBAC endpoints
@@ -22,6 +22,15 @@ export class ApiService {
 
   getRoles(): Observable<RbacRole[]> {
     return this.http.get<RbacRole[]>(`${this.base}/roles`);
+  }
+
+  getUsers(): Observable<UserOption[]> {
+    return this.http.get<UserOption[]>(`${this.base}/users`);
+  }
+
+  // Distinct legacy role names for the Menu Configuration role-override dropdown.
+  getRoleNames(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.base}/role-names`);
   }
 
   getRoleAssignments(): Observable<RoleAssignment[]> {

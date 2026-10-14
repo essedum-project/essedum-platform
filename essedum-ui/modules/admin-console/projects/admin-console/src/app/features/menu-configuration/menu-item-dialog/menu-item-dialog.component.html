@@ -35,7 +35,10 @@
 
   <mat-form-field appearance="outline" class="full-width">
     <mat-label>Roles (optional override)</mat-label>
-    <input matInput [(ngModel)]="roles" name="roles" placeholder="blank = by rank; else e.g. Admin, IT Portfolio Manager" />
+    <mat-select [(ngModel)]="selectedRoles" name="roles" multiple>
+      <mat-option *ngFor="let r of roleOptions" [value]="r">{{ r }}</mat-option>
+    </mat-select>
+    <mat-hint>Leave empty for rank-based default; pick roles to override.</mat-hint>
   </mat-form-field>
 </div>
 <div mat-dialog-actions align="end">

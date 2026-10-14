@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { ApiService } from '../../../core/api.service';
-import { RbacRole, LegacyOrganisation, LegacyProject } from '../../../core/api-models';
+import { RbacRole, LegacyOrganisation, LegacyProject, UserOption } from '../../../core/api-models';
 
 @Component({
   selector: 'app-grant-role-dialog',
@@ -10,6 +10,7 @@ import { RbacRole, LegacyOrganisation, LegacyProject } from '../../../core/api-m
 })
 export class GrantRoleDialogComponent implements OnInit {
   roles: RbacRole[] = [];
+  users: UserOption[] = [];
   organizations: LegacyOrganisation[] = [];
   projects: LegacyProject[] = [];
 
@@ -26,6 +27,7 @@ export class GrantRoleDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.api.getRoles().subscribe(roles => (this.roles = roles));
+    this.api.getUsers().subscribe(users => (this.users = users));
     this.api.getOrganisations().subscribe(orgs => (this.organizations = orgs));
     this.api.getProjects().subscribe(projects => (this.projects = projects));
   }

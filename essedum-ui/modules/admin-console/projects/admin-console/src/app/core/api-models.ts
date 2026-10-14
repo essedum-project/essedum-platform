@@ -58,6 +58,11 @@ export interface PromotionEvent {
 
 export type PromotionGate = 'project_admin' | 'org_admin' | 'platform_admin';
 
+export interface UserOption {
+  id: number;
+  name: string;
+}
+
 export interface MenuItem {
   id: number;
   parentId: number | null;

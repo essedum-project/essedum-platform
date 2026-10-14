@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, map } from 'rxjs';
 import { ApiService } from '../../core/api.service';
-import { RbacRole, RoleAssignment } from '../../core/api-models';
+import { RbacRole, RoleAssignment, UserOption } from '../../core/api-models';
 import { GrantRoleDialogComponent } from './grant-role-dialog/grant-role-dialog.component';
 
 interface RoleAssignmentRow extends RoleAssignment {
   roleName: string;
+  userName: string;
   scopeLabel: string;
 }
 
@@ -32,15 +33,16 @@ export class AccessComponent implements OnInit {
   }
 
   private load(): void {
-    combineLatest([this.api.getRoleAssignments(), this.api.getRoles()])
+    combineLatest([this.api.getRoleAssignments(), this.api.getRoles(), this.api.getUsers()])
       .pipe(
-        map(([assignments, roles]) => {
+        map(([assignments, roles, users]) => {
           this.roles = roles;
           return assignments
             .filter(a => !a.revokedAt)
             .map(a => ({
               ...a,
               roleName: roles.find(r => r.id === a.roleId)?.name ?? 'unknown',
+              userName: users.find((u: UserOption) => u.id === a.userId)?.name ?? `User #${a.userId}`,
               scopeLabel: a.projectId
                 ? `Project #${a.projectId}`
                 : a.organizationId
