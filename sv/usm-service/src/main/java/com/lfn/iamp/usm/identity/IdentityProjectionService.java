@@ -26,7 +26,11 @@ public class IdentityProjectionService {
 		this.repository = repository;
 	}
 
-	/** Called whenever a project-scoped role_assignment changes. Idempotent per project. */
+	/**
+	 * Called whenever a project-scoped role_assignment changes: ensures the four
+	 * to-do rows exist and (re-)marks them pending so the worker re-syncs every
+	 * external system. A change can never silently fail to queue (outbox, §8).
+	 */
 	@Transactional
 	public void enqueueForProject(Integer projectId) {
 		if (projectId == null) {
@@ -34,21 +38,32 @@ public class IdentityProjectionService {
 		}
 		List<IdentityProjectionTarget> existing = repository.findByProjectId(projectId);
 		for (String targetType : TARGET_TYPES) {
-			boolean alreadyQueued = existing.stream().anyMatch(t -> targetType.equals(t.getTargetType()));
-			if (alreadyQueued) {
-				continue;
-			}
-			IdentityProjectionTarget target = new IdentityProjectionTarget();
-			target.setProjectId(projectId);
-			target.setTargetType(targetType);
+			IdentityProjectionTarget target = existing.stream()
+					.filter(t -> targetType.equals(t.getTargetType()))
+					.findFirst()
+					.orElseGet(() -> {
+						IdentityProjectionTarget t = new IdentityProjectionTarget();
+						t.setProjectId(projectId);
+						t.setTargetType(targetType);
+						return t;
+					});
 			target.setSyncStatus("pending");
 			target.setLastAttemptAt(Instant.now());
 			repository.save(target);
 		}
 	}
 
+	public List<IdentityProjectionTarget> listAll() {
+		return repository.findAll();
+	}
+
 	public List<IdentityProjectionTarget> listByProject(Integer projectId) {
 		return repository.findByProjectId(projectId);
+	}
+
+	/** Re-queue a single target for the worker (manual retry from the UI). */
+	public void retry(Integer targetId) {
+		markStatus(targetId, "pending");
 	}
 
 	public List<IdentityProjectionTarget> listPending() {

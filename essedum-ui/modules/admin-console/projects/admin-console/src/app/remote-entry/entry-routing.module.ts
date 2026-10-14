@@ -8,6 +8,7 @@ import { AccessComponent } from '../features/access/access.component';
 import { PublishingComponent } from '../features/publishing/publishing.component';
 import { ApprovalsComponent } from '../features/approvals/approvals.component';
 import { AuditComponent } from '../features/audit/audit.component';
+import { IdentitySyncComponent } from '../features/identity-sync/identity-sync.component';
 import { MenuConfigurationComponent } from '../features/menu-configuration/menu-configuration.component';
 
 // Routes mount under `/admin-console/**` per the host manifest (routePath = 'admin-console').
@@ -23,6 +24,7 @@ const routes: Routes = [
       { path: 'publishing', component: PublishingComponent },
       { path: 'approvals', component: ApprovalsComponent },
       { path: 'audit', component: AuditComponent },
+      { path: 'identity-sync', component: IdentitySyncComponent },
       { path: 'menu-configuration', component: MenuConfigurationComponent },
     ],
   },

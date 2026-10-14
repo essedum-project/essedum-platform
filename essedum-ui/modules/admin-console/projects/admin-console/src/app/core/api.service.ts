@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   AccessContext, RbacRole, RoleAssignment, Asset, AssetVersion, PromotionEvent, MenuItem,
-  LegacyOrganisation, LegacyProject, RbacEnvironment, AuditEvent, UserOption,
+  LegacyOrganisation, LegacyProject, RbacEnvironment, AuditEvent, UserOption, IdentityTarget,
 } from './api-models';
 
 // Thin HTTP client over the sv/usm-service RBAC endpoints
@@ -129,5 +129,14 @@ export class ApiService {
   // ---- audit (rbac_audit_event, NFR-O2) ----
   getAuditEvents(): Observable<AuditEvent[]> {
     return this.http.get<AuditEvent[]>(`${this.base}/audit`);
+  }
+
+  // ---- identity projection status (§8) ----
+  getIdentityTargets(): Observable<IdentityTarget[]> {
+    return this.http.get<IdentityTarget[]>(`${this.base}/identity/targets`);
+  }
+
+  retryIdentityTarget(id: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/identity/targets/${id}/retry`, {});
   }
 }

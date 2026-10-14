@@ -1,0 +1,42 @@
+<div class="admin-console-page">
+  <div class="admin-console-toolbar">
+    <h2>Identity Sync Status</h2>
+  </div>
+  <p class="muted-hint" style="margin-top:-8px;">
+    Every role change is pushed to Git, Kubernetes, Storage and the Gateway automatically.
+    ✓ = in sync, ⚠ = not caught up yet (retries on its own; use Retry to force it).
+  </p>
+
+  <table
+    mat-table
+    [dataSource]="rows"
+    class="admin-console-table"
+    *ngIf="rows.length; else empty"
+  >
+    <ng-container matColumnDef="project">
+      <th mat-header-cell *matHeaderCellDef>Project</th>
+      <td mat-cell *matCellDef="let row">{{ row.projectName }}</td>
+    </ng-container>
+
+    <ng-container *ngFor="let s of systems" [matColumnDef]="s.key">
+      <th mat-header-cell *matHeaderCellDef>{{ s.label }}</th>
+      <td mat-cell *matCellDef="let row">
+        <ng-container [ngSwitch]="row.cells[s.key].status">
+          <span *ngSwitchCase="'synced'" class="sync-ok" title="in sync">✓</span>
+          <span *ngSwitchCase="'none'" class="sync-none" title="no binding">—</span>
+          <span *ngSwitchDefault class="sync-warn" title="{{ row.cells[s.key].status }}">
+            ⚠
+            <button mat-button color="primary" (click)="retry(row.cells[s.key])">Retry</button>
+          </span>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+  </table>
+
+  <ng-template #empty>
+    <p class="empty">{{ loading ? 'Loading…' : 'No projects have identity bindings yet. Grant a project-scoped role to enqueue sync.' }}</p>
+  </ng-template>
+</div>

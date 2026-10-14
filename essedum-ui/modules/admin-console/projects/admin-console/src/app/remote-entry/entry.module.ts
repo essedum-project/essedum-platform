@@ -32,6 +32,7 @@ import { GrantRoleDialogComponent } from '../features/access/grant-role-dialog/g
 import { PublishingComponent } from '../features/publishing/publishing.component';
 import { ApprovalsComponent } from '../features/approvals/approvals.component';
 import { AuditComponent } from '../features/audit/audit.component';
+import { IdentitySyncComponent } from '../features/identity-sync/identity-sync.component';
 import { MenuConfigurationComponent } from '../features/menu-configuration/menu-configuration.component';
 import { MenuItemDialogComponent } from '../features/menu-configuration/menu-item-dialog/menu-item-dialog.component';
 
@@ -46,6 +47,7 @@ import { MenuItemDialogComponent } from '../features/menu-configuration/menu-ite
     PublishingComponent,
     ApprovalsComponent,
     AuditComponent,
+    IdentitySyncComponent,
     MenuConfigurationComponent,
     MenuItemDialogComponent,
   ],

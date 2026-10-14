@@ -361,4 +361,20 @@
 		<update tableName="rbac_menu_item"><column name="icon" value="th-list" /><where>route = '/admin-console/menu-configuration'</where></update>
 	</changeSet>
 
+	<!-- Identity Sync Status screen (§8/§10). -->
+	<changeSet author="Essedum (rbac)" id="rbac-14">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT COUNT(*) FROM rbac_menu_item WHERE route = '/admin-console/identity-sync'</sqlCheck>
+		</preConditions>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="9" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Identity Sync" />
+			<column name="route" value="/admin-console/identity-sync" />
+			<column name="min_role_rank" valueNumeric="3" />
+			<column name="display_order" valueNumeric="7" />
+			<column name="icon" value="refresh" />
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>

@@ -63,6 +63,15 @@ export interface UserOption {
   name: string;
 }
 
+export interface IdentityTarget {
+  id: number;
+  projectId: number;
+  targetType: string;   // git_team | k8s_rbac | storage_iam | gateway_key
+  externalRef?: string | null;
+  syncStatus: string;   // pending | synced | failed
+  lastAttemptAt?: string | null;
+}
+
 export interface MenuItem {
   id: number;
   parentId: number | null;
