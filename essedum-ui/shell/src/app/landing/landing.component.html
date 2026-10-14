@@ -161,9 +161,10 @@
 
               <div class="profile-menu-divider"></div>
 
-              <!-- Portfolio -->
+              <!-- Organization (formerly Portfolio) — portfolios are promoted to
+                   first-class Organizations per the roadmap §1 tenancy schema. -->
               <div *ngIf="portfoliodata?.length >= 1" (click)="$event.stopPropagation()" class="profile-menu-field-row">
-                <span class="profile-menu-field-label">Portfolio</span>
+                <span class="profile-menu-field-label">Organization</span>
                 <mat-form-field class="profile-form-field" appearance="outline" subscriptSizing="dynamic">
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedportfolio"
                     (ngModelChange)="onSelection($event)" name="Portfolio" panelClass="profile-select-panel">

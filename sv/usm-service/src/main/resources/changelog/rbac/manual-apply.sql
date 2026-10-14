@@ -4,6 +4,11 @@
 -- Run against essedum_coredb. Safe to re-run — every statement checks first.
 --
 -- Usage: mysql -u <user> -p essedum_coredb < manual-apply.sql
+--
+-- NOTE: several UPDATEs below filter on non-key columns (route, name), which
+-- MySQL Workbench's "safe update mode" rejects with Error 1175. Disable it for
+-- this session so the whole script runs (harmless for a one-off dev apply):
+SET SQL_SAFE_UPDATES = 0;
 
 -- rbac-1: roles
 CREATE TABLE IF NOT EXISTS rbac_role (
@@ -188,3 +193,14 @@ WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/ide
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order, icon)
 SELECT 10, 1, 'Asset Catalog', '/admin-console/catalog', 1, 8, 'shopping-bag'
 WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/catalog');
+
+-- rbac-16: Promote portfolios to first-class Organizations (§1 tenancy schema).
+-- Each portfolio becomes the organisation its projects belong to (1:1 by id);
+-- usm_project.organisation_id is backfilled so org-scoped visibility resolves.
+-- usm_portfolio stays in place but dormant.
+UPDATE usm_organisation o JOIN usm_portfolio p ON p.id = o.id SET o.name = p.portfolio_name;
+INSERT INTO usm_organisation (id, name, status)
+  SELECT p.id, p.portfolio_name, 'active' FROM usm_portfolio p
+  WHERE NOT EXISTS (SELECT 1 FROM usm_organisation o WHERE o.id = p.id);
+UPDATE usm_project SET organisation_id = portfolio_id
+  WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL;

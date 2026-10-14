@@ -393,4 +393,25 @@
 		</insert>
 	</changeSet>
 
+	<!-- Promote portfolios to first-class Organizations (roadmap §1 tenancy schema).
+	     Portfolio is dropped as a concept: each usm_portfolio becomes the
+	     organisation its projects belong to (1:1 by id), and usm_project.organisation_id
+	     is backfilled so org-scoped visibility (§4) resolves. usm_portfolio is left
+	     in place but dormant. Runs once; new projects set organisation_id at creation. -->
+	<changeSet author="Essedum (rbac)" id="rbac-16">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">
+				SELECT CASE WHEN EXISTS (
+					SELECT 1 FROM usm_project WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL
+				) THEN 1 ELSE 0 END
+			</sqlCheck>
+		</preConditions>
+		<sql>UPDATE usm_organisation o JOIN usm_portfolio p ON p.id = o.id SET o.name = p.portfolio_name</sql>
+		<sql>INSERT INTO usm_organisation (id, name, status)
+			SELECT p.id, p.portfolio_name, 'active' FROM usm_portfolio p
+			WHERE NOT EXISTS (SELECT 1 FROM usm_organisation o WHERE o.id = p.id)</sql>
+		<sql>UPDATE usm_project SET organisation_id = portfolio_id
+			WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL</sql>
+	</changeSet>
+
 </databaseChangeLog>
