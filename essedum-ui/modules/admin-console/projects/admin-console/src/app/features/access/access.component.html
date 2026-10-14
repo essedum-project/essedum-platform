@@ -2,6 +2,7 @@
   <div class="admin-console-toolbar">
     <h2>Members &amp; Roles</h2>
     <button mat-raised-button color="primary" (click)="grantRole()">Grant Role</button>
+    <button mat-stroked-button color="primary" *ngIf="canCreateRole" (click)="createRole()" style="margin-left:8px;">Create Role</button>
   </div>
 
   <table mat-table [dataSource]="rows" class="admin-console-table">

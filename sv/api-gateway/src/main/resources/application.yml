@@ -57,11 +57,11 @@ spring:
         - id: usm-permissions
           uri: ${USM_SERVICE_URL:http://localhost:8081}
           predicates:
-            - Path=/api/permissions/**,/api/role-permissionss/**,/api/usm-role-permissionss/**,/api/usm-permission-apis/**,/api/user-api-permissionss/**
+            - Path=/api/permissions/**,/api/role-permissionss/**,/api/usm-role-permissionss/**,/api/usm-permissionss/**,/api/usm-permission-apis/**,/api/user-api-permissionss/**
         - id: usm-misc
           uri: ${USM_SERVICE_URL:http://localhost:8081}
           predicates:
-            - Path=/api/delegates/**,/api/email/**,/api/country-time-zones/**,/api/usm-modules/**,/api/usm-module-organisations/**,/api/usm-notificationss/**,/api/usm-portfolios/**,/api/usm-stages/**,/api/user-project-roles/**,/api/user-units/**,/api/user-process-mappings/**,/api/usm-role-to-roles/**,/api/usm-user-to-users/**,/api/file-extension-keys/**,/api/icms-processs/**,/api/dash-constants/**,/api/get-dash-constants
+            - Path=/api/delegates/**,/api/email/**,/api/country-time-zones/**,/api/usm-modules/**,/api/usm-module-organisations/**,/api/usm-notificationss/**,/api/usm-portfolios/**,/api/usm-portfolioss/**,/api/usm-stages/**,/api/user-project-roles/**,/api/user-units/**,/api/user-process-mappings/**,/api/usm-role-to-roles/**,/api/usm-user-to-users/**,/api/file-extension-keys/**,/api/icms-processs/**,/api/dash-constants/**,/api/get-dash-constants,/api/get-extension-key,/api/get-extension-key/**
         - id: usm-config
           uri: ${USM_SERVICE_URL:http://localhost:8081}
           predicates:

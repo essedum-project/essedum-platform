@@ -4,6 +4,8 @@ import { combineLatest, map } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { RbacRole, RoleAssignment, UserOption } from '../../core/api-models';
 import { GrantRoleDialogComponent } from './grant-role-dialog/grant-role-dialog.component';
+import { UserContextService } from '../../core/user-context.service';
+import { ProvisionDialogComponent } from '../tenancy/provision-dialog/provision-dialog.component';
 
 interface RoleAssignmentRow extends RoleAssignment {
   roleName: string;
@@ -20,16 +22,33 @@ interface RoleAssignmentRow extends RoleAssignment {
 export class AccessComponent implements OnInit {
   rows: RoleAssignmentRow[] = [];
   roles: RbacRole[] = [];
+  rank = 0;
 
   readonly columns = ['userName', 'roleName', 'scopeLabel', 'grantedAt', 'actions'];
 
   constructor(
     private readonly api: ApiService,
     private readonly dialog: MatDialog,
+    private readonly userContext: UserContextService,
   ) {}
 
+  get canCreateRole(): boolean { return this.rank >= 4; }
+
   ngOnInit(): void {
+    this.api.getAccessContext(this.userContext.userId$.value)
+      .subscribe(ctx => (this.rank = ctx?.highestRank ?? 0));
     this.load();
+  }
+
+  createRole(): void {
+    const userId = this.userContext.userId$.value;
+    const ref = this.dialog.open(ProvisionDialogComponent, { width: '460px', data: { kind: 'role' } });
+    ref.afterClosed().subscribe((r: any) => {
+      if (!r) {
+        return;
+      }
+      this.api.createRole(userId, { name: r.name, rank: r.rank }).subscribe(() => this.load());
+    });
   }
 
   private load(): void {

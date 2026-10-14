@@ -54,11 +54,13 @@
                 class="lfx-input-control"
                 placeholder="Enter your username or email..."
                 [(ngModel)]="username"
+                #usernameModel="ngModel"
+                name="username"
                 required
                 autocomplete="username"
                 aria-label="Username or Email" />
             </div>
-            <span class="lfx-input-error" *ngIf="!username">Username or email is required</span>
+            <span class="lfx-input-error" *ngIf="usernameModel.touched && !username">Username or email is required</span>
           </div>
 
           <div class="lfx-input-group">
@@ -70,6 +72,8 @@
                 class="lfx-input-control"
                 placeholder="Enter your password..."
                 [(ngModel)]="psd"
+                #psdModel="ngModel"
+                name="psd"
                 required
                 autocomplete="current-password"
                 aria-label="Password" />
@@ -82,7 +86,7 @@
                 <mat-icon *ngIf="!showPassword" aria-hidden="true">visibility_off</mat-icon>
               </button>
             </div>
-            <span class="lfx-input-error" *ngIf="!psd">Password is required</span>
+            <span class="lfx-input-error" *ngIf="psdModel.touched && !psd">Password is required</span>
           </div>
 
           <div *ngIf="errorAlert" class="login-error-msg" role="alert">

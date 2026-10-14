@@ -1,0 +1,52 @@
+<h2 mat-dialog-title>{{ titles[kind] }}</h2>
+<div mat-dialog-content>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Name</mat-label>
+    <input matInput [(ngModel)]="name" name="name" />
+  </mat-form-field>
+
+  <!-- organization -->
+  <mat-form-field appearance="outline" class="full-width" *ngIf="kind === 'organization'">
+    <mat-label>Status</mat-label>
+    <input matInput [(ngModel)]="status" name="status" />
+  </mat-form-field>
+
+  <!-- project -->
+  <ng-container *ngIf="kind === 'project'">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <input matInput [(ngModel)]="description" name="description" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Organization</mat-label>
+      <mat-select [(ngModel)]="organisationId" name="organisationId">
+        <mat-option [value]="null">None</mat-option>
+        <mat-option *ngFor="let o of organizations" [value]="o.id">{{ o.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </ng-container>
+
+  <!-- environment -->
+  <ng-container *ngIf="kind === 'environment'">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Project</mat-label>
+      <mat-select [(ngModel)]="projectId" name="projectId">
+        <mat-option *ngFor="let p of projects" [value]="p.id">{{ p.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Config reference (optional)</mat-label>
+      <input matInput [(ngModel)]="configRef" name="configRef" placeholder="vault path / config key" />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- role -->
+  <mat-form-field appearance="outline" class="full-width" *ngIf="kind === 'role'">
+    <mat-label>Rank (0 viewer … 4 platform admin)</mat-label>
+    <input matInput type="number" min="0" max="4" [(ngModel)]="rank" name="rank" />
+  </mat-form-field>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="save()" [disabled]="!valid">Create</button>
+</div>

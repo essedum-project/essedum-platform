@@ -1,44 +1,176 @@
 @use '@angular/material' as mat;
 
-.admin-console-page {
-  padding: 24px;
+/* =====================================================================
+   Admin Console — cohesive theme, scoped to the federated remote so it
+   never leaks into the host shell. Tuned for the shell's dark content
+   area; falls back gracefully in light mode.
+   Palette: slate surfaces, blue accent, soft borders.
+   ===================================================================== */
+
+$ac-accent:        #4f8ef7;
+$ac-accent-weak:   rgba(79, 142, 247, 0.16);
+$ac-surface:       #1e293b;   // slate-800
+$ac-surface-2:     #243044;   // slightly lifted
+$ac-surface-3:     #2b3a52;   // hover / header
+$ac-border:        rgba(148, 163, 184, 0.18);
+$ac-text:          #e2e8f0;   // slate-200
+$ac-text-muted:    #94a3b8;   // slate-400
+$ac-radius:        12px;
+
+.admin-console-shell {
+  color: $ac-text;
+  font-size: 14px;
+  min-height: 100%;
+}
+
+/* ---- page scaffold ---- */
+.admin-console-page,
+.overview {
+  padding: 24px 28px;
+  color: $ac-text;
 }
 
 .admin-console-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 20px;
 
   h2 {
     margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    flex: 0 0 auto;
+    margin-right: auto;
   }
 }
 
+.overview-title,
+.section-title {
+  color: $ac-text;
+  letter-spacing: 0.2px;
+}
+
+.muted-hint,
+.empty,
+.acting-as {
+  color: $ac-text-muted;
+  font-size: 0.85rem;
+}
+
+/* ---- cards / panels (mat-card, stat tiles, overview) ---- */
+.mat-mdc-card,
+.stat-card {
+  background: $ac-surface !important;
+  color: $ac-text !important;
+  border: 1px solid $ac-border;
+  border-radius: $ac-radius !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+.stat-card {
+  padding: 18px 20px;
+  border-top-width: 3px;
+  border-top-style: solid;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+
+  &:hover {
+    background: $ac-surface-2 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35) !important;
+  }
+}
+.stat-count { font-size: 2rem; font-weight: 700; line-height: 1.1; }
+.stat-label { margin-top: 4px; font-size: 0.82rem; color: $ac-text-muted; }
+.stat-grid  { gap: 18px; }
+
+/* ---- tables (the big one: kill the white Material default) ---- */
 .admin-console-table {
   width: 100%;
+  background: $ac-surface !important;
+  border: 1px solid $ac-border;
+  border-radius: $ac-radius;
+  overflow: hidden;
+
+  .mat-mdc-header-row {
+    background: $ac-surface-3;
+    min-height: 46px;
+  }
+  .mat-mdc-header-cell {
+    color: $ac-text-muted !important;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    border-bottom: 1px solid $ac-border;
+  }
+  .mat-mdc-row {
+    background: transparent;
+    transition: background 0.1s ease;
+    &:hover { background: rgba(148, 163, 184, 0.08); }
+  }
+  .mat-mdc-cell {
+    color: $ac-text !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.10);
+  }
+  .mat-mdc-row:last-child .mat-mdc-cell { border-bottom: none; }
 }
 
-.status-chip-active,
-.status-chip-synced,
-.status-chip-published,
-.status-chip-approved {
-  background-color: #e6f4ea !important;
-  color: #1e7e34 !important;
+/* empty "No data" row that Angular Material renders */
+.mat-mdc-no-data-row td { color: $ac-text-muted !important; padding: 18px; }
+
+/* ---- buttons ---- */
+.mat-mdc-raised-button.mat-primary {
+  --mdc-protected-button-container-color: #{$ac-accent};
+  background: linear-gradient(135deg, #5b96f9, #3f7ae0) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+}
+.mat-mdc-stroked-button.mat-primary,
+.mat-mdc-button.mat-primary { color: $ac-accent !important; }
+.mat-mdc-button.mat-warn, .mat-mdc-button[color='warn'] { color: #f87171 !important; }
+
+/* ---- filters / toolbars with form fields ---- */
+.menu-filters { align-items: center; }
+
+/* ---- Material form fields on dark ---- */
+.mat-mdc-form-field {
+  .mat-mdc-text-field-wrapper { background: $ac-surface-2; border-radius: 8px; }
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing { border-color: $ac-border !important; }
+  .mat-mdc-form-field-infix input,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-min-line { color: $ac-text !important; }
+  .mat-mdc-floating-label,
+  .mat-mdc-form-field-hint { color: $ac-text-muted !important; }
 }
 
-.status-chip-pending,
-.status-chip-in_review,
-.status-chip-submitted,
-.status-chip-draft {
-  background-color: #fff4e5 !important;
-  color: #b06000 !important;
+/* ---- tabs (tenancy orgs/projects/environments) ---- */
+.mat-mdc-tab .mdc-tab__text-label { color: $ac-text-muted; }
+.mat-mdc-tab.mdc-tab--active .mdc-tab__text-label { color: $ac-text; }
+.mdc-tab-indicator__content--underline { border-color: $ac-accent !important; }
+
+/* ---- dialogs ---- */
+.mat-mdc-dialog-surface {
+  background: $ac-surface !important;
+  color: $ac-text !important;
+  border: 1px solid $ac-border;
+  border-radius: $ac-radius !important;
+}
+.mat-mdc-dialog-title { color: $ac-text !important; }
+
+/* ---- status chips (kept, slightly softened for dark) ---- */
+.status-chip-active, .status-chip-synced, .status-chip-published, .status-chip-approved {
+  background-color: rgba(34, 197, 94, 0.18) !important;  color: #4ade80 !important;
+}
+.status-chip-pending, .status-chip-in_review, .status-chip-submitted, .status-chip-draft {
+  background-color: rgba(251, 146, 60, 0.18) !important;  color: #fb923c !important;
+}
+.status-chip-failed, .status-chip-rejected, .status-chip-archived, .status-chip-suspended {
+  background-color: rgba(248, 113, 113, 0.18) !important;  color: #f87171 !important;
 }
 
-.status-chip-failed,
-.status-chip-rejected,
-.status-chip-archived,
-.status-chip-suspended {
-  background-color: #fdecea !important;
-  color: #c62828 !important;
-}
+/* tab action bars (New Organization / New Project buttons) */
+.tab-actions { display: flex; align-items: center; gap: 12px; }

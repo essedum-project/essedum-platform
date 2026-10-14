@@ -26,6 +26,7 @@ import { ShellComponent } from '../shell/shell.component';
 // Features
 import { OverviewComponent } from '../features/overview/overview.component';
 import { TenancyComponent } from '../features/tenancy/tenancy.component';
+import { ProvisionDialogComponent } from '../features/tenancy/provision-dialog/provision-dialog.component';
 import { AccessComponent } from '../features/access/access.component';
 import { GrantRoleDialogComponent } from '../features/access/grant-role-dialog/grant-role-dialog.component';
 import { PublishingComponent } from '../features/publishing/publishing.component';
@@ -39,6 +40,7 @@ import { MenuItemDialogComponent } from '../features/menu-configuration/menu-ite
     ShellComponent,
     OverviewComponent,
     TenancyComponent,
+    ProvisionDialogComponent,
     AccessComponent,
     GrantRoleDialogComponent,
     PublishingComponent,

@@ -5,6 +5,10 @@
 
   <mat-tab-group>
     <mat-tab label="Organizations">
+      <div class="tab-actions" style="padding:12px 0;">
+        <button mat-raised-button color="primary" *ngIf="canCreateOrg" (click)="create('organization')">New Organization</button>
+        <span *ngIf="!canCreateOrg" class="muted-hint">Only a platform admin can create organizations.</span>
+      </div>
       <table mat-table [dataSource]="organizations" class="admin-console-table">
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Name</th>
@@ -22,6 +26,10 @@
     </mat-tab>
 
     <mat-tab label="Projects">
+      <div class="tab-actions" style="padding:12px 0;">
+        <button mat-raised-button color="primary" *ngIf="canCreateProject" (click)="create('project')">New Project</button>
+        <span *ngIf="!canCreateProject" class="muted-hint">Only an org admin or above can create projects.</span>
+      </div>
       <table mat-table [dataSource]="projects" class="admin-console-table">
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Name</th>
@@ -37,6 +45,10 @@
     </mat-tab>
 
     <mat-tab label="Environments">
+      <div class="tab-actions" style="padding:12px 0;">
+        <button mat-raised-button color="primary" *ngIf="canCreateEnv" (click)="create('environment')">New Environment</button>
+        <span *ngIf="!canCreateEnv" class="muted-hint">Only a project admin or above can create environments.</span>
+      </div>
       <table mat-table [dataSource]="environmentRows" class="admin-console-table">
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Name</th>

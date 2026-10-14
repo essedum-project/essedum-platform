@@ -47,6 +47,23 @@ export class ApiService {
     return this.http.delete<void>(`${this.base}/access/role-assignments/${id}`);
   }
 
+  // ---- provisioning (rank-gated creation; server re-checks) ----
+  createOrganization(actorUserId: number, body: { name: string; status?: string }): Observable<LegacyOrganisation> {
+    return this.http.post<LegacyOrganisation>(`${this.base}/provisioning/organizations`, body, { params: { actorUserId } });
+  }
+
+  createProject(actorUserId: number, body: { name: string; description?: string; organisationId: number | null }): Observable<LegacyProject> {
+    return this.http.post<LegacyProject>(`${this.base}/provisioning/projects`, body, { params: { actorUserId } });
+  }
+
+  createEnvironment(actorUserId: number, body: { name: string; projectId: number; configRef?: string }): Observable<RbacEnvironment> {
+    return this.http.post<RbacEnvironment>(`${this.base}/provisioning/environments`, body, { params: { actorUserId } });
+  }
+
+  createRole(actorUserId: number, body: { name: string; rank: number }): Observable<RbacRole> {
+    return this.http.post<RbacRole>(`${this.base}/provisioning/roles`, body, { params: { actorUserId } });
+  }
+
   // ---- publishing ----
   getAssets(userId: number): Observable<Asset[]> {
     return this.http.get<Asset[]>(`${this.base}/assets`, { params: { userId } });
