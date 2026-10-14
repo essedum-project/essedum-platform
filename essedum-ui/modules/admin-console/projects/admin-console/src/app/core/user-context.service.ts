@@ -22,7 +22,10 @@ export class UserContextService {
       if (!raw) {
         return null;
       }
-      const parsed = Number(JSON.parse(raw));
+      // sessionStorage "user" holds the full Users object (see
+      // shell's apis.service.ts) — pull out .id, don't Number() the object.
+      const obj = JSON.parse(raw);
+      const parsed = obj && typeof obj === 'object' ? Number(obj.id) : Number(obj);
       return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
     } catch {
       return null;

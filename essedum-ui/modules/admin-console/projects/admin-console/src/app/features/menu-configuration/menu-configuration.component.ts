@@ -19,7 +19,7 @@ interface MenuItemRow extends MenuItem {
 export class MenuConfigurationComponent implements OnInit {
   rows: MenuItemRow[] = [];
 
-  readonly columns = ['label', 'route', 'parentLabel', 'minRoleRank', 'displayOrder', 'actions'];
+  readonly columns = ['label', 'icon', 'route', 'parentLabel', 'minRoleRank', 'roles', 'displayOrder', 'actions'];
 
   constructor(
     private readonly api: ApiService,

@@ -27,6 +27,16 @@
     <mat-label>Display order</mat-label>
     <input matInput type="number" min="1" [(ngModel)]="displayOrder" name="displayOrder" />
   </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Icon</mat-label>
+    <input matInput [(ngModel)]="icon" name="icon" placeholder="e.g. tachometer, users, sitemap" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Roles (optional override)</mat-label>
+    <input matInput [(ngModel)]="roles" name="roles" placeholder="blank = by rank; else e.g. Admin, IT Portfolio Manager" />
+  </mat-form-field>
 </div>
 <div mat-dialog-actions align="end">
   <button mat-button (click)="cancel()">Cancel</button>

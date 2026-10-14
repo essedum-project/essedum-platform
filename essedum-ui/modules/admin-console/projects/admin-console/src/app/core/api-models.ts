@@ -1,5 +1,6 @@
-// Shapes returned by sv/usm-service's RBAC REST endpoints — distinct from
-// ./models.ts, which still backs the mock-only Tenancy/Audit screens.
+// Shapes returned by sv/usm-service's RBAC REST endpoints. Every screen
+// (Tenancy, Access, Approvals, Publishing, Audit, Menu) consumes these via
+// ApiService — there is no mock data layer.
 
 export interface AccessContext {
   userId: number;
@@ -64,6 +65,9 @@ export interface MenuItem {
   route: string;
   minRoleRank: number;
   displayOrder: number;
+  icon?: string | null;
+  // Optional comma-separated role-override (§7). Blank = rank-based default.
+  roles?: string | null;
 }
 
 // Shapes from the existing OrganisationResource/ProjectResource APIs

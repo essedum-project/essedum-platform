@@ -14,6 +14,8 @@ export class MenuItemDialogComponent implements OnInit {
   parentId: number | null = this.existing?.parentId ?? null;
   minRoleRank = this.existing?.minRoleRank ?? 0;
   displayOrder = this.existing?.displayOrder ?? 1;
+  icon = this.existing?.icon ?? '';
+  roles = this.existing?.roles ?? '';
 
   candidateParents: MenuItem[] = [];
 
@@ -39,6 +41,8 @@ export class MenuItemDialogComponent implements OnInit {
       parentId: this.parentId,
       minRoleRank: this.minRoleRank,
       displayOrder: this.displayOrder,
+      icon: this.icon?.trim() || null,
+      roles: this.roles?.trim() || null,
     });
   }
 

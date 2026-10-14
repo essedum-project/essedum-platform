@@ -47,4 +47,17 @@ public class MenuItem implements Serializable {
 	@NotNull
 	@Column(name = "display_order")
 	private Integer displayOrder;
+
+	/** Optional sidebar icon name (Font-Awesome), e.g. "tachometer". */
+	@Size(max = 64)
+	private String icon;
+
+	/**
+	 * Optional role-override (§7 "rank-based + role override"): a comma-separated
+	 * list of role names this item is scoped to. When blank the item follows the
+	 * rank-based default (min_role_rank); when set it is additionally surfaced to
+	 * users acting in one of these roles regardless of rank.
+	 */
+	@Size(max = 512)
+	private String roles;
 }

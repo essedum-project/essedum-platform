@@ -1318,11 +1318,12 @@ export class LandingComponent implements OnInit, AfterViewInit {
         let navUrl = nav.slice(0, nav.indexOf("pfolio"));
 
 
-        // Check if user is admin and direct to portfoliolist
+        // Admin lands on the new admin-console overview (replaces the legacy
+        // iamp-usm/portfoliolist landing — plan §7/§10 cutover).
         if (this.selectedrole.name === "admin" || this.selectedrole.name === "Admin") {
           this.router
             .navigate(["../"], { relativeTo: this.route })
-            .then(() => this.router.navigate(["landing/iamp-usm/portfoliolist"]));
+            .then(() => this.router.navigate(["landing/admin-console/overview"]));
         } else if (nav.toString().indexOf("pfolio") != -1) {
           this.router
             .navigate(["../"], { relativeTo: this.route })
@@ -3850,10 +3851,103 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   // ── Menu Customization ───────────────────────────────────────────────────
 
   /** Returns the sidebarMenu with advanced items hidden unless the user has opted in. */
+  // ── RBAC cutover (plan §7) ──────────────────────────────────────────────
+  // Legacy iamp-usm admin screens superseded by the admin-console MFE. These
+  // are stripped from whatever DashConstant-built menu lands in sidebarMenu,
+  // and replaced by the data-driven /api/usm/menu "Admin Console" tree.
+  // Secret Management (./iamp-usm/secret) is intentionally kept — the new
+  // console has no secrets screen.
+  private readonly supersededAdminUrls = [
+    "./iamp-usm/projectlist",
+    "./iamp-usm/portfoliolist",
+    "./iamp-usm/role/list",
+    "./iamp-usm/manageUsers",
+    "./iamp-usm/permissionlist",
+    "./iamp-usm/dashconstant",
+    "./iamp-usm/dashconstant/side",
+  ];
+  rbacMenuNodes: any[] = [];
+  private rbacMenuFetched = false;
+
+  private stripSuperseded(items: any[]): any[] {
+    return (items || [])
+      .filter((it) => !(it && it.url && this.supersededAdminUrls.includes(it.url)))
+      .map((it) =>
+        it && Array.isArray(it.children) && it.children.length
+          ? { ...it, children: this.stripSuperseded(it.children) }
+          : it
+      );
+  }
+
+  /** Fetch the data-driven RBAC menu once and cache it as sidebar nodes. */
+  private loadRbacMenu(): void {
+    if (this.rbacMenuFetched) return;
+    this.rbacMenuFetched = true;
+    let role: any = null;
+    let userId: number | null = null;
+    try { role = JSON.parse(sessionStorage.getItem("role") || "null"); } catch { role = null; }
+    try {
+      const parsed = JSON.parse(sessionStorage.getItem("user") || "null");
+      userId = parsed && typeof parsed === "object" ? Number(parsed.id) : Number(parsed);
+    } catch { userId = null; }
+    const isAdmin = !!(role && (role.roleadmin || role.name === "Admin"));
+    const fallback = () => {
+      if (isAdmin) {
+        this.rbacMenuNodes = [{ label: "Role & Access Management (new)", icon: "shield", url: "./admin-console/tenancy" }];
+      }
+    };
+    if (!userId || !Number.isFinite(userId)) { fallback(); return; }
+    this.apisService.getRbacMenu(userId).subscribe({
+      next: (menuItems: any[]) => {
+        if (!menuItems || menuItems.length === 0) { fallback(); return; }
+        const buildNode = (item: any): any => ({
+          label: item.label,
+          icon: item.icon || (item.parentId == null ? "shield" : ""),
+          url: `.${item.route}`,
+          roles: item.roles || "",
+          children: menuItems
+            .filter((child) => child.parentId === item.id)
+            .sort((a, b) => a.displayOrder - b.displayOrder)
+            .map(buildNode),
+        });
+        const roots = menuItems
+          .filter((it) => it.parentId == null)
+          .sort((a, b) => a.displayOrder - b.displayOrder)
+          .map(buildNode)
+          // The "Admin Console" root is seeded at min_role_rank 0, so the API
+          // returns it to everyone (incl. rank-0 guests) but with no visible
+          // children. Only surface a root the user can actually drill into.
+          .filter((node) => node.children && node.children.length > 0);
+        // Flatten: drop the "Admin Console" wrapper and surface its screens as
+        // top-level sidebar items (there is only one admin group, so a parent
+        // node adds a redundant level). Icon + role-override come from the
+        // menu item itself (configurable in Menu Configuration), falling back
+        // to a generic icon when none is set.
+        this.rbacMenuNodes = roots
+          .reduce((acc: any[], root: any) => acc.concat(root.children || []), [])
+          .map((child: any) => ({
+            label: child.label,
+            url: child.url,
+            icon: child.icon || "shield",
+            roles: child.roles || "",
+            children: child.children || [],
+          }));
+      },
+      error: () => fallback(),
+    });
+  }
+
   get visibleSidebarMenu(): any[] {
+    this.loadRbacMenu();
     const seen = new Set<string>();
-    const items = this.sidebarMenu.filter(
+    const selectedRoleIsAdmin = !!(this.selectedrole && this.selectedrole.roleadmin);
+    const items = this.stripSuperseded(this.sidebarMenu).filter(
       (item) => {
+        // For admins the platform Dashboard is replaced by the Admin Overview,
+        // so drop the legacy Dashboard entry when an admin role is selected.
+        if (selectedRoleIsAdmin && (item.label === 'Dashboard' || item.url === './dashboard')) {
+          return false;
+        }
         // Deduplicate items with the same label (e.g. renamed "Pipelines")
         if (seen.has(item.label)) return false;
         seen.add(item.label);
@@ -3866,6 +3960,28 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       if (!seen.has(cfg.label) && this.customMenuState[cfg.label] === true) {
         const url = this._advancedItemFallbackUrls[cfg.label];
         if (url) items.push({ label: cfg.label, url });
+      }
+    }
+    // Cutover: append the data-driven menu (plan §7) with "rank-based + role
+    // override" visibility:
+    //  • Admin role selected → sees every admin-console item (rank default).
+    //  • Any other role → sees only items explicitly tagged for that role name
+    //    via the item's `roles` override (Menu Configuration).
+    const selectedRoleName = this.selectedrole && this.selectedrole.name;
+    for (const node of this.rbacMenuNodes) {
+      if (!node || seen.has(node.label)) {
+        continue;
+      }
+      const nodeRoles = (node.roles || '')
+        .split(',')
+        .map((r: string) => r.trim())
+        .filter((r: string) => r);
+      const visibleForRole =
+        selectedRoleIsAdmin ||
+        (nodeRoles.length > 0 && selectedRoleName && nodeRoles.includes(selectedRoleName));
+      if (visibleForRole) {
+        seen.add(node.label);
+        items.push(node);
       }
     }
     return items;

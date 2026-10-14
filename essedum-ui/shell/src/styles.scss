@@ -2338,7 +2338,7 @@ app-aip-empty-state { display: block !important; width: 100% !important; }
 // ══════════════════════════════════════════════════════════════════════════════
 
 // ══════════════════════════════════════════════════════════════════════════════
-// LOGIN PAGE STYLES
+// LOGIN PAGE STYLES — Improved for better contrast and accessibility
 // ══════════════════════════════════════════════════════════════════════════════
 
 .lfx-l-mainwrapper--login {
@@ -2349,31 +2349,31 @@ app-aip-empty-state { display: block !important; width: 100% !important; }
   font-family: 'Inter', 'Roboto', system-ui, sans-serif;
 }
 
-// Dark theme (default)
+// Dark theme (default) — Enhanced with better contrast and refined gradients
 .lfx-l-mainwrapper--login.login-dark {
-  background: linear-gradient(135deg, #060c1a 0%, #0b1430 45%, #0c1838 75%, #07101f 100%);
+  background: linear-gradient(135deg, #0a0f1f 0%, #0d1633 40%, #0f1840 70%, #081025 100%);
   &::before {
     content: '';
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(ellipse 60% 50% at 15% 50%, rgba(79, 142, 247, 0.06) 0%, transparent 100%),
-      radial-gradient(ellipse 60% 50% at 85% 50%, rgba(124, 58, 237, 0.06) 0%, transparent 100%),
-      radial-gradient(ellipse 40% 30% at 50% 0%, rgba(79, 142, 247, 0.04) 0%, transparent 100%);
+      radial-gradient(ellipse 60% 50% at 15% 50%, rgba(99, 168, 255, 0.08) 0%, transparent 100%),
+      radial-gradient(ellipse 60% 50% at 85% 50%, rgba(147, 97, 253, 0.08) 0%, transparent 100%),
+      radial-gradient(ellipse 40% 30% at 50% 0%, rgba(99, 168, 255, 0.05) 0%, transparent 100%);
     pointer-events: none;
   }
 }
 
-// Light theme
+// Light theme — Refined palette with better contrast and warm undertones
 .lfx-l-mainwrapper--login.login-light {
-  background: linear-gradient(135deg, #dde8f8 0%, #e8e3f7 40%, #e3f2fd 70%, #edf7f0 100%);
+  background: linear-gradient(135deg, #f0f4fc 0%, #f3f0f9 40%, #f0f9f8 70%, #f4f8f5 100%);
   &::before {
     content: '';
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(ellipse 60% 50% at 15% 50%, rgba(79, 70, 229, 0.06) 0%, transparent 100%),
-      radial-gradient(ellipse 60% 50% at 85% 50%, rgba(0, 163, 224, 0.06) 0%, transparent 100%);
+      radial-gradient(ellipse 60% 50% at 15% 50%, rgba(99, 120, 226, 0.07) 0%, transparent 100%),
+      radial-gradient(ellipse 60% 50% at 85% 50%, rgba(34, 197, 194, 0.07) 0%, transparent 100%);
     pointer-events: none;
   }
 }
@@ -2395,6 +2395,7 @@ app-aip-empty-state { display: block !important; width: 100% !important; }
   align-items: center;
   gap: 20px;
   padding-bottom: 44px;
+  flex-shrink: 0;
 }
 
 // ── Logo area ────────────────────────────────────────────────────────────────
@@ -2402,111 +2403,272 @@ app-aip-empty-state { display: block !important; width: 100% !important; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .login-logo-icon-wrap {
-  width: 60px;
-  height: 60px;
-  border-radius: 16px;
-  background: rgba(79, 142, 247, 0.1);
-  border: 1px solid rgba(79, 142, 247, 0.22);
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(99, 168, 255, 0.15) 0%, rgba(147, 97, 253, 0.12) 100%);
+  border: 1.5px solid rgba(99, 168, 255, 0.28);
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 20px rgba(79, 142, 247, 0.15);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(99, 168, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.lfx-l-mainwrapper--login.login-dark .login-logo-icon-wrap {
+  border-color: rgba(99, 168, 255, 0.35);
+  box-shadow: 0 8px 32px rgba(99, 168, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.lfx-l-mainwrapper--login.login-light .login-logo-icon-wrap {
+  background: linear-gradient(135deg, rgba(99, 120, 226, 0.12) 0%, rgba(34, 197, 194, 0.1) 100%);
+  border-color: rgba(99, 120, 226, 0.25);
+  box-shadow: 0 8px 24px rgba(99, 120, 226, 0.08);
 }
 
 .login-essedum-icon {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
 }
 
 .logo-common {
-  font-size: 30px;
-  font-weight: 800;
-  letter-spacing: 5px;
-  background: linear-gradient(135deg, #4f8ef7 0%, #7c4dff 100%);
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  background: linear-gradient(135deg, #63a8ff 0%, #9361fd 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-transform: uppercase;
+  text-shadow: 0 0 30px rgba(99, 168, 255, 0.1);
+}
+
+.lfx-l-mainwrapper--login.login-light .logo-common {
+  background: linear-gradient(135deg, #6378e2 0%, #22c5c2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .login-tagline {
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  font-weight: 500;
-  color: rgba(148, 163, 184, 0.65);
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.72);
 }
 
-.login-light .login-tagline { color: rgba(71, 85, 105, 0.65); }
+.login-light .login-tagline { 
+  color: rgba(64, 80, 110, 0.75); 
+}
+
+// ── Full-page decorative background (large rings behind the branding copy) ──
+.login-page-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid rgba(99, 168, 255, 0.16);
+  }
+  &::before { width: 620px; height: 620px; left: -180px; top: 8%; }
+  &::after { width: 420px; height: 420px; left: 60px; top: 30%; border-color: rgba(147, 97, 253, 0.14); }
+}
+
+.login-light .login-page-decor {
+  &::before,
+  &::after { border-color: rgba(99, 120, 226, 0.14); }
+}
+
+// Content row: branding copy on the left, login card floating on the right
+.login-content-row {
+  position: relative;
+  z-index: 1;
+  width: min(1100px, 94vw);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+// Branding copy sits directly on the page background — no card/box around it
+.login-brand-copy {
+  flex: 1 1 380px;
+  max-width: 420px;
+}
+
+.login-split-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.login-split-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.login-split-brand-name {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #63a8ff 0%, #9361fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.login-light .login-split-brand-name {
+  background: linear-gradient(135deg, #5b6ec9 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.login-split-title {
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: rgba(226, 232, 240, 0.99);
+  margin: 0 0 14px;
+}
+
+.login-light .login-split-title { color: #050d1f; }
+
+.login-brand-copy .login-split-tagline {
+  font-size: 15px;
+  color: rgba(203, 213, 225, 0.88) !important;
+  margin: 0;
+  max-width: 320px;
+}
+
+.login-light .login-brand-copy .login-split-tagline { color: rgba(55, 65, 105, 0.85) !important; }
+
+// Login card — floats independently on the background, offset down-and-right
+// to match the reference layout instead of sitting perfectly centered.
+.login-card-floating {
+  flex: 0 0 auto;
+  margin-top: 24px;
+}
+
+@media (max-width: 900px) {
+  .login-content-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 24px;
+  }
+  .login-brand-copy { max-width: 420px; }
+  .login-split-brand { justify-content: center; }
+  .login-split-tagline { margin: 0 auto; }
+  .login-card-floating { margin-top: 0; }
+}
 
 // ── Login card ───────────────────────────────────────────────────────────────
+// Solid-enough background (not just translucent+blur) so text contrast holds up
+// regardless of what's rendered behind it (page gradient, other layers, etc).
 .lfx-l-login-ctr {
-  background: rgba(255, 255, 255, 0.04);
+  background: linear-gradient(160deg, rgba(15, 23, 46, 0.94) 0%, rgba(12, 19, 40, 0.94) 100%);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(100, 160, 255, 0.12);
-  border-radius: 20px;
-  padding: 28px 28px 20px;
+  border: 1.5px solid rgba(99, 168, 255, 0.24);
+  border-radius: 22px;
+  padding: 32px;
   width: 420px;
   box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.45),
-    0 1px 0 rgba(255, 255, 255, 0.05) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+    0 24px 72px rgba(0, 0, 0, 0.6),
+    0 8px 32px rgba(99, 168, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 0 40px rgba(99, 168, 255, 0.08);
+  transition: all 0.3s ease;
 }
 
 .login-light .lfx-l-login-ctr {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(24px);
-  border-color: rgba(79, 70, 229, 0.1);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.1), 0 4px 24px rgba(79, 70, 229, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(99, 120, 226, 0.22);
+  box-shadow: 
+    0 20px 60px rgba(99, 120, 226, 0.18),
+    0 8px 24px rgba(79, 120, 226, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 0 0 1px rgba(99, 120, 226, 0.1);
 }
 
 .login-card-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: rgba(226, 232, 240, 0.92);
-  margin: 0 0 14px;
-  letter-spacing: 0.2px;
+  font-size: 22px;
+  font-weight: 900;
+  color: rgba(226, 232, 240, 0.99);
+  margin: 0 0 20px;
+  letter-spacing: 0.3px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.login-light .login-card-title { color: #0f172a; }
+.login-light .login-card-title { 
+  color: #050d1f;
+  font-weight: 900;
+}
 
-// ── Tabs inside login card ───────────────────────────────────────────────────
+// ── Tabs inside login card — Improved contrast and accessibility ────────────
+// NOTE: selectors are over-qualified (mainwrapper + login-ctr + login-tab-group) so
+// they out-specify global tab-text resets like
+// ".mat-mdc-tab-group:not(.aip-pipeline-tabs) .mat-mdc-tab .mdc-tab__text-label"
+// and "body:not(.header-light-theme) .mat-mdc-tab .mdc-tab__text-label", which would
+// otherwise leave the inactive tab label washed out / low-contrast.
 .lfx-l-login-ctr .mat-mdc-tab-header { background: transparent !important; }
-.lfx-l-login-ctr .mat-mdc-tab .mdc-tab__text-label {
-  color: rgba(148, 163, 184, 0.65) !important;
+.lfx-l-mainwrapper--login .lfx-l-login-ctr .login-tab-group .mat-mdc-tab .mdc-tab__text-label {
+  color: rgba(148, 163, 184, 0.78) !important;
   font-size: 13px !important;
-  font-weight: 500 !important;
+  font-weight: 700 !important;
+  transition: color 0.25s ease !important;
 }
-.lfx-l-login-ctr .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
-  color: rgba(226, 232, 240, 0.95) !important;
-  font-weight: 600 !important;
+.lfx-l-mainwrapper--login .lfx-l-login-ctr .login-tab-group .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: rgba(226, 232, 240, 0.99) !important;
+  font-weight: 800 !important;
 }
-.lfx-l-login-ctr .mdc-tab-indicator__content--underline { border-color: #4f8ef7 !important; }
-.lfx-l-login-ctr .mat-mdc-tab:not(.mdc-tab--active):hover .mdc-tab__text-label {
-  color: rgba(226, 232, 240, 0.75) !important;
+.lfx-l-login-ctr .mdc-tab-indicator__content--underline { 
+  border-color: #63a8ff !important;
+  border-width: 3px !important;
+  transition: border-color 0.25s ease !important;
+  box-shadow: 0 2px 12px rgba(99, 168, 255, 0.3) !important;
+}
+.lfx-l-mainwrapper--login .lfx-l-login-ctr .login-tab-group .mat-mdc-tab:not(.mdc-tab--active):hover .mdc-tab__text-label {
+  color: rgba(226, 232, 240, 0.88) !important;
 }
 
-.login-light .lfx-l-login-ctr .mat-mdc-tab .mdc-tab__text-label {
-  color: rgba(71, 85, 105, 0.65) !important;
+.login-light .lfx-l-mainwrapper--login .lfx-l-login-ctr .login-tab-group .mat-mdc-tab .mdc-tab__text-label {
+  color: rgba(55, 65, 105, 0.78) !important;
+  font-weight: 700 !important;
 }
-.login-light .lfx-l-login-ctr .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
-  color: #0f172a !important;
+.login-light .lfx-l-mainwrapper--login .lfx-l-login-ctr .login-tab-group .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: #050d1f !important;
+  font-weight: 800 !important;
 }
-.login-light .lfx-l-login-ctr .mdc-tab-indicator__content--underline { border-color: #234f99 !important; }
+.login-light .lfx-l-login-ctr .mdc-tab-indicator__content--underline { 
+  border-color: #5b6ec9 !important;
+  border-width: 3px !important;
+  box-shadow: 0 2px 8px rgba(91, 110, 201, 0.25) !important;
+}
 
 // ── Tab content ──────────────────────────────────────────────────────────────
 .login-tab-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 18px 2px 4px;
+  gap: 14px;
+  padding: 20px 0 6px;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -2514,94 +2676,393 @@ app-aip-empty-state { display: block !important; width: 100% !important; }
 // Guest tab: center the button with comfortable width — not edge-to-edge
 .login-tab-content--guest {
   align-items: center;
-  padding-top: 24px;
-  padding-bottom: 12px;
+  padding-top: 28px;
+  padding-bottom: 14px;
 }
 
 .login-guest-hint {
-  font-size: 12px;
-  color: rgba(148, 163, 184, 0.6);
+  font-size: 13px;
+  color: rgba(148, 163, 184, 0.68);
   text-align: center;
-  margin: 0;
-  padding: 4px 0 4px;
+  margin: 8px 0 0;
+  padding: 0;
+  line-height: 1.5;
 }
-.login-light .login-guest-hint { color: rgba(71, 85, 105, 0.65); }
+.login-light .login-guest-hint { 
+  color: rgba(55, 65, 105, 0.8);
+  font-weight: 600;
+}
 
-// ── Form fields ──────────────────────────────────────────────────────────────
+// ── Form fields — Enhanced for better accessibility and visual hierarchy ─────
 .login-field { width: 100%; }
 
+// Compact icon+label input (custom markup, replaces mat-form-field for username/password)
+.lfx-input-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 6px;
+}
+
+.lfx-input-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  padding: 0 2px;
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.lfx-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1.5px solid rgba(99, 168, 255, 0.3);
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: #141d38;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover { border-color: rgba(99, 168, 255, 0.5); }
+  &:focus-within {
+    border-color: rgba(99, 168, 255, 0.75);
+    box-shadow: 0 0 0 3px rgba(99, 168, 255, 0.12);
+  }
+}
+
+.lfx-input-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: rgba(99, 168, 255, 0.8);
+}
+
+.lfx-input-control {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  background: transparent;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #f0f4f8;
+
+  &:focus, &:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  &::placeholder { color: rgba(148, 163, 184, 0.5); }
+
+  // Browser autofill override — uses the same color as .lfx-input-row so the
+  // input doesn't appear as a separate box once a saved credential fills it.
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #141d38 inset !important;
+    -webkit-text-fill-color: #f0f4f8 !important;
+    caret-color: #f0f4f8;
+    transition: background-color 9999s ease-in-out 0s;
+  }
+}
+
+.lfx-input-suffix-btn {
+  flex-shrink: 0;
+  color: rgba(148, 163, 184, 0.7);
+  // Override mat-icon-button's default 40px+ touch target so the password row
+  // doesn't grow taller than the plain username row.
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  --mdc-icon-button-state-layer-size: 28px;
+  &:hover { color: rgba(226, 232, 240, 0.9); }
+  .mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+.lfx-input-error {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ff7a7a;
+  padding: 0 2px;
+}
+
+.login-light .lfx-input-label { color: rgba(55, 65, 105, 0.85); }
+.login-light .lfx-input-row {
+  border-color: rgba(91, 110, 201, 0.3);
+  background: #f4f5fb;
+  &:hover { border-color: rgba(91, 110, 201, 0.55); }
+  &:focus-within {
+    border-color: rgba(91, 110, 201, 0.75);
+    box-shadow: 0 0 0 3px rgba(91, 110, 201, 0.1);
+  }
+}
+.login-light .lfx-input-icon { color: rgba(91, 110, 201, 0.85); }
+.login-light .lfx-input-control {
+  color: #050d1f;
+  &::placeholder { color: rgba(55, 65, 105, 0.5); }
+  &:focus, &:focus-visible { outline: none !important; box-shadow: none !important; }
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #f4f5fb inset !important;
+    -webkit-text-fill-color: #050d1f !important;
+    caret-color: #050d1f;
+  }
+}
+.login-light .lfx-input-suffix-btn { color: rgba(55, 65, 105, 0.6); &:hover { color: #050d1f; } }
+.login-light .lfx-input-error { color: #c41e3a; }
+
 .lfx-l-login-ctr .mat-mdc-form-field {
+  .mat-mdc-form-field-infix {
+    padding-top: 22px !important;
+    padding-bottom: 8px !important;
+    min-height: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+  }
   .mdc-notched-outline__leading,
   .mdc-notched-outline__trailing,
-  .mdc-notched-outline__notch { border-color: rgba(100, 160, 255, 0.2) !important; }
-  .mat-mdc-floating-label, mat-label { color: rgba(148, 163, 184, 0.8) !important; font-size: 13px !important; }
-  input.mat-mdc-input-element { color: #e2e8f0 !important; font-size: 13px !important; }
+  .mdc-notched-outline__notch { 
+    border-color: rgba(99, 168, 255, 0.3) !important;
+    transition: border-color 0.25s ease !important;
+  }
+  .mat-mdc-floating-label, mat-label { 
+    color: rgba(148, 163, 184, 0.9) !important; 
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+  input.mat-mdc-input-element { 
+    color: #f0f4f8 !important; 
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+  }
+  input.mat-mdc-input-element::placeholder {
+    color: rgba(148, 163, 184, 0.55) !important;
+  }
+
+  // Browser autofill (saved credentials) forces its own white background via UA
+  // styles that plain `background` can't override — neutralize with the inset
+  // box-shadow trick so autofilled fields still match the dark card.
+  input.mat-mdc-input-element:-webkit-autofill,
+  input.mat-mdc-input-element:-webkit-autofill:hover,
+  input.mat-mdc-input-element:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px rgba(15, 23, 46, 0.98) inset !important;
+    -webkit-text-fill-color: #f0f4f8 !important;
+    caret-color: #f0f4f8;
+    transition: background-color 9999s ease-in-out 0s;
+  }
 
   &:hover .mdc-notched-outline__leading,
   &:hover .mdc-notched-outline__trailing,
-  &:hover .mdc-notched-outline__notch { border-color: rgba(79, 142, 247, 0.4) !important; }
+  &:hover .mdc-notched-outline__notch { 
+    border-color: rgba(99, 168, 255, 0.5) !important; 
+  }
+  
+  &.mat-focused .mdc-notched-outline__leading,
+  &.mat-focused .mdc-notched-outline__trailing,
+  &.mat-focused .mdc-notched-outline__notch { 
+    border-color: rgba(99, 168, 255, 0.75) !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 0 3px rgba(99, 168, 255, 0.12) !important;
+  }
 }
 
 .login-light .lfx-l-login-ctr .mat-mdc-form-field {
   .mdc-notched-outline__leading,
   .mdc-notched-outline__trailing,
-  .mdc-notched-outline__notch { border-color: rgba(79, 70, 229, 0.18) !important; }
-  .mat-mdc-floating-label, mat-label { color: rgba(71, 85, 105, 0.85) !important; }
-  input.mat-mdc-input-element { color: #0f172a !important; }
+  .mdc-notched-outline__notch { 
+    border-color: rgba(91, 110, 201, 0.28) !important; 
+  }
+  .mat-mdc-floating-label, mat-label { 
+    color: rgba(55, 65, 105, 0.92) !important;
+    font-weight: 700 !important;
+  }
+  input.mat-mdc-input-element { 
+    color: #050d1f !important;
+    font-weight: 600 !important;
+  }
+  input.mat-mdc-input-element::placeholder {
+    color: rgba(55, 65, 105, 0.52) !important;
+  }
+
+  // Browser autofill override for light theme (see dark-theme note above)
+  input.mat-mdc-input-element:-webkit-autofill,
+  input.mat-mdc-input-element:-webkit-autofill:hover,
+  input.mat-mdc-input-element:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.98) inset !important;
+    -webkit-text-fill-color: #050d1f !important;
+    caret-color: #050d1f;
+    transition: background-color 9999s ease-in-out 0s;
+  }
 
   &:hover .mdc-notched-outline__leading,
   &:hover .mdc-notched-outline__trailing,
-  &:hover .mdc-notched-outline__notch { border-color: rgba(79, 70, 229, 0.45) !important; }
+  &:hover .mdc-notched-outline__notch { 
+    border-color: rgba(91, 110, 201, 0.55) !important; 
+  }
+  
+  &.mat-focused .mdc-notched-outline__leading,
+  &.mat-focused .mdc-notched-outline__trailing,
+  &.mat-focused .mdc-notched-outline__notch { 
+    border-color: rgba(91, 110, 201, 0.75) !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 0 3px rgba(91, 110, 201, 0.1) !important;
+  }
 }
 
-// ── CTA button ───────────────────────────────────────────────────────────────
-.login-cta-btn {
+// ── CTA button — Improved with better accessibility and hover states ────────
+// NOTE: selector is deliberately over-qualified (ancestor + compound classes) so it
+// out-specifies the generic "button.mat-mdc-raised-button.mat-unthemed" reset rule
+// that would otherwise make this button render as a near-invisible translucent surface.
+.lfx-l-login-ctr button.login-cta-btn.mat-mdc-raised-button.mat-unthemed,
+.lfx-l-login-ctr .login-cta-btn {
   width: auto !important;
   min-width: 180px !important;
   max-width: 100% !important;
-  height: 44px !important;
+  height: 46px !important;
   padding: 0 28px !important;
-  border-radius: 10px !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.4px !important;
-  background: linear-gradient(135deg, #234f99 0%, #0a1d61 100%) !important;
-  color: #fff !important;
-  border: none !important;
-  box-shadow: 0 4px 20px rgba(35, 79, 153, 0.35) !important;
-  transition: all 0.2s ease !important;
+  border-radius: 12px !important;
+  font-size: 14.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+  background: linear-gradient(135deg, #63a8ff 0%, #8b7ee8 50%, #9361fd 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 
+    0 8px 28px rgba(99, 168, 255, 0.35) !important,
+    0 0 24px rgba(147, 97, 253, 0.2) !important,
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
+  text-transform: uppercase !important;
+  outline: 2px solid transparent !important;
+  outline-offset: 2px !important;
 
   &:hover:not([disabled]) {
-    background: linear-gradient(135deg, #1a3d7a 0%, #071548 100%) !important;
-    box-shadow: 0 6px 28px rgba(35, 79, 153, 0.5) !important;
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, #528fe8 0%, #7a72d8 50%, #7e48d9 100%) !important;
+    box-shadow: 
+      0 12px 40px rgba(99, 168, 255, 0.45) !important,
+      0 0 32px rgba(147, 97, 253, 0.3) !important,
+      inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-2px);
   }
+  
   &:active:not([disabled]) {
     transform: translateY(0);
-    box-shadow: 0 2px 12px rgba(79, 142, 247, 0.3) !important;
+    box-shadow: 
+      0 6px 16px rgba(99, 168, 255, 0.3) !important,
+      inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  }
+  
+  &:focus-visible {
+    outline-color: rgba(99, 168, 255, 0.8) !important;
+  }
+  
+  &[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 }
 
-// Credentials tab: Log In button spans full card width
-.login-tab-content:not(.login-tab-content--guest) .login-cta-btn {
-  width: 100% !important;
+// Light theme button styling (kept over-qualified to beat body.header-light-theme .mat-unthemed reset)
+.login-light .lfx-l-login-ctr button.login-cta-btn.mat-mdc-raised-button.mat-unthemed,
+.login-light .lfx-l-login-ctr .login-cta-btn {
+  background: linear-gradient(135deg, #5b6ec9 0%, #6366f1 50%, #a78bfa 100%) !important;
+  box-shadow: 
+    0 8px 28px rgba(91, 110, 201, 0.4) !important,
+    0 0 20px rgba(167, 139, 250, 0.2) !important,
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  
+  &:hover:not([disabled]) {
+    background: linear-gradient(135deg, #4a5bb6 0%, #534be0 50%, #9370db 100%) !important;
+    box-shadow: 
+      0 12px 40px rgba(91, 110, 201, 0.5) !important,
+      0 0 30px rgba(167, 139, 250, 0.3) !important,
+      inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-2px);
+  }
+  
+  &:active:not([disabled]) {
+    transform: translateY(0);
+    box-shadow: 
+      0 6px 16px rgba(91, 110, 201, 0.3) !important,
+      inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  }
 }
 
-// ── Error message inside card ─────────────────────────────────────────────────
-.login-error-msg {
+// Actions row: guest link + submit button share the bottom row of the form
+.login-actions-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.22);
-  border-radius: 8px;
-  color: #f87171;
-  font-size: 12px;
-  font-weight: 500;
-  i { font-size: 13px; }
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.login-guest-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.85);
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  strong { color: #7eb8ff; font-weight: 800; }
+
+  &:hover {
+    color: rgba(226, 232, 240, 0.95);
+    strong { color: #a7c9ff; text-decoration: underline; }
+  }
+}
+
+.login-light .login-guest-link {
+  color: rgba(55, 65, 105, 0.85);
+  strong { color: #5b6ec9; }
+  &:hover {
+    color: #050d1f;
+    strong { color: #4a5bb6; text-decoration: underline; }
+  }
+}
+
+// ── Error message inside card — Enhanced visibility ─────────────────────────
+.login-error-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1.5px solid rgba(239, 68, 68, 0.4);
+  border-radius: 10px;
+  color: #ff7a7a;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+  i { 
+    font-size: 14px; 
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+.login-light .login-error-msg {
+  background: rgba(220, 53, 69, 0.12);
+  border-color: rgba(220, 53, 69, 0.35);
+  color: #c41e3a;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.12);
 }
 
 // ── Shared top header bar (login + logout) ────────────────────────────────────
@@ -2651,6 +3112,13 @@ app-aip-empty-state { display: block !important; width: 100% !important; }
 .lfx-l-mainwrapper--login .lfx-l-pageoverlay {
   flex: 1;
   height: auto !important;
+  // Card content can exceed the viewport (e.g. credentials tab at 100% zoom) —
+  // scroll the middle area instead of clipping the submit button.
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  // Extra bottom padding nudges the centered content up, leaving a gap above the fixed footer.
+  padding: 16px 0 72px;
+  box-sizing: border-box;
 }
 
 

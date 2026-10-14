@@ -119,15 +119,9 @@ export class SidebarComponent implements OnInit {
     if (this.fetchCredentials()) {
       this.route.navigate(["../login"], { relativeTo: this.router });
     } else {
-      if (this.role.roleadmin) {
-        this.sidebarMenu.splice(
-          1,
-          3,
-          { label: "Project Management", icon: "file-powerpoint-o", url: "./iamp-usm/projectlist" },
-          { label: "Role Management", icon: "registered", url: "./iamp-usm/role/list" },
-          { label: "User Management", icon: "users", url: "./iamp-usm/manageUsers" }
-        );
-      }
+      // RBAC admin screens are no longer injected here — appendRbacMenu()
+      // fetches the data-driven /api/usm/menu tree for admins (and any
+      // role_assignment holder) and appends it as the "Admin Console" entry.
       let dashconstant: any = new Object();
       let value;
       try {
@@ -206,7 +200,7 @@ export class SidebarComponent implements OnInit {
                 f = 1;
               }
             });
-            if (f == 0) this.sidebarMenu.push({ label: "Mapping", icon: "map-signs", url: "./iamp-usm/dashconstant" });
+            if (f == 0) this.sidebarMenu.push({ label: "Mapping", icon: "map-signs", url: "./admin-console/menu-configuration" });
           }
           if (this.role.name == "BCC Admin" || this.role.name == "Client Manager") {
             for (let i = 0; i < this.sidebarMenu.length; i++) {
@@ -247,10 +241,49 @@ export class SidebarComponent implements OnInit {
    * already there, or the user id / API call isn't available, in which case
    * it falls back to a single static entry so the feature stays reachable.
    */
+  /**
+   * Legacy iamp-usm admin screens now superseded by the admin-console MFE
+   * (plan §7 cutover). These are stripped from the sidebar — however the menu
+   * was built (DashConstant "Admin Side" records OR populateDefaultSidebarMenu)
+   * — so the data-driven "Admin Console" tree replaces them. Secret Management
+   * (./iamp-usm/secret) is deliberately kept: the new console has no secrets
+   * screen, so that existing USM feature stays reachable.
+   */
+  private readonly supersededAdminUrls = [
+    "./iamp-usm/projectlist",
+    "./iamp-usm/portfoliolist",
+    "./iamp-usm/role/list",
+    "./iamp-usm/manageUsers",
+    "./iamp-usm/permissionlist",
+    "./iamp-usm/dashconstant",
+    "./iamp-usm/dashconstant/side",
+  ];
+
+  private stripSupersededAdminEntries(): void {
+    const prune = (items: any[]): any[] =>
+      (items || [])
+        .filter((it) => !(it && it.url && this.supersededAdminUrls.includes(it.url)))
+        .map((it) => {
+          if (it && Array.isArray(it.children) && it.children.length) {
+            it.children = prune(it.children);
+          }
+          return it;
+        });
+    this.sidebarMenu = prune(this.sidebarMenu);
+  }
+
   private appendRbacMenu(done: () => void): void {
+    // Cutover: drop the old iamp-usm admin links before injecting the new tree.
+    this.stripSupersededAdminEntries();
+
     let userId: number | null = null;
     try {
-      userId = Number(JSON.parse(sessionStorage.getItem("user") || "null"));
+      // sessionStorage "user" holds the full Users object (set via
+      // JSON.stringify(userInfo.userId) in apis.service.ts, where
+      // userInfo.userId is itself the Users entity, not a bare id) — pull
+      // out .id rather than trying to Number() the whole object.
+      const parsed = JSON.parse(sessionStorage.getItem("user") || "null");
+      userId = parsed && typeof parsed === "object" ? Number(parsed.id) : Number(parsed);
     } catch (e) {
       userId = null;
     }
@@ -894,15 +927,16 @@ export class SidebarComponent implements OnInit {
 
     // admin
     else if (this.role.name == "Admin") {
+      // RBAC admin screens (Project / Role / User / Portfolio / Permission
+      // Management) are no longer hardcoded here — they are served by the
+      // data-driven /api/usm/menu tree injected by appendRbacMenu() as the
+      // "Admin Console" entry (plan §7). Only the unrelated legacy items
+      // (Dashboard Mapping, ICM, CIP) remain, and the old "Mapping"
+      // (DashConstant) link now points at the new console's Menu Configuration.
       this.sidebarMenu.splice(
         1,
         3,
-        { label: "Project Management", icon: "file-powerpoint-o", url: "./iamp-usm/projectlist" },
-        { label: "Role Management", icon: "registered", url: "./iamp-usm/role/list" },
-        { label: "User Management", icon: "users", url: "./iamp-usm/manageUsers" },
-        { label: "Portfolio Management", icon: "file-powerpoint-o", url: "./iamp-usm/portfoliolist" },
         { label: "Dashboard Mapping", icon: "desktop", url: "./dynamicDashboard/dashboardMapping" },
-        { label: "Permission Management", icon: "shield", url: "./iamp-usm/permissionlist" },
         { label: "ICM Management", icon: "ticket", url: "./tickets/icmMapping" },
         {
           label: "CIP Management",
@@ -914,7 +948,7 @@ export class SidebarComponent implements OnInit {
             { label: "Groupings", icon: "files-tasks", url: "./aibrain/groupings", children: [] },
           ],
         },
-        { label: "Mapping", icon: "map-signs", url: "./iamp-usm/dashconstant" }
+        { label: "Mapping", icon: "map-signs", url: "./admin-console/menu-configuration" }
       );
     }
 
@@ -1057,13 +1091,14 @@ export class SidebarComponent implements OnInit {
         }
       );
     } else if (this.role.roleadmin) {
+      // RBAC admin screens now come from the data-driven /api/usm/menu tree
+      // (appendRbacMenu injects it as "Admin Console"); only the Menu
+      // Configuration link is surfaced directly here, replacing the old
+      // DashConstant "Mapping" screen.
       this.sidebarMenu.splice(
         1,
         3,
-        { label: "Project Management", icon: "file-powerpoint-o", url: "./iamp-usm/projectlist" },
-        { label: "Role Management", icon: "registered", url: "./iamp-usm/role/list" },
-        { label: "User Management", icon: "users", url: "./iamp-usm/manageUsers" },
-        { label: "Mapping", icon: "map-signs", url: "./iamp-usm/dashconstant" }
+        { label: "Mapping", icon: "map-signs", url: "./admin-console/menu-configuration" }
       );
     }
   }

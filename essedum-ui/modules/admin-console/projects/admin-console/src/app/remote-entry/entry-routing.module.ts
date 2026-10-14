@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { ShellComponent } from '../shell/shell.component';
+import { OverviewComponent } from '../features/overview/overview.component';
 import { TenancyComponent } from '../features/tenancy/tenancy.component';
 import { AccessComponent } from '../features/access/access.component';
 import { PublishingComponent } from '../features/publishing/publishing.component';
@@ -15,7 +16,8 @@ const routes: Routes = [
     path: '',
     component: ShellComponent,
     children: [
-      { path: '', redirectTo: 'tenancy', pathMatch: 'full' },
+      { path: '', redirectTo: 'overview', pathMatch: 'full' },
+      { path: 'overview', component: OverviewComponent },
       { path: 'tenancy', component: TenancyComponent },
       { path: 'access', component: AccessComponent },
       { path: 'publishing', component: PublishingComponent },
