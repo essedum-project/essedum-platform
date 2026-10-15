@@ -39,6 +39,7 @@ import { IdentitySyncComponent } from '../features/identity-sync/identity-sync.c
 import { MenuConfigurationComponent } from '../features/menu-configuration/menu-configuration.component';
 import { MenuItemDialogComponent } from '../features/menu-configuration/menu-item-dialog/menu-item-dialog.component';
 import { RoleMenuDialogComponent } from '../features/menu-configuration/role-menu-dialog/role-menu-dialog.component';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
 
 @NgModule({
   declarations: [
@@ -57,6 +58,7 @@ import { RoleMenuDialogComponent } from '../features/menu-configuration/role-men
     MenuConfigurationComponent,
     MenuItemDialogComponent,
     RoleMenuDialogComponent,
+    ConfirmDialogComponent,
   ],
   imports: [
     CommonModule,

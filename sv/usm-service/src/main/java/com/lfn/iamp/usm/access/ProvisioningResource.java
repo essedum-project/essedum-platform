@@ -1,7 +1,10 @@
 package com.lfn.iamp.usm.access;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,7 +95,13 @@ public class ProvisioningResource {
 		org.setName(req.name());
 		org.setStatus(req.status() != null ? req.status() : "active");
 		org.setOnboarded(Boolean.TRUE);
-		Organisation saved = organisationRepository.save(org);
+		Organisation saved;
+		try {
+			saved = organisationRepository.save(org);
+		} catch (DataIntegrityViolationException e) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"An organization named \"" + req.name() + "\" already exists");
+		}
 		findOrCreatePortfolio(saved.getName());
 		auditService.record("organisation", "created", actorUserId, "User #" + actorUserId,
 				"organisation \"" + saved.getName() + "\" created");
@@ -111,10 +120,50 @@ public class ProvisioningResource {
 		p.setOrganisationId(req.organisationId());
 		organisationRepository.findById(req.organisationId())
 				.ifPresent(org -> p.setPortfolioId(findOrCreatePortfolio(org.getName())));
-		Project saved = projectRepository.save(p);
+		Project saved;
+		try {
+			saved = projectRepository.save(p);
+		} catch (DataIntegrityViolationException e) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"A project named \"" + req.name() + "\" already exists");
+		}
 		auditService.record("project", "created", actorUserId, "User #" + actorUserId,
 				"project \"" + saved.getName() + "\" created (org=" + req.organisationId() + ")");
 		return ResponseEntity.ok(saved);
+	}
+
+	@DeleteMapping("/organizations/{id}")
+	public ResponseEntity<Void> deleteOrganization(@PathVariable Integer id, @RequestParam Integer actorUserId) {
+		require(actorUserId, PLATFORM_ADMIN, "delete an organization");
+		long projectCount = projectRepository.findAll().stream().filter(p -> id.equals(p.getOrganisationId())).count();
+		if (projectCount > 0) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"Delete its " + projectCount + " project(s) first before deleting this organization");
+		}
+		try {
+			organisationRepository.deleteById(id);
+		} catch (DataIntegrityViolationException e) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"This organization is still referenced elsewhere and cannot be deleted");
+		}
+		auditService.record("organisation", "deleted", actorUserId, "User #" + actorUserId,
+				"organisation #" + id + " deleted");
+		return ResponseEntity.noContent().build();
+	}
+
+	@DeleteMapping("/projects/{id}")
+	public ResponseEntity<Void> deleteProject(@PathVariable Integer id, @RequestParam Integer actorUserId) {
+		require(actorUserId, ORG_ADMIN, "delete a project");
+		try {
+			projectRepository.deleteById(id);
+		} catch (DataIntegrityViolationException e) {
+			// usm_project is FK-referenced from many legacy modules (datasets,
+			// pipelines, surveys, etc.) — report instead of attempting a cascade.
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"This project still has dependent data (pipelines, datasets, environments, etc.) and cannot be deleted");
+		}
+		auditService.record("project", "deleted", actorUserId, "User #" + actorUserId, "project #" + id + " deleted");
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/environments")

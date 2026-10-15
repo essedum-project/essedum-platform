@@ -65,6 +65,14 @@ export class ApiService {
     return this.http.post<RbacRole>(`${this.base}/provisioning/roles`, body, { params: { actorUserId } });
   }
 
+  deleteOrganization(id: number, actorUserId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/provisioning/organizations/${id}`, { params: { actorUserId } });
+  }
+
+  deleteProject(id: number, actorUserId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/provisioning/projects/${id}`, { params: { actorUserId } });
+  }
+
   // ---- publishing ----
   getAssets(userId: number): Observable<Asset[]> {
     return this.http.get<Asset[]>(`${this.base}/assets`, { params: { userId } });
