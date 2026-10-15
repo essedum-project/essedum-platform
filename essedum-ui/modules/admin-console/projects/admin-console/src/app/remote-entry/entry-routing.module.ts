@@ -11,7 +11,6 @@ import { ApprovalsComponent } from '../features/approvals/approvals.component';
 import { AuditComponent } from '../features/audit/audit.component';
 import { IdentitySyncComponent } from '../features/identity-sync/identity-sync.component';
 import { MenuConfigurationComponent } from '../features/menu-configuration/menu-configuration.component';
-import { SecretManagementComponent } from '../features/secret-management/secret-management.component';
 
 // Routes mount under `/admin-console/**` per the host manifest (routePath = 'admin-console').
 const routes: Routes = [
@@ -29,7 +28,6 @@ const routes: Routes = [
       { path: 'audit', component: AuditComponent },
       { path: 'identity-sync', component: IdentitySyncComponent },
       { path: 'menu-configuration', component: MenuConfigurationComponent },
-      { path: 'secrets', component: SecretManagementComponent },
     ],
   },
 ];

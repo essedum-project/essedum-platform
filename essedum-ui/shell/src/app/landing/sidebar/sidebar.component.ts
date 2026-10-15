@@ -246,8 +246,8 @@ export class SidebarComponent implements OnInit {
    * (plan §7 cutover). These are stripped from the sidebar — however the menu
    * was built (DashConstant "Admin Side" records OR populateDefaultSidebarMenu)
    * — so the data-driven "Admin Console" tree replaces them. Secret Management
-   * (./iamp-usm/secret) is now superseded too — admin-console has a native
-   * replacement at /admin-console/secrets.
+   * (./iamp-usm/secret) was removed outright (no replacement) — kept here too
+   * in case a stale DashConstant row still links to it.
    */
   private readonly supersededAdminUrls = [
     "./iamp-usm/projectlist",

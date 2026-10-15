@@ -131,13 +131,3 @@ export interface AuditEvent {
   details: string | null;
 }
 
-// Legacy usm_secrets (key_, value_, project_id, salt_) via the existing
-// /api/secrets endpoint — not under /api/usm. The backend source for this
-// is outside what this agent can read (content-excluded); the request/response
-// shape below is inferred from the shipped iamp-usm bundle and may need a
-// follow-up fix once exercised against the real API.
-export interface Secret {
-  key: string;
-  project: string;
-}
-

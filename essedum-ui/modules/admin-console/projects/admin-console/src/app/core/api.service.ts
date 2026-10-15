@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   AccessContext, RbacRole, RoleAssignment, Asset, AssetVersion, PromotionEvent, MenuItem,
-  LegacyOrganisation, LegacyProject, RbacEnvironment, AuditEvent, UserOption, IdentityTarget, RoleMenu, Secret,
+  LegacyOrganisation, LegacyProject, RbacEnvironment, AuditEvent, UserOption, IdentityTarget, RoleMenu,
 } from './api-models';
 
 // Thin HTTP client over the sv/usm-service RBAC endpoints
@@ -202,22 +202,5 @@ export class ApiService {
 
   retryIdentityTarget(id: number): Observable<void> {
     return this.http.post<void>(`${this.base}/identity/targets/${id}/retry`, {});
-  }
-
-  // ---- secrets (legacy usm_secrets; lives at /api/secrets, not /api/usm) ----
-  getSecrets(project: string): Observable<Secret[]> {
-    return this.http.get<Secret[]>('/api/secrets', { params: { project } });
-  }
-
-  createSecret(payload: { project: string; key: string; value: string }): Observable<Secret> {
-    return this.http.post<Secret>('/api/secrets', payload);
-  }
-
-  updateSecret(payload: { project: string; key: string; value: string }): Observable<Secret> {
-    return this.http.put<Secret>('/api/secrets', payload);
-  }
-
-  deleteSecret(project: string, key: string): Observable<void> {
-    return this.http.delete<void>('/api/secrets', { params: { project, key } });
   }
 }
