@@ -1,54 +1,177 @@
+﻿:host {
+  display: block !important;
+  width: 100% !important;
+
+  /* Dark theme (default) */
+  --ac-accent: #4f8ef7;
+  --ac-surface: #1e293b;
+  --ac-surface-2: #243044;
+  --ac-surface-3: #2b3a52;
+  --ac-border: rgba(148, 163, 184, 0.18);
+  --ac-text: #e2e8f0;
+  --ac-text-muted: #94a3b8;
+  --ac-row-hover: rgba(148, 163, 184, 0.10);
+  --mat-table-background-color: #1e293b;
+  --mat-table-header-headline-color: #94a3b8;
+  --mat-table-row-item-label-text-color: #e2e8f0;
+  --mat-table-footer-supporting-text-color: #e2e8f0;
+  --mat-table-row-item-outline-color: rgba(148, 163, 184, 0.18);
+}
+
+:host(.light-theme) {
+  --ac-surface: #ffffff;
+  --ac-surface-2: #f8fafc;
+  --ac-surface-3: #f1f5f9;
+  --ac-border: rgba(15, 23, 42, 0.12);
+  --ac-text: #1e293b;
+  --ac-text-muted: #64748b;
+  --ac-row-hover: rgba(15, 23, 42, 0.04);
+  --mat-table-background-color: #ffffff;
+  --mat-table-header-headline-color: #64748b;
+  --mat-table-row-item-label-text-color: #1e293b;
+  --mat-table-footer-supporting-text-color: #1e293b;
+  --mat-table-row-item-outline-color: rgba(15, 23, 42, 0.12);
+}
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cardIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
 .overview {
-  padding: 16px 8px;
+  padding: 24px 28px !important;
+  color: var(--ac-text) !important;
+  min-height: 100vh;
+  animation: fadeUp 0.3s ease both !important;
 }
 
 .overview-title {
-  margin: 0 0 16px;
-  font-size: 1.25rem;
-  font-weight: 600;
+  margin: 0 0 28px !important;
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.4px !important;
+  color: var(--ac-text) !important;
 }
 
 .stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  gap: 16px !important;
+  margin-bottom: 36px !important;
 }
 
 .stat-card {
-  cursor: pointer;
-  border-top: 3px solid transparent;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 20px !important;
+  background: var(--ac-surface) !important;
+  border: 1px solid var(--ac-border) !important;
+  border-top: 4px solid !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  animation: cardIn 0.4s ease both !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+
+  &:nth-child(1) { animation-delay: 0.05s !important; border-top-color: #3b82f6 !important; }
+  &:nth-child(2) { animation-delay: 0.1s !important; border-top-color: #06b6d4 !important; }
+  &:nth-child(3) { animation-delay: 0.15s !important; border-top-color: #8b5cf6 !important; }
+  &:nth-child(4) { animation-delay: 0.2s !important; border-top-color: #f59e0b !important; }
+  &:nth-child(5) { animation-delay: 0.25s !important; border-top-color: #10b981 !important; }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12) !important;
+    background: var(--ac-surface-2) !important;
   }
 }
 
 .stat-count {
-  font-size: 2.2rem;
-  font-weight: 700;
-  line-height: 1.1;
+  font-size: 2.2rem !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  margin-bottom: 8px !important;
+  color: var(--ac-text) !important;
 }
 
 .stat-label {
-  margin-top: 4px;
-  font-size: 0.85rem;
-  opacity: 0.75;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: var(--ac-text-muted) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
 }
 
 .section-title {
-  margin: 0 0 12px;
-  font-size: 1rem;
-  font-weight: 600;
+  margin: 0 0 18px !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: var(--ac-text) !important;
 }
 
 .admin-console-table {
-  width: 100%;
+  width: 100% !important;
+  background: var(--ac-surface) !important;
+  border: 1px solid var(--ac-border) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  animation: fadeUp 0.3s ease 0.4s both !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  color: var(--ac-text) !important;
+
+  ::ng-deep .mat-mdc-header-row {
+    background: var(--ac-surface-3) !important;
+    min-height: 50px !important;
+    border-bottom: 1px solid var(--ac-border) !important;
+    color: var(--ac-text-muted) !important;
+  }
+
+  ::ng-deep .mat-mdc-header-cell {
+    color: #94a3b8 !important;
+    font-weight: 700 !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    padding: 14px 16px !important;
+  }
+
+  ::ng-deep .mat-mdc-cell {
+    color: #e2e8f0 !important;
+    padding: 14px 16px !important;
+    border-bottom: 1px solid var(--ac-border) !important;
+  }
+
+  ::ng-deep .mat-mdc-row {
+    transition: background 0.15s ease !important;
+    color: #e2e8f0 !important;
+    &:hover {
+      background: var(--ac-row-hover) !important;
+    }
+  }
+
+  ::ng-deep .mat-mdc-row:last-child .mat-mdc-cell {
+    border-bottom: none !important;
+  }
+
+  ::ng-deep .mdc-data-table__cell {
+    color: #e2e8f0 !important;
+  }
+
+  ::ng-deep .mdc-data-table__header-cell {
+    color: #94a3b8 !important;
+  }
 }
 
-.empty {
-  opacity: 0.6;
-  font-style: italic;
+:host(.light-theme) .admin-console-table ::ng-deep .mat-mdc-cell {
+  color: #1e293b !important;
+}
+
+:host(.light-theme) .admin-console-table ::ng-deep .mdc-data-table__cell {
+  color: #1e293b !important;
+}
+
+:host(.light-theme) .admin-console-table ::ng-deep .mat-mdc-header-cell {
+  color: #64748b !important;
+}
+
+:host(.light-theme) .admin-console-table ::ng-deep .mdc-data-table__header-cell {
+  color: #64748b !important;
 }

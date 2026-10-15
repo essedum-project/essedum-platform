@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ElementRef, effect } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
+import { ThemeService } from '../../core/theme.service';
 import { LegacyOrganisation, LegacyProject, RbacEnvironment } from '../../core/api-models';
 import { ProvisionDialogComponent, ProvisionKind } from './provision-dialog/provision-dialog.component';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
@@ -11,10 +12,14 @@ interface EnvironmentRow extends RbacEnvironment {
   projectName: string;
 }
 
+// ═════════════════════════════════════════════════════════════════════════════
+// P1 VERSION: Tenancy with Shadow DOM encapsulation
+// ═════════════════════════════════════════════════════════════════════════════
 @Component({
   selector: 'app-tenancy',
   templateUrl: './tenancy.component.html',
   styleUrls: ['./tenancy.component.scss'],
+  encapsulation: ViewEncapsulation.ShadowDom,
   standalone: false,
 })
 export class TenancyComponent implements OnInit {
@@ -32,7 +37,20 @@ export class TenancyComponent implements OnInit {
     private readonly api: ApiService,
     private readonly dialog: MatDialog,
     private readonly userContext: UserContextService,
-  ) {}
+    private readonly themeService: ThemeService,
+    private readonly elementRef: ElementRef,
+  ) {
+    // Apply light-theme class when isDarkTheme is false
+    effect(() => {
+      const isDark = this.themeService.isDarkTheme();
+      const hostElement = this.elementRef.nativeElement;
+      if (isDark) {
+        hostElement.classList.remove('light-theme');
+      } else {
+        hostElement.classList.add('light-theme');
+      }
+    });
+  }
 
   // Rank-gated create/delete buttons (server re-checks). 4=platform,3=org,2=project admin.
   get canCreateOrg(): boolean { return this.rank >= 4; }

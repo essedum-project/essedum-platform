@@ -1,0 +1,37 @@
+/* Provision dialog — fill-style form fields, fully themed */
+
+/* Force dialog content to stack vertically with gap */
+::ng-deep .mat-mdc-dialog-content {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  padding: 20px 24px !important;
+  min-width: 420px !important;
+}
+
+/* Remove the ripple underline from fill fields */
+::ng-deep .mdc-text-field--filled .mdc-line-ripple::before,
+::ng-deep .mdc-text-field--filled .mdc-line-ripple::after {
+  border-bottom: none !important;
+}
+
+/* ---- dialog actions button override (inside cdk-overlay) ---- */
+[mat-dialog-actions] {
+  button[mat-raised-button][color='primary'],
+  button[mat-raised-button].mat-primary {
+    background: linear-gradient(135deg, #4f8ef7, #2563eb) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4) !important;
+    border: none !important;
+
+    &:disabled { opacity: 0.45 !important; box-shadow: none !important; }
+  }
+
+  button[mat-button] {
+    color: #94a3b8 !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+  }
+}

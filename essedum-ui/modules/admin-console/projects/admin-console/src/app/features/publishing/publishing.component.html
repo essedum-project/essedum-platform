@@ -2,7 +2,7 @@
   <div class="admin-console-toolbar">
     <h2>My Drafts</h2>
     <button mat-raised-button color="primary" (click)="newDraft()">
-      <mat-icon>add</mat-icon> New Draft
+      New Draft
     </button>
   </div>
 
@@ -18,7 +18,7 @@
     <ng-container matColumnDef="status">
       <th mat-header-cell *matHeaderCellDef>Status</th>
       <td mat-cell *matCellDef="let row">
-        <mat-chip [ngClass]="'status-chip-' + row.status">{{ row.status }}</mat-chip>
+        <span [ngClass]="'status-badge status-badge-' + row.status">{{ row.status }}</span>
       </td>
     </ng-container>
     <ng-container matColumnDef="nextGate">
@@ -36,10 +36,12 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let row">
-        <button mat-button [disabled]="!canEdit(row)" (click)="edit(row)">Edit</button>
-        <button mat-button color="primary" [disabled]="!canSubmit(row)" (click)="submit(row)">
-          Submit
-        </button>
+        <button
+          style="background:transparent;border:1.5px solid #4f8ef7;outline:none;cursor:pointer;color:#4f8ef7;font-size:12px;font-weight:600;font-family:inherit;padding:4px 12px;border-radius:20px;letter-spacing:0.3px;margin-right:8px;"
+          [disabled]="!canEdit(row)" (click)="edit(row)">Edit</button>
+        <button
+          style="background:transparent;border:1.5px solid #4f8ef7;outline:none;cursor:pointer;color:#4f8ef7;font-size:12px;font-weight:600;font-family:inherit;padding:4px 12px;border-radius:20px;letter-spacing:0.3px;"
+          [disabled]="!canSubmit(row)" (click)="submit(row)">Submit</button>
       </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="columns"></tr>

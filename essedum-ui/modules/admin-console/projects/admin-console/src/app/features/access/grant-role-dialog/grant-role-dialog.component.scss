@@ -1,0 +1,42 @@
+/* Grant Role dialog */
+
+/* Stack fields vertically with gap */
+::ng-deep .mat-mdc-dialog-content {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  padding: 20px 24px !important;
+  min-width: 440px !important;
+}
+
+/* Remove fill-field underline ripple */
+::ng-deep .mdc-text-field--filled .mdc-line-ripple::before,
+::ng-deep .mdc-text-field--filled .mdc-line-ripple::after {
+  border-bottom: none !important;
+}
+
+/* Radio group label */
+.scope-label {
+  font-size: 0.73rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+/* Radio group row */
+.scope-group {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
+  align-items: center !important;
+  padding: 4px 0 !important;
+}
+
+/* Radio button label color */
+::ng-deep .scope-group .mdc-form-field label,
+::ng-deep .scope-group .mat-radio-label-content {
+  color: #e2e8f0 !important;
+  font-size: 0.875rem !important;
+}

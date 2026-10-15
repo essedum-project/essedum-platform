@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ElementRef, effect } from '@angular/core';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
+import { ThemeService } from '../../core/theme.service';
 import { AuditEvent } from '../../core/api-models';
 
 interface StatCard {
@@ -12,12 +13,14 @@ interface StatCard {
   accent: string;
 }
 
+// P1 VERSION: Admin landing overview with Shadow DOM encapsulation
 // Admin landing overview (plan §10) — headline counts across the admin
 // surfaces + a recent-activity feed, each card linking to its full screen.
 @Component({
   selector: 'app-overview',
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss'],
+  encapsulation: ViewEncapsulation.ShadowDom,
   standalone: false,
 })
 export class OverviewComponent implements OnInit {
@@ -35,7 +38,20 @@ export class OverviewComponent implements OnInit {
   constructor(
     private readonly api: ApiService,
     private readonly userContext: UserContextService,
-  ) {}
+    private readonly themeService: ThemeService,
+    private readonly elementRef: ElementRef,
+  ) {
+    // Apply light-theme class when isDarkTheme is false
+    effect(() => {
+      const isDark = this.themeService.isDarkTheme();
+      const hostElement = this.elementRef.nativeElement;
+      if (isDark) {
+        hostElement.classList.remove('light-theme');
+      } else {
+        hostElement.classList.add('light-theme');
+      }
+    });
+  }
 
   ngOnInit(): void {
     const userId = this.userContext.userId$.value;
