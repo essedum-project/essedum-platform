@@ -1,13 +1,14 @@
 @use '@angular/material' as mat;
 
 /* =====================================================================
-   Admin Console theme — adapts to the host shell's Light/Dark toggle
-   (shell sets body.header-dark-theme / body.header-light-theme).
+   Admin Console theme — P1 VERSION
+   Adapts to host shell's Light/Dark toggle via ThemeService
    Uses CSS custom properties so tables/cards/dialogs flip automatically.
    ===================================================================== */
 
 /* ---- theme tokens (dark default) ---- */
 .admin-console-shell,
+.admin-console-shell.dark-theme,
 .mat-mdc-dialog-surface,
 .cdk-overlay-container {
   --ac-accent: #4f8ef7;
@@ -19,9 +20,36 @@
   --ac-text-muted: #94a3b8;
   --ac-row-hover: rgba(148, 163, 184, 0.10);
   --ac-radius: 12px;
+
+  /* Override Angular Material MDC table tokens for dark theme */
+  --mat-table-background-color: #1e293b;
+  --mat-table-header-headline-color: #94a3b8;
+  --mat-table-row-item-label-text-color: #e2e8f0;
+  --mat-table-footer-supporting-text-color: #e2e8f0;
+  --mat-table-row-item-outline-color: rgba(148, 163, 184, 0.18);
 }
 
-/* ---- light overrides ---- */
+/* ---- light overrides (P1: now using local class, not body class) ---- */
+.admin-console-shell.light-theme,
+.admin-console-shell.light-theme ~ .mat-mdc-dialog-surface,
+.admin-console-shell.light-theme ~ .cdk-overlay-container {
+  --ac-surface: #ffffff;
+  --ac-surface-2: #f8fafc;
+  --ac-surface-3: #f1f5f9;
+  --ac-border: rgba(15, 23, 42, 0.12);
+  --ac-text: #1e293b;
+  --ac-text-muted: #64748b;
+  --ac-row-hover: rgba(15, 23, 42, 0.04);
+
+  /* Override Angular Material MDC table tokens for light theme */
+  --mat-table-background-color: #ffffff;
+  --mat-table-header-headline-color: #64748b;
+  --mat-table-row-item-label-text-color: #1e293b;
+  --mat-table-footer-supporting-text-color: #1e293b;
+  --mat-table-row-item-outline-color: rgba(15, 23, 42, 0.12);
+}
+
+/* Fallback: also support body classes for compatibility */
 body.header-light-theme .admin-console-shell,
 body.header-light-theme .mat-mdc-dialog-surface,
 body.header-light-theme .cdk-overlay-container {
@@ -32,13 +60,25 @@ body.header-light-theme .cdk-overlay-container {
   --ac-text: #1e293b;
   --ac-text-muted: #64748b;
   --ac-row-hover: rgba(15, 23, 42, 0.04);
+  --mat-table-background-color: #ffffff;
+  --mat-table-header-headline-color: #64748b;
+  --mat-table-row-item-label-text-color: #1e293b;
+  --mat-table-footer-supporting-text-color: #1e293b;
+  --mat-table-row-item-outline-color: rgba(15, 23, 42, 0.12);
 }
 
-.admin-console-shell { color: var(--ac-text); font-size: 14px; min-height: 100%; }
+.admin-console-shell { 
+  color: var(--ac-text); 
+  font-size: 14px; 
+  min-height: 100%;
+}
 
 /* ---- page scaffold ---- */
 .admin-console-page,
-.overview { padding: 24px 28px; color: var(--ac-text); }
+.overview { 
+  padding: 24px 28px; 
+  color: var(--ac-text); 
+}
 
 .admin-console-toolbar {
   display: flex;
@@ -85,13 +125,12 @@ body.header-light-theme .cdk-overlay-container {
 
   .mat-mdc-header-row { background: var(--ac-surface-3); min-height: 46px; }
   .mat-mdc-header-cell {
-    color: var(--ac-text-muted) !important;
     font-weight: 600; font-size: 0.72rem; letter-spacing: 0.6px; text-transform: uppercase;
     border-bottom: 1px solid var(--ac-border);
   }
   .mat-mdc-row { background: transparent; transition: background 0.1s ease;
     &:hover { background: var(--ac-row-hover); } }
-  .mat-mdc-cell { color: var(--ac-text) !important; border-bottom: 1px solid var(--ac-border); }
+  .mat-mdc-cell { border-bottom: 1px solid var(--ac-border); }
   .mat-mdc-row:last-child .mat-mdc-cell { border-bottom: none; }
 }
 .mat-mdc-no-data-row td { color: var(--ac-text-muted) !important; padding: 18px; }
@@ -155,5 +194,77 @@ body.header-light-theme .cdk-overlay-container {
 
 /* ---- dialog backdrop: darken the page behind so the surface reads clearly ---- */
 .cdk-overlay-dark-backdrop { background: rgba(2, 6, 23, 0.55); }
+
+/* ============================================================================ */
+/* CRITICAL: Force table text colors in Shadow DOM components                  */
+/* These rules pierce Shadow DOM boundaries to ensure text visibility          */
+/* ============================================================================ */
+
+/* Dark theme (default) - white text */
+.admin-console-shell,
+.admin-console-shell.dark-theme {
+  ::ng-deep .mat-mdc-cell {
+    color: #e2e8f0 !important;
+  }
+  
+  ::ng-deep .mat-mdc-header-cell {
+    color: #94a3b8 !important;
+  }
+  
+  ::ng-deep .mdc-data-table__cell {
+    color: #e2e8f0 !important;
+  }
+  
+  ::ng-deep .mdc-data-table__header-cell {
+    color: #94a3b8 !important;
+  }
+  
+  ::ng-deep app-overview .mat-mdc-cell,
+  ::ng-deep app-tenancy .mat-mdc-cell,
+  ::ng-deep app-access .mat-mdc-cell,
+  ::ng-deep app-publishing .mat-mdc-cell {
+    color: #e2e8f0 !important;
+  }
+  
+  ::ng-deep app-overview .mat-mdc-header-cell,
+  ::ng-deep app-tenancy .mat-mdc-header-cell,
+  ::ng-deep app-access .mat-mdc-header-cell,
+  ::ng-deep app-publishing .mat-mdc-header-cell {
+    color: #94a3b8 !important;
+  }
+}
+
+/* Light theme - dark text */
+.admin-console-shell.light-theme {
+  ::ng-deep .mat-mdc-cell {
+    color: #1e293b !important;
+  }
+  
+  ::ng-deep .mat-mdc-header-cell {
+    color: #64748b !important;
+  }
+  
+  ::ng-deep .mdc-data-table__cell {
+    color: #1e293b !important;
+  }
+  
+  ::ng-deep .mdc-data-table__header-cell {
+    color: #64748b !important;
+  }
+  
+  ::ng-deep app-overview .mat-mdc-cell,
+  ::ng-deep app-tenancy .mat-mdc-cell,
+  ::ng-deep app-access .mat-mdc-cell,
+  ::ng-deep app-publishing .mat-mdc-cell {
+    color: #1e293b !important;
+  }
+  
+  ::ng-deep app-overview .mat-mdc-header-cell,
+  ::ng-deep app-tenancy .mat-mdc-header-cell,
+  ::ng-deep app-access .mat-mdc-header-cell,
+  ::ng-deep app-publishing .mat-mdc-header-cell {
+    color: #64748b !important;
+  }
+}
 
 

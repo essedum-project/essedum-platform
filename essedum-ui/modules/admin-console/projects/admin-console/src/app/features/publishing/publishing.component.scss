@@ -1,1 +1,159 @@
-/* intentionally empty — admin-console-page/table styles come from global styles.scss */
+﻿:host {
+  display: block !important;
+  width: 100% !important;
+
+  /* Dark theme (default) */
+  --ac-accent: #4f8ef7;
+  --ac-surface: #1e293b;
+  --ac-surface-2: #243044;
+  --ac-surface-3: #2b3a52;
+  --ac-border: rgba(148, 163, 184, 0.18);
+  --ac-text: #e2e8f0;
+  --ac-text-muted: #94a3b8;
+  --ac-row-hover: rgba(148, 163, 184, 0.10);
+  --mat-table-background-color: #1e293b;
+  --mat-table-header-headline-color: #94a3b8;
+  --mat-table-row-item-label-text-color: #e2e8f0;
+  --mat-table-footer-supporting-text-color: #e2e8f0;
+  --mat-table-row-item-outline-color: rgba(148, 163, 184, 0.18);
+}
+
+:host(.light-theme) {
+  --ac-surface: #ffffff;
+  --ac-surface-2: #f8fafc;
+  --ac-surface-3: #f1f5f9;
+  --ac-border: rgba(15, 23, 42, 0.12);
+  --ac-text: #1e293b;
+  --ac-text-muted: #64748b;
+  --ac-row-hover: rgba(15, 23, 42, 0.04);
+  --mat-table-background-color: #ffffff;
+  --mat-table-header-headline-color: #64748b;
+  --mat-table-row-item-label-text-color: #1e293b;
+  --mat-table-footer-supporting-text-color: #1e293b;
+  --mat-table-row-item-outline-color: rgba(15, 23, 42, 0.12);
+}
+
+.admin-console-page {
+  padding: 24px 28px !important;
+  color: var(--ac-text) !important;
+  background: var(--ac-surface) !important;
+  min-height: 100vh;
+}
+
+.admin-console-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  margin-bottom: 24px !important;
+}
+
+.admin-console-toolbar h2 {
+  margin: 0 !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: var(--ac-text) !important;
+  flex: 1 !important;
+}
+
+.admin-console-toolbar button {
+  background: linear-gradient(135deg, #4f8ef7, #2563eb) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  padding: 10px 20px !important;
+  font-weight: 600 !important;
+}
+
+mat-tab-group {
+  display: block !important;
+  margin-top: 20px !important;
+}
+
+mat-tab-group ::ng-deep .mat-mdc-tab-list {
+  border-bottom: 2px solid var(--ac-border) !important;
+  background: transparent !important;
+}
+
+mat-tab-group ::ng-deep .mdc-tab {
+  color: var(--ac-text-muted) !important;
+  font-weight: 600 !important;
+}
+
+mat-tab-group ::ng-deep .mdc-tab--active {
+  color: var(--ac-accent) !important;
+}
+
+.tab-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 16px 0 20px !important;
+}
+
+.admin-console-table {
+  width: 100% !important;
+  background: var(--ac-surface) !important;
+  border: 1px solid var(--ac-border) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  color: var(--ac-text) !important;
+}
+
+.admin-console-table ::ng-deep .mat-mdc-header-row {
+  background: var(--ac-surface-3) !important;
+  min-height: 48px !important;
+  border-bottom: 1px solid var(--ac-border) !important;
+}
+
+.admin-console-table ::ng-deep .mat-mdc-header-cell {
+  color: #94a3b8 !important;
+  font-weight: 700 !important;
+  font-size: 0.73rem !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  padding: 14px 16px !important;
+}
+
+.admin-console-table ::ng-deep .mat-mdc-cell {
+  color: #e2e8f0 !important;
+  padding: 14px 16px !important;
+  border-bottom: 1px solid var(--ac-border) !important;
+}
+
+.admin-console-table ::ng-deep .mat-mdc-row {
+  transition: background 0.15s ease !important;
+  color: #e2e8f0 !important;
+}
+
+.admin-console-table ::ng-deep .mat-mdc-row:hover {
+  background: var(--ac-row-hover) !important;
+}
+
+.admin-console-table ::ng-deep .mdc-data-table__cell {
+  color: #e2e8f0 !important;
+}
+
+.admin-console-table ::ng-deep .mdc-data-table__header-cell {
+  color: #94a3b8 !important;
+}
+
+.admin-console-table ::ng-deep button {
+  color: var(--ac-accent) !important;
+  font-weight: 600 !important;
+}
+
+:host(.light-theme) .admin-console-table ::ng-deep .mat-mdc-cell {
+  color: #1e293b !important;
+}
+
+:host(.light-theme) .admin-console-table ::ng-deep .mdc-data-table__cell {
+  color: #1e293b !important;
+}
+
+:host(.light-theme) .admin-console-table ::ng-deep .mat-mdc-header-cell {
+  color: #64748b !important;
+}
+
+:host(.light-theme) .admin-console-table ::ng-deep .mdc-data-table__header-cell {
+  color: #64748b !important;
+}
