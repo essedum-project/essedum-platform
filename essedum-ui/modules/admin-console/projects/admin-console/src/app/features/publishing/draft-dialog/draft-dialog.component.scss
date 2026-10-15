@@ -1,0 +1,15 @@
+/* ---- Shared dialog shell styles (same pattern as provision/grant-role dialogs) ---- */
+
+::ng-deep .mat-mdc-dialog-content {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  padding: 20px 24px !important;
+  min-width: 440px !important;
+}
+
+/* Remove the ripple underline from fill fields */
+::ng-deep .mdc-text-field--filled .mdc-line-ripple::before,
+::ng-deep .mdc-text-field--filled .mdc-line-ripple::after {
+  border-bottom: none !important;
+}

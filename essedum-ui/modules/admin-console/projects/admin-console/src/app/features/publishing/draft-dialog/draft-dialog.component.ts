@@ -26,6 +26,7 @@ export interface DraftDialogResult {
 @Component({
   selector: 'app-draft-dialog',
   templateUrl: './draft-dialog.component.html',
+  styleUrls: ['./draft-dialog.component.scss'],
   standalone: false,
 })
 export class DraftDialogComponent implements OnInit {
