@@ -143,8 +143,15 @@
         type="button">
         App Pipelines
       </button>
-      <button 
-        class="toggle-button" 
+      <button
+        class="toggle-button"
+        [class.active]="pipelineMode === 'restBackendApp'"
+        (click)="switchToPipelineMode('restBackendApp')"
+        type="button">
+        REST Backend Apps
+      </button>
+      <button
+        class="toggle-button"
         [class.active]="pipelineMode === 'pipeline'"
         (click)="switchToPipelineMode('pipeline')"
         type="button">

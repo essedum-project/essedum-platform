@@ -480,7 +480,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   isZipFromGitHubPull = false;
 
   // MCP Pipeline Mode Support
-  pipelineMode: 'agent' | 'mcp' | 'app' = 'agent';
+  pipelineMode: 'agent' | 'mcp' | 'app' | 'restBackendApp' = 'agent';
 
   // Hardcoded agent cards with fixed cnames
   agentCards: AgentCard[] = [
@@ -3420,9 +3420,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    *   mcp-pipeline    → mcp
    *   app-pipeline    → app
    */
-  private modeFromInterfaceType(interfacetype: string): 'agent' | 'mcp' | 'app' {
-    if (interfacetype === 'mcp-pipeline') return 'mcp';
-    if (interfacetype === 'app-pipeline') return 'app';
+  private modeFromInterfaceType(interfacetype: string): 'agent' | 'mcp' | 'app' | 'restBackendApp' {
+    if (interfacetype === 'mcp-pipeline')              return 'mcp';
+    if (interfacetype === 'app-pipeline')              return 'app';
+    if (interfacetype === 'rest-backend-app-pipeline') return 'restBackendApp';
     return 'agent';
   }
 

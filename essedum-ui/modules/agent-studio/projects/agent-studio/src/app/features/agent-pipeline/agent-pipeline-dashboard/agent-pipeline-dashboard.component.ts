@@ -36,6 +36,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       return 'MCP Pipelines';
     } else if (this.pipelineMode === 'app') {
       return 'App Pipelines';
+    } else if (this.pipelineMode === 'restBackendApp') {
+      return 'REST Backend App';
     } else if (this.pipelineMode === 'pipeline') {
       return 'Native Pipelines';
     } else if (this.pipelineMode === 'data') {
@@ -49,7 +51,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   readonly SERVICE_V1 = 'pipelineagent';
 
   // Pipeline Mode Support
-  pipelineMode: 'agent' | 'mcp' | 'app' | 'pipeline' | 'data' | 'training' = 'agent';
+  pipelineMode: 'agent' | 'mcp' | 'app' | 'restBackendApp' | 'pipeline' | 'data' | 'training' = 'agent';
 
   // Component state
   hoverStates: boolean[] = [];
@@ -208,7 +210,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   private handleRouteState(): void {
     const state = this.location.getState() as any;
 
-    if (state?.pipelineMode && ['agent', 'mcp', 'app'].includes(state.pipelineMode)) {
+    if (state?.pipelineMode && ['agent', 'mcp', 'app', 'restBackendApp'].includes(state.pipelineMode)) {
       this.pipelineMode = state.pipelineMode;
     }
 
@@ -559,14 +561,14 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     }
 
     const modeConfig = this.getCreateDialogConfig();
-    
+
     const dialogRef = this.dialog.open(PipelineCreateComponent, {
       width: '460px',
       maxWidth: '92vw',
       disableClose: true,
       data: modeConfig.data
     });
-    
+
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.service.message(modeConfig.successMessage, 'success');
@@ -586,6 +588,11 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
         return {
           data: { interfacetype: 'app-pipeline', type: 'appPipeline', mode: 'create' },
           successMessage: 'App Pipeline created successfully!'
+        };
+      case 'restBackendApp':
+        return {
+          data: { interfacetype: 'rest-backend-app-pipeline', type: 'restBackendApp', mode: 'create' },
+          successMessage: 'REST Backend App Tool created successfully!'
         };
       case 'pipeline':
         return {
@@ -677,13 +684,15 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
           });
         }
       }
-      // For agent, MCP, and app pipeline types - use existing logic
-      else if (this.streamItem.type === 'AIAgent' || 
-          this.streamItem.type === 'mcpServer' || 
+      // For agent, MCP, app, and REST backend pipeline types - use existing logic
+      else if (this.streamItem.type === 'AIAgent' ||
+          this.streamItem.type === 'mcpServer' ||
           this.streamItem.type === 'appPipeline' ||
+          this.streamItem.type === 'restBackendApp' ||
           this.streamItem.type === 'NativeScript' ||
           this.pipelineMode === 'mcp' ||
           this.pipelineMode === 'app' ||
+          this.pipelineMode === 'restBackendApp' ||
           (this.pipelineMode === 'agent' && this.streamItem.interfacetype === 'pipeline-agent')) {
         this.router.navigate(['./view' + '/' + card.name], navigationExtras);
       } else {
@@ -777,7 +786,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   /**
    * Switch to specific pipeline mode - simplified method
    */
-  switchToPipelineMode(mode: 'agent' | 'mcp' | 'app' | 'pipeline' | 'data' | 'training'): void {
+  switchToPipelineMode(mode: 'agent' | 'mcp' | 'app' | 'restBackendApp' | 'pipeline' | 'data' | 'training'): void {
     
     if (this.pipelineMode !== mode) {
       this.pipelineMode = mode;
@@ -812,6 +821,11 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       return {
         type: 'appPipeline',
         interfacetype: 'app-pipeline'
+      };
+    } else if (this.pipelineMode === 'restBackendApp') {
+      return {
+        type: 'restBackendApp',
+        interfacetype: 'rest-backend-app-pipeline'
       };
     } else if (this.pipelineMode === 'pipeline') {
       return {

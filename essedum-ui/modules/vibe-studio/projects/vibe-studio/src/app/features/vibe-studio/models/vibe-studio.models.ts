@@ -13,7 +13,7 @@ export interface VibeSession {
   status: VibeSessionStatus;
 }
 
-export type AppType = 'agent' | 'mcp_server' | 'react_app' | 'streamlit';
+export type AppType = 'agent' | 'mcp_server' | 'react_app' | 'streamlit' | 'rest_tool';
 
 export type VibeModel = string;
 
@@ -109,6 +109,12 @@ export const APP_TYPE_OPTIONS: { label: string; value: AppType; icon: string; de
     value: 'mcp_server',
     icon: 'assets/img/resources_icon.jpg',
     description: 'Build a Model Context Protocol server integration'
+  },
+  {
+    label: 'Python REST Backend App',
+    value: 'rest_tool',
+    icon: 'assets/img/tools_icon.jpg',
+    description: 'FastAPI/Flask REST backend service callable by Goose agents'
   },
   {
     label: 'React App',

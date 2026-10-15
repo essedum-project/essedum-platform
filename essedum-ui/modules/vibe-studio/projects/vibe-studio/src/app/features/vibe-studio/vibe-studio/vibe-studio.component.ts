@@ -115,6 +115,10 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
       type = 'MCPServer';
       interfacetype = 'mcp-pipeline';
       pipelineScreen = 'MCP Pipelines';
+    } else if (this.selectedAppType === 'rest_tool') {
+      type = 'restBackendApp';
+      interfacetype = 'rest-backend-app-pipeline';
+      pipelineScreen = 'REST Backend Apps';
     } else {
       return;
     }
