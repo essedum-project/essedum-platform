@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.lfn.iamp.usm.audit.AuditService;
 import com.lfn.iamp.usm.domain.Organisation;
 import com.lfn.iamp.usm.domain.Project;
@@ -31,6 +33,8 @@ import com.lfn.iamp.usm.repository.UsersRepository;
  */
 @Service
 public class AccessContextService {
+
+	private static final Logger log = LoggerFactory.getLogger(AccessContextService.class);
 
 	/** Matches rbac_role's seeded platform_admin rank (changelog/rbac/rbac.xml). */
 	private static final int PLATFORM_ADMIN_RANK = 4;
@@ -147,7 +151,14 @@ public class AccessContextService {
 				"role " + roleId + " granted, org=" + organizationId + " project=" + projectId);
 		identityProjectionService.enqueueForProject(projectId);
 		if (projectId != null) {
-			bridgeToLegacyUserProjectRole(userId, roleId, projectId);
+			// Best-effort mirror into the legacy table — must never fail or roll
+			// back the authoritative RBAC grant above (see bridge method javadoc).
+			try {
+				bridgeToLegacyUserProjectRole(userId, roleId, projectId);
+			} catch (RuntimeException e) {
+				log.warn("Legacy usm_user_project_role bridge skipped for user {} project {}: {}", userId, projectId,
+						e.getMessage());
+			}
 		}
 		return saved;
 	}
@@ -181,7 +192,10 @@ public class AccessContextService {
 				.findFirst().orElse(null);
 
 		Project project = projectRepository.findById(projectId).orElse(null);
-		if (project == null) {
+		if (project == null || project.getPortfolioId() == null) {
+			// usm_user_project_role.portfolio_id is NOT NULL, and projects
+			// created after the §1 org/portfolio split never get one — nothing
+			// safe to bridge, so skip (the RBAC grant itself still succeeds).
 			return;
 		}
 
