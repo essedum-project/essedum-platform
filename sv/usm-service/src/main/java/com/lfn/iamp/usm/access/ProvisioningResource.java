@@ -14,8 +14,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import com.lfn.iamp.usm.audit.AuditService;
 import com.lfn.iamp.usm.domain.Organisation;
 import com.lfn.iamp.usm.domain.Project;
+import com.lfn.iamp.usm.domain.UsmPortfolio;
 import com.lfn.iamp.usm.repository.OrganisationRepository;
 import com.lfn.iamp.usm.repository.ProjectRepository;
+import com.lfn.iamp.usm.repository.UsmPortfolioRepository;
 import com.lfn.iamp.usm.tenancy.Environment;
 import com.lfn.iamp.usm.tenancy.EnvironmentRepository;
 
@@ -39,17 +41,36 @@ public class ProvisioningResource {
 	private final EnvironmentRepository environmentRepository;
 	private final RbacRoleRepository rbacRoleRepository;
 	private final AuditService auditService;
+	private final UsmPortfolioRepository usmPortfolioRepository;
 
 	public ProvisioningResource(AccessContextService accessContextService,
 			OrganisationRepository organisationRepository, ProjectRepository projectRepository,
 			EnvironmentRepository environmentRepository, RbacRoleRepository rbacRoleRepository,
-			AuditService auditService) {
+			AuditService auditService, UsmPortfolioRepository usmPortfolioRepository) {
 		this.accessContextService = accessContextService;
 		this.organisationRepository = organisationRepository;
 		this.projectRepository = projectRepository;
 		this.environmentRepository = environmentRepository;
 		this.rbacRoleRepository = rbacRoleRepository;
 		this.auditService = auditService;
+		this.usmPortfolioRepository = usmPortfolioRepository;
+	}
+
+	/**
+	 * Every project needs a legacy usm_portfolio link (usm_user_project_role.
+	 * portfolio_id is NOT NULL) for the RBAC→legacy bridge and the shell's
+	 * header switcher to work. New orgs/projects have no such link by default
+	 * (portfolios were replaced by organisations) — find-or-create one by name.
+	 */
+	private UsmPortfolio findOrCreatePortfolio(String name) {
+		return usmPortfolioRepository.findAll().stream()
+				.filter(p -> name.equals(p.getPortfolioName()))
+				.findFirst()
+				.orElseGet(() -> {
+					UsmPortfolio p = new UsmPortfolio();
+					p.setPortfolioName(name);
+					return usmPortfolioRepository.save(p);
+				});
 	}
 
 	private void require(Integer actorUserId, int minRank, String action) {
@@ -72,6 +93,7 @@ public class ProvisioningResource {
 		org.setStatus(req.status() != null ? req.status() : "active");
 		org.setOnboarded(Boolean.TRUE);
 		Organisation saved = organisationRepository.save(org);
+		findOrCreatePortfolio(saved.getName());
 		auditService.record("organisation", "created", actorUserId, "User #" + actorUserId,
 				"organisation \"" + saved.getName() + "\" created");
 		return ResponseEntity.ok(saved);
@@ -87,6 +109,8 @@ public class ProvisioningResource {
 		p.setProjectdisplayname(req.name());
 		p.setDescription(req.description());
 		p.setOrganisationId(req.organisationId());
+		organisationRepository.findById(req.organisationId())
+				.ifPresent(org -> p.setPortfolioId(findOrCreatePortfolio(org.getName())));
 		Project saved = projectRepository.save(p);
 		auditService.record("project", "created", actorUserId, "User #" + actorUserId,
 				"project \"" + saved.getName() + "\" created (org=" + req.organisationId() + ")");
