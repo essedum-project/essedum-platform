@@ -1,7 +1,10 @@
 package com.lfn.iamp.usm.access;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,8 +17,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import com.lfn.iamp.usm.audit.AuditService;
 import com.lfn.iamp.usm.domain.Organisation;
 import com.lfn.iamp.usm.domain.Project;
+import com.lfn.iamp.usm.domain.UsmPortfolio;
 import com.lfn.iamp.usm.repository.OrganisationRepository;
 import com.lfn.iamp.usm.repository.ProjectRepository;
+import com.lfn.iamp.usm.repository.UsmPortfolioRepository;
 import com.lfn.iamp.usm.tenancy.Environment;
 import com.lfn.iamp.usm.tenancy.EnvironmentRepository;
 
@@ -39,17 +44,36 @@ public class ProvisioningResource {
 	private final EnvironmentRepository environmentRepository;
 	private final RbacRoleRepository rbacRoleRepository;
 	private final AuditService auditService;
+	private final UsmPortfolioRepository usmPortfolioRepository;
 
 	public ProvisioningResource(AccessContextService accessContextService,
 			OrganisationRepository organisationRepository, ProjectRepository projectRepository,
 			EnvironmentRepository environmentRepository, RbacRoleRepository rbacRoleRepository,
-			AuditService auditService) {
+			AuditService auditService, UsmPortfolioRepository usmPortfolioRepository) {
 		this.accessContextService = accessContextService;
 		this.organisationRepository = organisationRepository;
 		this.projectRepository = projectRepository;
 		this.environmentRepository = environmentRepository;
 		this.rbacRoleRepository = rbacRoleRepository;
 		this.auditService = auditService;
+		this.usmPortfolioRepository = usmPortfolioRepository;
+	}
+
+	/**
+	 * Every project needs a legacy usm_portfolio link (usm_user_project_role.
+	 * portfolio_id is NOT NULL) for the RBAC→legacy bridge and the shell's
+	 * header switcher to work. New orgs/projects have no such link by default
+	 * (portfolios were replaced by organisations) — find-or-create one by name.
+	 */
+	private UsmPortfolio findOrCreatePortfolio(String name) {
+		return usmPortfolioRepository.findAll().stream()
+				.filter(p -> name.equals(p.getPortfolioName()))
+				.findFirst()
+				.orElseGet(() -> {
+					UsmPortfolio p = new UsmPortfolio();
+					p.setPortfolioName(name);
+					return usmPortfolioRepository.save(p);
+				});
 	}
 
 	private void require(Integer actorUserId, int minRank, String action) {
@@ -71,7 +95,14 @@ public class ProvisioningResource {
 		org.setName(req.name());
 		org.setStatus(req.status() != null ? req.status() : "active");
 		org.setOnboarded(Boolean.TRUE);
-		Organisation saved = organisationRepository.save(org);
+		Organisation saved;
+		try {
+			saved = organisationRepository.save(org);
+		} catch (DataIntegrityViolationException e) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"An organization named \"" + req.name() + "\" already exists");
+		}
+		findOrCreatePortfolio(saved.getName());
 		auditService.record("organisation", "created", actorUserId, "User #" + actorUserId,
 				"organisation \"" + saved.getName() + "\" created");
 		return ResponseEntity.ok(saved);
@@ -87,10 +118,52 @@ public class ProvisioningResource {
 		p.setProjectdisplayname(req.name());
 		p.setDescription(req.description());
 		p.setOrganisationId(req.organisationId());
-		Project saved = projectRepository.save(p);
+		organisationRepository.findById(req.organisationId())
+				.ifPresent(org -> p.setPortfolioId(findOrCreatePortfolio(org.getName())));
+		Project saved;
+		try {
+			saved = projectRepository.save(p);
+		} catch (DataIntegrityViolationException e) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"A project named \"" + req.name() + "\" already exists");
+		}
 		auditService.record("project", "created", actorUserId, "User #" + actorUserId,
 				"project \"" + saved.getName() + "\" created (org=" + req.organisationId() + ")");
 		return ResponseEntity.ok(saved);
+	}
+
+	@DeleteMapping("/organizations/{id}")
+	public ResponseEntity<Void> deleteOrganization(@PathVariable Integer id, @RequestParam Integer actorUserId) {
+		require(actorUserId, PLATFORM_ADMIN, "delete an organization");
+		long projectCount = projectRepository.findAll().stream().filter(p -> id.equals(p.getOrganisationId())).count();
+		if (projectCount > 0) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"Delete its " + projectCount + " project(s) first before deleting this organization");
+		}
+		try {
+			organisationRepository.deleteById(id);
+		} catch (DataIntegrityViolationException e) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"This organization is still referenced elsewhere and cannot be deleted");
+		}
+		auditService.record("organisation", "deleted", actorUserId, "User #" + actorUserId,
+				"organisation #" + id + " deleted");
+		return ResponseEntity.noContent().build();
+	}
+
+	@DeleteMapping("/projects/{id}")
+	public ResponseEntity<Void> deleteProject(@PathVariable Integer id, @RequestParam Integer actorUserId) {
+		require(actorUserId, ORG_ADMIN, "delete a project");
+		try {
+			projectRepository.deleteById(id);
+		} catch (DataIntegrityViolationException e) {
+			// usm_project is FK-referenced from many legacy modules (datasets,
+			// pipelines, surveys, etc.) — report instead of attempting a cascade.
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"This project still has dependent data (pipelines, datasets, environments, etc.) and cannot be deleted");
+		}
+		auditService.record("project", "deleted", actorUserId, "User #" + actorUserId, "project #" + id + " deleted");
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/environments")

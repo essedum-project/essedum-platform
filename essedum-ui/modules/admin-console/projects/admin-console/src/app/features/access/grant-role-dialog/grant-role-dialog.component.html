@@ -31,7 +31,7 @@
 
   <mat-form-field appearance="fill" class="full-width" *ngIf="scopeType === 'organization'">
     <mat-label>Organization</mat-label>
-    <mat-select [(ngModel)]="organizationId" name="organizationId">
+    <mat-select [(ngModel)]="organizationId" name="organizationId" (ngModelChange)="onOrganizationChange()">
       <mat-option *ngFor="let o of organizations" [value]="o.id">{{ o.name }}</mat-option>
     </mat-select>
   </mat-form-field>

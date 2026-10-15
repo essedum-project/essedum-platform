@@ -17,9 +17,12 @@ export class GrantRoleDialogComponent implements OnInit {
 
   userId: number | null = null;
   roleId: number | null = null;
-  scopeType: 'project' | 'organization' | 'platform' = 'project';
   organizationId: number | null = null;
-  projectId: number | null = null;
+  // true = org-scoped grant (dynamic — automatically covers future projects
+  // too, per AccessContextService's org→project expansion); false = pick
+  // specific current projects.
+  wholeOrganization = true;
+  projectIds: number[] = [];
 
   constructor(
     private readonly ref: MatDialogRef<GrantRoleDialogComponent>,
@@ -33,15 +36,31 @@ export class GrantRoleDialogComponent implements OnInit {
     this.api.getProjects().subscribe(projects => (this.projects = projects));
   }
 
+  // Org-scoped grant is org-first: pick the org, then either apply to the
+  // whole org (dynamic) or pick which of its current projects to grant into.
+  get projectsForOrg(): LegacyProject[] {
+    return this.organizationId == null
+      ? []
+      : this.projects.filter(p => p.organisationId === this.organizationId);
+  }
+
+  onOrganizationChange(): void {
+    this.wholeOrganization = true;
+    this.projectIds = [];
+  }
+
   save(): void {
-    if (!this.userId || !this.roleId) {
+    if (!this.userId || !this.roleId || !this.organizationId) {
+      return;
+    }
+    if (!this.wholeOrganization && this.projectIds.length === 0) {
       return;
     }
     this.ref.close({
       userId: this.userId,
       roleId: this.roleId,
-      organizationId: this.scopeType === 'organization' ? this.organizationId : null,
-      projectId: this.scopeType === 'project' ? this.projectId : null,
+      organizationId: this.wholeOrganization ? this.organizationId : null,
+      projectIds: this.wholeOrganization ? [] : this.projectIds,
     });
   }
 

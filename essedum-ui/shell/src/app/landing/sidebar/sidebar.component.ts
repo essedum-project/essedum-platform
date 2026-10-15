@@ -308,23 +308,14 @@ export class SidebarComponent implements OnInit {
           fallback();
           return;
         }
-        const roots = items.filter((it) => it.parentId == null);
-        const buildNode = (item: any): any => ({
-          label: item.label,
-          icon: item.parentId == null ? "shield" : "",
-          url: `.${item.route}`,
-          children: items
-            .filter((child) => child.parentId === item.id)
-            .sort((a, b) => a.displayOrder - b.displayOrder)
-            .map(buildNode),
-        });
-        roots
+        // Flat, one row per item — matches every other sidebar entry (icon +
+        // label + url), not a nested accordion. Each item keeps its own icon
+        // from rbac_menu_item instead of a hardcoded shield/blank pair.
+        items
+          .slice()
           .sort((a, b) => a.displayOrder - b.displayOrder)
-          .forEach((root) => {
-            const node = buildNode(root);
-            // Key the dedup on url, not label — a stale legacy entry sharing
-            // the same label (e.g. "Secret Management") must not mask the
-            // new data-driven node.
+          .forEach((item) => {
+            const node = { label: item.label, icon: item.icon || "circle", url: `.${item.route}` };
             if (!this.sidebarMenu.some((it: any) => it && it.url === node.url)) {
               this.sidebarMenu.push(node);
             }
@@ -1182,7 +1173,11 @@ export class SidebarComponent implements OnInit {
     // this.route.navigate([url])
   }
 
-  trackByMethod(index, item) { }
+  // Was a no-op (implicit `undefined` return) — every row shared the same
+  // trackBy identity, so *ngFor's differ silently dropped items pushed into
+  // sidebarMenu after the first change-detection pass (e.g. the async
+  // RBAC-driven admin-console entries). Must return a per-item stable key.
+  trackByMethod(index, item) { return (item && (item.url || item.label)) || index; }
   checkDashConstantResponseForKeys(){
     let project;
     try {
