@@ -124,6 +124,7 @@ body.header-light-theme .cdk-overlay-container {
   color: var(--ac-text) !important;
   border: 1px solid var(--ac-border);
   border-radius: var(--ac-radius) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 .mat-mdc-dialog-title { color: var(--ac-text) !important; margin: 0 0 8px !important; }
 .mat-mdc-dialog-content {
@@ -131,6 +132,8 @@ body.header-light-theme .cdk-overlay-container {
   padding-top: 8px !important; color: var(--ac-text) !important;
   min-width: 360px;
 }
+.mat-mdc-dialog-actions { border-top: none !important; padding: 16px 0 0 !important; }
+
 
 /* ---- tabs ---- */
 .mat-mdc-tab .mdc-tab__text-label { color: var(--ac-text-muted); }
@@ -149,3 +152,8 @@ body.header-light-theme .cdk-overlay-container {
 }
 
 .tab-actions { display: flex; align-items: center; gap: 12px; }
+
+/* ---- dialog backdrop: darken the page behind so the surface reads clearly ---- */
+.cdk-overlay-dark-backdrop { background: rgba(2, 6, 23, 0.55); }
+
+

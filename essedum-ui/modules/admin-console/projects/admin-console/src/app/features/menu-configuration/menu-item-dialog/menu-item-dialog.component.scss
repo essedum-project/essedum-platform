@@ -1,0 +1,3 @@
+// Shared dialog chrome (.ac-dialog-header, .ac-dialog-content, etc.) lives in
+// the global styles.scss, keyed off panelClass: 'ac-dialog-panel' set when
+// this dialog is opened — nothing component-specific needed here.

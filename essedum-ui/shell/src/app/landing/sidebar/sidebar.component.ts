@@ -246,8 +246,8 @@ export class SidebarComponent implements OnInit {
    * (plan §7 cutover). These are stripped from the sidebar — however the menu
    * was built (DashConstant "Admin Side" records OR populateDefaultSidebarMenu)
    * — so the data-driven "Admin Console" tree replaces them. Secret Management
-   * (./iamp-usm/secret) is deliberately kept: the new console has no secrets
-   * screen, so that existing USM feature stays reachable.
+   * (./iamp-usm/secret) is now superseded too — admin-console has a native
+   * replacement at /admin-console/secrets.
    */
   private readonly supersededAdminUrls = [
     "./iamp-usm/projectlist",
@@ -257,6 +257,7 @@ export class SidebarComponent implements OnInit {
     "./iamp-usm/permissionlist",
     "./iamp-usm/dashconstant",
     "./iamp-usm/dashconstant/side",
+    "./iamp-usm/secret",
   ];
 
   private stripSupersededAdminEntries(): void {
@@ -321,7 +322,10 @@ export class SidebarComponent implements OnInit {
           .sort((a, b) => a.displayOrder - b.displayOrder)
           .forEach((root) => {
             const node = buildNode(root);
-            if (!this.sidebarMenu.some((it: any) => it && it.label === node.label)) {
+            // Key the dedup on url, not label — a stale legacy entry sharing
+            // the same label (e.g. "Secret Management") must not mask the
+            // new data-driven node.
+            if (!this.sidebarMenu.some((it: any) => it && it.url === node.url)) {
               this.sidebarMenu.push(node);
             }
           });

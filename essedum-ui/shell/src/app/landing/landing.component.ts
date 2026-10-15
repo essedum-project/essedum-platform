@@ -3854,8 +3854,8 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   // Legacy iamp-usm admin screens superseded by the admin-console MFE. These
   // are stripped from whatever DashConstant-built menu lands in sidebarMenu,
   // and replaced by the data-driven /api/usm/menu "Admin Console" tree.
-  // Secret Management (./iamp-usm/secret) is intentionally kept — the new
-  // console has no secrets screen.
+  // Secret Management (./iamp-usm/secret) is now superseded too — admin-console
+  // has a native replacement at /admin-console/secrets.
   private readonly supersededAdminUrls = [
     "./iamp-usm/projectlist",
     "./iamp-usm/portfoliolist",
@@ -3864,6 +3864,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
     "./iamp-usm/permissionlist",
     "./iamp-usm/dashconstant",
     "./iamp-usm/dashconstant/side",
+    "./iamp-usm/secret",
   ];
   rbacMenuNodes: any[] = [];
   private rbacMenuFetched = false;
