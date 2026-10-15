@@ -137,10 +137,38 @@ mat-tab-group ::ng-deep .mdc-tab--active {
   color: #94a3b8 !important;
 }
 
-.admin-console-table ::ng-deep button {
-  color: var(--ac-accent) !important;
-  font-weight: 600 !important;
+/* in-table action buttons */
+::ng-deep .tbl-btn {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  cursor: pointer !important;
+  color: #4f8ef7 !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  font-family: inherit !important;
+  padding: 5px 12px !important;
+  border-radius: 6px !important;
+  line-height: 1 !important;
+  transition: background 0.12s ease !important;
 }
+
+::ng-deep .tbl-btn:hover:not(:disabled) {
+  background: rgba(79, 142, 247, 0.12) !important;
+  color: #7aadfb !important;
+}
+
+::ng-deep .tbl-btn:disabled {
+  color: #475569 !important;
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+:host(.light-theme) ::ng-deep .tbl-btn { color: #2563eb !important; }
+:host(.light-theme) ::ng-deep .tbl-btn:hover:not(:disabled) { color: #1d4ed8 !important; }
 
 :host(.light-theme) .admin-console-table ::ng-deep .mat-mdc-cell {
   color: #1e293b !important;

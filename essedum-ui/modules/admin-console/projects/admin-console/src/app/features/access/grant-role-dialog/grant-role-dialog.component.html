@@ -1,38 +1,41 @@
 <h2 mat-dialog-title>Grant Role</h2>
 <div mat-dialog-content>
-  <mat-form-field appearance="outline" class="full-width">
+
+  <mat-form-field appearance="fill" class="full-width">
     <mat-label>User</mat-label>
     <mat-select [(ngModel)]="userId" name="userId">
       <mat-option *ngFor="let u of users" [value]="u.id">{{ u.name }}</mat-option>
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="full-width">
+  <mat-form-field appearance="fill" class="full-width">
     <mat-label>Role</mat-label>
     <mat-select [(ngModel)]="roleId" name="roleId">
       <mat-option *ngFor="let role of roles" [value]="role.id">{{ role.name }}</mat-option>
     </mat-select>
   </mat-form-field>
 
+  <div class="scope-label">Scope</div>
   <mat-radio-group [(ngModel)]="scopeType" name="scopeType" class="scope-group">
     <mat-radio-button value="project">Project</mat-radio-button>
     <mat-radio-button value="organization">Organization</mat-radio-button>
     <mat-radio-button value="platform">Platform</mat-radio-button>
   </mat-radio-group>
 
-  <mat-form-field appearance="outline" class="full-width" *ngIf="scopeType === 'project'">
+  <mat-form-field appearance="fill" class="full-width" *ngIf="scopeType === 'project'">
     <mat-label>Project</mat-label>
     <mat-select [(ngModel)]="projectId" name="projectId">
       <mat-option *ngFor="let p of projects" [value]="p.id">{{ p.name }}</mat-option>
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="full-width" *ngIf="scopeType === 'organization'">
+  <mat-form-field appearance="fill" class="full-width" *ngIf="scopeType === 'organization'">
     <mat-label>Organization</mat-label>
     <mat-select [(ngModel)]="organizationId" name="organizationId">
       <mat-option *ngFor="let o of organizations" [value]="o.id">{{ o.name }}</mat-option>
     </mat-select>
   </mat-form-field>
+
 </div>
 <div mat-dialog-actions align="end">
   <button mat-button (click)="cancel()">Cancel</button>

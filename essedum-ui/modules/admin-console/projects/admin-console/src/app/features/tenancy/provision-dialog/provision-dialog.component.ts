@@ -8,6 +8,7 @@ export type ProvisionKind = 'organization' | 'project' | 'environment' | 'role';
 @Component({
   selector: 'app-provision-dialog',
   templateUrl: './provision-dialog.component.html',
+  styleUrls: ['./provision-dialog.component.scss'],
   standalone: false,
 })
 export class ProvisionDialogComponent implements OnInit {

@@ -6,6 +6,7 @@ import { RbacRole, LegacyOrganisation, LegacyProject, UserOption } from '../../.
 @Component({
   selector: 'app-grant-role-dialog',
   templateUrl: './grant-role-dialog.component.html',
+  styleUrls: ['./grant-role-dialog.component.scss'],
   standalone: false,
 })
 export class GrantRoleDialogComponent implements OnInit {

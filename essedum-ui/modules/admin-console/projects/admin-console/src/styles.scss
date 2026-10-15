@@ -138,40 +138,168 @@ body.header-light-theme .cdk-overlay-container {
 /* ---- buttons ---- */
 .mat-mdc-raised-button.mat-primary,
 .mat-mdc-raised-button[color='primary'] {
-  background: linear-gradient(135deg, #5b96f9, #3f7ae0) !important;
-  color: #fff !important; border-radius: 8px !important; box-shadow: none !important;
+  background: linear-gradient(135deg, #4f8ef7, #2563eb) !important;
+  color: #fff !important; border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
 }
 .mat-mdc-stroked-button.mat-primary, .mat-mdc-button.mat-primary { color: var(--ac-accent) !important; }
 .mat-mdc-button.mat-warn, .mat-mdc-button[color='warn'], .mat-mdc-stroked-button[color='warn'] { color: #ef4444 !important; }
 
+/* ---- in-table action buttons (plain — no mat-button) ---- */
+.tbl-btn {
+  /* full browser reset */
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  margin: 0;
+
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  color: #4f8ef7;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: inherit;
+  letter-spacing: 0.2px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: background 0.12s ease, color 0.12s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(79, 142, 247, 0.12);
+    color: #7aadfb;
+  }
+
+  &:disabled {
+    color: #475569;
+    cursor: default;
+    pointer-events: none;
+  }
+}
+
+.tbl-btn--warn {
+  color: #f87171;
+
+  &:hover:not(:disabled) {
+    background: rgba(248, 113, 113, 0.12);
+    color: #fca5a5;
+  }
+}
+
+/* light theme */
+.admin-console-shell.light-theme .tbl-btn {
+  color: #2563eb;
+  &:hover:not(:disabled) { background: rgba(37, 99, 235, 0.08); color: #1d4ed8; }
+  &:disabled { color: #94a3b8; }
+}
+
+.admin-console-shell.light-theme .tbl-btn--warn {
+  color: #dc2626;
+  &:hover:not(:disabled) { background: rgba(220, 38, 38, 0.08); color: #b91c1c; }
+}
+
 /* ---- filters / toolbars ---- */
 .menu-filters { align-items: center; flex-wrap: wrap; }
 
-/* ---- Material form fields ---- */
+/* ---- Material form fields (general) ---- */
 .mat-mdc-form-field { width: 100%; }
-.admin-console-shell .mat-mdc-text-field-wrapper,
-.mat-mdc-dialog-surface .mat-mdc-text-field-wrapper { background: var(--ac-surface-2); border-radius: 8px; }
-.mat-mdc-dialog-surface {
-  .mdc-notched-outline__leading, .mdc-notched-outline__notch, .mdc-notched-outline__trailing { border-color: var(--ac-border) !important; }
-  .mat-mdc-form-field-infix input, .mat-mdc-select-value-text, .mat-mdc-select-min-line { color: var(--ac-text) !important; }
-  .mat-mdc-floating-label, .mat-mdc-form-field-hint, .mdc-floating-label { color: var(--ac-text-muted) !important; }
-}
 
-/* ---- dialogs: proper stacked, spaced form ---- */
+/* ---- dialogs ---- */
 .mat-mdc-dialog-surface {
   background: var(--ac-surface) !important;
   color: var(--ac-text) !important;
-  border: 1px solid var(--ac-border);
+  border: 1px solid var(--ac-border) !important;
   border-radius: var(--ac-radius) !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden !important;
+  min-width: 460px !important;
 }
-.mat-mdc-dialog-title { color: var(--ac-text) !important; margin: 0 0 8px !important; }
+
+.mat-mdc-dialog-title {
+  color: var(--ac-text) !important;
+  margin: 0 !important;
+  padding: 22px 24px 16px !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  border-bottom: 1px solid var(--ac-border) !important;
+}
+
 .mat-mdc-dialog-content {
-  display: flex; flex-direction: column; gap: 6px;
-  padding-top: 8px !important; color: var(--ac-text) !important;
-  min-width: 360px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  padding: 20px 24px !important;
+  color: var(--ac-text) !important;
+  overflow-y: auto !important;
 }
-.mat-mdc-dialog-actions { border-top: none !important; padding: 16px 0 0 !important; }
+
+.mat-mdc-dialog-actions {
+  padding: 12px 24px 20px !important;
+  border-top: 1px solid var(--ac-border) !important;
+  gap: 10px !important;
+}
+
+/* ---- fill-style form fields inside dialogs ---- */
+.mat-mdc-dialog-surface {
+  /* wrapper background — no outline, rounded bottom only */
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    background: var(--ac-surface-2) !important;
+    border-radius: 8px !important;
+    border: none !important;
+
+    /* remove the ripple underline line */
+    .mdc-line-ripple::before,
+    .mdc-line-ripple::after {
+      display: none !important;
+      border-bottom: none !important;
+    }
+  }
+
+  /* input and select text */
+  .mat-mdc-form-field-infix input,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-min-line {
+    color: var(--ac-text) !important;
+    caret-color: var(--ac-accent) !important;
+  }
+
+  /* floating label */
+  .mdc-floating-label,
+  .mat-mdc-floating-label {
+    color: var(--ac-text-muted) !important;
+  }
+
+  /* select arrow */
+  .mat-mdc-select-arrow svg { fill: var(--ac-text-muted) !important; }
+
+  /* hint / error */
+  .mat-mdc-form-field-hint { color: var(--ac-text-muted) !important; }
+}
+
+/* ---- select dropdown panel ---- */
+.cdk-overlay-container .mat-mdc-select-panel {
+  background: var(--ac-surface-2) !important;
+  border: 1px solid var(--ac-border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
+}
+
+.cdk-overlay-container .mat-mdc-option {
+  color: var(--ac-text) !important;
+
+  &:hover:not(.mdc-list-item--disabled),
+  &.mat-mdc-option-active {
+    background: rgba(79, 142, 247, 0.12) !important;
+  }
+
+  &.mdc-list-item--selected:not(.mat-mdc-option-multiple) {
+    color: var(--ac-accent) !important;
+  }
+}
 
 
 /* ---- tabs ---- */
@@ -179,15 +307,81 @@ body.header-light-theme .cdk-overlay-container {
 .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label { color: var(--ac-text); }
 .mdc-tab-indicator__content--underline { border-color: var(--ac-accent) !important; }
 
-/* ---- status chips ---- */
+/* ---- status badges (not buttons — no border, no elevation) ---- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: default;
+  user-select: none;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+}
+
+.status-badge-active, .status-badge-synced, .status-badge-published, .status-badge-approved {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+.status-badge-pending, .status-badge-in_review, .status-badge-submitted, .status-badge-draft {
+  background-color: rgba(251, 146, 60, 0.15);
+  color: #f59e0b;
+}
+.status-badge-failed, .status-badge-rejected, .status-badge-archived, .status-badge-suspended {
+  background-color: rgba(248, 113, 113, 0.15);
+  color: #ef4444;
+}
+
+/* Legacy mat-chip status classes — override chip's button appearance */
 .status-chip-active, .status-chip-synced, .status-chip-published, .status-chip-approved {
-  background-color: rgba(34, 197, 94, 0.18) !important; color: #16a34a !important;
+  background-color: rgba(34, 197, 94, 0.15) !important; color: #22c55e !important;
+  border: none !important; box-shadow: none !important;
 }
 .status-chip-pending, .status-chip-in_review, .status-chip-submitted, .status-chip-draft {
-  background-color: rgba(251, 146, 60, 0.18) !important; color: #d97706 !important;
+  background-color: rgba(251, 146, 60, 0.15) !important; color: #f59e0b !important;
+  border: none !important; box-shadow: none !important;
 }
 .status-chip-failed, .status-chip-rejected, .status-chip-archived, .status-chip-suspended {
-  background-color: rgba(248, 113, 113, 0.18) !important; color: #dc2626 !important;
+  background-color: rgba(248, 113, 113, 0.15) !important; color: #ef4444 !important;
+  border: none !important; box-shadow: none !important;
+}
+
+/* Strip all button-like MDC chip styles when used as a status badge */
+.admin-console-shell mat-chip.status-chip-active,
+.admin-console-shell mat-chip.status-chip-synced,
+.admin-console-shell mat-chip.status-chip-published,
+.admin-console-shell mat-chip.status-chip-approved,
+.admin-console-shell mat-chip.status-chip-pending,
+.admin-console-shell mat-chip.status-chip-in_review,
+.admin-console-shell mat-chip.status-chip-submitted,
+.admin-console-shell mat-chip.status-chip-draft,
+.admin-console-shell mat-chip.status-chip-failed,
+.admin-console-shell mat-chip.status-chip-rejected,
+.admin-console-shell mat-chip.status-chip-archived,
+.admin-console-shell mat-chip.status-chip-suspended {
+  --mdc-chip-outline-width: 0 !important;
+  --mdc-chip-container-shape-radius: 99px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  cursor: default !important;
+  pointer-events: none !important;
+  height: auto !important;
+  min-height: unset !important;
+  padding: 3px 10px !important;
 }
 
 .tab-actions { display: flex; align-items: center; gap: 12px; }
