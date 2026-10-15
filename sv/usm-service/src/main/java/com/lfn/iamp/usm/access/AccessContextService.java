@@ -244,20 +244,26 @@ public class AccessContextService {
 	 */
 	private void grantTemplatePermissions(Role newRole) {
 		List<UsmRolePermissions> allLinks = usmRolePermissionsRepository.findAll();
-		Role template = allLinks.stream()
-				.map(UsmRolePermissions::getRole)
-				.filter(r -> r != null && !r.getId().equals(newRole.getId())
-						&& java.util.Objects.equals(r.getRoleadmin(), newRole.getRoleadmin())
-						&& java.util.Objects.equals(r.getProjectadmin(), newRole.getProjectadmin()))
-				.collect(Collectors.groupingBy(Role::getId, Collectors.counting()))
-				.entrySet().stream()
-				.max(java.util.Map.Entry.comparingByValue())
-				.map(e -> allLinks.stream().map(UsmRolePermissions::getRole)
-						.filter(r -> r.getId().equals(e.getKey())).findFirst().orElse(null))
-				.orElse(null);
+		// Broadening fallback chain — exact capability match first, then
+		// progressively looser matches, so something is always found as long
+		// as at least one role anywhere has permissions configured.
+		Role template = findTemplateRole(allLinks, newRole,
+				r -> java.util.Objects.equals(r.getRoleadmin(), newRole.getRoleadmin())
+						&& java.util.Objects.equals(r.getProjectadmin(), newRole.getProjectadmin()));
 		if (template == null) {
-			log.warn("No existing legacy role matches roleadmin={} projectadmin={} to copy permissions from for new role #{} — it will have none",
-					newRole.getRoleadmin(), newRole.getProjectadmin(), newRole.getId());
+			template = findTemplateRole(allLinks, newRole,
+					r -> java.util.Objects.equals(r.getProjectadmin(), newRole.getProjectadmin()));
+		}
+		if (template == null) {
+			template = findTemplateRole(allLinks, newRole,
+					r -> java.util.Objects.equals(r.getRoleadmin(), newRole.getRoleadmin()));
+		}
+		if (template == null) {
+			template = findTemplateRole(allLinks, newRole, r -> true);
+		}
+		if (template == null) {
+			log.warn("No existing legacy role has any permissions to copy for new role #{} — it will have none",
+					newRole.getId());
 			return;
 		}
 		for (UsmRolePermissions link : allLinks) {
@@ -269,6 +275,19 @@ public class AccessContextService {
 			}
 		}
 		usmPermissionApiService.refreshConfigAPIsMap();
+	}
+
+	/** The role (other than newRole itself) matching the predicate with the most permission links already configured. */
+	private Role findTemplateRole(List<UsmRolePermissions> allLinks, Role newRole, java.util.function.Predicate<Role> matches) {
+		return allLinks.stream()
+				.map(UsmRolePermissions::getRole)
+				.filter(r -> r != null && !r.getId().equals(newRole.getId()) && matches.test(r))
+				.collect(Collectors.groupingBy(Role::getId, Collectors.counting()))
+				.entrySet().stream()
+				.max(java.util.Map.Entry.comparingByValue())
+				.map(e -> allLinks.stream().map(UsmRolePermissions::getRole)
+						.filter(r -> r.getId().equals(e.getKey())).findFirst().orElse(null))
+				.orElse(null);
 	}
 
 	public void revoke(Integer roleAssignmentId) {
