@@ -81,12 +81,24 @@ export class AccessComponent implements OnInit {
 
   grantRole(): void {
     const ref = this.dialog.open(GrantRoleDialogComponent, { width: '480px' });
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result: { userId: number; roleId: number; organizationId: number | null; projectIds: number[] } | undefined) => {
       if (!result) {
         return;
       }
-      // The acting admin is rank-checked server-side (NFR-SEC2).
-      this.api.grantRole({ ...result, actorUserId: this.userContext.userId$.value }).subscribe(() => this.load());
+      const actorUserId = this.userContext.userId$.value;
+      // Project scope can target multiple (or "all") projects at once — grant
+      // each one individually; the existing endpoint is single-project.
+      const projectIds = result.projectIds.length ? result.projectIds : [null];
+      const grants = projectIds.map(projectId =>
+        this.api.grantRole({
+          userId: result.userId,
+          roleId: result.roleId,
+          organizationId: result.organizationId,
+          projectId,
+          actorUserId,
+        }),
+      );
+      combineLatest(grants).subscribe(() => this.load());
     });
   }
 

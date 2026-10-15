@@ -180,22 +180,26 @@ public class AccessContextService {
 				.filter(upr -> upr.getProject_id() != null && projectId.equals(upr.getProject_id().getId()))
 				.findFirst().orElse(null);
 
+		Project project = projectRepository.findById(projectId).orElse(null);
+		if (project == null) {
+			return;
+		}
+
 		if (existing != null) {
 			existing.setRole_id(legacyRole);
+			existing.setPortfolio_id(project.getPortfolioId());
 			existing.setTime_stamp(ZonedDateTime.now());
 			userProjectRoleRepository.save(existing);
 			return;
 		}
 
 		usersRepository.findById(userId).ifPresent(user -> {
-			Project project = projectRepository.findById(projectId).orElse(null);
-			if (project == null) {
-				return;
-			}
 			UserProjectRole upr = new UserProjectRole();
 			upr.setUser_id(user);
 			upr.setProject_id(project);
 			upr.setRole_id(legacyRole);
+			// usm_user_project_role.portfolio_id is NOT NULL — mirror the project's own portfolio.
+			upr.setPortfolio_id(project.getPortfolioId());
 			upr.setTime_stamp(ZonedDateTime.now());
 			userProjectRoleRepository.save(upr);
 		});

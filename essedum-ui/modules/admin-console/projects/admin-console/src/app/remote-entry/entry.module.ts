@@ -16,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 // Routing
 import { EntryRoutingModule } from './entry-routing.module';
@@ -73,6 +74,7 @@ import { RoleMenuDialogComponent } from '../features/menu-configuration/role-men
     MatRadioModule,
     MatTooltipModule,
     MatDialogModule,
+    MatCheckboxModule,
     EntryRoutingModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
