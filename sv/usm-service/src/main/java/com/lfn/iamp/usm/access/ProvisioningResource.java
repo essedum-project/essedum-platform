@@ -1,5 +1,8 @@
 package com.lfn.iamp.usm.access;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,7 @@ import com.lfn.iamp.usm.domain.Project;
 import com.lfn.iamp.usm.domain.UsmPortfolio;
 import com.lfn.iamp.usm.repository.OrganisationRepository;
 import com.lfn.iamp.usm.repository.ProjectRepository;
+import com.lfn.iamp.usm.repository.UserProjectRoleRepository;
 import com.lfn.iamp.usm.repository.UsmPortfolioRepository;
 import com.lfn.iamp.usm.tenancy.Environment;
 import com.lfn.iamp.usm.tenancy.EnvironmentRepository;
@@ -45,11 +49,14 @@ public class ProvisioningResource {
 	private final RbacRoleRepository rbacRoleRepository;
 	private final AuditService auditService;
 	private final UsmPortfolioRepository usmPortfolioRepository;
+	private final RoleAssignmentRepository roleAssignmentRepository;
+	private final UserProjectRoleRepository userProjectRoleRepository;
 
 	public ProvisioningResource(AccessContextService accessContextService,
 			OrganisationRepository organisationRepository, ProjectRepository projectRepository,
 			EnvironmentRepository environmentRepository, RbacRoleRepository rbacRoleRepository,
-			AuditService auditService, UsmPortfolioRepository usmPortfolioRepository) {
+			AuditService auditService, UsmPortfolioRepository usmPortfolioRepository,
+			RoleAssignmentRepository roleAssignmentRepository, UserProjectRoleRepository userProjectRoleRepository) {
 		this.accessContextService = accessContextService;
 		this.organisationRepository = organisationRepository;
 		this.projectRepository = projectRepository;
@@ -57,6 +64,8 @@ public class ProvisioningResource {
 		this.rbacRoleRepository = rbacRoleRepository;
 		this.auditService = auditService;
 		this.usmPortfolioRepository = usmPortfolioRepository;
+		this.roleAssignmentRepository = roleAssignmentRepository;
+		this.userProjectRoleRepository = userProjectRoleRepository;
 	}
 
 	/**
@@ -135,11 +144,17 @@ public class ProvisioningResource {
 	@DeleteMapping("/organizations/{id}")
 	public ResponseEntity<Void> deleteOrganization(@PathVariable Integer id, @RequestParam Integer actorUserId) {
 		require(actorUserId, PLATFORM_ADMIN, "delete an organization");
-		long projectCount = projectRepository.findAll().stream().filter(p -> id.equals(p.getOrganisationId())).count();
-		if (projectCount > 0) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT,
-					"Delete its " + projectCount + " project(s) first before deleting this organization");
+		// Cascade: its projects (and their role mappings) go with it. Org-scoped
+		// role assignments (no specific project) are cleared too.
+		List<Project> orgProjects = projectRepository.findAll().stream()
+				.filter(p -> id.equals(p.getOrganisationId()))
+				.collect(Collectors.toList());
+		for (Project p : orgProjects) {
+			deleteProjectCascade(p.getId());
 		}
+		roleAssignmentRepository.findAll().stream()
+				.filter(a -> id.equals(a.getOrganizationId()))
+				.forEach(roleAssignmentRepository::delete);
 		try {
 			organisationRepository.deleteById(id);
 		} catch (DataIntegrityViolationException e) {
@@ -147,23 +162,37 @@ public class ProvisioningResource {
 					"This organization is still referenced elsewhere and cannot be deleted");
 		}
 		auditService.record("organisation", "deleted", actorUserId, "User #" + actorUserId,
-				"organisation #" + id + " deleted");
+				"organisation #" + id + " deleted (cascaded " + orgProjects.size() + " project(s))");
 		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping("/projects/{id}")
 	public ResponseEntity<Void> deleteProject(@PathVariable Integer id, @RequestParam Integer actorUserId) {
 		require(actorUserId, ORG_ADMIN, "delete a project");
-		try {
-			projectRepository.deleteById(id);
-		} catch (DataIntegrityViolationException e) {
-			// usm_project is FK-referenced from many legacy modules (datasets,
-			// pipelines, surveys, etc.) — report instead of attempting a cascade.
-			throw new ResponseStatusException(HttpStatus.CONFLICT,
-					"This project still has dependent data (pipelines, datasets, environments, etc.) and cannot be deleted");
-		}
+		deleteProjectCascade(id);
 		auditService.record("project", "deleted", actorUserId, "User #" + actorUserId, "project #" + id + " deleted");
 		return ResponseEntity.noContent().build();
+	}
+
+	/** Clears a project's role mappings (both RBAC and legacy) before deleting it. */
+	private void deleteProjectCascade(Integer projectId) {
+		roleAssignmentRepository.findAll().stream()
+				.filter(a -> projectId.equals(a.getProjectId()))
+				.forEach(roleAssignmentRepository::delete);
+		try {
+			userProjectRoleRepository.findByProjectIdId(projectId).forEach(userProjectRoleRepository::delete);
+		} catch (java.sql.SQLException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+					"Failed to clear legacy role mappings for project #" + projectId);
+		}
+		try {
+			projectRepository.deleteById(projectId);
+		} catch (DataIntegrityViolationException e) {
+			// usm_project is FK-referenced from many legacy modules (datasets,
+			// pipelines, surveys, etc.) — report instead of forcing a wider cascade.
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"Project #" + projectId + " still has dependent data (pipelines, datasets, environments, etc.) and cannot be deleted");
+		}
 	}
 
 	@PostMapping("/environments")

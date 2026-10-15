@@ -160,7 +160,14 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 		}
 
 		for (Integer loop_roleid : roleIdList) {
-				for (Map.Entry<String, List<String>> apiMap : this.configurationApisService.getRoleMappedApis(loop_roleid).entrySet()) {
+				Map<String, List<String>> roleMappedApis = this.configurationApisService.getRoleMappedApis(loop_roleid);
+				// A role with no configured API permissions (e.g. newly created,
+				// not yet given any) must not crash the whole auth check — treat
+				// it as "no permissions" rather than NPE on a null map.
+				if (roleMappedApis == null) {
+					continue;
+				}
+				for (Map.Entry<String, List<String>> apiMap : roleMappedApis.entrySet()) {
 					if (RegularExpressionUtil.matchInputForRegex(urlForValidation,apiMap.getKey())
 							&& ((apiMap.getValue().contains(authorizationContext.getRequest().getMethod().toUpperCase())) || apiMap.getValue().contains("ALL"))) {
 						return new AuthorizationDecision(true);

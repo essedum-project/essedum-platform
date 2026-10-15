@@ -15,26 +15,27 @@
     </mat-select>
   </mat-form-field>
 
-  <div class="scope-label">Scope</div>
-  <mat-radio-group [(ngModel)]="scopeType" name="scopeType" class="scope-group">
-    <mat-radio-button value="project">Project</mat-radio-button>
-    <mat-radio-button value="organization">Organization</mat-radio-button>
-    <mat-radio-button value="platform">Platform</mat-radio-button>
-  </mat-radio-group>
-
-  <mat-form-field appearance="fill" class="full-width" *ngIf="scopeType === 'project'">
-    <mat-label>Project</mat-label>
-    <mat-select [(ngModel)]="projectId" name="projectId">
-      <mat-option *ngFor="let p of projects" [value]="p.id">{{ p.name }}</mat-option>
-    </mat-select>
-  </mat-form-field>
-
-  <mat-form-field appearance="fill" class="full-width" *ngIf="scopeType === 'organization'">
+  <div class="scope-label">Organization</div>
+  <mat-form-field appearance="fill" class="full-width">
     <mat-label>Organization</mat-label>
     <mat-select [(ngModel)]="organizationId" name="organizationId" (ngModelChange)="onOrganizationChange()">
       <mat-option *ngFor="let o of organizations" [value]="o.id">{{ o.name }}</mat-option>
     </mat-select>
   </mat-form-field>
+
+  <ng-container *ngIf="organizationId">
+    <mat-checkbox [(ngModel)]="wholeOrganization" name="wholeOrganization">
+      Whole organization (covers future projects too)
+    </mat-checkbox>
+
+    <mat-form-field appearance="fill" class="full-width" *ngIf="!wholeOrganization">
+      <mat-label>Projects</mat-label>
+      <mat-select [(ngModel)]="projectIds" name="projectIds" multiple>
+        <mat-option *ngFor="let p of projectsForOrg" [value]="p.id">{{ p.name }}</mat-option>
+      </mat-select>
+      <mat-hint *ngIf="!projectsForOrg.length">No projects in this organization.</mat-hint>
+    </mat-form-field>
+  </ng-container>
 
 </div>
 <div mat-dialog-actions align="end">

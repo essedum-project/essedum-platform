@@ -15,12 +15,15 @@ import com.lfn.iamp.usm.domain.Organisation;
 import com.lfn.iamp.usm.domain.Project;
 import com.lfn.iamp.usm.domain.Role;
 import com.lfn.iamp.usm.domain.UserProjectRole;
+import com.lfn.iamp.usm.domain.UsmRolePermissions;
 import com.lfn.iamp.usm.identity.IdentityProjectionService;
 import com.lfn.iamp.usm.repository.OrganisationRepository;
 import com.lfn.iamp.usm.repository.ProjectRepository;
 import com.lfn.iamp.usm.repository.RoleRepository;
 import com.lfn.iamp.usm.repository.UserProjectRoleRepository;
 import com.lfn.iamp.usm.repository.UsersRepository;
+import com.lfn.iamp.usm.repository.UsmRolePermissionsRepository;
+import com.lfn.iamp.usm.service.UsmPermissionApiService;
 
 /**
  * The one access-resolution mechanism (§2 design philosophy #1): answers
@@ -48,12 +51,15 @@ public class AccessContextService {
 	private final UserProjectRoleRepository userProjectRoleRepository;
 	private final RoleRepository legacyRoleRepository;
 	private final UsersRepository usersRepository;
+	private final UsmRolePermissionsRepository usmRolePermissionsRepository;
+	private final UsmPermissionApiService usmPermissionApiService;
 
 	public AccessContextService(RoleAssignmentRepository roleAssignmentRepository,
 			RbacRoleRepository rbacRoleRepository, ProjectRepository projectRepository,
 			OrganisationRepository organisationRepository, AuditService auditService,
 			IdentityProjectionService identityProjectionService, UserProjectRoleRepository userProjectRoleRepository,
-			RoleRepository legacyRoleRepository, UsersRepository usersRepository) {
+			RoleRepository legacyRoleRepository, UsersRepository usersRepository,
+			UsmRolePermissionsRepository usmRolePermissionsRepository, UsmPermissionApiService usmPermissionApiService) {
 		this.roleAssignmentRepository = roleAssignmentRepository;
 		this.rbacRoleRepository = rbacRoleRepository;
 		this.projectRepository = projectRepository;
@@ -63,6 +69,8 @@ public class AccessContextService {
 		this.userProjectRoleRepository = userProjectRoleRepository;
 		this.legacyRoleRepository = legacyRoleRepository;
 		this.usersRepository = usersRepository;
+		this.usmRolePermissionsRepository = usmRolePermissionsRepository;
+		this.usmPermissionApiService = usmPermissionApiService;
 	}
 
 	public AccessContext resolve(Integer userId) {
@@ -175,6 +183,7 @@ public class AccessContextService {
 		int rank = rankOfRole(roleId);
 		String roleName = rbacRoleRepository.findById(roleId).map(RbacRole::getName).orElse("viewer");
 
+		boolean[] isNewRole = { false };
 		Role legacyRole = legacyRoleRepository.findByNameAndProjectId(roleName, projectId).stream().findFirst()
 				.orElseGet(() -> {
 					Role r = new Role();
@@ -184,8 +193,13 @@ public class AccessContextService {
 					r.setRoleadmin(rank >= 3);
 					r.setProjectadmin(rank >= 2);
 					r.setProjectId(projectId);
-					return legacyRoleRepository.save(r);
+					Role saved = legacyRoleRepository.save(r);
+					isNewRole[0] = true;
+					return saved;
 				});
+		if (isNewRole[0]) {
+			grantTemplatePermissions(legacyRole);
+		}
 
 		UserProjectRole existing = userProjectRoleRepository.findByUserId(userId).stream()
 				.filter(upr -> upr.getProject_id() != null && projectId.equals(upr.getProject_id().getId()))
@@ -217,6 +231,44 @@ public class AccessContextService {
 			upr.setTime_stamp(ZonedDateTime.now());
 			userProjectRoleRepository.save(upr);
 		});
+	}
+
+	/**
+	 * A freshly bridged legacy Role has zero entries in usm_role_permissions,
+	 * so CustomAuthorizationManager's in-memory roleMappedApi cache has
+	 * nothing for it — every legacy-secured API silently 403s (or, before a
+	 * defensive null-check, 500s). Copy the permission set from an existing
+	 * role with the same roleadmin/projectadmin capability tier (whichever
+	 * one has the most permissions already configured), then force an
+	 * immediate cache refresh so it's usable without an app restart.
+	 */
+	private void grantTemplatePermissions(Role newRole) {
+		List<UsmRolePermissions> allLinks = usmRolePermissionsRepository.findAll();
+		Role template = allLinks.stream()
+				.map(UsmRolePermissions::getRole)
+				.filter(r -> r != null && !r.getId().equals(newRole.getId())
+						&& java.util.Objects.equals(r.getRoleadmin(), newRole.getRoleadmin())
+						&& java.util.Objects.equals(r.getProjectadmin(), newRole.getProjectadmin()))
+				.collect(Collectors.groupingBy(Role::getId, Collectors.counting()))
+				.entrySet().stream()
+				.max(java.util.Map.Entry.comparingByValue())
+				.map(e -> allLinks.stream().map(UsmRolePermissions::getRole)
+						.filter(r -> r.getId().equals(e.getKey())).findFirst().orElse(null))
+				.orElse(null);
+		if (template == null) {
+			log.warn("No existing legacy role matches roleadmin={} projectadmin={} to copy permissions from for new role #{} — it will have none",
+					newRole.getRoleadmin(), newRole.getProjectadmin(), newRole.getId());
+			return;
+		}
+		for (UsmRolePermissions link : allLinks) {
+			if (link.getRole() != null && link.getRole().getId().equals(template.getId())) {
+				UsmRolePermissions copy = new UsmRolePermissions();
+				copy.setRole(newRole);
+				copy.setPermission(link.getPermission());
+				usmRolePermissionsRepository.save(copy);
+			}
+		}
+		usmPermissionApiService.refreshConfigAPIsMap();
 	}
 
 	public void revoke(Integer roleAssignmentId) {
