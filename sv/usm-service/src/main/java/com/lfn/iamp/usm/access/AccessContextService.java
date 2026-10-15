@@ -1,6 +1,7 @@
 package com.lfn.iamp.usm.access;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,9 +11,14 @@ import org.springframework.stereotype.Service;
 import com.lfn.iamp.usm.audit.AuditService;
 import com.lfn.iamp.usm.domain.Organisation;
 import com.lfn.iamp.usm.domain.Project;
+import com.lfn.iamp.usm.domain.Role;
+import com.lfn.iamp.usm.domain.UserProjectRole;
 import com.lfn.iamp.usm.identity.IdentityProjectionService;
 import com.lfn.iamp.usm.repository.OrganisationRepository;
 import com.lfn.iamp.usm.repository.ProjectRepository;
+import com.lfn.iamp.usm.repository.RoleRepository;
+import com.lfn.iamp.usm.repository.UserProjectRoleRepository;
+import com.lfn.iamp.usm.repository.UsersRepository;
 
 /**
  * The one access-resolution mechanism (§2 design philosophy #1): answers
@@ -35,17 +41,24 @@ public class AccessContextService {
 	private final OrganisationRepository organisationRepository;
 	private final AuditService auditService;
 	private final IdentityProjectionService identityProjectionService;
+	private final UserProjectRoleRepository userProjectRoleRepository;
+	private final RoleRepository legacyRoleRepository;
+	private final UsersRepository usersRepository;
 
 	public AccessContextService(RoleAssignmentRepository roleAssignmentRepository,
 			RbacRoleRepository rbacRoleRepository, ProjectRepository projectRepository,
 			OrganisationRepository organisationRepository, AuditService auditService,
-			IdentityProjectionService identityProjectionService) {
+			IdentityProjectionService identityProjectionService, UserProjectRoleRepository userProjectRoleRepository,
+			RoleRepository legacyRoleRepository, UsersRepository usersRepository) {
 		this.roleAssignmentRepository = roleAssignmentRepository;
 		this.rbacRoleRepository = rbacRoleRepository;
 		this.projectRepository = projectRepository;
 		this.organisationRepository = organisationRepository;
 		this.auditService = auditService;
 		this.identityProjectionService = identityProjectionService;
+		this.userProjectRoleRepository = userProjectRoleRepository;
+		this.legacyRoleRepository = legacyRoleRepository;
+		this.usersRepository = usersRepository;
 	}
 
 	public AccessContext resolve(Integer userId) {
@@ -114,6 +127,15 @@ public class AccessContextService {
 		if (organizationId != null && projectId != null) {
 			throw new IllegalArgumentException("A role assignment scopes to at most one of organization/project");
 		}
+		// Idempotent: granting the exact same (user, role, scope) again just
+		// returns the existing active assignment instead of piling up duplicates.
+		for (RoleAssignment existing : roleAssignmentRepository.findByUserIdAndRevokedAtIsNull(userId)) {
+			if (existing.getRoleId().equals(roleId)
+					&& java.util.Objects.equals(existing.getOrganizationId(), organizationId)
+					&& java.util.Objects.equals(existing.getProjectId(), projectId)) {
+				return existing;
+			}
+		}
 		RoleAssignment assignment = new RoleAssignment();
 		assignment.setUserId(userId);
 		assignment.setRoleId(roleId);
@@ -124,7 +146,59 @@ public class AccessContextService {
 		auditService.record("role_assignment", "granted", userId, "User #" + userId,
 				"role " + roleId + " granted, org=" + organizationId + " project=" + projectId);
 		identityProjectionService.enqueueForProject(projectId);
+		if (projectId != null) {
+			bridgeToLegacyUserProjectRole(userId, roleId, projectId);
+		}
 		return saved;
+	}
+
+	/**
+	 * Mirrors a project-scoped RBAC grant into the legacy usm_user_project_role
+	 * table, which is what the shell header's Organization/Project/Role
+	 * switcher (landing.component.ts checkDefaultProject/getRole) actually
+	 * reads — that switcher predates rbac_role_assignment and isn't wired to
+	 * it. Best-effort: only handles project scope (not organization/platform,
+	 * since the legacy table has no equivalent of either).
+	 */
+	private void bridgeToLegacyUserProjectRole(Integer userId, Integer roleId, Integer projectId) {
+		int rank = rankOfRole(roleId);
+		String roleName = rbacRoleRepository.findById(roleId).map(RbacRole::getName).orElse("viewer");
+
+		Role legacyRole = legacyRoleRepository.findByNameAndProjectId(roleName, projectId).stream().findFirst()
+				.orElseGet(() -> {
+					Role r = new Role();
+					r.setName(roleName);
+					r.setDescription("Bridged from RBAC role_assignment");
+					r.setPermission(true);
+					r.setRoleadmin(rank >= 3);
+					r.setProjectadmin(rank >= 2);
+					r.setProjectId(projectId);
+					return legacyRoleRepository.save(r);
+				});
+
+		UserProjectRole existing = userProjectRoleRepository.findByUserId(userId).stream()
+				.filter(upr -> upr.getProject_id() != null && projectId.equals(upr.getProject_id().getId()))
+				.findFirst().orElse(null);
+
+		if (existing != null) {
+			existing.setRole_id(legacyRole);
+			existing.setTime_stamp(ZonedDateTime.now());
+			userProjectRoleRepository.save(existing);
+			return;
+		}
+
+		usersRepository.findById(userId).ifPresent(user -> {
+			Project project = projectRepository.findById(projectId).orElse(null);
+			if (project == null) {
+				return;
+			}
+			UserProjectRole upr = new UserProjectRole();
+			upr.setUser_id(user);
+			upr.setProject_id(project);
+			upr.setRole_id(legacyRole);
+			upr.setTime_stamp(ZonedDateTime.now());
+			userProjectRoleRepository.save(upr);
+		});
 	}
 
 	public void revoke(Integer roleAssignmentId) {

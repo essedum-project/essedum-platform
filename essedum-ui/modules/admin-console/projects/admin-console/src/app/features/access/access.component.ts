@@ -52,9 +52,15 @@ export class AccessComponent implements OnInit {
   }
 
   private load(): void {
-    combineLatest([this.api.getRoleAssignments(), this.api.getRoles(), this.api.getUsers()])
+    combineLatest([
+      this.api.getRoleAssignments(),
+      this.api.getRoles(),
+      this.api.getUsers(),
+      this.api.getProjects(),
+      this.api.getOrganisations(),
+    ])
       .pipe(
-        map(([assignments, roles, users]) => {
+        map(([assignments, roles, users, projects, organisations]) => {
           this.roles = roles;
           return assignments
             .filter(a => !a.revokedAt)
@@ -63,9 +69,9 @@ export class AccessComponent implements OnInit {
               roleName: roles.find(r => r.id === a.roleId)?.name ?? 'unknown',
               userName: users.find((u: UserOption) => u.id === a.userId)?.name ?? `User #${a.userId}`,
               scopeLabel: a.projectId
-                ? `Project #${a.projectId}`
+                ? `Project: ${projects.find(p => p.id === a.projectId)?.name ?? '#' + a.projectId}`
                 : a.organizationId
-                ? `Organization #${a.organizationId}`
+                ? `Organization: ${organisations.find(o => o.id === a.organizationId)?.name ?? '#' + a.organizationId}`
                 : 'Platform',
             }));
         }),

@@ -22,7 +22,7 @@ export class TenancyComponent implements OnInit {
   environmentRows: EnvironmentRow[] = [];
 
   readonly orgColumns = ['name', 'status'];
-  readonly projectColumns = ['name', 'description'];
+  readonly projectColumns = ['name', 'organization', 'description'];
   readonly environmentColumns = ['name', 'projectName', 'configRef'];
 
   rank = 0;
@@ -52,6 +52,11 @@ export class TenancyComponent implements OnInit {
 
   private loadProjects(): void {
     this.api.getProjects().subscribe(projects => (this.projects = projects));
+  }
+
+  organizationName(project: LegacyProject): string {
+    const org = this.organizations.find(o => o.id === project.organisationId);
+    return org ? org.name : '—';
   }
 
   private loadEnvironments(): void {

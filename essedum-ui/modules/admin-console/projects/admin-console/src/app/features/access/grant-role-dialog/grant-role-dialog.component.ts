@@ -47,4 +47,11 @@ export class GrantRoleDialogComponent implements OnInit {
   cancel(): void {
     this.ref.close();
   }
+
+  // Project names often coincide with their parent org's name in seed/demo
+  // data (one project per org) — show the org alongside the name to disambiguate.
+  projectLabel(project: LegacyProject): string {
+    const org = this.organizations.find(o => o.id === project.organisationId);
+    return org ? `${project.name} (${org.name})` : project.name;
+  }
 }
