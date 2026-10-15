@@ -1,4 +1,221 @@
-.empty-state {
-  color: rgba(0, 0, 0, 0.6);
-  margin-top: 16px;
+:host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
+
+// ── Page header (title area) ──────────────────────────────────────────────────
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0 14px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(79, 142, 247, 0.08);
+
+  .page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .page-title-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(79, 142, 247, 0.12);
+    border: 1px solid rgba(79, 142, 247, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon { font-size: 20px; width: 20px; height: 20px; color: #7eb8ff; }
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #e2e8f0;
+    line-height: 1.2;
+  }
+
+  .page-subtitle { display: block; font-size: 12px; color: #6e8ea8; margin-top: 2px; }
+}
+
+// ── Table: force dark background (Material sets --mat-table-background-color  ─
+// which is white by default; ::ng-deep + !important beats it).               ─
+::ng-deep .admin-console-table {
+  --mat-table-background-color: #1e293b;
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+
+  .mat-mdc-header-row { background: #2b3a52 !important; min-height: 46px !important; }
+  .mat-mdc-header-cell {
+    color: #94a3b8 !important;
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.6px !important;
+    text-transform: uppercase !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+  }
+  .mat-mdc-cell {
+    color: #e2e8f0 !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+  }
+  .mat-mdc-row { background: transparent !important; transition: background 0.1s ease !important; }
+  .mat-mdc-row:hover { background: rgba(148, 163, 184, 0.10) !important; }
+  .mat-mdc-row:last-child .mat-mdc-cell { border-bottom: none !important; }
+}
+
+// ── Light theme: table ────────────────────────────────────────────────────────
+:host-context(body.header-light-theme) ::ng-deep .admin-console-table {
+  --mat-table-background-color: #ffffff;
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+
+  .mat-mdc-header-row { background: #f1f5f9 !important; }
+  .mat-mdc-header-cell {
+    color: #64748b !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+  }
+  .mat-mdc-cell {
+    color: #1e293b !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+  }
+  .mat-mdc-row:hover { background: rgba(15, 23, 42, 0.04) !important; }
+}
+
+// ── Badge & cell styles (dark default) ───────────────────────────────────────
+::ng-deep {
+  // Gate badge — base colour is generic blue; specific sub-classes override it.
+  .gate-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 2px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    // default (any unrecognised gate value)
+    background: rgba(79, 142, 247, 0.15);
+    color: #7eb8ff;
+
+    &.gate-dev          { background: rgba(79, 142, 247, 0.15);  color: #7eb8ff; }
+    &.gate-qa           { background: rgba(6, 182, 212, 0.12);   color: #22d3ee; }
+    &.gate-uat          { background: rgba(245, 158, 11, 0.12);  color: #fbbf24; }
+    &.gate-prod         { background: rgba(239, 68, 68, 0.12);   color: #f87171; }
+    &.gate-staging      { background: rgba(168, 85, 247, 0.12);  color: #c084fc; }
+    &.gate-project_admin { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
+    &.gate-org_admin    { background: rgba(168, 85, 247, 0.12);  color: #c084fc; }
+  }
+
+  .approval-version-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 10px;
+    padding: 2px 7px;
+    background: rgba(168, 85, 247, 0.12);
+    color: #c084fc;
+  }
+
+  .approval-asset-text { font-size: 13px; font-weight: 500; color: #c9d8f0; }
+  .approval-actor-text { font-size: 13px; color: #c9d8f0; }
+  .approval-date-text  { font-size: 12px; color: #6e8ea8; white-space: nowrap; }
+
+  .approval-actions { display: flex; gap: 6px; align-items: center; }
+
+  .btn-approve {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    border-radius: 6px !important;
+    padding: 0 12px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    line-height: 28px !important;
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(16, 185, 129, 0.28) !important;
+    &:hover { background: rgba(16, 185, 129, 0.22) !important; }
+  }
+
+  .btn-reject {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    border-radius: 6px !important;
+    padding: 0 12px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    line-height: 28px !important;
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #f87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.28) !important;
+    &:hover { background: rgba(239, 68, 68, 0.22) !important; }
+  }
+}
+
+// ── Light theme: header + badges + buttons ────────────────────────────────────
+:host-context(body.header-light-theme) {
+  .page-header {
+    border-bottom-color: rgba(99, 102, 241, 0.1);
+
+    .page-title-icon {
+      background: rgba(99, 102, 241, 0.08);
+      border-color: rgba(99, 102, 241, 0.18);
+      mat-icon { color: #4f46e5; }
+    }
+
+    h2             { color: #0f172a; }
+    .page-subtitle { color: #64748b; }
+  }
+}
+
+:host-context(body.header-light-theme) ::ng-deep {
+  .gate-badge {
+    background: rgba(79, 70, 229, 0.08);
+    color: #4f46e5;
+    &.gate-qa           { background: rgba(8, 145, 178, 0.08);   color: #0891b2; }
+    &.gate-uat          { background: rgba(217, 119, 6, 0.08);   color: #d97706; }
+    &.gate-prod         { background: rgba(220, 38, 38, 0.08);   color: #dc2626; }
+    &.gate-staging      { background: rgba(124, 58, 237, 0.08);  color: #7c3aed; }
+    &.gate-project_admin { background: rgba(99, 102, 241, 0.1);  color: #4338ca; }
+    &.gate-org_admin    { background: rgba(124, 58, 237, 0.08);  color: #7c3aed; }
+  }
+
+  .approval-version-badge { background: rgba(124, 58, 237, 0.08); color: #7c3aed; }
+  .approval-asset-text    { color: #1e293b; }
+  .approval-actor-text    { color: #334155; }
+  .approval-date-text     { color: #64748b; }
+
+  .btn-approve {
+    background: rgba(5, 150, 105, 0.08) !important;
+    color: #059669 !important;
+    border-color: rgba(5, 150, 105, 0.22) !important;
+    &:hover { background: rgba(5, 150, 105, 0.16) !important; }
+  }
+
+  .btn-reject {
+    background: rgba(220, 38, 38, 0.08) !important;
+    color: #dc2626 !important;
+    border-color: rgba(220, 38, 38, 0.22) !important;
+    &:hover { background: rgba(220, 38, 38, 0.16) !important; }
+  }
+}
+
+// ── Dark theme explicit ───────────────────────────────────────────────────────
+:host-context(body.header-dark-theme) .page-header h2 { color: #e2e8f0; }
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.approvals-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 0;
+  color: #94a3b8;
+  font-size: 14px;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
 }

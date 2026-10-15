@@ -6,6 +6,7 @@ import { MenuItem } from '../../../core/api-models';
 @Component({
   selector: 'app-menu-item-dialog',
   templateUrl: './menu-item-dialog.component.html',
+  styleUrls: ['./menu-item-dialog.component.scss'],
   standalone: false,
 })
 export class MenuItemDialogComponent implements OnInit {

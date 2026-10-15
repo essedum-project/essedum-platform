@@ -1,3 +1,281 @@
-.admin-console-toolbar {
-  align-items: flex-start;
+:host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
+
+// ── Page header ───────────────────────────────────────────────────────────────
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0 14px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(79, 142, 247, 0.08);
+
+  .page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .page-title-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(79, 142, 247, 0.12);
+    border: 1px solid rgba(79, 142, 247, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon { font-size: 20px; width: 20px; height: 20px; color: #7eb8ff; }
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #e2e8f0;
+    line-height: 1.2;
+  }
+
+  .page-subtitle { display: block; font-size: 12px; color: #6e8ea8; margin-top: 2px; }
 }
+
+// ── Search bar ────────────────────────────────────────────────────────────────
+.page-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(79, 142, 247, 0.25);
+  border-radius: 8px;
+  min-width: 260px;
+  transition: border-color 0.15s;
+
+  &:focus-within {
+    border-color: rgba(79, 142, 247, 0.5);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; color: #b8cce0; flex-shrink: 0; }
+
+  input {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    color: #e2e8f0;
+    flex: 1;
+    min-width: 0;
+    font-family: inherit;
+    &::placeholder { color: #475569; }
+  }
+}
+
+// ── Table: force dark background (Material --mat-table-background-color fix) ──
+::ng-deep .admin-console-table {
+  --mat-table-background-color: #1e293b;
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+
+  .mat-mdc-header-row { background: #2b3a52 !important; min-height: 46px !important; }
+  .mat-mdc-header-cell {
+    color: #94a3b8 !important;
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.6px !important;
+    text-transform: uppercase !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+  }
+  .mat-mdc-cell {
+    color: #e2e8f0 !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+  }
+  .mat-mdc-row { background: transparent !important; transition: background 0.1s ease !important; }
+  .mat-mdc-row:hover { background: rgba(148, 163, 184, 0.10) !important; }
+  .mat-mdc-row:last-child .mat-mdc-cell { border-bottom: none !important; }
+}
+
+// ── Light theme: table ────────────────────────────────────────────────────────
+:host-context(body.header-light-theme) ::ng-deep .admin-console-table {
+  --mat-table-background-color: #ffffff;
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+
+  .mat-mdc-header-row { background: #f1f5f9 !important; }
+  .mat-mdc-header-cell {
+    color: #64748b !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+  }
+  .mat-mdc-cell {
+    color: #1e293b !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+  }
+  .mat-mdc-row:hover { background: rgba(15, 23, 42, 0.04) !important; }
+}
+
+// ── Badge & cell styles (dark default) ───────────────────────────────────────
+::ng-deep {
+  // Action badges — base is gray; specific actions override.
+  // "SUBMITTED" from real API data included.
+  .audit-action-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 2px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    // default fallback (any unlisted action)
+    background: rgba(148, 163, 184, 0.12);
+    color: #94a3b8;
+
+    &.action-created   { background: rgba(16, 185, 129, 0.12);  color: #34d399; }
+    &.action-updated   { background: rgba(79, 142, 247, 0.15);  color: #7eb8ff; }
+    &.action-deleted   { background: rgba(239, 68, 68, 0.12);   color: #f87171; }
+    &.action-approved  { background: rgba(52, 211, 153, 0.12);  color: #6ee7b7; }
+    &.action-rejected  { background: rgba(248, 113, 113, 0.12); color: #fca5a5; }
+    &.action-submitted { background: rgba(245, 158, 11, 0.12);  color: #fbbf24; }
+    &.action-published { background: rgba(99, 102, 241, 0.15);  color: #a5b4fc; }
+    &.action-promoted  { background: rgba(6, 182, 212, 0.12);   color: #22d3ee; }
+    &.action-revoked   { background: rgba(239, 68, 68, 0.12);   color: #f87171; }
+    &.action-assigned  { background: rgba(168, 85, 247, 0.12);  color: #c084fc; }
+    &.action-synced    { background: rgba(16, 185, 129, 0.12);  color: #34d399; }
+    &.action-archived  { background: rgba(148, 163, 184, 0.12); color: #94a3b8; }
+  }
+
+  // Entity badges — base is gray; specific entities override.
+  // "Asset", "Project", "Promotion_event" from real API data included.
+  .audit-entity-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 400;
+    border-radius: 10px;
+    padding: 2px 8px;
+    text-transform: capitalize;
+    // default fallback
+    background: rgba(148, 163, 184, 0.12);
+    color: #94a3b8;
+
+    &.entity-asset            { background: rgba(79, 142, 247, 0.15);  color: #7eb8ff; }
+    &.entity-project          { background: rgba(99, 102, 241, 0.15);  color: #a5b4fc; }
+    &.entity-promotion_event  { background: rgba(6, 182, 212, 0.12);   color: #22d3ee; }
+    &.entity-skill            { background: rgba(16, 185, 129, 0.12);  color: #34d399; }
+    &.entity-agent            { background: rgba(79, 142, 247, 0.15);  color: #7eb8ff; }
+    &.entity-model            { background: rgba(168, 85, 247, 0.12);  color: #c084fc; }
+    &.entity-endpoint         { background: rgba(6, 182, 212, 0.12);   color: #22d3ee; }
+    &.entity-pipeline         { background: rgba(245, 158, 11, 0.12);  color: #fbbf24; }
+    &.entity-user             { background: rgba(99, 102, 241, 0.15);  color: #a5b4fc; }
+    &.entity-role             { background: rgba(52, 211, 153, 0.12);  color: #6ee7b7; }
+    &.entity-version          { background: rgba(168, 85, 247, 0.12);  color: #c084fc; }
+    &.entity-portfolio        { background: rgba(245, 158, 11, 0.12);  color: #fbbf24; }
+    &.entity-organization     { background: rgba(239, 68, 68, 0.12);   color: #f87171; }
+  }
+
+  .audit-actor-text { font-size: 13px; color: #c9d8f0; }
+  .audit-date-text  { font-size: 12px; color: #6e8ea8; white-space: nowrap; }
+
+  .audit-details-text {
+    font-size: 12px;
+    color: #6e8ea8;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+    max-width: 220px;
+  }
+
+  .audit-correlation-text {
+    display: inline-block;
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    color: #6e8ea8;
+    background: rgba(148, 163, 184, 0.08);
+    border-radius: 4px;
+    padding: 2px 6px;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// ── Light theme: header + search + badges ─────────────────────────────────────
+:host-context(body.header-light-theme) {
+  .page-header {
+    border-bottom-color: rgba(99, 102, 241, 0.1);
+
+    .page-title-icon {
+      background: rgba(99, 102, 241, 0.08);
+      border-color: rgba(99, 102, 241, 0.18);
+      mat-icon { color: #4f46e5; }
+    }
+
+    h2             { color: #0f172a; }
+    .page-subtitle { color: #64748b; }
+  }
+
+  .page-search {
+    background: rgba(99, 102, 241, 0.05);
+    border-color: rgba(99, 102, 241, 0.2);
+
+    &:focus-within {
+      border-color: rgba(99, 102, 241, 0.45);
+      background: rgba(99, 102, 241, 0.07);
+    }
+
+    mat-icon { color: #94a3b8; }
+    input { color: #0f172a; &::placeholder { color: #94a3b8; } }
+  }
+}
+
+:host-context(body.header-light-theme) ::ng-deep {
+  .audit-action-badge {
+    background: rgba(100, 116, 139, 0.08);
+    color: #64748b;
+
+    &.action-created   { background: rgba(5, 150, 105, 0.08);   color: #059669; }
+    &.action-updated   { background: rgba(79, 70, 229, 0.08);   color: #4f46e5; }
+    &.action-deleted   { background: rgba(220, 38, 38, 0.08);   color: #dc2626; }
+    &.action-approved  { background: rgba(16, 185, 129, 0.08);  color: #047857; }
+    &.action-rejected  { background: rgba(220, 38, 38, 0.08);   color: #b91c1c; }
+    &.action-submitted { background: rgba(217, 119, 6, 0.08);   color: #d97706; }
+    &.action-published { background: rgba(99, 102, 241, 0.1);   color: #4338ca; }
+    &.action-promoted  { background: rgba(8, 145, 178, 0.08);   color: #0891b2; }
+    &.action-revoked   { background: rgba(220, 38, 38, 0.08);   color: #dc2626; }
+    &.action-assigned  { background: rgba(124, 58, 237, 0.08);  color: #7c3aed; }
+    &.action-synced    { background: rgba(5, 150, 105, 0.08);   color: #059669; }
+    &.action-archived  { background: rgba(100, 116, 139, 0.08); color: #64748b; }
+  }
+
+  .audit-entity-badge {
+    background: rgba(100, 116, 139, 0.08);
+    color: #64748b;
+
+    &.entity-asset            { background: rgba(79, 70, 229, 0.08);   color: #4f46e5; }
+    &.entity-project          { background: rgba(99, 102, 241, 0.1);   color: #4338ca; }
+    &.entity-promotion_event  { background: rgba(8, 145, 178, 0.08);   color: #0891b2; }
+    &.entity-skill            { background: rgba(5, 150, 105, 0.08);   color: #059669; }
+    &.entity-agent            { background: rgba(79, 70, 229, 0.08);   color: #4f46e5; }
+    &.entity-model            { background: rgba(124, 58, 237, 0.08);  color: #7c3aed; }
+    &.entity-endpoint         { background: rgba(8, 145, 178, 0.08);   color: #0891b2; }
+    &.entity-pipeline         { background: rgba(217, 119, 6, 0.08);   color: #d97706; }
+    &.entity-user             { background: rgba(99, 102, 241, 0.1);   color: #4338ca; }
+    &.entity-role             { background: rgba(16, 185, 129, 0.08);  color: #047857; }
+    &.entity-version          { background: rgba(124, 58, 237, 0.08);  color: #7c3aed; }
+    &.entity-portfolio        { background: rgba(217, 119, 6, 0.08);   color: #b45309; }
+    &.entity-organization     { background: rgba(220, 38, 38, 0.08);   color: #dc2626; }
+  }
+
+  .audit-actor-text          { color: #334155; }
+  .audit-date-text           { color: #64748b; }
+  .audit-details-text        { color: #64748b; }
+  .audit-correlation-text    { color: #64748b; background: rgba(15, 23, 42, 0.06); }
+}
+
+:host-context(body.header-dark-theme) .page-header h2 { color: #e2e8f0; }
