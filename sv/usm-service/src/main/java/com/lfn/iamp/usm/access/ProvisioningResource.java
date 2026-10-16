@@ -22,6 +22,7 @@ import com.lfn.iamp.usm.domain.DashConstant;
 import com.lfn.iamp.usm.domain.Organisation;
 import com.lfn.iamp.usm.domain.Project;
 import com.lfn.iamp.usm.domain.UsmPortfolio;
+import com.lfn.iamp.usm.identity.IdentityProjectionTargetRepository;
 import com.lfn.iamp.usm.repository.DashConstantRepository;
 import com.lfn.iamp.usm.repository.OrganisationRepository;
 import com.lfn.iamp.usm.repository.ProjectRepository;
@@ -62,13 +63,15 @@ public class ProvisioningResource {
 	private final RoleAssignmentRepository roleAssignmentRepository;
 	private final UserProjectRoleRepository userProjectRoleRepository;
 	private final DashConstantRepository dashConstantRepository;
+	private final IdentityProjectionTargetRepository identityProjectionTargetRepository;
 
 	public ProvisioningResource(AccessContextService accessContextService,
 			OrganisationRepository organisationRepository, ProjectRepository projectRepository,
 			EnvironmentRepository environmentRepository, RbacRoleRepository rbacRoleRepository,
 			AuditService auditService, UsmPortfolioRepository usmPortfolioRepository,
 			RoleAssignmentRepository roleAssignmentRepository, UserProjectRoleRepository userProjectRoleRepository,
-			DashConstantRepository dashConstantRepository) {
+			DashConstantRepository dashConstantRepository,
+			IdentityProjectionTargetRepository identityProjectionTargetRepository) {
 		this.accessContextService = accessContextService;
 		this.organisationRepository = organisationRepository;
 		this.projectRepository = projectRepository;
@@ -79,6 +82,7 @@ public class ProvisioningResource {
 		this.roleAssignmentRepository = roleAssignmentRepository;
 		this.userProjectRoleRepository = userProjectRoleRepository;
 		this.dashConstantRepository = dashConstantRepository;
+		this.identityProjectionTargetRepository = identityProjectionTargetRepository;
 	}
 
 	/**
@@ -244,11 +248,15 @@ public class ProvisioningResource {
 		return ResponseEntity.noContent().build();
 	}
 
-	/** Clears a project's role mappings (both RBAC and legacy) before deleting it. */
+	/** Clears a project's RBAC-owned rows (roles, identity targets, environments) before deleting it. */
 	private void deleteProjectCascade(Integer projectId) {
 		roleAssignmentRepository.findAll().stream()
 				.filter(a -> projectId.equals(a.getProjectId()))
 				.forEach(roleAssignmentRepository::delete);
+		// Orphans here would keep showing on the Identity Sync screen as
+		// "Project #<id>", since the project name can no longer be resolved.
+		identityProjectionTargetRepository.deleteAll(identityProjectionTargetRepository.findByProjectId(projectId));
+		environmentRepository.deleteAll(environmentRepository.findByProjectId(projectId));
 		try {
 			userProjectRoleRepository.findByProjectIdId(projectId).forEach(userProjectRoleRepository::delete);
 		} catch (java.sql.SQLException e) {

@@ -3910,18 +3910,17 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
             .sort((a, b) => a.displayOrder - b.displayOrder)
             .map(buildNode),
         });
-        const roots = menuItems
-          // Only the admin-console root (no role tag). Migrated legacy per-role
-          // menus are also top-level rows but carry a `roles` tag — they are
-          // managed in Menu Configuration and rendered via their own role path,
-          // not folded into the admin-console sidebar.
-          .filter((it) => it.parentId == null && !it.roles)
-          .sort((a, b) => a.displayOrder - b.displayOrder)
-          .map(buildNode);
         // Two supported shapes: nested (an "Admin Console" wrapper holding the
         // screens) and flat (every screen top-level, no wrapper). Nested drops
         // the wrapper and surfaces its children; flat uses the roots as-is.
         const nested = menuItems.some((it) => it.parentId != null);
+        const roots = menuItems
+          // Nested only: a tagged top-level row is a migrated legacy per-role
+          // menu, not the admin-console wrapper. Flat has no wrapper, so every
+          // screen is top-level and the tag is honoured later per selected role.
+          .filter((it) => it.parentId == null && (!nested || !it.roles))
+          .sort((a, b) => a.displayOrder - b.displayOrder)
+          .map(buildNode);
         const nodes = nested
           ? roots
               // The wrapper is seeded at min_role_rank 0, so the API returns it
@@ -3946,33 +3945,15 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
     this.loadRbacMenu();
     const seen = new Set<string>();
     const selectedRoleIsAdmin = !!(this.selectedrole && this.selectedrole.roleadmin);
-    const items = this.stripSuperseded(this.sidebarMenu).filter(
-      (item) => {
-        // For admins the platform Dashboard is replaced by the Admin Overview,
-        // so drop the legacy Dashboard entry when an admin role is selected.
-        if (selectedRoleIsAdmin && (item.label === 'Dashboard' || item.url === './dashboard')) {
-          return false;
-        }
-        // Deduplicate items with the same label (e.g. renamed "Pipelines")
-        if (seen.has(item.label)) return false;
-        seen.add(item.label);
-        return (!this.ADVANCED_MENU_LABELS.includes(item.label) ||
-          this.customMenuState[item.label] === true);
-      }
-    );
-    // Include advanced items not in the DB sidebar when the user has toggled them ON
-    for (const cfg of this.advancedMenuItems) {
-      if (!seen.has(cfg.label) && this.customMenuState[cfg.label] === true) {
-        const url = this._advancedItemFallbackUrls[cfg.label];
-        if (url) items.push({ label: cfg.label, url });
-      }
-    }
-    // Cutover: append the data-driven menu (plan §7) with "rank-based + role
-    // override" visibility:
-    //  • Admin role selected → sees every admin-console item (rank default).
-    //  • Any other role → sees only items explicitly tagged for that role name
-    //    via the item's `roles` override (Menu Configuration).
     const selectedRoleName = this.selectedrole && this.selectedrole.name;
+    const items: any[] = [];
+
+    // Cutover: the data-driven menu (plan §7) is authoritative for the admin
+    // screens, so it is collected BEFORE the legacy rows — otherwise a legacy
+    // row sharing a label would claim it in `seen` and suppress the real item.
+    // Visibility is "rank-based + role override":
+    //  • untagged → already rank-filtered server-side, so show it.
+    //  • `roles` tagged → only that role (or an admin role) sees it.
     for (const node of this.rbacMenuNodes) {
       if (!node || seen.has(node.label)) {
         continue;
@@ -3981,8 +3962,6 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         .split(',')
         .map((r: string) => r.trim())
         .filter((r: string) => r);
-      // Untagged items already cleared the caller's rank server-side, so show
-      // them. A `roles` tag narrows an item to those roles (plus admins).
       const visibleForRole =
         selectedRoleIsAdmin ||
         nodeRoles.length === 0 ||
@@ -3990,6 +3969,35 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       if (visibleForRole) {
         seen.add(node.label);
         items.push(node);
+      }
+    }
+
+    const legacy = this.stripSuperseded(this.sidebarMenu).filter(
+      (item) => {
+        // For admins the platform Dashboard is replaced by the Admin Overview,
+        // so drop the legacy Dashboard entry when an admin role is selected.
+        if (selectedRoleIsAdmin && (item.label === 'Dashboard' || item.url === './dashboard')) {
+          return false;
+        }
+        // Deduplicate items with the same label (e.g. renamed "Pipelines")
+        if (seen.has(item.label)) return false;
+        if (this.ADVANCED_MENU_LABELS.includes(item.label) &&
+            this.customMenuState[item.label] !== true) {
+          // Toggled off — skip without claiming the label, so a later entry
+          // with the same name can still surface.
+          return false;
+        }
+        seen.add(item.label);
+        return true;
+      }
+    );
+    items.push(...legacy);
+
+    // Include advanced items not in the DB sidebar when the user has toggled them ON
+    for (const cfg of this.advancedMenuItems) {
+      if (!seen.has(cfg.label) && this.customMenuState[cfg.label] === true) {
+        const url = this._advancedItemFallbackUrls[cfg.label];
+        if (url) items.push({ label: cfg.label, url });
       }
     }
     return items;
