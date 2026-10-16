@@ -3917,25 +3917,26 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
           // not folded into the admin-console sidebar.
           .filter((it) => it.parentId == null && !it.roles)
           .sort((a, b) => a.displayOrder - b.displayOrder)
-          .map(buildNode)
-          // The "Admin Console" root is seeded at min_role_rank 0, so the API
-          // returns it to everyone (incl. rank-0 guests) but with no visible
-          // children. Only surface a root the user can actually drill into.
-          .filter((node) => node.children && node.children.length > 0);
-        // Flatten: drop the "Admin Console" wrapper and surface its screens as
-        // top-level sidebar items (there is only one admin group, so a parent
-        // node adds a redundant level). Icon + role-override come from the
-        // menu item itself (configurable in Menu Configuration), falling back
-        // to a generic icon when none is set.
-        this.rbacMenuNodes = roots
-          .reduce((acc: any[], root: any) => acc.concat(root.children || []), [])
-          .map((child: any) => ({
-            label: child.label,
-            url: child.url,
-            icon: child.icon || "shield",
-            roles: child.roles || "",
-            children: child.children || [],
-          }));
+          .map(buildNode);
+        // Two supported shapes: nested (an "Admin Console" wrapper holding the
+        // screens) and flat (every screen top-level, no wrapper). Nested drops
+        // the wrapper and surfaces its children; flat uses the roots as-is.
+        const nested = menuItems.some((it) => it.parentId != null);
+        const nodes = nested
+          ? roots
+              // The wrapper is seeded at min_role_rank 0, so the API returns it
+              // to everyone but with no visible children. Only surface a root
+              // the user can actually drill into.
+              .filter((node) => node.children && node.children.length > 0)
+              .reduce((acc: any[], root: any) => acc.concat(root.children || []), [])
+          : roots;
+        this.rbacMenuNodes = nodes.map((child: any) => ({
+          label: child.label,
+          url: child.url,
+          icon: child.icon || "shield",
+          roles: child.roles || "",
+          children: child.children || [],
+        }));
       },
       error: () => fallback(),
     });
@@ -3980,9 +3981,12 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         .split(',')
         .map((r: string) => r.trim())
         .filter((r: string) => r);
+      // Untagged items already cleared the caller's rank server-side, so show
+      // them. A `roles` tag narrows an item to those roles (plus admins).
       const visibleForRole =
         selectedRoleIsAdmin ||
-        (nodeRoles.length > 0 && selectedRoleName && nodeRoles.includes(selectedRoleName));
+        nodeRoles.length === 0 ||
+        (!!selectedRoleName && nodeRoles.includes(selectedRoleName));
       if (visibleForRole) {
         seen.add(node.label);
         items.push(node);
