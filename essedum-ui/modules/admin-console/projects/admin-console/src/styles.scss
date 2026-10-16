@@ -285,12 +285,17 @@ body.header-light-theme .cdk-overlay-container {
 .cdk-overlay-container .mat-mdc-select-panel {
   background: var(--ac-surface-2) !important;
   border: 1px solid var(--ac-border) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35) !important;
+  padding: 4px !important;
 }
 
 .cdk-overlay-container .mat-mdc-option {
   color: var(--ac-text) !important;
+  font-size: 13px !important;
+  min-height: 38px !important;
+  border-radius: 6px !important;
+  margin: 1px 0 !important;
 
   &:hover:not(.mdc-list-item--disabled),
   &.mat-mdc-option-active {
@@ -299,7 +304,12 @@ body.header-light-theme .cdk-overlay-container {
 
   &.mdc-list-item--selected:not(.mat-mdc-option-multiple) {
     color: var(--ac-accent) !important;
+    background: rgba(79, 142, 247, 0.16) !important;
+    font-weight: 600 !important;
   }
+
+  /* hide the leading checkmark gutter — selection is shown by accent fill */
+  .mat-pseudo-checkbox-minimal { display: none !important; }
 }
 
 

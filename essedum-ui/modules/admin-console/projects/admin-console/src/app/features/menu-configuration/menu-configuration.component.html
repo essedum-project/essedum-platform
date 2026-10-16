@@ -32,16 +32,9 @@
     </button>
   </div>
 
-  <mat-radio-group [(ngModel)]="mode" (ngModelChange)="setMode($event)" name="mode"
-                   style="display:flex; gap:20px; margin-bottom:12px;">
-    <mat-radio-button value="admin">Admin Console menu</mat-radio-button>
-    <mat-radio-button value="role">Role sidebars (live)</mat-radio-button>
-  </mat-radio-group>
-
   <!-- ===== Admin Console menu (rbac_menu_item) ===== -->
-  <div *ngIf="mode === 'admin'" class="menu-filters"
-       style="display:flex; gap:16px; align-items:center; margin-bottom:12px;">
-    <mat-form-field appearance="outline" style="width:260px;">
+  <div *ngIf="mode === 'admin'" class="role-filter-bar">
+    <mat-form-field appearance="fill" class="filter-field filter-field-wide">
       <mat-label>Visible to admin type</mat-label>
       <mat-select [(ngModel)]="adminTierFilter" name="adminTierFilter">
         <mat-option [value]="null">All menu items</mat-option>
@@ -50,7 +43,7 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <span class="muted-hint">{{ filteredAdminRows.length }} of {{ adminRows.length }} items</span>
+    <span class="count-badge">{{ filteredAdminRows.length }} of {{ adminRows.length }} items</span>
   </div>
 
   <table *ngIf="mode === 'admin'" mat-table [dataSource]="filteredAdminRows" class="admin-console-table">

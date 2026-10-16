@@ -108,6 +108,7 @@
   border-radius: 10px;
 
   .filter-field { width: 200px; flex-shrink: 0; }
+  .filter-field-wide { width: 260px; }
 
   // Underline-only fill style for filter dropdowns
   ::ng-deep {
