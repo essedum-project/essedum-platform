@@ -31,6 +31,26 @@
 :host ::ng-deep .mat-mdc-form-field-subscript-wrapper { min-height: 0 !important; padding: 0 !important; }
 :host ::ng-deep .mat-mdc-form-field-flex { align-items: flex-end !important; }
 
+// ── mat-select underline fix (inputs already work via mdc-line-ripple) ────────
+// mat-select with fill appearance needs an explicit overflow:visible so the
+// line-ripple at the bottom is not clipped by the text-field-wrapper.
+:host ::ng-deep .mat-form-field-type-mat-select .mat-mdc-text-field-wrapper,
+:host ::ng-deep .mat-mdc-form-field-type-mat-select .mat-mdc-text-field-wrapper {
+  overflow: visible !important;
+}
+:host ::ng-deep .mat-form-field-type-mat-select .mdc-line-ripple::before,
+:host ::ng-deep .mat-mdc-form-field-type-mat-select .mdc-line-ripple::before {
+  border-bottom-color: rgba(79, 142, 247, 0.4) !important;
+  border-bottom-width: 1px !important;
+  display: block !important;
+}
+:host ::ng-deep .mat-form-field-type-mat-select .mdc-line-ripple::after,
+:host ::ng-deep .mat-mdc-form-field-type-mat-select .mdc-line-ripple::after {
+  border-bottom-color: #58a6ff !important;
+  border-bottom-width: 2px !important;
+  display: block !important;
+}
+
 // ── Dialog header — gradient top bar + title + close button ───────────────────
 .dialog-header {
   display: flex;
@@ -131,6 +151,17 @@
 :host-context(body.header-light-theme) {
   ::ng-deep .mdc-line-ripple::before { border-bottom-color: rgba(71, 66, 220, 0.3) !important; }
   ::ng-deep .mdc-line-ripple::after  { border-bottom-color: #4742dc !important; }
+  // mat-select underline in light theme
+  ::ng-deep .mat-form-field-type-mat-select .mdc-line-ripple::before,
+  ::ng-deep .mat-mdc-form-field-type-mat-select .mdc-line-ripple::before {
+    border-bottom-color: rgba(71, 66, 220, 0.3) !important;
+    display: block !important;
+  }
+  ::ng-deep .mat-form-field-type-mat-select .mdc-line-ripple::after,
+  ::ng-deep .mat-mdc-form-field-type-mat-select .mdc-line-ripple::after {
+    border-bottom-color: #4742dc !important;
+    display: block !important;
+  }
   ::ng-deep .mdc-floating-label, ::ng-deep mat-label { color: #64748b !important; }
   ::ng-deep .mdc-floating-label--float-above { color: #4742dc !important; }
   ::ng-deep .mat-mdc-input-element { color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; }
@@ -169,4 +200,8 @@
     background: linear-gradient(135deg, #4480f5 0%, #875ef7 100%) !important;
     box-shadow: 0 5px 20px rgba(68, 128, 245, 0.46) !important;
   }
+}
+
+.fs{
+  font-size: 8px !important;
 }

@@ -86,7 +86,7 @@ body.header-light-theme .cdk-overlay-container {
   .mat-mdc-header-row { background: var(--ac-surface-3); min-height: 46px; }
   .mat-mdc-header-cell {
     color: var(--ac-text-muted) !important;
-    font-weight: 600; font-size: 0.72rem; letter-spacing: 0.6px; text-transform: uppercase;
+    font-weight: 600; font-size: 0.8rem; letter-spacing: 0.5px; text-transform: uppercase;
     border-bottom: 1px solid var(--ac-border);
   }
   .mat-mdc-row { background: transparent; transition: background 0.1s ease;

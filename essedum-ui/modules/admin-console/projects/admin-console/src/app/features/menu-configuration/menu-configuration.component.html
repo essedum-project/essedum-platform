@@ -101,14 +101,14 @@
   <ng-container *ngIf="mode === 'role'">
 
     <div class="role-filter-bar">
-      <mat-form-field appearance="outline" class="filter-field">
+      <mat-form-field appearance="fill" class="filter-field">
         <mat-label>Role</mat-label>
         <mat-select [(ngModel)]="selectedRole" (ngModelChange)="onRoleChange($event)" name="selectedRole">
           <mat-option *ngFor="let r of roleOptions" [value]="r">{{ r }}</mat-option>
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="filter-field">
+      <mat-form-field appearance="fill" class="filter-field">
         <mat-label>Project</mat-label>
         <mat-select [(ngModel)]="selectedProject" (ngModelChange)="onProjectChange($event)" name="selectedProject">
           <mat-option *ngFor="let p of projectOptions" [value]="p">{{ p }}</mat-option>

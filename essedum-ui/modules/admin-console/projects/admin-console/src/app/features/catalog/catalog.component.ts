@@ -45,14 +45,19 @@ export class CatalogComponent implements OnInit {
 
   scopeLabel(scope: string): string {
     switch (scope) {
-      case 'project':
-        return 'Project';
-      case 'organization':
-        return 'Organization';
-      case 'public':
-        return 'Public';
-      default:
-        return scope;
+      case 'project':      return 'Project';
+      case 'organization': return 'Organization';
+      case 'public':       return 'Public';
+      default:             return scope;
+    }
+  }
+
+  scopeIcon(scope: string): string {
+    switch (scope) {
+      case 'project':      return 'folder';
+      case 'organization': return 'business';
+      case 'public':       return 'public';
+      default:             return 'label';
     }
   }
 }

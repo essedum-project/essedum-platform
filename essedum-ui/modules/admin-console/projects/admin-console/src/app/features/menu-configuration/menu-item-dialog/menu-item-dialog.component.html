@@ -35,7 +35,7 @@
       <mat-select [(ngModel)]="selectedRoles" name="roles" multiple>
         <mat-option *ngFor="let r of roleOptions" [value]="r">{{ r }}</mat-option>
       </mat-select>
-      <mat-hint>Leave empty for rank-based default; pick roles to override.</mat-hint>
+      <mat-hint class="fs">Leave empty for rank-based default; pick roles to override.</mat-hint>
     </mat-form-field>
   </div>
 
