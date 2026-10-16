@@ -181,7 +181,7 @@ public class AccessContextService {
 	 */
 	private void bridgeToLegacyUserProjectRole(Integer userId, Integer roleId, Integer projectId) {
 		int rank = rankOfRole(roleId);
-		String roleName = rbacRoleRepository.findById(roleId).map(RbacRole::getName).orElse("viewer");
+		String roleName = rbacRoleRepository.findById(roleId).map(RbacRole::getName).orElse("Viewer");
 
 		boolean[] isNewRole = { false };
 		Role legacyRole = legacyRoleRepository.findByNameAndProjectId(roleName, projectId).stream().findFirst()

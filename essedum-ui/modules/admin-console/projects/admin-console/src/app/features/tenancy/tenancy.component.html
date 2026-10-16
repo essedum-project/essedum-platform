@@ -3,7 +3,7 @@
     <h2>Organizations &amp; Projects</h2>
   </div>
 
-  <mat-tab-group>
+  <mat-tab-group [selectedIndex]="selectedTab">
     <mat-tab label="Organizations">
       <div class="tab-actions" style="padding:12px 0;">
         <button mat-raised-button color="primary" *ngIf="canCreateOrg" (click)="create('organization')">New Organization</button>

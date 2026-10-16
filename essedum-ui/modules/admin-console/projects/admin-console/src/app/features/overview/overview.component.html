@@ -5,7 +5,12 @@
     <mat-card
       *ngFor="let c of cards"
       class="stat-card"
-      [routerLink]="c.route"
+      role="button"
+      tabindex="0"
+      [attr.aria-label]="'Open ' + c.label"
+      (click)="open(c)"
+      (keydown.enter)="open(c)"
+      (keydown.space)="open(c)"
       [style.borderTopColor]="c.accent"
     >
       <div class="stat-count" [style.color]="c.accent">{{ c.count }}</div>

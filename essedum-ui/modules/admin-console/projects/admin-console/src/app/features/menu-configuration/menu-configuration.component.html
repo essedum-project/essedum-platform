@@ -17,7 +17,21 @@
   </mat-radio-group>
 
   <!-- ===== Admin Console menu (rbac_menu_item) ===== -->
-  <table *ngIf="mode === 'admin'" mat-table [dataSource]="adminRows" class="admin-console-table">
+  <div *ngIf="mode === 'admin'" class="menu-filters"
+       style="display:flex; gap:16px; align-items:center; margin-bottom:12px;">
+    <mat-form-field appearance="outline" style="width:260px;">
+      <mat-label>Visible to admin type</mat-label>
+      <mat-select [(ngModel)]="adminTierFilter" name="adminTierFilter">
+        <mat-option [value]="null">All menu items</mat-option>
+        <mat-option *ngFor="let tier of adminTiers" [value]="tier.rank">
+          {{ tier.label }} (rank {{ tier.rank }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <span class="muted-hint">{{ filteredAdminRows.length }} of {{ adminRows.length }} items</span>
+  </div>
+
+  <table *ngIf="mode === 'admin'" mat-table [dataSource]="filteredAdminRows" class="admin-console-table">
     <ng-container matColumnDef="label">
       <th mat-header-cell *matHeaderCellDef>Label</th>
       <td mat-cell *matCellDef="let row">{{ row.label }}</td>

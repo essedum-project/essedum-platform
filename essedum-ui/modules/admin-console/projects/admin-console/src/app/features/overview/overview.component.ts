@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewEncapsulation, ElementRef, effect } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/api.service';
@@ -11,6 +12,7 @@ interface StatCard {
   count: number;
   route: string;
   accent: string;
+  queryParams?: Record<string, string>;
 }
 
 // P1 VERSION: Admin landing overview with Shadow DOM encapsulation
@@ -24,12 +26,15 @@ interface StatCard {
   standalone: false,
 })
 export class OverviewComponent implements OnInit {
+  // `route` is a sibling segment, navigated relative to this route — the
+  // remote is mounted under the host's /landing/admin-console/**, so an
+  // absolute '/admin-console/...' link would not resolve.
   cards: StatCard[] = [
-    { label: 'Organizations', count: 0, route: '/admin-console/tenancy', accent: '#3b82f6' },
-    { label: 'Projects', count: 0, route: '/admin-console/tenancy', accent: '#06b6d4' },
-    { label: 'Members & Roles', count: 0, route: '/admin-console/access', accent: '#8b5cf6' },
-    { label: 'Pending Approvals', count: 0, route: '/admin-console/approvals', accent: '#fb923c' },
-    { label: 'Menu Items', count: 0, route: '/admin-console/menu-configuration', accent: '#22c55e' },
+    { label: 'Organizations', count: 0, route: 'tenancy', accent: '#3b82f6', queryParams: { tab: 'organizations' } },
+    { label: 'Projects', count: 0, route: 'tenancy', accent: '#06b6d4', queryParams: { tab: 'projects' } },
+    { label: 'Members & Roles', count: 0, route: 'access', accent: '#8b5cf6' },
+    { label: 'Pending Approvals', count: 0, route: 'approvals', accent: '#fb923c' },
+    { label: 'Menu Items', count: 0, route: 'menu-configuration', accent: '#22c55e' },
   ];
   recentAudit: AuditEvent[] = [];
   readonly auditColumns = ['occurredAt', 'entity', 'action', 'actorName'];
@@ -40,6 +45,8 @@ export class OverviewComponent implements OnInit {
     private readonly userContext: UserContextService,
     private readonly themeService: ThemeService,
     private readonly elementRef: ElementRef,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
   ) {
     // Apply light-theme class when isDarkTheme is false
     effect(() => {
@@ -71,5 +78,9 @@ export class OverviewComponent implements OnInit {
       this.recentAudit = (res.audit || []).slice(0, 8);
       this.loading = false;
     });
+  }
+
+  open(card: StatCard): void {
+    this.router.navigate(['..', card.route], { relativeTo: this.route, queryParams: card.queryParams });
   }
 }

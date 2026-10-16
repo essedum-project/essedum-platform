@@ -27,6 +27,24 @@ export class MenuConfigurationComponent implements OnInit {
   adminRows: MenuItemRow[] = [];
   readonly adminColumns = ['label', 'icon', 'route', 'parentLabel', 'minRoleRank', 'displayOrder', 'actions'];
 
+  // Matches rbac_role ranks. null = no filter.
+  readonly adminTiers = [
+    { rank: 4, label: 'Platform Admin' },
+    { rank: 3, label: 'Organization Admin' },
+    { rank: 2, label: 'Project Admin' },
+    { rank: 1, label: 'Developer' },
+    { rank: 0, label: 'Viewer' },
+  ];
+  adminTierFilter: number | null = null;
+
+  /** Items the chosen tier would actually see, i.e. minRoleRank at or below it. */
+  get filteredAdminRows(): MenuItemRow[] {
+    if (this.adminTierFilter === null) {
+      return this.adminRows;
+    }
+    return this.adminRows.filter(row => (row.minRoleRank ?? 0) <= this.adminTierFilter!);
+  }
+
   // ----- role menus (usm_constant) -----
   roleOptions: string[] = [];
   projectOptions: string[] = [];

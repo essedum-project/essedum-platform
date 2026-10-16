@@ -19,18 +19,28 @@ export class RankGuard implements CanActivate {
     private readonly router: Router,
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<boolean | UrlTree> {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> {
     const minRank: number = route.data?.['minRank'] ?? 0;
     const userId = this.userContext.userId$.value;
+    const fallback = this.overviewUrl(state.url);
     return this.api.getAccessContext(userId).pipe(
       map(ctx => {
         const rank = ctx?.highestRank ?? 0;
         if (rank >= minRank) {
           return true;
         }
-        return this.router.createUrlTree(['/admin-console/overview']);
+        return this.router.parseUrl(fallback);
       }),
-      catchError(() => of(this.router.createUrlTree(['/admin-console/overview']))),
+      catchError(() => of(this.router.parseUrl(fallback))),
     );
+  }
+
+  // The remote is mounted under the host (e.g. /landing/admin-console/**), so
+  // swap the last segment rather than hardcoding an absolute path.
+  private overviewUrl(url: string): string {
+    const path = url.split('?')[0].split('#')[0];
+    const segments = path.split('/').filter(s => s);
+    segments[segments.length - 1] = 'overview';
+    return '/' + segments.join('/');
   }
 }

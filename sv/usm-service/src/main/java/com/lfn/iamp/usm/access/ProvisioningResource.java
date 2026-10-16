@@ -18,9 +18,11 @@ import org.springframework.web.server.ResponseStatusException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.lfn.iamp.usm.audit.AuditService;
+import com.lfn.iamp.usm.domain.DashConstant;
 import com.lfn.iamp.usm.domain.Organisation;
 import com.lfn.iamp.usm.domain.Project;
 import com.lfn.iamp.usm.domain.UsmPortfolio;
+import com.lfn.iamp.usm.repository.DashConstantRepository;
 import com.lfn.iamp.usm.repository.OrganisationRepository;
 import com.lfn.iamp.usm.repository.ProjectRepository;
 import com.lfn.iamp.usm.repository.UserProjectRoleRepository;
@@ -42,6 +44,14 @@ public class ProvisioningResource {
 	private static final int ORG_ADMIN = 3;
 	private static final int PLATFORM_ADMIN = 4;
 
+	/** The four system roles every project gets a sidebar for (rbac-20). */
+	private static final String[] ADMIN_SIDE_KEYS = { "Platform Admin Side", "Organization Admin Side", "Project Admin Side" };
+	private static final String DEVELOPER_SIDE_KEY = "Developer Side";
+	/** Developer menus are seeded as a one-time copy of this legacy role's. */
+	private static final String DEVELOPER_TEMPLATE_KEY = "IT Portfolio Manager Side";
+	private static final String DASHBOARD_ITEM = "{\"label\":\"Dashboard\",\"icon\":\"tachometer\",\"url\":\"./dashboard\",\"children\":[]}";
+	private static final String ADMIN_CONSOLE_ITEM = "{\"label\":\"Admin Console\",\"icon\":\"shield\",\"url\":\"./admin-console\",\"children\":[]}";
+
 	private final AccessContextService accessContextService;
 	private final OrganisationRepository organisationRepository;
 	private final ProjectRepository projectRepository;
@@ -51,12 +61,14 @@ public class ProvisioningResource {
 	private final UsmPortfolioRepository usmPortfolioRepository;
 	private final RoleAssignmentRepository roleAssignmentRepository;
 	private final UserProjectRoleRepository userProjectRoleRepository;
+	private final DashConstantRepository dashConstantRepository;
 
 	public ProvisioningResource(AccessContextService accessContextService,
 			OrganisationRepository organisationRepository, ProjectRepository projectRepository,
 			EnvironmentRepository environmentRepository, RbacRoleRepository rbacRoleRepository,
 			AuditService auditService, UsmPortfolioRepository usmPortfolioRepository,
-			RoleAssignmentRepository roleAssignmentRepository, UserProjectRoleRepository userProjectRoleRepository) {
+			RoleAssignmentRepository roleAssignmentRepository, UserProjectRoleRepository userProjectRoleRepository,
+			DashConstantRepository dashConstantRepository) {
 		this.accessContextService = accessContextService;
 		this.organisationRepository = organisationRepository;
 		this.projectRepository = projectRepository;
@@ -66,6 +78,40 @@ public class ProvisioningResource {
 		this.usmPortfolioRepository = usmPortfolioRepository;
 		this.roleAssignmentRepository = roleAssignmentRepository;
 		this.userProjectRoleRepository = userProjectRoleRepository;
+		this.dashConstantRepository = dashConstantRepository;
+	}
+
+	/**
+	 * Gives a brand-new project the same baseline sidebars rbac-20 seeded for
+	 * existing ones, so a freshly provisioned project is never a blank slate.
+	 */
+	private void seedDefaultRoleMenus(String projectName) {
+		for (String key : ADMIN_SIDE_KEYS) {
+			saveRoleMenuItem(key, projectName, DASHBOARD_ITEM);
+			saveRoleMenuItem(key, projectName, ADMIN_CONSOLE_ITEM);
+		}
+		List<String> templateValues = dashConstantRepository.findDistinctProjectsForItem(DEVELOPER_TEMPLATE_KEY)
+				.stream()
+				.filter(p -> p != null && !p.isBlank())
+				.findFirst()
+				.map(p -> dashConstantRepository.findAllDashConstantsbyItemAndProject(DEVELOPER_TEMPLATE_KEY, p).stream()
+						.filter(c -> DEVELOPER_TEMPLATE_KEY.equals(c.getKeys()))
+						.map(DashConstant::getValue)
+						.collect(Collectors.toList()))
+				.orElseGet(java.util.Collections::emptyList);
+		if (templateValues.isEmpty()) {
+			saveRoleMenuItem(DEVELOPER_SIDE_KEY, projectName, DASHBOARD_ITEM);
+		} else {
+			templateValues.forEach(v -> saveRoleMenuItem(DEVELOPER_SIDE_KEY, projectName, v));
+		}
+	}
+
+	private void saveRoleMenuItem(String key, String projectName, String itemValue) {
+		DashConstant c = new DashConstant();
+		c.setKeys(key);
+		c.setProject_name(projectName);
+		c.setValue(itemValue);
+		dashConstantRepository.save(c);
 	}
 
 	/**
@@ -160,6 +206,7 @@ public class ProvisioningResource {
 		}
 		auditService.record("project", "created", actorUserId, "User #" + actorUserId,
 				"project \"" + saved.getName() + "\" created (org=" + req.organisationId() + ")");
+		seedDefaultRoleMenus(saved.getName());
 		return ResponseEntity.ok(saved);
 	}
 
@@ -236,10 +283,18 @@ public class ProvisioningResource {
 	@PostMapping("/roles")
 	public ResponseEntity<RbacRole> createRole(@RequestParam Integer actorUserId,
 			@RequestBody CreateRoleRequest req) {
-		require(actorUserId, PLATFORM_ADMIN, "create a role");
+		int actorRank = require(actorUserId, PLATFORM_ADMIN, "create a role");
+		int rank = req.rank() != null ? req.rank() : 0;
+		if (rank < 0) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "rank cannot be negative");
+		}
+		if (rank > actorRank) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"Cannot create a role ranked above your own (rank " + rank + ", have " + actorRank + ")");
+		}
 		RbacRole r = new RbacRole();
 		r.setName(req.name());
-		r.setRank(req.rank() != null ? req.rank() : 0);
+		r.setRank(rank);
 		RbacRole saved = rbacRoleRepository.save(r);
 		auditService.record("rbac_role", "created", actorUserId, "User #" + actorUserId,
 				"role \"" + saved.getName() + "\" (rank " + saved.getRank() + ") created");

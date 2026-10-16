@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewEncapsulation, ElementRef, effect } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
@@ -31,6 +32,9 @@ export class TenancyComponent implements OnInit {
   readonly projectColumns = ['name', 'organization', 'description', 'actions'];
   readonly environmentColumns = ['name', 'projectName', 'configRef'];
 
+  private readonly tabIndexByName: Record<string, number> = { organizations: 0, projects: 1, environments: 2 };
+  selectedTab = 0;
+
   rank = 0;
 
   constructor(
@@ -39,6 +43,7 @@ export class TenancyComponent implements OnInit {
     private readonly userContext: UserContextService,
     private readonly themeService: ThemeService,
     private readonly elementRef: ElementRef,
+    private readonly route: ActivatedRoute,
   ) {
     // Apply light-theme class when isDarkTheme is false
     effect(() => {
@@ -60,6 +65,9 @@ export class TenancyComponent implements OnInit {
   get canDeleteProject(): boolean { return this.rank >= 3; }
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe(params => {
+      this.selectedTab = this.tabIndexByName[params.get('tab') ?? ''] ?? 0;
+    });
     const userId = this.userContext.userId$.value;
     this.api.getAccessContext(userId).subscribe(ctx => (this.rank = ctx?.highestRank ?? 0));
     this.loadOrgs();

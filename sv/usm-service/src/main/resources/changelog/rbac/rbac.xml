@@ -414,4 +414,30 @@
 			WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL</sql>
 	</changeSet>
 
+	<!-- rbac-17: rbac_role.name is user-visible, not just a key — the bridge names
+	     legacy usm_role rows after it, sidebars are keyed "<name> Side", and it
+	     shows in the shell header's Role switcher. Rename the seeded roles to
+	     display form so every dropdown reads properly. Legacy same-named roles
+	     are retired first by changelog/rbac/manual-apply.sql (rbac-20). -->
+	<changeSet author="Essedum (rbac)" id="rbac-17">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">
+				SELECT CASE WHEN EXISTS (
+					SELECT 1 FROM rbac_role WHERE name IN
+						('platform_admin', 'org_admin', 'project_admin', 'developer', 'viewer')
+				) THEN 1 ELSE 0 END
+			</sqlCheck>
+		</preConditions>
+		<sql>UPDATE rbac_role SET name = 'Platform Admin' WHERE name = 'platform_admin'</sql>
+		<sql>UPDATE rbac_role SET name = 'Organization Admin' WHERE name = 'org_admin'</sql>
+		<sql>UPDATE rbac_role SET name = 'Project Admin' WHERE name = 'project_admin'</sql>
+		<sql>UPDATE rbac_role SET name = 'Developer' WHERE name = 'developer'</sql>
+		<sql>UPDATE rbac_role SET name = 'Viewer' WHERE name = 'viewer'</sql>
+		<sql>UPDATE usm_constant SET item = 'Platform Admin Side' WHERE item = 'platform_admin Side'</sql>
+		<sql>UPDATE usm_constant SET item = 'Organization Admin Side' WHERE item = 'org_admin Side'</sql>
+		<sql>UPDATE usm_constant SET item = 'Project Admin Side' WHERE item = 'project_admin Side'</sql>
+		<sql>UPDATE usm_constant SET item = 'Developer Side' WHERE item = 'developer Side'</sql>
+		<sql>UPDATE usm_constant SET item = 'Viewer Side' WHERE item = 'viewer Side'</sql>
+	</changeSet>
+
 </databaseChangeLog>
