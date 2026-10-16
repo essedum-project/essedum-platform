@@ -84,7 +84,7 @@ export class MenuConfigurationComponent implements OnInit {
   }
 
   addAdmin(): void {
-    const ref = this.dialog.open(MenuItemDialogComponent, { width: '480px' });
+    const ref = this.dialog.open(MenuItemDialogComponent, { width: '640px' });
     ref.afterClosed().subscribe((result: Omit<MenuItem, 'id'> | undefined) => {
       if (result) {
         this.api.createMenuItem(this.userContext.userId$.value, result).subscribe(() => this.loadAdmin());
@@ -93,7 +93,7 @@ export class MenuConfigurationComponent implements OnInit {
   }
 
   editAdmin(row: MenuItemRow): void {
-    const ref = this.dialog.open(MenuItemDialogComponent, { width: '480px', data: row });
+    const ref = this.dialog.open(MenuItemDialogComponent, { width: '640px', data: row });
     ref.afterClosed().subscribe((result: Omit<MenuItem, 'id'> | undefined) => {
       if (result) {
         this.api.updateMenuItem(row.id, this.userContext.userId$.value, result).subscribe(() => this.loadAdmin());

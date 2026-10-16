@@ -1,37 +1,74 @@
 <div class="admin-console-page">
-  <div class="admin-console-toolbar">
-    <h2>Audit Log</h2>
-    <mat-form-field appearance="outline">
-      <mat-label>Filter</mat-label>
-      <input matInput [(ngModel)]="filterText" placeholder="entity, action, actor..." />
-    </mat-form-field>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-title-icon">
+        <mat-icon>history</mat-icon>
+      </div>
+      <div>
+        <h2>Audit Log</h2>
+        <span class="page-subtitle">Track all system events and actor activity</span>
+      </div>
+    </div>
+
+    <!-- Search bar styled like aip-header's header-search -->
+    <div class="page-search">
+      <mat-icon>search</mat-icon>
+      <input
+        type="text"
+        [(ngModel)]="filterText"
+        placeholder="Search entity, action, actor…" />
+    </div>
   </div>
 
+  <!-- Table -->
   <table mat-table [dataSource]="filteredEvents" class="admin-console-table">
+
     <ng-container matColumnDef="occurredAt">
       <th mat-header-cell *matHeaderCellDef>When</th>
-      <td mat-cell *matCellDef="let row">{{ row.occurredAt | date: 'medium' }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="audit-date-text">{{ row.occurredAt | date: 'medium' }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="entity">
       <th mat-header-cell *matHeaderCellDef>Entity</th>
-      <td mat-cell *matCellDef="let row">{{ row.entity }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="audit-entity-badge"
+              [ngClass]="'entity-' + (row.entity | lowercase)">{{ row.entity }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="action">
       <th mat-header-cell *matHeaderCellDef>Action</th>
-      <td mat-cell *matCellDef="let row">{{ row.action }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="audit-action-badge"
+              [ngClass]="'action-' + (row.action | lowercase)">{{ row.action }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="actorName">
       <th mat-header-cell *matHeaderCellDef>Actor</th>
-      <td mat-cell *matCellDef="let row">{{ row.actorName }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="audit-actor-text">{{ row.actorName }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="details">
       <th mat-header-cell *matHeaderCellDef>Details</th>
-      <td mat-cell *matCellDef="let row">{{ row.details }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="audit-details-text">{{ row.details }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="correlationId">
       <th mat-header-cell *matHeaderCellDef>Correlation ID</th>
-      <td mat-cell *matCellDef="let row">{{ row.correlationId }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="audit-correlation-text" [title]="row.correlationId">{{ row.correlationId }}</span>
+      </td>
     </ng-container>
+
     <tr mat-header-row *matHeaderRowDef="columns"></tr>
     <tr mat-row *matRowDef="let row; columns: columns"></tr>
   </table>

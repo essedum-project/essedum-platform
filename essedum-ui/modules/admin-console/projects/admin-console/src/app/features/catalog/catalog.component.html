@@ -1,26 +1,63 @@
 <div class="admin-console-page">
-  <div class="admin-console-toolbar">
-    <h2>Asset Catalog</h2>
+
+  <!-- Page Header — same structure as Audit Log / Menu Configuration -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-title-icon">
+        <mat-icon>inventory_2</mat-icon>
+      </div>
+      <div>
+        <div class="title-row">
+          <h2>Asset Catalog</h2>
+          <span class="count-chip" *ngIf="assets.length > 0">{{ assets.length }} asset{{ assets.length !== 1 ? 's' : '' }}</span>
+        </div>
+        <span class="page-subtitle">Browse published assets available in your scope</span>
+      </div>
+    </div>
   </div>
 
-  <div class="catalog-grid">
-    <mat-card *ngFor="let asset of assets" class="catalog-card">
-      <mat-card-header>
-        <mat-card-title>{{ asset.name }}</mat-card-title>
-        <mat-card-subtitle>{{ asset.assetType }}</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <span class="scope-badge" [ngClass]="'scope-' + asset.scope">
-          {{ scopeLabel(asset.scope) }}
-        </span>
-        <span class="serving-version" *ngIf="asset.servingVersionNo !== null">
+  <div class="catalog-grid" *ngIf="assets.length > 0">
+    <div *ngFor="let asset of assets" class="catalog-card">
+
+      <!-- Header row: name + scope badge -->
+      <div class="card-main-header">
+        <div class="card-title-group">
+          <div class="card-main-title" [title]="asset.name">{{ asset.name }}</div>
+          <div class="card-main-sub">
+            <mat-icon class="sub-icon">category</mat-icon>
+            {{ asset.assetType }}
+          </div>
+        </div>
+        <div class="card-badge-group">
+          <span class="card-type-badge" [ngClass]="'badge-' + asset.scope">
+            <mat-icon class="badge-icon">{{ scopeIcon(asset.scope) }}</mat-icon>
+            {{ scopeLabel(asset.scope) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Visual canvas area — icon right-aligned -->
+      <div class="card-canvas">
+        <div class="canvas-icon-bg" [ngClass]="'canvas-' + asset.scope">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+      </div>
+
+      <!-- Footer: serving version only (no scope repeat) -->
+      <div class="card-actions-bar">
+        <span class="serving-pill" *ngIf="asset.servingVersionNo !== null">
+          <span class="v-dot"></span>
           serving v{{ asset.servingVersionNo }}
         </span>
-      </mat-card-content>
-    </mat-card>
+        <span class="no-version" *ngIf="asset.servingVersionNo === null">No active version</span>
+      </div>
+
+    </div>
   </div>
 
-  <p *ngIf="assets.length === 0" class="empty-state">
-    Nothing published in your scope yet.
-  </p>
+  <div *ngIf="assets.length === 0" class="empty-state">
+    <mat-icon>inventory_2</mat-icon>
+    <span class="empty-title">No published assets</span>
+    <span class="empty-sub">Nothing published in your scope yet.</span>
+  </div>
 </div>

@@ -1,1 +1,343 @@
-/* intentionally empty — admin-console-page/table styles come from global styles.scss */
+:host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
+
+// ── Page header ───────────────────────────────────────────────────────────────
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0 14px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(79, 142, 247, 0.08);
+
+  .page-header-left { display: flex; align-items: center; gap: 12px; }
+
+  .page-title-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: rgba(79, 142, 247, 0.12);
+    border: 1px solid rgba(79, 142, 247, 0.22);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    mat-icon { font-size: 20px; width: 20px; height: 20px; color: #7eb8ff; }
+  }
+
+  h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; color: #e2e8f0; line-height: 1.2; }
+  .page-subtitle { display: block; font-size: 12px; color: #6e8ea8; margin-top: 2px; }
+}
+
+// ── Add button ────────────────────────────────────────────────────────────────
+.btn-add {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: linear-gradient(135deg, #5b96f9, #3f7ae0) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  height: 36px !important;
+  padding: 0 16px !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-family: inherit !important;
+  transition: opacity 0.15s !important;
+
+  mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; }
+  &[disabled] { opacity: 0.45 !important; cursor: not-allowed !important; }
+  &:not([disabled]):hover { opacity: 0.9 !important; }
+}
+
+// ── Mode toggle (pill segmented control) ─────────────────────────────────────
+.mode-toggle {
+  display: inline-flex;
+  background: rgba(148, 163, 184, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 10px;
+  padding: 4px;
+  gap: 2px;
+  margin-bottom: 20px;
+}
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6e8ea8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  line-height: 1;
+
+  mat-icon { font-size: 16px !important; width: 16px !important; height: 16px !important; }
+
+  &:hover:not(.active) { color: #b8cce0; background: rgba(148, 163, 184, 0.08); }
+
+  &.active {
+    background: rgba(79, 142, 247, 0.18);
+    color: #7eb8ff;
+    font-weight: 600;
+  }
+}
+
+.live-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-radius: 6px;
+  padding: 1px 5px;
+  line-height: 1.5;
+}
+
+// ── Role filter bar ───────────────────────────────────────────────────────────
+.role-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  background: rgba(79, 142, 247, 0.04);
+  border: 1px solid rgba(79, 142, 247, 0.1);
+  border-radius: 10px;
+
+  .filter-field { width: 200px; flex-shrink: 0; }
+
+  // Underline-only fill style for filter dropdowns
+  ::ng-deep {
+    .mat-mdc-form-field { font-size: 13px !important; }
+    .mat-mdc-text-field-wrapper {
+      background: transparent !important;
+      border-radius: 0 !important;
+      overflow: visible !important;
+      padding: 0 4px !important;
+    }
+    .mdc-text-field--filled,
+    .mdc-text-field--filled:not(.mdc-text-field--disabled),
+    .mdc-text-field--filled:hover { background: transparent !important; border-radius: 0 !important; }
+    // padding-top 18px reserves space for the floating label; without it the
+    // label and value overlap ("two labels" bug).
+    .mat-mdc-form-field-infix { padding: 18px 0 4px !important; min-height: 40px !important; border-top: 0 !important; }
+    .mdc-line-ripple::before { border-bottom-color: rgba(79, 142, 247, 0.45) !important; border-bottom-width: 1px !important; }
+    .mdc-line-ripple::after  { border-bottom-color: #58a6ff !important; border-bottom-width: 2px !important; }
+    .mat-mdc-form-field-focus-overlay { display: none !important; opacity: 0 !important; }
+    .mdc-text-field__ripple { display: none !important; }
+    .mdc-floating-label { font-size: 12px !important; color: #6e8ea8 !important; }
+    .mdc-floating-label--float-above { color: #7eb8ff !important; font-size: 12px !important; }
+    .mat-mdc-select-value-text { font-size: 13px !important; color: #c9d8f0 !important; }
+    .mat-mdc-select-arrow { color: #5b96f9 !important; }
+    .mat-mdc-select-placeholder { color: #4e6a82 !important; }
+    .mat-mdc-form-field-subscript-wrapper { min-height: 0 !important; padding: 0 !important; }
+    .mat-mdc-form-field-flex { align-items: flex-end !important; }
+  }
+}
+
+.count-badge {
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(79, 142, 247, 0.12);
+  color: #7eb8ff;
+  border-radius: 20px;
+  padding: 4px 12px;
+}
+
+// ── Table: force dark background (Material --mat-table-background-color fix) ──
+::ng-deep .admin-console-table {
+  --mat-table-background-color: #1e293b;
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+
+  .mat-mdc-header-row { background: #2b3a52 !important; min-height: 46px !important; }
+  .mat-mdc-header-cell {
+    color: #94a3b8 !important; font-weight: 600 !important; font-size: 1.2rem !important;
+    letter-spacing: 0.6px !important; text-transform: uppercase !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+  }
+  .mat-mdc-cell {
+    color: #e2e8f0 !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+  }
+  .mat-mdc-row { background: transparent !important; transition: background 0.1s ease !important; }
+  .mat-mdc-row:hover { background: rgba(148, 163, 184, 0.10) !important; }
+  .mat-mdc-row:last-child .mat-mdc-cell { border-bottom: none !important; }
+}
+
+:host-context(body.header-light-theme) ::ng-deep .admin-console-table {
+  --mat-table-background-color: #ffffff;
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+
+  .mat-mdc-header-row { background: #f1f5f9 !important; }
+  .mat-mdc-header-cell {
+    color: #64748b !important; border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+  }
+  .mat-mdc-cell {
+    color: #1e293b !important; border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+  }
+  .mat-mdc-row:hover { background: rgba(15, 23, 42, 0.04) !important; }
+}
+
+// ── Cell styles (dark default) ────────────────────────────────────────────────
+::ng-deep {
+  .menu-label-text { font-size: 13px; font-weight: 500; color: #c9d8f0; }
+
+  .route-text {
+    font-size: 11px; font-family: 'Courier New', monospace;
+    color: #6e8ea8; word-break: break-all;
+  }
+
+  .empty-val { color: rgba(148, 163, 184, 0.45); font-size: 13px; }
+
+  .icon-code {
+    display: inline-block; font-size: 11px;
+    font-family: 'Courier New', monospace;
+    color: #94a3b8; background: rgba(148, 163, 184, 0.08);
+    border-radius: 4px; padding: 2px 6px;
+  }
+
+  .parent-badge {
+    display: inline-block; font-size: 11px; font-weight: 500;
+    border-radius: 10px; padding: 2px 8px;
+    background: rgba(168, 85, 247, 0.12); color: #c084fc;
+  }
+
+  .rank-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    font-size: 11px; font-weight: 700;
+    &.rank-0 { background: rgba(16, 185, 129, 0.12); color: #34d399; }
+    &.rank-1 { background: rgba(79, 142, 247, 0.15); color: #7eb8ff; }
+    &.rank-2 { background: rgba(245, 158, 11, 0.12); color: #fbbf24; }
+    &.rank-3 { background: rgba(239, 68, 68, 0.12);  color: #f87171; }
+    &.rank-4 { background: rgba(168, 85, 247, 0.12); color: #c084fc; }
+  }
+
+  .order-badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    color: #6e8ea8; background: rgba(148, 163, 184, 0.08);
+    border-radius: 6px; padding: 2px 10px; text-align: center;
+  }
+
+  .submenu-yes {
+    display: inline-block; font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.03em;
+    border-radius: 10px; padding: 2px 8px;
+    background: rgba(16, 185, 129, 0.12); color: #34d399;
+  }
+
+  .row-actions { display: flex; gap: 6px; align-items: center; }
+
+  .btn-edit {
+    font-size: 12px !important; font-weight: 500 !important;
+    border-radius: 6px !important; height: 28px !important;
+    min-height: 28px !important; line-height: 28px !important; padding: 0 10px !important;
+    background: rgba(79, 142, 247, 0.12) !important;
+    color: #7eb8ff !important;
+    border: 1px solid rgba(79, 142, 247, 0.25) !important;
+    mat-icon { font-size: 14px !important; width: 14px !important; height: 14px !important; }
+    &:hover { background: rgba(79, 142, 247, 0.22) !important; }
+  }
+
+  .btn-delete {
+    font-size: 12px !important; font-weight: 500 !important;
+    border-radius: 6px !important; height: 28px !important;
+    min-height: 28px !important; line-height: 28px !important; padding: 0 10px !important;
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #f87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.25) !important;
+    mat-icon { font-size: 14px !important; width: 14px !important; height: 14px !important; }
+    &:hover { background: rgba(239, 68, 68, 0.22) !important; }
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.menu-empty-state {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 40px 0; color: #94a3b8; font-size: 14px;
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  strong { color: #b8cce0; font-weight: 600; }
+}
+
+// ── Light theme ───────────────────────────────────────────────────────────────
+:host-context(body.header-light-theme) {
+  .page-header {
+    border-bottom-color: rgba(99, 102, 241, 0.1);
+    .page-title-icon {
+      background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.18);
+      mat-icon { color: #4f46e5; }
+    }
+    h2          { color: #0f172a; }
+    .page-subtitle { color: #64748b; }
+  }
+
+  .mode-toggle {
+    background: rgba(99, 102, 241, 0.04);
+    border-color: rgba(99, 102, 241, 0.15);
+  }
+
+  .mode-btn {
+    color: #64748b;
+    &:hover:not(.active) { color: #334155; background: rgba(99, 102, 241, 0.06); }
+    &.active { background: rgba(99, 102, 241, 0.1); color: #4338ca; }
+  }
+
+  .live-badge { background: rgba(5, 150, 105, 0.1); color: #059669; }
+  .count-badge { background: rgba(79, 70, 229, 0.08); color: #4f46e5; }
+  .menu-empty-state { color: #64748b; strong { color: #334155; } }
+
+  .role-filter-bar {
+    background: rgba(79, 70, 229, 0.04);
+    border-color: rgba(79, 70, 229, 0.12);
+    ::ng-deep {
+      .mat-mdc-text-field-wrapper { background: transparent !important; }
+      .mdc-line-ripple::before { border-bottom-color: rgba(71, 66, 220, 0.3) !important; }
+      .mdc-line-ripple::after  { border-bottom-color: #4742dc !important; }
+      .mdc-floating-label { color: #64748b !important; }
+      .mdc-floating-label--float-above { color: #4f46e5 !important; }
+      .mat-mdc-select-value-text { color: #1e293b !important; }
+      .mat-mdc-select-arrow { color: #4f46e5 !important; }
+    }
+  }
+}
+
+:host-context(body.header-light-theme) ::ng-deep {
+  .menu-label-text  { color: #1e293b; }
+  .route-text       { color: #64748b; }
+  .empty-val        { color: rgba(100, 116, 139, 0.45); }
+  .icon-code        { color: #64748b; background: rgba(15, 23, 42, 0.06); }
+  .parent-badge     { background: rgba(124, 58, 237, 0.08); color: #7c3aed; }
+  .order-badge      { color: #64748b; background: rgba(15, 23, 42, 0.06); }
+  .submenu-yes      { background: rgba(5, 150, 105, 0.08); color: #059669; }
+
+  .rank-badge {
+    &.rank-0 { background: rgba(5, 150, 105, 0.08);  color: #059669; }
+    &.rank-1 { background: rgba(79, 70, 229, 0.08);  color: #4f46e5; }
+    &.rank-2 { background: rgba(217, 119, 6, 0.08);  color: #d97706; }
+    &.rank-3 { background: rgba(220, 38, 38, 0.08);  color: #dc2626; }
+    &.rank-4 { background: rgba(124, 58, 237, 0.08); color: #7c3aed; }
+  }
+
+  .btn-edit {
+    background: rgba(79, 70, 229, 0.08) !important;
+    color: #4f46e5 !important;
+    border-color: rgba(79, 70, 229, 0.2) !important;
+    &:hover { background: rgba(79, 70, 229, 0.15) !important; }
+  }
+
+  .btn-delete {
+    background: rgba(220, 38, 38, 0.08) !important;
+    color: #dc2626 !important;
+    border-color: rgba(220, 38, 38, 0.2) !important;
+    &:hover { background: rgba(220, 38, 38, 0.15) !important; }
+  }
+}
+
+:host-context(body.header-dark-theme) .page-header h2 { color: #e2e8f0; }

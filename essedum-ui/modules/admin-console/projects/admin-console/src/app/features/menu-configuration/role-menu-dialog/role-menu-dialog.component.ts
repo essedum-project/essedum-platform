@@ -8,6 +8,7 @@ import { RoleMenu } from '../../../core/api-models';
 @Component({
   selector: 'app-role-menu-dialog',
   templateUrl: './role-menu-dialog.component.html',
+  styleUrls: ['./role-menu-dialog.component.scss'],
   standalone: false,
 })
 export class RoleMenuDialogComponent {

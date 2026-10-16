@@ -1,12 +1,34 @@
 <div class="admin-console-page">
-  <div class="admin-console-toolbar">
-    <h2>Menu Configuration</h2>
-    <button *ngIf="mode === 'admin'" mat-raised-button color="primary" (click)="addAdmin()">
+
+  <!-- ── Page Header ──────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-title-icon">
+        <mat-icon>menu</mat-icon>
+      </div>
+      <div>
+        <h2>Menu Configuration</h2>
+        <span class="page-subtitle">Manage sidebar navigation items and role-based menus</span>
+      </div>
+    </div>
+    <button class="btn-add"
+            [disabled]="mode === 'role' && (!selectedRole || !selectedProject)"
+            (click)="mode === 'admin' ? addAdmin() : addRoleMenu()">
+      <mat-icon>add</mat-icon>
       Add Menu Item
     </button>
-    <button *ngIf="mode === 'role'" mat-raised-button color="primary"
-            [disabled]="!selectedRole || !selectedProject" (click)="addRoleMenu()">
-      Add Menu Item
+  </div>
+
+  <!-- ── Mode Toggle (pill segmented control) ─────────────────────────────── -->
+  <div class="mode-toggle">
+    <button class="mode-btn" [class.active]="mode === 'admin'" (click)="setMode('admin')">
+      <mat-icon>manage_accounts</mat-icon>
+      Admin Console
+    </button>
+    <button class="mode-btn" [class.active]="mode === 'role'" (click)="setMode('role')">
+      <mat-icon>group</mat-icon>
+      Role Sidebars
+      <span class="live-badge">LIVE</span>
     </button>
   </div>
 
@@ -34,87 +56,149 @@
   <table *ngIf="mode === 'admin'" mat-table [dataSource]="filteredAdminRows" class="admin-console-table">
     <ng-container matColumnDef="label">
       <th mat-header-cell *matHeaderCellDef>Label</th>
-      <td mat-cell *matCellDef="let row">{{ row.label }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="menu-label-text">{{ row.label }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="icon">
       <th mat-header-cell *matHeaderCellDef>Icon</th>
-      <td mat-cell *matCellDef="let row">{{ row.icon || '—' }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span *ngIf="row.icon" class="icon-code">{{ row.icon }}</span>
+        <span *ngIf="!row.icon" class="empty-val">—</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="route">
       <th mat-header-cell *matHeaderCellDef>Route</th>
-      <td mat-cell *matCellDef="let row">{{ row.route }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="route-text">{{ row.route }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="parentLabel">
       <th mat-header-cell *matHeaderCellDef>Parent</th>
-      <td mat-cell *matCellDef="let row">{{ row.parentLabel }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span *ngIf="row.parentLabel !== '—'" class="parent-badge">{{ row.parentLabel }}</span>
+        <span *ngIf="row.parentLabel === '—'" class="empty-val">—</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="minRoleRank">
-      <th mat-header-cell *matHeaderCellDef>Min Role Rank</th>
-      <td mat-cell *matCellDef="let row">{{ row.minRoleRank }}</td>
+      <th mat-header-cell *matHeaderCellDef>Min Rank</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="rank-badge" [ngClass]="'rank-' + row.minRoleRank">{{ row.minRoleRank }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="displayOrder">
       <th mat-header-cell *matHeaderCellDef>Order</th>
-      <td mat-cell *matCellDef="let row">{{ row.displayOrder }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="order-badge">{{ row.displayOrder }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let row">
-        <button mat-button (click)="editAdmin(row)">Edit</button>
-        <button mat-button color="warn" (click)="removeAdmin(row)">Delete</button>
+        <div class="row-actions">
+          <button mat-button class="btn-edit" (click)="editAdmin(row)">
+            <mat-icon>edit</mat-icon> Edit
+          </button>
+          <button mat-button class="btn-delete" (click)="removeAdmin(row)">
+            <mat-icon>delete</mat-icon> Delete
+          </button>
+        </div>
       </td>
     </ng-container>
+
     <tr mat-header-row *matHeaderRowDef="adminColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: adminColumns"></tr>
   </table>
 
-  <!-- ===== Role sidebars (usm_constant, live) ===== -->
+  <!-- ── Role sidebars (usm_constant, live) ───────────────────────────────── -->
   <ng-container *ngIf="mode === 'role'">
-    <div class="menu-filters" style="display:flex; gap:16px; align-items:center; margin-bottom:12px;">
-      <mat-form-field appearance="outline" style="width:260px;">
+
+    <div class="role-filter-bar">
+      <mat-form-field appearance="fill" class="filter-field">
         <mat-label>Role</mat-label>
         <mat-select [(ngModel)]="selectedRole" (ngModelChange)="onRoleChange($event)" name="selectedRole">
           <mat-option *ngFor="let r of roleOptions" [value]="r">{{ r }}</mat-option>
         </mat-select>
       </mat-form-field>
-      <mat-form-field appearance="outline" style="width:220px;">
+
+      <mat-form-field appearance="fill" class="filter-field">
         <mat-label>Project</mat-label>
         <mat-select [(ngModel)]="selectedProject" (ngModelChange)="onProjectChange($event)" name="selectedProject">
           <mat-option *ngFor="let p of projectOptions" [value]="p">{{ p }}</mat-option>
         </mat-select>
       </mat-form-field>
-      <span>{{ roleRows.length }} item(s)</span>
+
+      <span *ngIf="selectedRole && selectedProject" class="count-badge">
+        {{ roleRows.length }} item{{ roleRows.length !== 1 ? 's' : '' }}
+      </span>
     </div>
 
     <table mat-table [dataSource]="roleRows" class="admin-console-table">
+
       <ng-container matColumnDef="label">
         <th mat-header-cell *matHeaderCellDef>Label</th>
-        <td mat-cell *matCellDef="let row">{{ row.label }}</td>
+        <td mat-cell *matCellDef="let row">
+          <span class="menu-label-text">{{ row.label }}</span>
+        </td>
       </ng-container>
+
       <ng-container matColumnDef="icon">
         <th mat-header-cell *matHeaderCellDef>Icon</th>
-        <td mat-cell *matCellDef="let row">{{ row.icon || '—' }}</td>
+        <td mat-cell *matCellDef="let row">
+          <span *ngIf="row.icon" class="icon-code">{{ row.icon }}</span>
+          <span *ngIf="!row.icon" class="empty-val">—</span>
+        </td>
       </ng-container>
+
       <ng-container matColumnDef="url">
         <th mat-header-cell *matHeaderCellDef>URL</th>
-        <td mat-cell *matCellDef="let row">{{ row.url || '—' }}</td>
+        <td mat-cell *matCellDef="let row">
+          <span *ngIf="row.url" class="route-text">{{ row.url }}</span>
+          <span *ngIf="!row.url" class="empty-val">—</span>
+        </td>
       </ng-container>
+
       <ng-container matColumnDef="hasChildren">
         <th mat-header-cell *matHeaderCellDef>Submenu</th>
-        <td mat-cell *matCellDef="let row">{{ row.hasChildren ? 'yes' : '—' }}</td>
+        <td mat-cell *matCellDef="let row">
+          <span *ngIf="row.hasChildren" class="submenu-yes">Yes</span>
+          <span *ngIf="!row.hasChildren" class="empty-val">—</span>
+        </td>
       </ng-container>
+
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
-          <button mat-button (click)="editRoleMenu(row)">Edit</button>
-          <button mat-button color="warn" (click)="removeRoleMenu(row)">Delete</button>
+          <div class="row-actions">
+            <button mat-button class="btn-edit" (click)="editRoleMenu(row)">
+              <mat-icon>edit</mat-icon> Edit
+            </button>
+            <button mat-button class="btn-delete" (click)="removeRoleMenu(row)">
+              <mat-icon>delete</mat-icon> Delete
+            </button>
+          </div>
         </td>
       </ng-container>
+
       <tr mat-header-row *matHeaderRowDef="roleColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: roleColumns"></tr>
     </table>
 
-    <p *ngIf="roleRows.length === 0 && selectedRole && selectedProject" class="empty-state">
-      No menu items for {{ selectedRole }} in {{ selectedProject }}.
-    </p>
+    <div *ngIf="roleRows.length === 0 && selectedRole && selectedProject" class="menu-empty-state">
+      <mat-icon>menu_open</mat-icon>
+      <span>No menu items for <strong>{{ selectedRole }}</strong> in <strong>{{ selectedProject }}</strong>.</span>
+    </div>
+
+    <div *ngIf="!selectedRole || !selectedProject" class="menu-empty-state">
+      <mat-icon>filter_list</mat-icon>
+      <span>Select a role and project to view their menu items.</span>
+    </div>
+
   </ng-container>
 </div>

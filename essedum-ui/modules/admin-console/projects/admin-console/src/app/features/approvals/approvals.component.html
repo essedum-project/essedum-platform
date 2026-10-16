@@ -1,39 +1,72 @@
 <div class="admin-console-page">
-  <div class="admin-console-toolbar">
-    <h2>Approvals</h2>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-title-icon">
+        <mat-icon>task_alt</mat-icon>
+      </div>
+      <div>
+        <h2>Approvals</h2>
+        <span class="page-subtitle">Review and decide on pending promotion requests</span>
+      </div>
+    </div>
   </div>
 
+  <!-- Table -->
   <table mat-table [dataSource]="pending" class="admin-console-table">
+
     <ng-container matColumnDef="assetName">
       <th mat-header-cell *matHeaderCellDef>Asset</th>
-      <td mat-cell *matCellDef="let row">{{ row.assetName }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="approval-asset-text">{{ row.assetName }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="versionNo">
       <th mat-header-cell *matHeaderCellDef>Version</th>
-      <td mat-cell *matCellDef="let row">v{{ row.versionNo }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="approval-version-badge">v{{ row.versionNo }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="gate">
       <th mat-header-cell *matHeaderCellDef>Gate</th>
-      <td mat-cell *matCellDef="let row">{{ row.gate }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="gate-badge" [ngClass]="'gate-' + (row.gate | lowercase)">{{ row.gate }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="actorName">
       <th mat-header-cell *matHeaderCellDef>Submitted by</th>
-      <td mat-cell *matCellDef="let row">{{ row.actorName }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="approval-actor-text">{{ row.actorName }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="occurredAt">
       <th mat-header-cell *matHeaderCellDef>Submitted</th>
-      <td mat-cell *matCellDef="let row">{{ row.occurredAt | date: 'medium' }}</td>
+      <td mat-cell *matCellDef="let row">
+        <span class="approval-date-text">{{ row.occurredAt | date: 'medium' }}</span>
+      </td>
     </ng-container>
+
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let row">
-        <button mat-button color="primary" (click)="decide(row, 'approved')">Approve</button>
-        <button mat-button color="warn" (click)="decide(row, 'rejected')">Reject</button>
+        <div class="approval-actions">
+          <button mat-button class="btn-approve" (click)="decide(row, 'approved')">Approve</button>
+          <button mat-button class="btn-reject"  (click)="decide(row, 'rejected')">Reject</button>
+        </div>
       </td>
     </ng-container>
+
     <tr mat-header-row *matHeaderRowDef="columns"></tr>
     <tr mat-row *matRowDef="let row; columns: columns"></tr>
   </table>
 
-  <p *ngIf="pending.length === 0" class="empty-state">Nothing pending at your gates.</p>
+  <div *ngIf="pending.length === 0" class="approvals-empty">
+    <mat-icon>task_alt</mat-icon>
+    <span>Nothing pending at your gates.</span>
+  </div>
 </div>
