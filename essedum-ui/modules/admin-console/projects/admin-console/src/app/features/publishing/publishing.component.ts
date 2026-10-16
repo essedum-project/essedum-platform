@@ -111,7 +111,10 @@ export class PublishingComponent implements OnInit {
             actorId: userId,
             actorName: `User #${userId}`,
           })
-          .subscribe(() => this.load());
+          .subscribe({
+            next: () => this.load(),
+            error: err => alert(err?.error?.message || 'Failed to create the draft.'),
+          });
       });
   }
 
@@ -140,7 +143,10 @@ export class PublishingComponent implements OnInit {
             actorId: userId,
             actorName: `User #${userId}`,
           })
-          .subscribe(() => this.load());
+          .subscribe({
+            next: () => this.load(),
+            error: err => alert(err?.error?.message || 'Failed to save the draft.'),
+          });
       });
   }
 
@@ -150,7 +156,10 @@ export class PublishingComponent implements OnInit {
     const userId = this.userContext.userId$.value;
     this.api
       .submitVersion(version.id, { actorId: userId, actorName: `User #${userId}`, note: '' })
-      .subscribe(() => this.load());
+      .subscribe({
+        next: () => this.load(),
+        error: err => alert(err?.error?.message || 'Failed to submit for approval.'),
+      });
   }
 
   canSubmit(version: AssetVersionRow): boolean {

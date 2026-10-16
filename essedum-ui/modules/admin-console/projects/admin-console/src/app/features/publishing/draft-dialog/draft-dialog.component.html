@@ -1,5 +1,6 @@
 <h2 mat-dialog-title>{{ isEdit ? 'Edit Draft' : 'New Asset Draft' }}</h2>
 <div mat-dialog-content>
+  <p *ngIf="loadError" class="load-error">{{ loadError }}</p>
   <mat-form-field appearance="fill" class="full-width" *ngIf="!isEdit">
     <mat-label>Project</mat-label>
     <mat-select [(ngModel)]="projectId" name="projectId">

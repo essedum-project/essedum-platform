@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { catchError, of } from 'rxjs';
 import { ApiService } from '../../../core/api.service';
 import { LegacyProject } from '../../../core/api-models';
 
@@ -31,6 +32,7 @@ export interface DraftDialogResult {
 })
 export class DraftDialogComponent implements OnInit {
   projects: LegacyProject[] = [];
+  loadError = '';
 
   projectId: number | null = null;
   name = '';
@@ -54,7 +56,14 @@ export class DraftDialogComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.isEdit) {
-      this.api.getProjects().subscribe(projects => {
+      this.api.getProjects().pipe(
+        catchError(err => {
+          this.loadError = err?.status === 403
+            ? 'You do not have permission to list projects. Contact an admin.'
+            : 'Failed to load projects. Please try again.';
+          return of([] as LegacyProject[]);
+        }),
+      ).subscribe(projects => {
         this.projects = projects;
         if (projects.length === 1) {
           this.projectId = projects[0].id;

@@ -2270,7 +2270,14 @@ export class LandingComponent implements OnInit, AfterViewInit {
         if (sidebarMenutemp.length > 0) {
           this.sidebarMenu = sidebarMenutemp;
 
-          if (!this.sidebarMenu.some((it: any) => it && it.label === 'Dashboard')) {
+          // RBAC admin tiers (Project Admin and above, bridgeToLegacyUserProjectRole
+          // sets projectadmin for rank>=2) land on the Admin Console Overview
+          // instead, so don't force the legacy Dashboard entry back in for them.
+          const roleForDashboard = JSON.parse(sessionStorage.getItem("role") || "null");
+          if (
+            !roleForDashboard?.projectadmin &&
+            !this.sidebarMenu.some((it: any) => it && it.label === 'Dashboard')
+          ) {
             this.sidebarMenu.unshift({ label: 'Dashboard', icon: 'tachometer', url: './dashboard' });
           }
 
@@ -2353,6 +2360,16 @@ export class LandingComponent implements OnInit, AfterViewInit {
             datafromcoreproject = false;
         }
         let temprole = JSON.parse(sessionStorage.getItem("role"));
+        // RBAC admin tiers have no legacy per-role sidebar rows of their own
+        // (the admin-console RBAC menu is their sidebar) — drop the component's
+        // hardcoded Dashboard/Configuration placeholder rather than show it.
+        if (
+          datafromcoreproject == false &&
+          datafromcurrentproject == false &&
+          temprole.projectadmin
+        ) {
+          this.sidebarMenu = [];
+        }
         if (
           datafromcoreproject == false &&
           datafromcurrentproject == false &&
@@ -2442,7 +2459,10 @@ export class LandingComponent implements OnInit, AfterViewInit {
 
 // After all sidebar menu processing: land admins on the new Admin Console
 // Overview (the old iamp-usm/portfoliolist screen is retired — §7/§10 cutover).
-const isAdmin = this.role21.toLowerCase() === "admin";
+// Covers every RBAC admin tier (role.projectadmin, rank>=2), not just the
+// literal "Admin" role name, so Project/Organization Admin land there too.
+const roleForRedirect = JSON.parse(sessionStorage.getItem("role") || "null");
+const isAdmin = this.role21.toLowerCase() === "admin" || !!roleForRedirect?.projectadmin;
 const currentUrl = this.router.url;
 const isAtMainLanding = currentUrl === "/landing" || currentUrl === "/landing/";
 const isNavigatingToSpecificRoute = sessionStorage.getItem("navigatingToRoute");

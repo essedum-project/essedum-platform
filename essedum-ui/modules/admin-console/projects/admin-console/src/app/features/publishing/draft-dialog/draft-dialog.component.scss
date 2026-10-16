@@ -13,3 +13,9 @@
 ::ng-deep .mdc-text-field--filled .mdc-line-ripple::after {
   border-bottom: none !important;
 }
+
+.load-error {
+  color: #d32f2f;
+  font-size: 0.875rem;
+  margin: 0 0 8px;
+}
