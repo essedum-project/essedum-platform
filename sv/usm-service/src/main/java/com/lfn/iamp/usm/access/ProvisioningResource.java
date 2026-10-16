@@ -45,7 +45,7 @@ public class ProvisioningResource {
 	private static final int PLATFORM_ADMIN = 4;
 
 	/** The four system roles every project gets a sidebar for (rbac-20). */
-	private static final String[] ADMIN_SIDE_KEYS = { "Platform Admin Side", "Organization Admin Side", "Project Admin Side" };
+	private static final String[] ADMIN_SIDE_KEYS = { "Admin Side", "Organization Admin Side", "Project Admin Side" };
 	private static final String DEVELOPER_SIDE_KEY = "Developer Side";
 	/** Developer menus are seeded as a one-time copy of this legacy role's. */
 	private static final String DEVELOPER_TEMPLATE_KEY = "IT Portfolio Manager Side";

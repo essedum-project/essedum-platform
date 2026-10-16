@@ -428,12 +428,12 @@
 				) THEN 1 ELSE 0 END
 			</sqlCheck>
 		</preConditions>
-		<sql>UPDATE rbac_role SET name = 'Platform Admin' WHERE name = 'platform_admin'</sql>
+		<sql>UPDATE rbac_role SET name = 'Admin' WHERE name = 'platform_admin'</sql>
 		<sql>UPDATE rbac_role SET name = 'Organization Admin' WHERE name = 'org_admin'</sql>
 		<sql>UPDATE rbac_role SET name = 'Project Admin' WHERE name = 'project_admin'</sql>
 		<sql>UPDATE rbac_role SET name = 'Developer' WHERE name = 'developer'</sql>
 		<sql>UPDATE rbac_role SET name = 'Viewer' WHERE name = 'viewer'</sql>
-		<sql>UPDATE usm_constant SET item = 'Platform Admin Side' WHERE item = 'platform_admin Side'</sql>
+		<sql>UPDATE usm_constant SET item = 'Admin Side' WHERE item = 'platform_admin Side'</sql>
 		<sql>UPDATE usm_constant SET item = 'Organization Admin Side' WHERE item = 'org_admin Side'</sql>
 		<sql>UPDATE usm_constant SET item = 'Project Admin Side' WHERE item = 'project_admin Side'</sql>
 		<sql>UPDATE usm_constant SET item = 'Developer Side' WHERE item = 'developer Side'</sql>
