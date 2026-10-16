@@ -75,9 +75,9 @@ body.header-light-theme .cdk-overlay-container {
 
 /* ---- page scaffold ---- */
 .admin-console-page,
-.overview { 
-  padding: 24px 28px; 
-  color: var(--ac-text); 
+.overview {
+  padding: 14px 24px;
+  color: var(--ac-text);
 }
 
 .admin-console-toolbar {
@@ -292,10 +292,12 @@ body.header-light-theme .cdk-overlay-container {
 
 .cdk-overlay-container .mat-mdc-option {
   color: var(--ac-text) !important;
-  font-size: 13px !important;
-  min-height: 38px !important;
+  font-size: 12px !important;
+  min-height: 30px !important;
   border-radius: 6px !important;
-  margin: 1px 0 !important;
+  margin: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 
   &:hover:not(.mdc-list-item--disabled),
   &.mat-mdc-option-active {

@@ -1,14 +1,14 @@
 :host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
 
-.admin-console-page { padding: 24px 28px; }
+.admin-console-page { padding: 14px 24px; }
 
 // ── Page header ───────────────────────────────────────────────────────────────
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 0 14px;
-  margin-bottom: 20px;
+  padding: 10px 0 8px;
+  margin-bottom: 10px;
   border-bottom: 1px solid rgba(79, 142, 247, 0.08);
 
   .page-header-left { display: flex; align-items: center; gap: 12px; }
@@ -56,7 +56,7 @@
   border-radius: 10px;
   padding: 4px;
   gap: 2px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
 .mode-btn {
@@ -102,9 +102,9 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 6px;
   flex-wrap: wrap;
-  padding: 10px 14px;
+  padding: 2px 10px;
   background: rgba(79, 142, 247, 0.04);
   border: 1px solid rgba(79, 142, 247, 0.1);
   border-radius: 10px;
@@ -124,18 +124,16 @@
     .mdc-text-field--filled,
     .mdc-text-field--filled:not(.mdc-text-field--disabled),
     .mdc-text-field--filled:hover { background: transparent !important; border-radius: 0 !important; }
-    // padding-top 18px reserves space for the floating label; without it the
-    // label and value overlap ("two labels" bug).
-    .mat-mdc-form-field-infix { padding: 18px 0 4px !important; min-height: 40px !important; border-top: 0 !important; }
+    .mat-mdc-form-field-infix { padding: 14px 0 2px !important; min-height: 22px !important; border-top: 0 !important; }
     .mdc-line-ripple::before { border-bottom-color: rgba(79, 142, 247, 0.45) !important; border-bottom-width: 1px !important; }
     .mdc-line-ripple::after  { border-bottom-color: #58a6ff !important; border-bottom-width: 2px !important; }
     .mat-mdc-form-field-focus-overlay { display: none !important; opacity: 0 !important; }
     .mdc-text-field__ripple { display: none !important; }
-    .mdc-floating-label { font-size: 12px !important; color: #6e8ea8 !important; }
-    .mdc-floating-label--float-above { color: #7eb8ff !important; font-size: 12px !important; }
-    .mat-mdc-select-value-text { font-size: 13px !important; color: #c9d8f0 !important; }
+    .mdc-floating-label { font-size: 11px !important; color: #6e8ea8 !important; }
+    .mdc-floating-label--float-above { color: #7eb8ff !important; font-size: 11px !important; }
+    .mat-mdc-select-value-text { font-size: 12px !important; color: #c9d8f0 !important; }
     .mat-mdc-select-arrow { color: #5b96f9 !important; }
-    .mat-mdc-select-placeholder { color: #4e6a82 !important; }
+    .mat-mdc-select-placeholder { color: #4e6a82 !important; font-size: 12px !important; }
     .mat-mdc-form-field-subscript-wrapper { min-height: 0 !important; padding: 0 !important; }
     .mat-mdc-form-field-flex { align-items: flex-end !important; }
   }
@@ -158,9 +156,9 @@
   border-radius: 12px !important;
   overflow: hidden !important;
 
-  .mat-mdc-header-row { background: #2b3a52 !important; min-height: 46px !important; }
+  .mat-mdc-header-row { background: #2b3a52 !important; min-height: 36px !important; }
   .mat-mdc-header-cell {
-    color: #94a3b8 !important; font-weight: 600 !important; font-size: 1.2rem !important;
+    color: #94a3b8 !important; font-weight: 600 !important; font-size: 1.0rem !important;
     letter-spacing: 0.6px !important; text-transform: uppercase !important;
     border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
   }
@@ -344,3 +342,11 @@
 }
 
 :host-context(body.header-dark-theme) .page-header h2 { color: #e2e8f0; }
+
+// ── Dropdown options — compact size ───────────────────────────────────────────
+::ng-deep .mat-mdc-select-panel .mat-mdc-option {
+  font-size: 11px !important;
+  min-height: 36px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}

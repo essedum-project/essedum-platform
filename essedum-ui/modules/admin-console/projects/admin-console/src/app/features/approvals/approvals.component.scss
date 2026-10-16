@@ -1,14 +1,14 @@
 :host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
 
-.admin-console-page { padding: 24px 28px; }
+.admin-console-page { padding: 14px 24px; }
 
 // ── Page header (title area) ──────────────────────────────────────────────────
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 0 14px;
-  margin-bottom: 20px;
+  padding: 10px 0 8px;
+  margin-bottom: 12px;
   border-bottom: 1px solid rgba(79, 142, 247, 0.08);
 
   .page-header-left {
@@ -52,11 +52,11 @@
   border-radius: 12px !important;
   overflow: hidden !important;
 
-  .mat-mdc-header-row { background: #2b3a52 !important; min-height: 46px !important; }
+  .mat-mdc-header-row { background: #2b3a52 !important; min-height: 36px !important; }
   .mat-mdc-header-cell {
     color: #94a3b8 !important;
     font-weight: 600 !important;
-    font-size: 1.2rem !important;
+    font-size: 1.0rem !important;
     letter-spacing: 0.6px !important;
     text-transform: uppercase !important;
     border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;

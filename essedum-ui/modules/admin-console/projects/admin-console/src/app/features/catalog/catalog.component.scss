@@ -1,14 +1,14 @@
 :host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
 
-.admin-console-page { padding: 24px 28px; }
+.admin-console-page { padding: 14px 24px; }
 
 // ── Page header (mirrors Audit Log / Menu Configuration) ─────────────────────
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 0 14px;
-  margin-bottom: 20px;
+  padding: 10px 0 8px;
+  margin-bottom: 12px;
   border-bottom: 1px solid rgba(79, 142, 247, 0.08);
 
   .page-header-left { display: flex; align-items: center; gap: 12px; }
