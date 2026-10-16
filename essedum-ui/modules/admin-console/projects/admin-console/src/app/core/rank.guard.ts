@@ -23,23 +23,27 @@ export class RankGuard implements CanActivate {
     const minRank: number = route.data?.['minRank'] ?? 0;
     const userId = this.userContext.userId$.value;
     const fallback = this.overviewUrl(state.url);
+    // Overview is itself rank-gated, so redirecting to it when it is the route
+    // being denied would loop forever — block outright instead.
+    const deny = (): boolean | UrlTree =>
+      fallback === this.stripQuery(state.url) ? false : this.router.parseUrl(fallback);
     return this.api.getAccessContext(userId).pipe(
       map(ctx => {
         const rank = ctx?.highestRank ?? 0;
-        if (rank >= minRank) {
-          return true;
-        }
-        return this.router.parseUrl(fallback);
+        return rank >= minRank ? true : deny();
       }),
-      catchError(() => of(this.router.parseUrl(fallback))),
+      catchError(() => of(deny())),
     );
+  }
+
+  private stripQuery(url: string): string {
+    return url.split('?')[0].split('#')[0];
   }
 
   // The remote is mounted under the host (e.g. /landing/admin-console/**), so
   // swap the last segment rather than hardcoding an absolute path.
   private overviewUrl(url: string): string {
-    const path = url.split('?')[0].split('#')[0];
-    const segments = path.split('/').filter(s => s);
+    const segments = this.stripQuery(url).split('/').filter(s => s);
     segments[segments.length - 1] = 'overview';
     return '/' + segments.join('/');
   }

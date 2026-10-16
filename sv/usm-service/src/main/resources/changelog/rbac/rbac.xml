@@ -440,4 +440,22 @@
 		<sql>UPDATE usm_constant SET item = 'Viewer Side' WHERE item = 'viewer Side'</sql>
 	</changeSet>
 
+	<!-- rbac-18: flatten the admin menu. The shell renders rbac_menu_item as a flat
+	     list (appendRbacMenu ignores parentId), so the "Admin Console" parent was
+	     only an extra row pointing at /admin-console — which redirects to overview
+	     and duplicated the Overview entry. It was also min_role_rank 0, showing an
+	     admin link to viewers. Drop it and null the now-meaningless parent links. -->
+	<changeSet author="Essedum (rbac)" id="rbac-18">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">
+				SELECT CASE WHEN EXISTS (
+					SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console'
+				) THEN 1 ELSE 0 END
+			</sqlCheck>
+		</preConditions>
+		<sql>DELETE FROM rbac_menu_item WHERE route = '/admin-console'</sql>
+		<sql>UPDATE rbac_menu_item SET parent_id = NULL WHERE parent_id IS NOT NULL</sql>
+		<sql>UPDATE rbac_menu_item SET display_order = 0 WHERE route = '/admin-console/overview'</sql>
+	</changeSet>
+
 </databaseChangeLog>
