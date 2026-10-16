@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ApiService } from '../../core/api.service';
+import { UserContextService } from '../../core/user-context.service';
 import { MenuItem, RoleMenu } from '../../core/api-models';
 import { MenuItemDialogComponent } from './menu-item-dialog/menu-item-dialog.component';
 import { RoleMenuDialogComponent } from './role-menu-dialog/role-menu-dialog.component';
@@ -37,11 +38,12 @@ export class MenuConfigurationComponent implements OnInit {
   constructor(
     private readonly api: ApiService,
     private readonly dialog: MatDialog,
+    private readonly userContext: UserContextService,
   ) {}
 
   ngOnInit(): void {
     this.loadAdmin();
-    this.api.getRoleMenuRoles().subscribe(roles => (this.roleOptions = roles));
+    this.api.getRoleMenuRoles(this.userContext.userId$.value).subscribe(roles => (this.roleOptions = roles));
   }
 
   setMode(mode: 'admin' | 'role'): void {
@@ -53,7 +55,7 @@ export class MenuConfigurationComponent implements OnInit {
 
   // ----- admin console menu -----
   private loadAdmin(): void {
-    this.api.getMenuItems().subscribe(items => {
+    this.api.getMenuItems(this.userContext.userId$.value).subscribe(items => {
       this.adminRows = items
         .map(item => ({
           ...item,
@@ -67,7 +69,7 @@ export class MenuConfigurationComponent implements OnInit {
     const ref = this.dialog.open(MenuItemDialogComponent, { width: '480px' });
     ref.afterClosed().subscribe((result: Omit<MenuItem, 'id'> | undefined) => {
       if (result) {
-        this.api.createMenuItem(result).subscribe(() => this.loadAdmin());
+        this.api.createMenuItem(this.userContext.userId$.value, result).subscribe(() => this.loadAdmin());
       }
     });
   }
@@ -76,13 +78,13 @@ export class MenuConfigurationComponent implements OnInit {
     const ref = this.dialog.open(MenuItemDialogComponent, { width: '480px', data: row });
     ref.afterClosed().subscribe((result: Omit<MenuItem, 'id'> | undefined) => {
       if (result) {
-        this.api.updateMenuItem(row.id, result).subscribe(() => this.loadAdmin());
+        this.api.updateMenuItem(row.id, this.userContext.userId$.value, result).subscribe(() => this.loadAdmin());
       }
     });
   }
 
   removeAdmin(row: MenuItemRow): void {
-    this.api.deleteMenuItem(row.id).subscribe(() => this.loadAdmin());
+    this.api.deleteMenuItem(row.id, this.userContext.userId$.value).subscribe(() => this.loadAdmin());
   }
 
   // ----- role menus -----
@@ -90,7 +92,7 @@ export class MenuConfigurationComponent implements OnInit {
     this.selectedRole = role;
     this.selectedProject = '';
     this.roleRows = [];
-    this.api.getRoleMenuProjects(role).subscribe(projects => {
+    this.api.getRoleMenuProjects(role, this.userContext.userId$.value).subscribe(projects => {
       this.projectOptions = projects;
       if (projects.length) {
         this.onProjectChange(projects[0]);
@@ -108,7 +110,7 @@ export class MenuConfigurationComponent implements OnInit {
       this.roleRows = [];
       return;
     }
-    this.api.getRoleMenus(this.selectedRole, this.selectedProject).subscribe(rows => (this.roleRows = rows));
+    this.api.getRoleMenus(this.selectedRole, this.selectedProject, this.userContext.userId$.value).subscribe(rows => (this.roleRows = rows));
   }
 
   addRoleMenu(): void {
@@ -119,7 +121,7 @@ export class MenuConfigurationComponent implements OnInit {
     ref.afterClosed().subscribe((result: { label: string; icon: string | null; url: string | null } | undefined) => {
       if (result) {
         this.api
-          .createRoleMenu({ role: this.selectedRole, project: this.selectedProject, ...result })
+          .createRoleMenu(this.userContext.userId$.value, { role: this.selectedRole, project: this.selectedProject, ...result })
           .subscribe(() => this.loadRoleMenus());
       }
     });
@@ -129,12 +131,12 @@ export class MenuConfigurationComponent implements OnInit {
     const ref = this.dialog.open(RoleMenuDialogComponent, { width: '480px', data: row });
     ref.afterClosed().subscribe((result: { label: string; icon: string | null; url: string | null } | undefined) => {
       if (result) {
-        this.api.updateRoleMenu(row.id, result).subscribe(() => this.loadRoleMenus());
+        this.api.updateRoleMenu(row.id, this.userContext.userId$.value, result).subscribe(() => this.loadRoleMenus());
       }
     });
   }
 
   removeRoleMenu(row: RoleMenu): void {
-    this.api.deleteRoleMenu(row.id).subscribe(() => this.loadRoleMenus());
+    this.api.deleteRoleMenu(row.id, this.userContext.userId$.value).subscribe(() => this.loadRoleMenus());
   }
 }

@@ -71,7 +71,7 @@ export class AccessComponent implements OnInit {
 
   private load(): void {
     combineLatest([
-      this.api.getRoleAssignments(),
+      this.api.getRoleAssignments(this.userContext.userId$.value),
       this.api.getRoles(),
       this.api.getUsers(),
       this.api.getProjects(),

@@ -33,6 +33,7 @@ import com.lfn.iamp.usm.repository.UsersRepository;
 public class AccessResource {
 
 	private static final int ORG_ADMIN = 3;
+	private static final int PLATFORM_ADMIN = 4;
 
 	private final AccessContextService accessContextService;
 	private final UsersRepository usersRepository;
@@ -93,8 +94,23 @@ public class AccessResource {
 	}
 
 	@GetMapping("/access/role-assignments")
-	public ResponseEntity<List<RoleAssignment>> listRoleAssignments() {
-		return ResponseEntity.ok(accessContextService.listActive());
+	public ResponseEntity<List<RoleAssignment>> listRoleAssignments(@RequestParam Integer actorUserId) {
+		if (actorUserId == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "actorUserId required");
+		}
+		AccessContext ctx = accessContextService.resolve(actorUserId);
+		List<RoleAssignment> all = accessContextService.listActive();
+		if (ctx.getHighestRank() >= PLATFORM_ADMIN) {
+			return ResponseEntity.ok(all);
+		}
+		List<Integer> projectIds = ctx.getReachableProjectIds();
+		List<Integer> orgIds = ctx.getReachableOrganizationIds();
+		List<RoleAssignment> scoped = all.stream()
+				.filter(a -> actorUserId.equals(a.getUserId())
+						|| (a.getProjectId() != null && projectIds.contains(a.getProjectId()))
+						|| (a.getOrganizationId() != null && orgIds.contains(a.getOrganizationId())))
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(scoped);
 	}
 
 	@PostMapping("/access/role-assignments")
@@ -107,6 +123,17 @@ public class AccessResource {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
 					"Cannot grant a role above your own rank (granting rank " + grantedRank + ", have " + actorRank + ")");
 		}
+		if (actorRank < PLATFORM_ADMIN) {
+			AccessContext ctx = accessContextService.resolve(request.getActorUserId());
+			Integer projectId = request.getProjectId();
+			Integer organizationId = request.getOrganizationId();
+			boolean inReach = (projectId != null && ctx.getReachableProjectIds().contains(projectId))
+					|| (organizationId != null && ctx.getReachableOrganizationIds().contains(organizationId));
+			if (!inReach) {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+						"Cannot grant a role outside your own projects/organizations");
+			}
+		}
 		RoleAssignment saved = accessContextService.grant(request.getUserId(), request.getRoleId(),
 				request.getOrganizationId(), request.getProjectId());
 		return ResponseEntity.ok(saved);
@@ -114,7 +141,23 @@ public class AccessResource {
 
 	@DeleteMapping("/access/role-assignments/{id}")
 	public ResponseEntity<Void> revoke(@PathVariable Integer id, @RequestParam Integer actorUserId) {
-		requireActorRank(actorUserId, ORG_ADMIN, "revoke a role assignment");
+		int actorRank = requireActorRank(actorUserId, ORG_ADMIN, "revoke a role assignment");
+		RoleAssignment target = accessContextService.getAssignment(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "role assignment not found"));
+		int targetRank = accessContextService.rankOfRole(target.getRoleId());
+		if (actorRank < targetRank) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"Cannot revoke a role above your own rank (target rank " + targetRank + ", have " + actorRank + ")");
+		}
+		if (actorRank < PLATFORM_ADMIN) {
+			AccessContext ctx = accessContextService.resolve(actorUserId);
+			boolean inReach = (target.getProjectId() != null && ctx.getReachableProjectIds().contains(target.getProjectId()))
+					|| (target.getOrganizationId() != null && ctx.getReachableOrganizationIds().contains(target.getOrganizationId()));
+			if (!inReach) {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+						"Cannot revoke a role outside your own projects/organizations");
+			}
+		}
 		accessContextService.revoke(id);
 		return ResponseEntity.noContent().build();
 	}

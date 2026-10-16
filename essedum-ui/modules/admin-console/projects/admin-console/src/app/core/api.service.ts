@@ -33,8 +33,8 @@ export class ApiService {
     return this.http.get<string[]>(`${this.base}/role-names`);
   }
 
-  getRoleAssignments(): Observable<RoleAssignment[]> {
-    return this.http.get<RoleAssignment[]>(`${this.base}/access/role-assignments`);
+  getRoleAssignments(actorUserId: number): Observable<RoleAssignment[]> {
+    return this.http.get<RoleAssignment[]>(`${this.base}/access/role-assignments`, { params: { actorUserId } });
   }
 
   grantRole(payload: {
@@ -139,49 +139,49 @@ export class ApiService {
   }
 
   // ---- menu ----
-  getMenuItems(): Observable<MenuItem[]> {
-    return this.http.get<MenuItem[]>(`${this.base}/menu-items`);
+  getMenuItems(actorUserId: number): Observable<MenuItem[]> {
+    return this.http.get<MenuItem[]>(`${this.base}/menu-items`, { params: { actorUserId } });
   }
 
-  createMenuItem(item: Omit<MenuItem, 'id'>): Observable<MenuItem> {
-    return this.http.post<MenuItem>(`${this.base}/menu-items`, item);
+  createMenuItem(actorUserId: number, item: Omit<MenuItem, 'id'>): Observable<MenuItem> {
+    return this.http.post<MenuItem>(`${this.base}/menu-items`, item, { params: { actorUserId } });
   }
 
-  updateMenuItem(id: number, item: Omit<MenuItem, 'id'>): Observable<MenuItem> {
-    return this.http.put<MenuItem>(`${this.base}/menu-items/${id}`, item);
+  updateMenuItem(id: number, actorUserId: number, item: Omit<MenuItem, 'id'>): Observable<MenuItem> {
+    return this.http.put<MenuItem>(`${this.base}/menu-items/${id}`, item, { params: { actorUserId } });
   }
 
-  deleteMenuItem(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/menu-items/${id}`);
+  deleteMenuItem(id: number, actorUserId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/menu-items/${id}`, { params: { actorUserId } });
   }
 
   // ---- role menus (live per-role sidebars in usm_constant) ----
-  getRoleMenuRoles(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.base}/role-menus/roles`);
+  getRoleMenuRoles(actorUserId: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.base}/role-menus/roles`, { params: { actorUserId } });
   }
 
-  getRoleMenuProjects(role: string): Observable<string[]> {
-    return this.http.get<string[]>(`${this.base}/role-menus/projects`, { params: { role } });
+  getRoleMenuProjects(role: string, actorUserId: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.base}/role-menus/projects`, { params: { role, actorUserId } });
   }
 
-  getRoleMenus(role: string, project: string): Observable<RoleMenu[]> {
-    return this.http.get<RoleMenu[]>(`${this.base}/role-menus`, { params: { role, project } });
+  getRoleMenus(role: string, project: string, actorUserId: number): Observable<RoleMenu[]> {
+    return this.http.get<RoleMenu[]>(`${this.base}/role-menus`, { params: { role, project, actorUserId } });
   }
 
-  createRoleMenu(body: {
+  createRoleMenu(actorUserId: number, body: {
     role: string; project: string; label: string; icon: string | null; url: string | null;
   }): Observable<RoleMenu> {
-    return this.http.post<RoleMenu>(`${this.base}/role-menus`, body);
+    return this.http.post<RoleMenu>(`${this.base}/role-menus`, body, { params: { actorUserId } });
   }
 
-  updateRoleMenu(id: number, body: {
+  updateRoleMenu(id: number, actorUserId: number, body: {
     label: string; icon: string | null; url: string | null;
   }): Observable<RoleMenu> {
-    return this.http.put<RoleMenu>(`${this.base}/role-menus/${id}`, body);
+    return this.http.put<RoleMenu>(`${this.base}/role-menus/${id}`, body, { params: { actorUserId } });
   }
 
-  deleteRoleMenu(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/role-menus/${id}`);
+  deleteRoleMenu(id: number, actorUserId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/role-menus/${id}`, { params: { actorUserId } });
   }
 
   // ---- legacy tenancy (existing OrganisationResource/ProjectResource, under /api not /api/usm) ----
@@ -199,16 +199,16 @@ export class ApiService {
   }
 
   // ---- audit (rbac_audit_event, NFR-O2) ----
-  getAuditEvents(): Observable<AuditEvent[]> {
-    return this.http.get<AuditEvent[]>(`${this.base}/audit`);
+  getAuditEvents(actorUserId: number): Observable<AuditEvent[]> {
+    return this.http.get<AuditEvent[]>(`${this.base}/audit`, { params: { actorUserId } });
   }
 
   // ---- identity projection status (§8) ----
-  getIdentityTargets(): Observable<IdentityTarget[]> {
-    return this.http.get<IdentityTarget[]>(`${this.base}/identity/targets`);
+  getIdentityTargets(actorUserId: number): Observable<IdentityTarget[]> {
+    return this.http.get<IdentityTarget[]>(`${this.base}/identity/targets`, { params: { actorUserId } });
   }
 
-  retryIdentityTarget(id: number): Observable<void> {
-    return this.http.post<void>(`${this.base}/identity/targets/${id}/retry`, {});
+  retryIdentityTarget(id: number, actorUserId: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/identity/targets/${id}/retry`, {}, { params: { actorUserId } });
   }
 }

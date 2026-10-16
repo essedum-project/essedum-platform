@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/api.service';
+import { UserContextService } from '../../core/user-context.service';
 import { IdentityTarget, LegacyProject } from '../../core/api-models';
 
 interface SystemCell {
@@ -35,15 +36,19 @@ export class IdentitySyncComponent implements OnInit {
   rows: ProjectRow[] = [];
   loading = true;
 
-  constructor(private readonly api: ApiService) {}
+  constructor(
+    private readonly api: ApiService,
+    private readonly userContext: UserContextService,
+  ) {}
 
   ngOnInit(): void {
     this.load();
   }
 
   private load(): void {
+    const userId = this.userContext.userId$.value;
     forkJoin({
-      targets: this.api.getIdentityTargets().pipe(catchError(() => of([] as IdentityTarget[]))),
+      targets: this.api.getIdentityTargets(userId).pipe(catchError(() => of([] as IdentityTarget[]))),
       projects: this.api.getProjects().pipe(catchError(() => of([] as LegacyProject[]))),
     }).subscribe(({ targets, projects }) => {
       const nameById = new Map<number, string>(projects.map(p => [p.id, p.name]));
@@ -70,6 +75,6 @@ export class IdentitySyncComponent implements OnInit {
     if (!cell.target) {
       return;
     }
-    this.api.retryIdentityTarget(cell.target.id).subscribe(() => this.load());
+    this.api.retryIdentityTarget(cell.target.id, this.userContext.userId$.value).subscribe(() => this.load());
   }
 }

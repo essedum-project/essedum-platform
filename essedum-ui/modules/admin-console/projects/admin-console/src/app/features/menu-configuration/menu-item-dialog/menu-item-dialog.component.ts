@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit, Optional } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ApiService } from '../../../core/api.service';
+import { UserContextService } from '../../../core/user-context.service';
 import { MenuItem } from '../../../core/api-models';
 
 @Component({
@@ -28,11 +29,12 @@ export class MenuItemDialogComponent implements OnInit {
   constructor(
     private readonly ref: MatDialogRef<MenuItemDialogComponent>,
     private readonly api: ApiService,
+    private readonly userContext: UserContextService,
     @Optional() @Inject(MAT_DIALOG_DATA) private readonly existing: MenuItem | null,
   ) {}
 
   ngOnInit(): void {
-    this.api.getMenuItems().subscribe(items => {
+    this.api.getMenuItems(this.userContext.userId$.value).subscribe(items => {
       this.candidateParents = items.filter(item => item.id !== this.existing?.id);
     });
     this.api.getRoleNames().subscribe(names => (this.roleOptions = names));

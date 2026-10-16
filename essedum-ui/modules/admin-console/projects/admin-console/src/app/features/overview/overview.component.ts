@@ -58,10 +58,10 @@ export class OverviewComponent implements OnInit {
     forkJoin({
       orgs: this.api.getOrganisations().pipe(catchError(() => of([] as any[]))),
       projects: this.api.getProjects().pipe(catchError(() => of([] as any[]))),
-      members: this.api.getRoleAssignments().pipe(catchError(() => of([] as any[]))),
+      members: this.api.getRoleAssignments(userId).pipe(catchError(() => of([] as any[]))),
       approvals: this.api.getApprovals(userId).pipe(catchError(() => of([] as any[]))),
-      menus: this.api.getMenuItems().pipe(catchError(() => of([] as any[]))),
-      audit: this.api.getAuditEvents().pipe(catchError(() => of([] as AuditEvent[]))),
+      menus: this.api.getMenuItems(userId).pipe(catchError(() => of([] as any[]))),
+      audit: this.api.getAuditEvents(userId).pipe(catchError(() => of([] as AuditEvent[]))),
     }).subscribe(res => {
       this.cards[0].count = res.orgs.length;
       this.cards[1].count = res.projects.length;

@@ -85,7 +85,7 @@ public class ProvisioningResource {
 				});
 	}
 
-	private void require(Integer actorUserId, int minRank, String action) {
+	private int require(Integer actorUserId, int minRank, String action) {
 		if (actorUserId == null) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "actorUserId required");
 		}
@@ -93,6 +93,27 @@ public class ProvisioningResource {
 		if (rank < minRank) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
 					"Insufficient role to " + action + " (needs rank " + minRank + ", have " + rank + ")");
+		}
+		return rank;
+	}
+
+	/** Non-platform_admin callers must have the organization within their own reach. */
+	private void requireOrgReach(Integer actorUserId, int actorRank, Integer organisationId, String action) {
+		if (actorRank >= PLATFORM_ADMIN || organisationId == null) {
+			return;
+		}
+		if (!accessContextService.resolve(actorUserId).getReachableOrganizationIds().contains(organisationId)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot " + action + " outside your own organization");
+		}
+	}
+
+	/** Non-platform_admin callers must have the project within their own reach. */
+	private void requireProjectReach(Integer actorUserId, int actorRank, Integer projectId, String action) {
+		if (actorRank >= PLATFORM_ADMIN || projectId == null) {
+			return;
+		}
+		if (!accessContextService.resolve(actorUserId).getReachableProjectIds().contains(projectId)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot " + action + " outside your own projects");
 		}
 	}
 
@@ -120,7 +141,8 @@ public class ProvisioningResource {
 	@PostMapping("/projects")
 	public ResponseEntity<Project> createProject(@RequestParam Integer actorUserId,
 			@RequestBody CreateProjectRequest req) {
-		require(actorUserId, ORG_ADMIN, "create a project");
+		int rank = require(actorUserId, ORG_ADMIN, "create a project");
+		requireOrgReach(actorUserId, rank, req.organisationId(), "create a project");
 		Project p = new Project();
 		p.setName(req.name());
 		// project_display_name is NOT NULL in usm_project — default it to the name.
@@ -168,7 +190,8 @@ public class ProvisioningResource {
 
 	@DeleteMapping("/projects/{id}")
 	public ResponseEntity<Void> deleteProject(@PathVariable Integer id, @RequestParam Integer actorUserId) {
-		require(actorUserId, ORG_ADMIN, "delete a project");
+		int rank = require(actorUserId, ORG_ADMIN, "delete a project");
+		requireProjectReach(actorUserId, rank, id, "delete a project");
 		deleteProjectCascade(id);
 		auditService.record("project", "deleted", actorUserId, "User #" + actorUserId, "project #" + id + " deleted");
 		return ResponseEntity.noContent().build();
@@ -198,7 +221,8 @@ public class ProvisioningResource {
 	@PostMapping("/environments")
 	public ResponseEntity<Environment> createEnvironment(@RequestParam Integer actorUserId,
 			@RequestBody CreateEnvRequest req) {
-		require(actorUserId, PROJECT_ADMIN, "create an environment");
+		int rank = require(actorUserId, PROJECT_ADMIN, "create an environment");
+		requireProjectReach(actorUserId, rank, req.projectId(), "create an environment");
 		Environment e = new Environment();
 		e.setName(req.name());
 		e.setProjectId(req.projectId());

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../core/api.service';
+import { UserContextService } from '../../core/user-context.service';
 import { AuditEvent } from '../../core/api-models';
 
 @Component({
@@ -14,10 +15,13 @@ export class AuditComponent implements OnInit {
 
   readonly columns = ['occurredAt', 'entity', 'action', 'actorName', 'details', 'correlationId'];
 
-  constructor(private readonly api: ApiService) {}
+  constructor(
+    private readonly api: ApiService,
+    private readonly userContext: UserContextService,
+  ) {}
 
   ngOnInit(): void {
-    this.api.getAuditEvents().subscribe(events => (this.events = events));
+    this.api.getAuditEvents(this.userContext.userId$.value).subscribe(events => (this.events = events));
   }
 
   get filteredEvents(): AuditEvent[] {

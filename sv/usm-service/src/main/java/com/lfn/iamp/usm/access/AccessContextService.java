@@ -303,6 +303,10 @@ public class AccessContextService {
 		return roleAssignmentRepository.findByRevokedAtIsNull();
 	}
 
+	public java.util.Optional<RoleAssignment> getAssignment(Integer id) {
+		return roleAssignmentRepository.findById(id);
+	}
+
 	public List<RbacRole> listRoles() {
 		return Collections.unmodifiableList(rbacRoleRepository.findAll());
 	}

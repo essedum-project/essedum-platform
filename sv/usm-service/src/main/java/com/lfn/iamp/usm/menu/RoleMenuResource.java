@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.lfn.iamp.usm.access.AccessContextService;
 import com.lfn.iamp.usm.audit.AuditService;
 import com.lfn.iamp.usm.domain.DashConstant;
 import com.lfn.iamp.usm.repository.DashConstantRepository;
@@ -37,19 +40,35 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class RoleMenuResource {
 
 	private static final String SIDE_SUFFIX = " Side";
+	private static final int PLATFORM_ADMIN = 4;
 
 	private final DashConstantRepository dashConstantRepository;
 	private final AuditService auditService;
+	private final AccessContextService accessContextService;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	public RoleMenuResource(DashConstantRepository dashConstantRepository, AuditService auditService) {
+	public RoleMenuResource(DashConstantRepository dashConstantRepository, AuditService auditService,
+			AccessContextService accessContextService) {
 		this.dashConstantRepository = dashConstantRepository;
 		this.auditService = auditService;
+		this.accessContextService = accessContextService;
+	}
+
+	private void requirePlatformAdmin(Integer actorUserId) {
+		if (actorUserId == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "actorUserId required");
+		}
+		int rank = accessContextService.highestRank(actorUserId);
+		if (rank < PLATFORM_ADMIN) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"Only a platform admin may manage menu configuration (have rank " + rank + ")");
+		}
 	}
 
 	/** Distinct role names that have a sidebar menu (e.g. "IT Portfolio Manager"). */
 	@GetMapping("/role-menus/roles")
-	public ResponseEntity<List<String>> roles() {
+	public ResponseEntity<List<String>> roles(@RequestParam Integer actorUserId) {
+		requirePlatformAdmin(actorUserId);
 		List<String> roles = dashConstantRepository.findDistinctSideItems().stream()
 				.filter(k -> k != null && k.endsWith(SIDE_SUFFIX))
 				.map(k -> k.substring(0, k.length() - SIDE_SUFFIX.length()).trim())
@@ -61,7 +80,8 @@ public class RoleMenuResource {
 
 	/** Projects a given role's menu is configured for. */
 	@GetMapping("/role-menus/projects")
-	public ResponseEntity<List<String>> projects(@RequestParam String role) {
+	public ResponseEntity<List<String>> projects(@RequestParam String role, @RequestParam Integer actorUserId) {
+		requirePlatformAdmin(actorUserId);
 		List<String> projects = dashConstantRepository.findDistinctProjectsForItem(role + SIDE_SUFFIX).stream()
 				.filter(p -> p != null && !p.isBlank())
 				.distinct()
@@ -72,7 +92,9 @@ public class RoleMenuResource {
 
 	/** The top-level sidebar items for a role in a project. */
 	@GetMapping("/role-menus")
-	public ResponseEntity<List<RoleMenuDto>> list(@RequestParam String role, @RequestParam String project) {
+	public ResponseEntity<List<RoleMenuDto>> list(@RequestParam String role, @RequestParam String project,
+			@RequestParam Integer actorUserId) {
+		requirePlatformAdmin(actorUserId);
 		List<RoleMenuDto> rows = new ArrayList<>();
 		for (DashConstant dc : dashConstantRepository.findAllDashConstantsbyItemAndProject(role + SIDE_SUFFIX,
 				project)) {
@@ -83,7 +105,9 @@ public class RoleMenuResource {
 
 	/** Edit a top-level item in place; children in the JSON are preserved. */
 	@PutMapping("/role-menus/{id}")
-	public ResponseEntity<RoleMenuDto> update(@PathVariable Integer id, @RequestBody RoleMenuDto body) {
+	public ResponseEntity<RoleMenuDto> update(@PathVariable Integer id, @RequestParam Integer actorUserId,
+			@RequestBody RoleMenuDto body) {
+		requirePlatformAdmin(actorUserId);
 		DashConstant dc = dashConstantRepository.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("No such menu item: " + id));
 		ObjectNode node = readValue(dc.getValue());
@@ -99,7 +123,8 @@ public class RoleMenuResource {
 
 	/** Add a new top-level item to a role's menu, cloning the project linkage from a sibling. */
 	@PostMapping("/role-menus")
-	public ResponseEntity<RoleMenuDto> create(@RequestBody RoleMenuDto body) {
+	public ResponseEntity<RoleMenuDto> create(@RequestParam Integer actorUserId, @RequestBody RoleMenuDto body) {
+		requirePlatformAdmin(actorUserId);
 		String item = body.getRole() + SIDE_SUFFIX;
 		DashConstant dc = new DashConstant();
 		dc.setKeys(item);
@@ -124,9 +149,10 @@ public class RoleMenuResource {
 	}
 
 	@DeleteMapping("/role-menus/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Integer id) {
-		dashConstantRepository.findById(id).ifPresent(dc -> auditService.record("role_menu", "deleted", null, null,
-				"menu row " + id + " removed from " + dc.getKeys() + " / " + dc.getProject_name()));
+	public ResponseEntity<Void> delete(@PathVariable Integer id, @RequestParam Integer actorUserId) {
+		requirePlatformAdmin(actorUserId);
+		dashConstantRepository.findById(id).ifPresent(dc -> auditService.record("role_menu", "deleted", actorUserId,
+				"User #" + actorUserId, "menu row " + id + " removed from " + dc.getKeys() + " / " + dc.getProject_name()));
 		dashConstantRepository.deleteById(id);
 		return ResponseEntity.noContent().build();
 	}
