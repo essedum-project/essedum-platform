@@ -47,6 +47,22 @@ public final class PromotionGate {
 		return Arrays.asList(PROJECT_ADMIN, ORG_ADMIN, PLATFORM_ADMIN);
 	}
 
+	/**
+	 * The lowest gate that needs at least {@code minRank} to decide, never
+	 * below {@code gate}. Capped at the top gate, so a platform admin's own
+	 * submission still has somewhere to land.
+	 */
+	public static String atLeastRank(String gate, int minRank) {
+		int needed = Math.max(requiredRank(gate), minRank);
+		if (needed <= REQUIRED_RANK.get(PROJECT_ADMIN)) {
+			return PROJECT_ADMIN;
+		}
+		if (needed <= REQUIRED_RANK.get(ORG_ADMIN)) {
+			return ORG_ADMIN;
+		}
+		return PLATFORM_ADMIN;
+	}
+
 	/** Draft → Project → Org → Public. The scope reached once {@code gate} approves. */
 	public static String scopeForGate(String gate) {
 		String scope = SCOPE_FOR_GATE.get(gate);

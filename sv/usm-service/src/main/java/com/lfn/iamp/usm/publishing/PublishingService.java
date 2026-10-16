@@ -185,6 +185,9 @@ public class PublishingService {
 		if (gate == null) {
 			throw new IllegalStateException("Version " + versionId + " is already public — nothing to submit");
 		}
+		// The approver must outrank the submitter, so a project admin's draft goes
+		// to an org admin (reaching organization scope) rather than back to them.
+		gate = PromotionGate.atLeastRank(gate, accessContextService.highestRank(actorId) + 1);
 		version.setStatus("in_review");
 		assetVersionRepository.save(version);
 
