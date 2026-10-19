@@ -1,16 +1,31 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { interval, Subject } from 'rxjs';
-import { exhaustMap, takeUntil } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { interval, Subject, forkJoin, of } from 'rxjs';
+import { exhaustMap, takeUntil, catchError, map } from 'rxjs/operators';
 import { Services } from '@essedum/shared-lib';
 import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
 import { PodLogDialogComponent } from './pod-log-dialog/pod-log-dialog.component';
 import { PodWatcherService, PipelinePodsResponse } from '../../services/pod-watcher.service';
 import { AipGridColumn, AipGridAction } from '../../sharedModule/aip-grid/aip-grid.component';
 
+/** Agent Designer pipeline record shape from /mfe/agent-designer/api/v1/pipelines */
+interface AgentDesignerPipeline {
+  id: string;
+  flow_id: string;
+  name: string;
+  description: string | null;
+  cname: string;
+  status: string;
+  env_vars: any[];
+  secrets: any[];
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ExecutionPipeline {
-  pipeline_name: any;
+  pipeline_name:    any;
   pod_name:         string;
   container_name:   string;
   deployment_name:  string;
@@ -101,7 +116,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   ];
 
   readonly gridActions: AipGridAction[] = [
-     {
+    {
       key: 'view',
       label: this.VIEWPIPELINE,
       icon: 'visibility',
@@ -136,7 +151,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
 
   onGridAction(event: { key: string; row: ExecutionPipeline }): void {
     switch (event.key) {
-      case 'view':            this.viewPipeline(event.row);               break;
+      case 'view':             this.viewPipeline(event.row);              break;
       case 'logs':             this.checkPodLog(event.row);               break;
       case 'delete-pod':       this.deletePipelinePod(event.row);         break;
       case 'delete-container': this.deletePipelineAsContainer(event.row); break;
@@ -179,12 +194,16 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   endIndex = 0;                // window end into pageArr
   hoverStates: boolean[] = [];
 
+  /** Base URL for the Agent Designer backend (proxied via MFE ingress). */
+  private readonly AGENT_DESIGNER_API = '/mfe/agent-designer/api/v1';
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private service: Services,
     private dialog: MatDialog,
-    private podWatcher: PodWatcherService
+    private podWatcher: PodWatcherService,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -195,16 +214,18 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
         this.loadAllPipelines();
       });
 
-    // Auto-refresh: re-fetch all records for current type every 15 s
+    // Auto-refresh: re-fetch all records every 15 s (pod-watcher + agent-designer)
     interval(15000)
       .pipe(
         takeUntil(this.destroy$),
-        exhaustMap(() => this.podWatcher.getPipelinePods(
-          'all', 1, this.FETCH_SIZE, undefined, this.selectedType
-        ))
+        exhaustMap(() => forkJoin({
+          pods: this.podWatcher.getPipelinePods('all', 1, this.FETCH_SIZE, undefined, this.selectedType),
+          designer: this.fetchAgentDesignerPipelines(),
+        }))
       )
-      .subscribe(res => {
-        this.allRecords = (res.records || []).map(r => ({ ...r, pipeline_name: (r as any)?.pipeline_name || r.container_name, pipelineMode: this.modeFromType(r.type) }));
+      .subscribe(({ pods, designer }) => {
+        const podRecords = (pods.records || []).map(r => ({ ...r, pipeline_name: (r as any)?.pipeline_name || r.container_name, pipelineMode: this.modeFromType(r.type) }));
+        this.allRecords = [...podRecords, ...designer];
         this.applyClientFilters();
       });
   }
@@ -214,16 +235,77 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /** Fetches ALL records for the current type (no status param) then applies client-side filters. */
+  /** Fetches ALL records for the current type (pod-watcher + agent-designer) then applies client-side filters. */
   loadAllPipelines(): void {
     this.loading = true;
-    this.podWatcher
-      .getPipelinePods('all', 1, this.FETCH_SIZE, undefined, this.selectedType)
-      .subscribe(res => {
-        this.allRecords = (res.records || []).map(r => ({ ...r, pipeline_name: (r as any)?.pipeline_name || r.container_name, pipelineMode: this.modeFromType(r.type) }));
-        this.applyClientFilters();
-        this.loading = false;
-      });
+    forkJoin({
+      pods: this.podWatcher.getPipelinePods('all', 1, this.FETCH_SIZE, undefined, this.selectedType),
+      designer: this.fetchAgentDesignerPipelines(),
+    }).subscribe(({ pods, designer }) => {
+      const podRecords = (pods.records || []).map(r => ({ ...r, pipeline_name: (r as any)?.pipeline_name || r.container_name, pipelineMode: this.modeFromType(r.type) }));
+      this.allRecords = [...podRecords, ...designer];
+      this.applyClientFilters();
+      this.loading = false;
+    });
+  }
+
+  /**
+   * Fetches pipelines registered via Agent Designer and maps them to ExecutionPipeline shape.
+   * These show as "Agent" type with status derived from the pipeline record.
+   */
+  private fetchAgentDesignerPipelines(): import('rxjs').Observable<ExecutionPipeline[]> {
+    return this.http
+      .get<{ items: AgentDesignerPipeline[]; total: number }>(
+        `${this.AGENT_DESIGNER_API}/pipelines?limit=200`
+      )
+      .pipe(
+        map(res => (res.items || []).map(p => this.mapAgentDesignerPipeline(p))),
+        catchError(() => of([] as ExecutionPipeline[]))
+      );
+  }
+
+  /** Maps an AgentDesignerPipeline record to the ExecutionPipeline shape used by this component. */
+  private mapAgentDesignerPipeline(p: AgentDesignerPipeline): ExecutionPipeline {
+    const podPhase = this.agentDesignerStatusToPodPhase(p.status);
+    const age = this.computeAge(p.created_at);
+    return {
+      pipeline_name:    p.cname || p.name,
+      pod_name:         p.cname,
+      container_name:   p.name,
+      deployment_name:  p.name,
+      namespace:        'agent-designer',
+      type:             'Agent',
+      description:      p.description || '',
+      execution_status: podPhase,
+      container_status: p.status,
+      pod_phase:        podPhase,
+      ready:            p.status === 'running',
+      restarts:         0,
+      created_at:       p.created_at,
+      updated_at:       p.updated_at,
+      age,
+      pipelineMode:     'agent',
+    };
+  }
+
+  private agentDesignerStatusToPodPhase(status: string): string {
+    switch (status) {
+      case 'running':    return 'running';
+      case 'deploying':  return 'pending';
+      case 'error':      return 'failed';
+      default:           return 'inactive';
+    }
+  }
+
+  private computeAge(createdAt: string): string {
+    try {
+      const diff = Date.now() - new Date(createdAt).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 60)  { return `${mins}m`; }
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24)   { return `${hrs}h`; }
+      return `${Math.floor(hrs / 24)}d`;
+    } catch { return '—'; }
   }
 
   /**
@@ -352,8 +434,13 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   }
 
   viewPipeline(pipeline: ExecutionPipeline): void {
-   // const name = pipeline.container_name;
-    const pipelineName = pipeline.pipeline_name;
+    // Agent Designer pipelines open in Agent Designer (not the legacy pipeline view)
+    if (pipeline.namespace === 'agent-designer') {
+      window.open('/mfe/agent-designer/', '_blank');
+      return;
+    }
+
+    const pipelineName = pipeline.pipeline_name || pipeline.container_name;
 
     const cardTitle =
       pipeline.pipelineMode === 'mcp' ? 'MCP Pipelines' :
@@ -362,7 +449,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
 
     const cardForState = {
       ...pipeline,
-      name:  pipelineName,  
+      name: pipelineName,
     };
 
     const navigate = (streamItem: any) => {
@@ -456,6 +543,26 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
     });
     ref.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       if (result === 'delete') {
+        if (pipeline.namespace === 'agent-designer') {
+          // Delete from agent-designer backend using cname as pipeline lookup
+          this.http
+            .get<{ items: AgentDesignerPipeline[] }>(`${this.AGENT_DESIGNER_API}/pipelines?limit=200`)
+            .pipe(
+              map(res => (res.items || []).find(p => p.name === pipeline.container_name)),
+              catchError(() => of(undefined))
+            )
+            .subscribe(found => {
+              if (found) {
+                this.http.delete(`${this.AGENT_DESIGNER_API}/pipelines/${found.id}`)
+                  .pipe(catchError(() => of(null)))
+                  .subscribe(() => {
+                    this.service.message(this.DEPLOYMENTDELETEDSUCCESS, 'success');
+                    this.loadAllPipelines();
+                  });
+              }
+            });
+          return;
+        }
         this.podWatcher
           .deleteDeployment(pipeline.deployment_name, pipeline.namespace)
           .subscribe(() => {

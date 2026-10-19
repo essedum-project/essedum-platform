@@ -16,6 +16,9 @@ import * as ExtensionUtils from './extension-utils';
 import * as AuthSetupUtils from './auth-setup-utils';
 import * as UserUtils from './user-utils';
 import { MESSAGES as MSG } from '../messages/extension-messages';
+import { GitHubAuthService } from '../auth/services/github-auth.service';
+import { SessionBranchManager } from '../services/session-branch.manager';
+import { GITHUB_COMMANDS, GITHUB_CONTEXT_KEYS } from '../constants/github-constants';
 
 const logger = ExtensionUtils.createLogger('CommandHandlers');
 
@@ -606,4 +609,88 @@ export async function handleUploadAgentFolder(
         logger.error('Error uploading folder:', error);
         vscode.window.showErrorMessage(`Failed to upload folder: ${error}`);
     }
+}
+
+/**
+ * Registers all GitHub integration commands.
+ * Called from the extension's activate() after all services are created.
+ */
+export function registerGitHubCommands(
+    context: vscode.ExtensionContext,
+    githubAuth: GitHubAuthService,
+    sessionBranchManager: SessionBranchManager
+): void {
+    context.subscriptions.push(
+
+        vscode.commands.registerCommand(GITHUB_COMMANDS.SIGN_IN, async () => {
+            const ok = await githubAuth.signIn();
+            if (ok) { vscode.window.showInformationMessage(MSG.GITHUB.TOKEN_VERIFIED); }
+        }),
+
+        vscode.commands.registerCommand(GITHUB_COMMANDS.SIGN_OUT, async () => {
+            await githubAuth.signOut();
+            vscode.window.showInformationMessage(MSG.GITHUB.SIGN_OUT_DONE);
+        }),
+
+        vscode.commands.registerCommand(GITHUB_COMMANDS.COMMIT_AND_PUSH, async () => {
+            // Show a quick-pick of active pipeline sessions
+            const state = [...(sessionBranchManager as any).sessions?.entries?.() ?? []];
+            if (state.length === 0) {
+                vscode.window.showWarningMessage(MSG.GITHUB.NO_SESSION_BRANCH);
+                return;
+            }
+            const key = state.length === 1
+                ? state[0][0] as string
+                : await vscode.window.showQuickPick(state.map((s: any) => s[0] as string), { placeHolder: 'Select pipeline' });
+            if (key) { await sessionBranchManager.commitAndPush(key); }
+        }),
+
+        vscode.commands.registerCommand(GITHUB_COMMANDS.RAISE_PULL_REQUEST, async () => {
+            const state = [...(sessionBranchManager as any).sessions?.entries?.() ?? []];
+            if (state.length === 0) { vscode.window.showWarningMessage(MSG.GITHUB.NO_SESSION_BRANCH); return; }
+            const key = state.length === 1
+                ? state[0][0] as string
+                : await vscode.window.showQuickPick(state.map((s: any) => s[0] as string), { placeHolder: 'Select pipeline' });
+            if (key) { await sessionBranchManager.raisePullRequest(key); }
+        }),
+
+        vscode.commands.registerCommand(GITHUB_COMMANDS.OPEN_PULL_REQUEST, async () => {
+            const state = [...(sessionBranchManager as any).sessions?.entries?.() ?? []];
+            for (const [, s] of state) {
+                if ((s as any).prUrl) {
+                    vscode.env.openExternal(vscode.Uri.parse((s as any).prUrl));
+                    return;
+                }
+            }
+            vscode.window.showInformationMessage('No open pull request found.');
+        }),
+
+        vscode.commands.registerCommand(GITHUB_COMMANDS.REFRESH_PR_STATUS, async () => {
+            const state = [...(sessionBranchManager as any).sessions?.keys?.() ?? []];
+            await Promise.all(state.map((k: string) => sessionBranchManager.refreshPrStatus(k)));
+            vscode.window.setStatusBarMessage('PR status refreshed', 3000);
+        }),
+
+        vscode.commands.registerCommand(GITHUB_COMMANDS.END_SESSION, async () => {
+            const state = [...(sessionBranchManager as any).sessions?.entries?.() ?? []];
+            if (state.length === 0) { vscode.window.showInformationMessage('No active GitHub session.'); return; }
+            const key = state.length === 1
+                ? state[0][0] as string
+                : await vscode.window.showQuickPick(state.map((s: any) => s[0] as string), { placeHolder: 'Select pipeline' });
+            if (key) { await sessionBranchManager.endSession(key, 'explicit'); }
+        }),
+
+        vscode.commands.registerCommand(GITHUB_COMMANDS.SHOW_SESSION_ACTIONS, async () => {
+            const items = [
+                { label: '$(cloud-upload) Commit & Push…',         cmd: GITHUB_COMMANDS.COMMIT_AND_PUSH },
+                { label: '$(git-pull-request) Raise Pull Request…', cmd: GITHUB_COMMANDS.RAISE_PULL_REQUEST },
+                { label: '$(link-external) Open Pull Request',      cmd: GITHUB_COMMANDS.OPEN_PULL_REQUEST },
+                { label: '$(refresh) Refresh PR Status',            cmd: GITHUB_COMMANDS.REFRESH_PR_STATUS },
+                { label: '$(stop-circle) End Session…',             cmd: GITHUB_COMMANDS.END_SESSION },
+                { label: '$(sign-out) Sign out of GitHub',          cmd: GITHUB_COMMANDS.SIGN_OUT },
+            ];
+            const pick = await vscode.window.showQuickPick(items, { placeHolder: 'GitHub Session Actions' });
+            if (pick) { vscode.commands.executeCommand(pick.cmd); }
+        })
+    );
 }

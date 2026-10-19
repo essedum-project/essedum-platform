@@ -724,6 +724,8 @@ export class CodeEditorTabComponent
 {
   @Input() model: WizardPipelineModel;
   @Output() codeChange = new EventEmitter<string>();
+  @Output() codeModify = new EventEmitter<void>();
+  @Output() codeRestore = new EventEmitter<void>();
 
   @ViewChild("msgList") msgListEl: ElementRef<HTMLUListElement>;
 
@@ -731,6 +733,7 @@ export class CodeEditorTabComponent
   scriptLines: string[] = [];
   dirty = false;
   private originalCode = "";
+  private editorLoaded = false;
 
   // Chat state
   prompt = "";
@@ -927,6 +930,7 @@ export class CodeEditorTabComponent
       this.scriptLines = (this.model.code || "").split("\n");
       this.originalCode = this.model.code || "";
       this.dirty = false;
+      this.editorLoaded = false;
       this.seeded = false;
 
       // For freshly created pipelines, read agent+model from pipeline_attributes
@@ -1389,7 +1393,17 @@ ${this.model.code}
   onScriptChange(lines: string[]): void {
     this.scriptLines = lines;
     const joined = lines.join("\n");
+    if (!this.editorLoaded) {
+      // First change event = editor loaded the code, not a user edit; sync originalCode.
+      this.editorLoaded = true;
+      this.originalCode = joined;
+      this.dirty = false;
+      return;
+    }
+    const wasDirty = this.dirty;
     this.dirty = joined !== this.originalCode;
+    if (this.dirty && !wasDirty) { this.codeModify.emit(); }
+    if (!this.dirty && wasDirty) { this.codeRestore.emit(); }
   }
 
   save(): void {

@@ -53,6 +53,28 @@ export class PlaygroundTabComponent {
     this.openPlaygroundClick.emit();
   }
 
+  /**
+   * Resize the embedded app iframe to its content height so the app fills the
+   * preview instead of leaving an empty area below it. The app is served from
+   * the same origin (via the /apps proxy), so its document height is readable.
+   */
+  onAppFrameLoad(iframe: HTMLIFrameElement): void {
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (doc) {
+        const h = Math.max(
+          doc.documentElement ? doc.documentElement.scrollHeight : 0,
+          doc.body ? doc.body.scrollHeight : 0
+        );
+        if (h > 0) {
+          iframe.style.height = h + 'px';
+        }
+      }
+    } catch {
+      // Cross-origin or access error: keep the CSS-driven height.
+    }
+  }
+
   getPlaygroundTooltipMessage(): string {
     // For App Pipeline, always show launch tooltip
     if (this.pipelineMode === 'app') {

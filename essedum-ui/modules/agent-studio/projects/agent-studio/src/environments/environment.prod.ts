@@ -5,7 +5,8 @@ export const environment = {
   baseUrl: '/api/aip',
   datasetsUrl: '/api/aip',
   langflowUrl: '/mfe/agent-designer/',
-  litellmUrl: '/litellm/',
-  langfuseUrl: '/langfuse/',
-  salusUrl: '/',
+  agentDesignerUrl: '__FE_AGENT_DESIGNER_URL__',
+  litellmUrl: '__FE_LITELLM_URL__',
+  langfuseUrl: '__FE_LANGFUSE_URL__',
+  salusUrl: '__FE_SALUS_URL__',
 };

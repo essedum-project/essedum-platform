@@ -20,17 +20,20 @@
 @keyframes borderShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 @keyframes rowIn     { from { opacity:0; transform:translateX(-5px); } to { opacity:1; transform:translateX(0); } }
 
+// Remove Bootstrap mt-3 top gap — the fullscreen wrapper already handles outer spacing
+.mt-3 { margin-top: 0 !important; }
+
 // ── Page container / unified toolbar row ────────────────────────
 .container {
-  padding: 10px 18px !important;
+  padding: 4px 14px !important;
   width: 100% !important;
   box-sizing: border-box !important;
   display: flex !important;
   align-items: center !important;
   justify-content: flex-end !important;
-  gap: 12px !important;
-  background: rgba(79,142,247,0.04) !important;
-  border-radius: 16px 16px 0 0 !important;
+  gap: 8px !important;
+  background: transparent !important;
+  border-radius: 0 !important;
 }
 
 // ── Toolbar: action buttons (right side) ─────────────────────────
@@ -270,22 +273,23 @@ button.page-btn, .page-btn {
 //  LIGHT THEME
 // ══════════════════════════════════════════════════════════════════
 body.header-light-theme {
-  .table-card { background: #ffffff !important; border-color: rgba(79,70,229,0.14) !important; box-shadow: 0 8px 36px rgba(79,70,229,0.1) !important; &::before { background: linear-gradient(90deg, #6366f1, #06b6d4, #8b5cf6, #4f46e5, #6366f1); } }
-  .container { background: rgba(79,70,229,0.03) !important; }
-  .table thead tr th, table thead tr th { background: rgba(79,70,229,0.05) !important; color: #64748b !important; border-color: rgba(79,70,229,0.1) !important; &:hover { color: #4f46e5 !important; background: rgba(79,70,229,0.1) !important; } }
+  .table-card { background: #ffffff !important; border-color: rgba(79,70,229,0.18) !important; box-shadow: 0 8px 36px rgba(79,70,229,0.1) !important; &::before { background: linear-gradient(90deg, #6366f1, #06b6d4, #8b5cf6, #4f46e5, #6366f1); } }
+  .container { background: transparent !important; }
+  .table thead tr th, table thead tr th { background: rgba(79,70,229,0.05) !important; color: #475569 !important; border-color: rgba(79,70,229,0.1) !important; &:hover { color: #4f46e5 !important; background: rgba(79,70,229,0.1) !important; } }
   .table tbody tr, table tbody tr { border-color: rgba(79,70,229,0.05) !important; &:nth-child(even) { background: rgba(79,70,229,0.018) !important; } &:hover { background: rgba(79,70,229,0.06) !important; td { color: #0f172a !important; } } td { color: #334155 !important; &:first-child { color: #4f46e5 !important; } } }
   .pagination-row, .pagination-container { border-top-color: rgba(79,70,229,0.08) !important; background: rgba(79,70,229,0.02) !important; }
-  button.page-btn, .page-btn { border-color: rgba(79,70,229,0.16) !important; background: rgba(79,70,229,0.04) !important; color: #64748b !important; &:hover { background: rgba(79,70,229,0.1) !important; border-color: rgba(79,70,229,0.3) !important; color: #4f46e5 !important; } &.active { background: rgba(79,70,229,0.14) !important; border-color: rgba(79,70,229,0.38) !important; color: #4f46e5 !important; } }
-  mat-icon, .mat-icon { color: #475569 !important; }
+  button.page-btn, .page-btn { border-color: rgba(79,70,229,0.22) !important; background: rgba(79,70,229,0.05) !important; color: #334155 !important; &:hover { background: rgba(79,70,229,0.1) !important; border-color: rgba(79,70,229,0.38) !important; color: #4f46e5 !important; } &.active { background: rgba(79,70,229,0.14) !important; border-color: rgba(79,70,229,0.42) !important; color: #4f46e5 !important; } }
+  mat-icon, .mat-icon { color: #334155 !important; }
   .card-header > div, .card-header > button {
-    background: rgba(79,70,229,0.06) !important;
-    border-color: rgba(79,70,229,0.2) !important;
-    mat-icon, .mat-icon, i[class*="icon"], span[class*="icon"] { color: #475569 !important; }
+    background: rgba(79,70,229,0.07) !important;
+    border-color: rgba(79,70,229,0.3) !important;
+    mat-icon, .mat-icon, i[class*="icon"], span[class*="icon"] { color: #1e293b !important; }
     &:hover {
-      background: rgba(79,70,229,0.14) !important;
-      border-color: rgba(79,70,229,0.4) !important;
+      background: rgba(79,70,229,0.15) !important;
+      border-color: rgba(79,70,229,0.5) !important;
       mat-icon, .mat-icon, i[class*="icon"], span[class*="icon"] { color: #4f46e5 !important; }
     }
   }
-  .cell-badge { background: rgba(79,70,229,0.08) !important; border-color: rgba(79,70,229,0.2) !important; color: #4f46e5 !important; }
+  ::ng-deep .card-header mat-icon { color: #1e293b !important; }
+  .cell-badge { background: rgba(79,70,229,0.08) !important; border-color: rgba(79,70,229,0.22) !important; color: #4f46e5 !important; }
 }

@@ -1,17 +1,182 @@
-<div class="embed-fullscreen">
-  <iframe
-    *ngIf="isUrlConfigured"
-    #salusIframeRef
-    id="salusIframe"
-    [src]="currentIframeUrl"
-    frameborder="0"
-    allow="fullscreen; microphone; camera">
-  </iframe>
-  <div *ngIf="!isUrlConfigured" class="not-configured">
-    <div class="not-configured-icon">
-      <i class="bi bi-shield-check"></i>
+<div class="salus-root">
+
+  <!-- Header -->
+  <header class="salus-header">
+    <div class="title-block">
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5L12 1zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Salus Guardrails</h1>
+        <span class="subtitle">Responsible AI monitoring &middot; {{ windowLabel }}</span>
+      </div>
     </div>
-    <h3>Salus Not Configured</h3>
-    <p>The Salus service URL has not been configured for this environment. Set <code>salusUrl</code> in the environment configuration to enable this integration.</p>
+
+    <div class="header-actions">
+      <select class="range-select" [ngModel]="range" (ngModelChange)="setRange($event)">
+        <option *ngFor="let r of rangeOptions" [value]="r.key">{{ r.label }}</option>
+      </select>
+      <div class="seg-toggle">
+        <button type="button" [class.active]="view === 'overview'" (click)="view = 'overview'">Overview</button>
+        <button type="button" [class.active]="view === 'events'" (click)="view = 'events'">
+          Event Log <span class="pill">{{ total }}</span>
+        </button>
+      </div>
+      <button type="button" class="ghost-btn" (click)="load()" [disabled]="loading">
+        <span class="refresh-icon" [class.spinning]="loading">&#10227;</span> Refresh
+      </button>
+      <button type="button" class="ghost-btn" (click)="exportJson()" [disabled]="!events.length">&#8681; Export</button>
+    </div>
+  </header>
+
+  <div *ngIf="error" class="alert">{{ error }}</div>
+
+  <div *ngIf="loading && !allEvents.length" class="state-msg">Loading guardrail data…</div>
+  <div *ngIf="!loading && !allEvents.length && !error" class="state-msg">No guardrail evaluations recorded yet.</div>
+  <div *ngIf="allEvents.length && !events.length" class="state-msg">
+    No evaluations in the selected period — try a wider date range.
   </div>
+
+  <!-- ── Overview ── -->
+  <section *ngIf="view === 'overview' && events.length" class="content">
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-label">Total Evaluations</span>
+        <span class="kpi-value">{{ total }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Blocked Requests <em class="warn" *ngIf="blocked">&#9888;</em></span>
+        <span class="kpi-value danger">{{ blocked }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Pass Rate</span>
+        <span class="kpi-value success">{{ passRate | number:'1.1-1' }}%</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Active Guardrails</span>
+        <span class="kpi-value">{{ activeGuardrails }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Models Monitored</span>
+        <span class="kpi-value">{{ modelsMonitored }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Last Updated</span>
+        <span class="kpi-value small">{{ lastUpdated ? (lastUpdated | date:'HH:mm:ss') : '—' }}</span>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <!-- Evaluations over time -->
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Evaluations over time</h2>
+          <div class="legend">
+            <span><i class="dot ok"></i> Passed</span>
+            <span><i class="dot bad"></i> Blocked</span>
+          </div>
+        </div>
+        <div class="bars">
+          <div class="bar-col" *ngFor="let bar of timeline" [title]="bar.label + ': ' + bar.passed + ' passed, ' + bar.blocked + ' blocked'">
+            <div class="stack">
+              <div class="seg bad" [style.height.%]="bar.blockedHeight"></div>
+              <div class="seg ok" [style.height.%]="bar.passedHeight"></div>
+            </div>
+            <span class="bar-label">{{ bar.label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage split -->
+      <div class="panel">
+        <div class="panel-head"><h2>Evaluation stages</h2></div>
+        <div class="donut-wrap">
+          <svg viewBox="0 0 140 140" class="donut">
+            <circle cx="70" cy="70" r="54" class="donut-track"></circle>
+            <circle *ngFor="let s of stages"
+              cx="70" cy="70" r="54"
+              [attr.stroke]="s.color"
+              [attr.stroke-dasharray]="s.dash"
+              [attr.stroke-dashoffset]="s.offset"
+              class="donut-seg"></circle>
+            <text x="70" y="66" class="donut-value">{{ total }}</text>
+            <text x="70" y="84" class="donut-caption">events</text>
+          </svg>
+          <ul class="donut-legend">
+            <li *ngFor="let s of stages">
+              <i class="dot" [style.background]="s.color"></i>
+              <span class="name">{{ s.name }}</span>
+              <span class="val">{{ s.count }} · {{ s.percent | number:'1.0-0' }}%</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Guardrail checks -->
+      <div class="panel wide">
+        <div class="panel-head"><h2>Guardrail checks</h2><span class="hint">runs vs. failures</span></div>
+        <div class="check-list">
+          <div class="check-row" *ngFor="let c of checkStats">
+            <span class="check-name">{{ c.name }}</span>
+            <div class="track">
+              <div class="fill" [style.width.%]="c.width"></div>
+              <div class="fill fail" [style.width.%]="(c.failures / (c.runs || 1)) * c.width"></div>
+            </div>
+            <span class="check-val">{{ c.runs }} runs</span>
+            <span class="check-val" [class.danger]="c.failures">{{ c.failures }} failed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" class="cta" (click)="view = 'events'">
+      View full event log &rarr;
+    </button>
+  </section>
+
+  <!-- ── Event log ── -->
+  <section *ngIf="view === 'events' && events.length" class="content">
+    <div class="filters">
+      <input class="search" type="text" [(ngModel)]="search" placeholder="Search text, model or check…" />
+      <select [(ngModel)]="stageFilter">
+        <option *ngFor="let s of stageOptions" [value]="s">{{ s === 'all' ? 'All stages' : s }}</option>
+      </select>
+      <select [(ngModel)]="resultFilter">
+        <option value="all">All results</option>
+        <option value="passed">Passed</option>
+        <option value="blocked">Blocked</option>
+      </select>
+      <span class="count">{{ filteredEvents.length }} of {{ total }}</span>
+    </div>
+
+    <div class="event-list">
+      <article class="event-card" *ngFor="let e of filteredEvents; let i = index">
+        <div class="event-head">
+          <span class="badge" [class.ok]="e.passed" [class.bad]="!e.passed">
+            {{ e.passed ? 'PASSED' : 'BLOCKED' }}
+          </span>
+          <span class="stage" [attr.data-stage]="e.stage">{{ e.stage }}</span>
+          <span class="time">{{ formatTime(e.timestamp) }}</span>
+          <span class="model" *ngIf="e.model">{{ e.model }}</span>
+          <span class="spacer"></span>
+          <button type="button" class="link-btn" (click)="toggleExpanded(i)">
+            {{ isExpanded(i) ? 'Collapse' : 'Expand' }}
+          </button>
+        </div>
+
+        <div class="chips">
+          <span class="chip" *ngFor="let c of e.checks"
+            [class.failed]="e.failed_checks?.includes(c)">{{ c }}</span>
+        </div>
+
+        <pre class="event-text" [class.collapsed]="!isExpanded(i)">{{ e.text }}</pre>
+        <button type="button" class="more-btn" (click)="toggleExpanded(i)">
+          {{ isExpanded(i) ? 'Show less' : 'Show full text' }}
+        </button>
+      </article>
+    </div>
+  </section>
 </div>

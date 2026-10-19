@@ -138,7 +138,7 @@ public class ICIPRemoteLoggerService implements IICIPJobRuntimeLoggerService {
 						List<String> jobExecutorOrgList = Arrays.asList(jobExecutorOrg.split(","));
 						executeEnable = !jobExecutorOrgList.contains(job.getOrganization());
 					}
-					if (jobExecutorEnabled || Objects.nonNull(taskId)) {
+					if (jobExecutorEnabled && Objects.nonNull(taskId)) {
 						logger.info("Getting the task status");
 						org.json.JSONObject responseObj = remoteJob.getTaskStatus(taskId, connDetails);
 						if (!responseObj.has("task_status")) {

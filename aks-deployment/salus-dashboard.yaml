@@ -1,0 +1,188 @@
+# Lightweight, self-hosted dashboard showing recent Salus guardrail checks.
+# custom_callbacks.py (litellm-custom-callbacks configmap) POSTs each check
+# result here in addition to Langfuse, since Langfuse's trace-detail view is
+# broken for the aipns/langfuse instance (missing ClickHouse backend).
+# In-memory ring buffer only (no PVC) — history resets on pod restart, which is
+# fine for a "recent activity" view; long-term audit trail should use Langfuse
+# once that's fixed, or a real Salus deployment.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: salus-dashboard-app
+  namespace: aipns
+data:
+  app.py: |
+    import time
+    from collections import deque
+    from datetime import datetime, timezone
+
+    from fastapi import FastAPI
+    from fastapi.responses import HTMLResponse, JSONResponse
+    from pydantic import BaseModel
+
+    app = FastAPI(title="Salus Dashboard")
+
+    MAX_EVENTS = 500
+    _events: deque = deque(maxlen=MAX_EVENTS)
+
+
+    class SalusEvent(BaseModel):
+        stage: str  # "input" | "output"
+        text: str
+        checks: list[str] = []
+        passed: bool
+        failed_checks: list[str] = []
+        trace_id: str | None = None
+        model: str | None = None
+
+
+    @app.post("/log")
+    def log_event(evt: SalusEvent):
+        _events.appendleft({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            **evt.model_dump(),
+        })
+        return {"stored": True, "total": len(_events)}
+
+
+    @app.get("/health")
+    def health():
+        return {"status": "ok", "events_buffered": len(_events)}
+
+
+    @app.get("/events")
+    def get_events(limit: int = 100):
+        return JSONResponse(list(_events)[:limit])
+
+
+    _PAGE = """<!DOCTYPE html>
+    <html><head><title>Salus Guardrail Dashboard</title>
+    <style>
+      body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #0f1117; color: #e6e6e6; }
+      header { padding: 16px 24px; background: #171a23; border-bottom: 1px solid #2a2e3a; display: flex; align-items: center; gap: 12px; }
+      header h1 { font-size: 16px; margin: 0; }
+      .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #2a2e3a; }
+      main { padding: 16px 24px; }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #22252f; vertical-align: top; }
+      th { color: #9aa0ac; font-weight: 600; position: sticky; top: 0; background: #0f1117; }
+      .pass { color: #3fd67a; font-weight: 600; }
+      .fail { color: #ff5c5c; font-weight: 600; }
+      .stage-input { color: #7db8ff; }
+      .stage-output { color: #d59fff; }
+      .checks { color: #9aa0ac; font-size: 12px; }
+      .text { max-width: 420px; white-space: pre-wrap; word-break: break-word; color: #c7cbd4; }
+      .empty { color: #6b7280; padding: 40px; text-align: center; }
+    </style>
+    </head>
+    <body>
+      <header><h1>Salus Guardrail Dashboard</h1><span id="count" class="badge">0 events</span></header>
+      <main>
+        <table>
+          <thead><tr><th>Time</th><th>Stage</th><th>Result</th><th>Checks</th><th>Text</th><th>Model</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div id="empty" class="empty" style="display:none">No Salus checks recorded yet.</div>
+      </main>
+      <script>
+        // Relative (no leading slash) so it resolves against whatever prefix this page is
+        // served under (e.g. /guardrail-dashboard/events), not the site root.
+        function load() {
+          fetch('events').then(r => r.json()).then(data => {
+            document.getElementById('count').textContent = data.length + ' events (last ' + Math.min(data.length, 500) + ')';
+            const rows = document.getElementById('rows');
+            rows.innerHTML = '';
+            document.getElementById('empty').style.display = data.length === 0 ? 'block' : 'none';
+            for (const e of data) {
+              const tr = document.createElement('tr');
+              const t = new Date(e.timestamp).toLocaleString();
+              const resultClass = e.passed ? 'pass' : 'fail';
+              const resultText = e.passed ? 'PASSED' : ('FAILED: ' + (e.failed_checks || []).join(', '));
+              tr.innerHTML = `<td>${t}</td>` +
+                `<td class="stage-${e.stage}">${e.stage}</td>` +
+                `<td class="${resultClass}">${resultText}</td>` +
+                `<td class="checks">${(e.checks || []).join(', ')}</td>` +
+                `<td class="text">${(e.text || '').slice(0, 300)}</td>` +
+                `<td>${e.model || ''}</td>`;
+              rows.appendChild(tr);
+            }
+          }).catch(err => console.error('Failed to load events:', err));
+        }
+        load();
+        setInterval(load, 5000);
+      </script>
+    </body></html>
+    """
+
+
+    @app.get("/", response_class=HTMLResponse)
+    def dashboard():
+        return HTMLResponse(_PAGE)
+
+
+    if __name__ == "__main__":
+        import uvicorn
+        uvicorn.run(app, host="0.0.0.0", port=8090)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: salus-dashboard
+  namespace: aipns
+  labels:
+    app: salus-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: salus-dashboard
+  template:
+    metadata:
+      labels:
+        app: salus-dashboard
+    spec:
+      containers:
+      - name: salus-dashboard
+        image: python:3.11-slim
+        command: ["sh", "-c", "pip install --quiet --no-cache-dir fastapi uvicorn pydantic && python /app/app.py"]
+        ports:
+        - containerPort: 8090
+        volumeMounts:
+        - name: app-code
+          mountPath: /app/app.py
+          subPath: app.py
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8090
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          failureThreshold: 12
+      volumes:
+      - name: app-code
+        configMap:
+          name: salus-dashboard-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: salus-dashboard
+  namespace: aipns
+  labels:
+    app: salus-dashboard
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8090
+    protocol: TCP
+    name: http
+  selector:
+    app: salus-dashboard

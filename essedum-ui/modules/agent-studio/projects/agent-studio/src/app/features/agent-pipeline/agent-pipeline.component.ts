@@ -314,7 +314,13 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   deploymentStatus: 'idle' | 'running' | 'success' | 'error' = 'idle';
   deploymentStatusMessage: string = ''; // User-friendly status message for deployment
   isPlaygroundEnabled = false; // Enable playground only after successful deployment
-  
+
+  // Agent Designer pipeline support
+  isAgentDesignerPipeline = false;
+  agentDesignerPipelineId = '';
+  agentDesignerFlowId = '';
+  private readonly AGENT_DESIGNER_API = '/mfe/agent-designer/api/v1';
+
   // LLM Selection and Prompt Template
   selectedLLM: string = '';
   showPromptCopyDialog = false;
@@ -734,12 +740,20 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
     // Check if we have router state data with card information
     const historyState = history.state;
-    const cardFromState = historyState?.card;
-    
+
+    // Fallback: read card stored by AgentComponent when navigating via window.location.hash
+    let storedNav: any = null;
+    try {
+      const raw = sessionStorage.getItem('agentDesignerNavigationCard');
+      if (raw) { storedNav = JSON.parse(raw); sessionStorage.removeItem('agentDesignerNavigationCard'); }
+    } catch { /* ignore */ }
+    const cardFromState = historyState?.card ?? storedNav?.card ?? null;
+    const resolvedState = { ...storedNav, ...historyState };
+
     // Set pipeline mode from navigation state if available
-    if (historyState?.pipelineMode) {
-      this.pipelineMode = historyState.pipelineMode;
-      
+    if (resolvedState?.pipelineMode) {
+      this.pipelineMode = resolvedState.pipelineMode;
+
       // Set cardTitle based on pipeline mode
       if (this.pipelineMode === 'mcp') {
         this.cardTitle = 'MCP Pipelines';
@@ -748,31 +762,38 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       } else {
         this.cardTitle = 'Agent Pipelines';
       }
-      
+
       // DO NOT initialize MCP config here - let the API load the real data first
       // Default config will only be set if API call fails
     }
-    
+
     if (cardFromState && cardFromState.name) {
       // This is a real pipeline card from dashboard - use its cname for auto-loading
       this.initializePipelineSessionContext(cardFromState.name);
       this.viewMode = 'detail';
-      
+
+      // Detect agent-designer pipelines
+      if (cardFromState.isAgentDesigner) {
+        this.isAgentDesignerPipeline = true;
+        this.agentDesignerPipelineId = cardFromState.cid || '';
+        this.agentDesignerFlowId = cardFromState.flowId || '';
+      }
+
       // Update filename if in MCP or App mode now that we have the actual cname
       if (this.pipelineMode === 'mcp' || this.pipelineMode === 'app') {
         this.scriptFileName = `${this.currentCname}.json`;
       }
-      
+
       // Set pipeline alias for display
-      if (historyState?.pipelineAlias) {
-        this.pipelineAlias = historyState.pipelineAlias;
+      if (resolvedState?.pipelineAlias) {
+        this.pipelineAlias = resolvedState.pipelineAlias;
       }
-      
+
       // Trigger auto-loading for real pipeline cards
       this.autoLoadAgentDataForPipelineCard();
     } else {
       // Fall back to old flow for hardcoded agent cards or when no state data
-      
+
       // Also try using cardName as currentCname for the new APIs
       if (this.cardName) {
         this.initializePipelineSessionContext(this.cardName);
@@ -868,6 +889,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   getPipelineByName() {
+    if (this.isAgentDesignerPipeline) return;
     let params: HttpParams = new HttpParams();
     params = params.set('name', this.cardName);
     params = params.set('org', this.organisation);
@@ -2552,6 +2574,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    * Delete the current deployment via WebSocket
    */
   async deleteDeployment(): Promise<void> {
+    if (this.isAgentDesignerPipeline) {
+      await this.deleteAgentDesignerDeployment();
+      return;
+    }
     if (!this.canDeleteDeployment() || !this.currentCname) {
       return;
     }
@@ -2743,6 +2769,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    * Run and Deploy the agent using WebSocket pipeline
    */
   runAndDeploy(): void {
+    if (this.isAgentDesignerPipeline) {
+      this.runAndDeployAgentDesigner();
+      return;
+    }
     if (!this.canRunAndDeploy()) {
       return;
     }
@@ -3544,6 +3574,16 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
   // Playground methods
   openPlayground(): void {
+    if (this.isAgentDesignerPipeline) {
+      this.playgroundUrl = `${this.AGENT_DESIGNER_API}/executions/flows/${this.agentDesignerFlowId}/run`;
+      this.showPlayground = true;
+      const agentName = (this.pipelineAlias as string) || this.currentCname || 'Agent';
+      this.playgroundMessages = [{
+        role: 'agent',
+        content: `Hello! I'm ${agentName}. How can I help you today?`
+      }];
+      return;
+    }
     // For App Pipeline, allow opening anytime (no deployment check)
     if (this.pipelineMode === 'app') {
       // Clear deployment status message when launching app
@@ -3700,9 +3740,20 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         throw new Error('Playground URL not available');
       }
 
+      // Agent Designer pipeline: poll execution result
+      if (this.isAgentDesignerPipeline) {
+        const runResp = await this.http.post<any>(this.playgroundUrl, { message: question }).toPromise();
+        const executionId = runResp?.execution_id;
+        if (!executionId) throw new Error('No execution_id returned');
+        const result = await this.pollAgentDesignerExecution(executionId);
+        this.playgroundMessages.push({ role: 'agent', content: result });
+        this.isAgentThinking = false;
+        return;
+      }
+
       // Use the exact playground URL from the streaming services API response
       const apiEndpoint = this.playgroundUrl;
-      
+
       // Send whatever the user typed directly as the request body
       // Try to parse as JSON first, if it fails, send as raw string
       let payload: any;
@@ -3712,12 +3763,17 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         // Not valid JSON, send as plain text string
         payload = question;
       }
-      
+
       const headers = {
         'Content-Type': 'application/json'
       };
-      
-      const response = await this.http.post<any>(apiEndpoint, payload, { headers }).toPromise();
+
+      // Angular's HttpClient forwards string bodies verbatim, so a plain-text
+      // question would hit the wire unquoted (invalid JSON) and 500 server-side.
+      // Re-encode strings so the body is always valid JSON.
+      const body = typeof payload === 'string' ? JSON.stringify(payload) : payload;
+
+      const response = await this.http.post<any>(apiEndpoint, body, { headers }).toPromise();
       
       // Add agent response
       this.playgroundMessages.push({
@@ -4752,6 +4808,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   // Call the upload API to get full content
   // Auto-load agent data specifically for pipeline cards from dashboard
    private async autoLoadAgentDataForPipelineCard(): Promise<void> {
+    if (this.isAgentDesignerPipeline) {
+      await this.loadAgentDesignerFlow();
+      return;
+    }
+
     if (!this.currentCname) {
       console.error('Cannot auto-load pipeline agent data: no cname available');
       this.showScriptTabOnly();
@@ -5326,7 +5387,13 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
                   ? `Resuming session on existing branch: ${response.branchName}`
                   : `Session branch created: ${response.branchName}`;
                 this.service.message(msg, 'success');
-                resolve(true);
+
+                if (!response.alreadyExisted) {
+                  this.seedSessionHistoryAndAutoRaisePr(repoName, mainBranch, response.branchName)
+                    .finally(() => resolve(true));
+                } else {
+                  resolve(true);
+                }
               } else {
                 this.service.message(`Could not create session branch: ${response.message}`, 'warning');
                 resolve(false);
@@ -5345,6 +5412,44 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
           this.service.message('Git config not found. Cannot create session branch.', 'warning');
           resolve(false);
         }
+      });
+    });
+  }
+
+  private seedSessionHistoryAndAutoRaisePr(repoName: string, mainBranch: string, branchName: string): Promise<void> {
+    return new Promise((resolve) => {
+      this.githubService.pushToGitHub({
+        repoName,
+        branch: branchName,
+        commitMessage: 'chore: initialize session history',
+        files: [],
+        sessionHistoryEntry: {
+          actor: this.currentGitUsername || this.githubUsername || 'unknown',
+          source: 'web',
+          action: 'session-start',
+          message: `Session branch created from ${mainBranch}`,
+          filesChanged: [],
+          timestamp: new Date().toISOString(),
+          pipelineName: this.currentCname || '',
+          sessionId: this.getCurrentGitSessionId() || '',
+          org: this.organisation || this.getConsistentOrganization() || '',
+          mainBranch,
+          sessionBranch: branchName,
+        },
+      }).subscribe({
+        next: () => {
+          this.sessionBranchLastCommitId = 'committed';
+          this.updateStoredSessionBranchState({ lastCommitId: 'committed' });
+
+          this.createPullRequestFromSessionBranch(
+            `Merge session branch ${branchName} into ${mainBranch}`
+          ).finally(() => resolve());
+        },
+        error: (error: any) => {
+          const msg = error?.error?.message || error?.message || 'Failed to initialize session history';
+          this.service.message(msg, 'warning');
+          resolve();
+        },
       });
     });
   }
@@ -5421,7 +5526,20 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
             fileName: file.filename,
             id: file.id,
             content: file.filescript,
-          }))
+          })),
+          sessionHistoryEntry: {
+            actor: this.currentGitUsername || this.githubUsername || 'unknown',
+            source: 'web',
+            action: 'file-save',
+            message: commitMessage,
+            filesChanged: fetchedFiles.map(file => file.filePath),
+            timestamp: new Date().toISOString(),
+            pipelineName: this.currentCname || '',
+            sessionId: this.getCurrentGitSessionId() || '',
+            org: this.organisation || this.getConsistentOrganization() || '',
+            mainBranch: this.lastPulledBranch || 'main',
+            sessionBranch: this.activeSessionBranch || '',
+          }
         };
 
         this.githubService.pushToGitHub(request).subscribe({
@@ -5814,5 +5932,150 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         }
       });
     });
+  }
+
+  // ── Agent Designer pipeline helpers ──────────────────────────────────────────
+
+  private async loadAgentDesignerFlow(): Promise<void> {
+    this.isLoadingFiles = true;
+    this.resetToInitialStateForNewAgent();
+    await this.fetchAgentDesignerStatus();
+
+    try {
+      const pipeline = await this.http.get<any>(
+        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}`
+      ).toPromise();
+
+      const flowId = pipeline?.flow_id || this.agentDesignerFlowId;
+      const flow = await this.http.get<any>(
+        `${this.AGENT_DESIGNER_API}/flows/${flowId}`
+      ).toPromise();
+
+      const jsonContent = JSON.stringify(flow, null, 2);
+      const fileName = `${this.currentCname}.json`;
+      const fileNode: FileNode = {
+        name: fileName,
+        type: 'file',
+        content: jsonContent,
+        id: 'flow-json',
+        path: fileName,
+        extension: 'json',
+      };
+
+      this.fileSystemData = [fileNode];
+      this.hasGeneratedAgent = true;
+      this.isJsonProcessed = true;
+      this.selectedFileName = fileName;
+      this.selectedFileContent = jsonContent;
+      this.selectedFilePath = fileName;
+      this.fileExtension = 'json';
+      this.isLoadingFiles = false;
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('Failed to load agent designer flow:', err);
+      this.isLoadingFiles = false;
+      this.showScriptTabOnly();
+    }
+  }
+
+  private async fetchAgentDesignerStatus(): Promise<void> {
+    if (!this.agentDesignerPipelineId) return;
+    try {
+      const pipeline = await this.http.get<any>(
+        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}`
+      ).toPromise();
+      const status = pipeline?.status || 'registered';
+      this.runnerServiceStatus = status === 'running';
+      this.isPlaygroundEnabled = status === 'running';
+    } catch {
+      this.runnerServiceStatus = false;
+      this.isPlaygroundEnabled = false;
+    }
+  }
+
+  private async runAndDeployAgentDesigner(): Promise<void> {
+    this.isRunningAndDeploying = true;
+    this.deploymentStatus = 'running';
+    this.deploymentStatusMessage = 'Deploying agent to Kubernetes...';
+    this.isPlaygroundEnabled = false;
+    this.consoleOutput = ['[INFO] Creating Kubernetes pod in vibe-agents namespace...'];
+    this.cdr.detectChanges();
+
+    try {
+      await this.http.post<any>(
+        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}/deploy`,
+        {}
+      ).toPromise();
+
+      this.runnerServiceStatus = true;
+      this.isPlaygroundEnabled = true;
+      this.deploymentStatus = 'success';
+      this.deploymentStatusMessage = 'Agent deployed successfully!';
+      this.consoleOutput = [
+        ...this.consoleOutput,
+        '[SUCCESS] Pod created in vibe-agents namespace.',
+        '[SUCCESS] Service and ingress wired. Open Playground to chat!',
+      ];
+      this.service.message('Agent deployed to Kubernetes!', 'success');
+    } catch (err: any) {
+      this.deploymentStatus = 'error';
+      this.deploymentStatusMessage = 'Deployment failed.';
+      this.consoleOutput = [...this.consoleOutput, `[ERROR] ${err?.error?.detail || err?.message || 'Deployment failed.'}`];
+      this.service.message('Deployment failed. Check console for details.', 'error');
+    }
+
+    this.isRunningAndDeploying = false;
+    this.cdr.detectChanges();
+  }
+
+  private async pollAgentDesignerExecution(executionId: string): Promise<string> {
+    const maxAttempts = 30;
+    for (let i = 0; i < maxAttempts; i++) {
+      await new Promise(r => setTimeout(r, 2000));
+      try {
+        const resp = await this.http.get<any>(
+          `${this.AGENT_DESIGNER_API}/executions/${executionId}`
+        ).toPromise();
+        if (resp?.status === 'completed') {
+          const out = resp.output;
+          return out?.result || out?.answer || out?.response || (out ? JSON.stringify(out) : 'Done.');
+        } else if (resp?.status === 'failed') {
+          return 'Execution failed: ' + (resp.output?.error || 'Unknown error');
+        }
+      } catch { /* keep polling */ }
+    }
+    return 'Execution timed out. Check Agent Designer for results.';
+  }
+
+  private async deleteAgentDesignerDeployment(): Promise<void> {
+    this.isDeletingDeployment = true;
+    this.deploymentStatus = 'running';
+    this.deploymentStatusMessage = 'Deleting Kubernetes deployment...';
+    this.consoleOutput = ['[INFO] Removing agent pod from vibe-agents namespace...'];
+    this.cdr.detectChanges();
+
+    try {
+      await this.http.delete<any>(
+        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}/deployment`
+      ).toPromise();
+
+      this.runnerServiceStatus = false;
+      this.isPlaygroundEnabled = false;
+      this.deploymentStatus = 'idle';
+      this.deploymentStatusMessage = '';
+      this.consoleOutput = [...this.consoleOutput, '[SUCCESS] Kubernetes deployment removed from vibe-agents.'];
+      this.service.message('Deployment deleted successfully.', 'success');
+    } catch (err: any) {
+      this.deploymentStatus = 'error';
+      this.deploymentStatusMessage = 'Failed to delete deployment.';
+      this.consoleOutput = [...this.consoleOutput, `[ERROR] ${err?.error?.detail || err?.message || 'Delete failed.'}`];
+      this.service.message('Failed to delete deployment.', 'error');
+    }
+
+    // Close the delete socket so it does not linger and re-emit
+    // 'delete_deployment' on reconnect (which would delete a future deploy).
+    this.isDeletingDeployment = false;
+    this.disconnectWebSocket();
+    this.cdr.detectChanges();
   }
 }

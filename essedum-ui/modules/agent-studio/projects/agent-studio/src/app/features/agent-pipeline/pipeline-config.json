@@ -4,7 +4,7 @@
     "bucketName": "aiptest"
   },
   "containerRegistry": {
-    "registryPrefix": "acrreq0762935.azurecr.io/",
+    "registryPrefix": "192.168.28.36:5000/",
     "imageVersion": "v1"
   }
 }

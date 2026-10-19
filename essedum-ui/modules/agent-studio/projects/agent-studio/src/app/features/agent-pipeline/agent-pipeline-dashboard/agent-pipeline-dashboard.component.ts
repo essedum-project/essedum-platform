@@ -12,11 +12,13 @@ import {
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { Services } from '@essedum/shared-lib';
 import { MatDialog } from '@angular/material/dialog';
-import { HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { TagsService } from '@essedum/shared-lib';
 import { Location } from '@angular/common';
 import { GitHubService } from '../../sharedModule/services/github.service';
 import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { PipelineCreateComponent } from '../../pipeline/pipeline-create/pipeline-create.component';
 import { DataPipelineWizardLocalComponent } from '../wizard/data-pipeline-wizard/data-pipeline-wizard.component';
 import { TrainingPipelineWizardLocalComponent } from '../wizard/training-pipeline-wizard/training-pipeline-wizard.component';
@@ -108,6 +110,9 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   isGitLoading = false;
   showGitDropdown = false;
 
+  private readonly AGENT_DESIGNER_API = '/mfe/agent-designer/api/v1';
+  private agentDesignerCids = new Set<string>();
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -116,7 +121,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     public dialog: MatDialog,
     public tagService: TagsService,
     private location: Location,
-    private githubService: GitHubService
+    private githubService: GitHubService,
+    private http: HttpClient
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -299,14 +305,38 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   private getCards(): void {
     const params = this.buildHttpParams();
 
-    this.service.getPipelinesCards(params).subscribe((res) => {
+    const agentDesigner$ = this.pipelineMode === 'agent'
+      ? this.http.get<any>(`${this.AGENT_DESIGNER_API}/pipelines?limit=200`).pipe(catchError(() => of({ items: [] })))
+      : of({ items: [] });
+
+    forkJoin({
+      java: this.service.getPipelinesCards(params).pipe(catchError(() => of([]))),
+      agentDesigner: agentDesigner$
+    }).subscribe(({ java, agentDesigner }) => {
       const data: any[] = [];
-      if (res.length) {
-        res.forEach((element: any) => {
+      this.agentDesignerCids = new Set<string>();
+
+      if (java && java.length) {
+        java.forEach((element: any) => {
           data.push(element);
           this.users.push(element.alias);
         });
       }
+
+      const adItems: any[] = agentDesigner?.items || [];
+      adItems.forEach((item: any) => {
+        const card = {
+          ...item,
+          alias: item.name || item.alias || item.id,
+          name: item.id || item.name,
+          isAgentDesigner: true,
+          cid: item.id
+        };
+        data.push(card);
+        if (item.id) {
+          this.agentDesignerCids.add(item.id);
+        }
+      });
 
       this.cards = data;
       this.filteredCards = data;
@@ -589,6 +619,21 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   }
 
   redirection(card: any): void {
+    if (card.isAgentDesigner) {
+      try {
+        sessionStorage.setItem('agentDesignerNavigationCard', JSON.stringify({ card }));
+      } catch { /* ignore */ }
+      this.router.navigate(['./view/' + card.name], {
+        queryParamsHandling: 'merge',
+        state: {
+          card,
+          pipelineMode: this.pipelineMode
+        },
+        relativeTo: this.route
+      });
+      return;
+    }
+
     this.service.getStreamingServicesByName(card.name).subscribe((res) => {
       this.streamItem = res;
       const navigationExtras: NavigationExtras = {
@@ -651,10 +696,22 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
       dialogRef.afterClosed().subscribe((result) => {
         if (result === 'delete') {
-          this.service.deletePipeline(cid).subscribe((res) => {
-            this.service.message('Pipeline deleted successfully!', 'success');
-            this.onRefresh();
-          });
+          if (this.agentDesignerCids.has(cid)) {
+            this.http.delete(`${this.AGENT_DESIGNER_API}/pipelines/${cid}`).subscribe({
+              next: () => {
+                this.service.message('Agent Designer Pipeline deleted successfully!', 'success');
+                this.onRefresh();
+              },
+              error: () => {
+                this.service.message('Error deleting Agent Designer Pipeline', 'error');
+              }
+            });
+          } else {
+            this.service.deletePipeline(cid).subscribe((res) => {
+              this.service.message('Pipeline deleted successfully!', 'success');
+              this.onRefresh();
+            });
+          }
         }
       });
     } catch (Exception) {
