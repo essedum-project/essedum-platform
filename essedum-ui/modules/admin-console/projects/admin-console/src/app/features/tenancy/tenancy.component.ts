@@ -13,14 +13,11 @@ interface EnvironmentRow extends RbacEnvironment {
   projectName: string;
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// P1 VERSION: Tenancy with Shadow DOM encapsulation
-// ═════════════════════════════════════════════════════════════════════════════
 @Component({
   selector: 'app-tenancy',
   templateUrl: './tenancy.component.html',
   styleUrls: ['./tenancy.component.scss'],
-  encapsulation: ViewEncapsulation.ShadowDom,
+  encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
 export class TenancyComponent implements OnInit {

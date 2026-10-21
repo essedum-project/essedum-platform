@@ -19,14 +19,11 @@ const GATE_LABEL: Record<string, string> = {
   platform_admin: 'Public',
 };
 
-// ═════════════════════════════════════════════════════════════════════════════
-// P1 VERSION: Publishing (My Drafts) with Shadow DOM encapsulation
-// ═════════════════════════════════════════════════════════════════════════════
 @Component({
   selector: 'app-publishing',
   templateUrl: './publishing.component.html',
   styleUrls: ['./publishing.component.scss'],
-  encapsulation: ViewEncapsulation.ShadowDom,
+  encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
 export class PublishingComponent implements OnInit {

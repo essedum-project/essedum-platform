@@ -14,14 +14,11 @@ interface RoleAssignmentRow extends RoleAssignment {
   scopeLabel: string;
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// P1 VERSION: Access control with Shadow DOM encapsulation
-// ═════════════════════════════════════════════════════════════════════════════
 @Component({
   selector: 'app-access',
   templateUrl: './access.component.html',
   styleUrls: ['./access.component.scss'],
-  encapsulation: ViewEncapsulation.ShadowDom,
+  encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
 export class AccessComponent implements OnInit {
