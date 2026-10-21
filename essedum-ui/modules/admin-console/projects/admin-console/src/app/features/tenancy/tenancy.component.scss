@@ -33,36 +33,38 @@
   --mat-table-row-item-outline-color: rgba(15, 23, 42, 0.12);
 }
 
-.admin-console-page {
-  padding: 24px 28px !important;
-  color: var(--ac-text) !important;
-  background: var(--ac-surface) !important;
-  min-height: 100vh;
+.admin-console-page { padding: 14px 24px; }
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(79, 142, 247, 0.08);
+
+  .page-header-left { display: flex; align-items: center; gap: 12px; }
+
+  h2 {
+    margin: 0;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.3px;
+    color: #e2e8f0 !important;
+    line-height: 1.2;
+  }
+
+  .page-subtitle { display: block; font-size: 12px; color: #6e8ea8; margin-top: 2px; }
+
+  .page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 }
 
-.admin-console-toolbar {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 16px !important;
-  margin-bottom: 24px !important;
-}
-
-.admin-console-toolbar h2 {
-  margin: 0 !important;
-  font-size: 1.5rem !important;
-  font-weight: 700 !important;
-  color: var(--ac-text) !important;
-  flex: 1 !important;
-}
-
-.admin-console-toolbar button {
-  background: linear-gradient(135deg, #4f8ef7, #2563eb) !important;
-  color: #fff !important;
-  border-radius: 8px !important;
-  padding: 10px 20px !important;
-  font-weight: 600 !important;
-}
+:host-context(body.header-light-theme) .page-header h2 { color: #0f172a !important; }
+:host-context(body.header-light-theme) .page-header .page-subtitle { color: #64748b; }
 
 mat-tab-group {
   display: block !important;
@@ -75,7 +77,7 @@ mat-tab-group ::ng-deep .mat-mdc-tab-list {
 }
 
 mat-tab-group ::ng-deep .mdc-tab {
-  color: var(--ac-text-muted) !important;
+  color: #94a3b8 !important;
   font-weight: 600 !important;
   font-size: 0.95rem !important;
 }
@@ -86,8 +88,11 @@ mat-tab-group ::ng-deep .mdc-tab__text-label {
 }
 
 mat-tab-group ::ng-deep .mdc-tab--active {
-  color: var(--ac-accent) !important;
+  color: #4f8ef7 !important;
 }
+
+:host-context(body.header-light-theme) mat-tab-group ::ng-deep .mdc-tab { color: #64748b !important; }
+:host-context(body.header-light-theme) mat-tab-group ::ng-deep .mdc-tab--active { color: #2563eb !important; }
 
 .tab-actions {
   display: flex !important;
@@ -147,8 +152,7 @@ mat-tab-group ::ng-deep .mdc-tab--active {
   .mat-mdc-row:last-child .mat-mdc-cell { border-bottom: none !important; }
 }
 
-:host-context(body.header-light-theme) ::ng-deep .admin-console-table,
-:host(.light-theme) ::ng-deep .admin-console-table {
+:host-context(body.header-light-theme) ::ng-deep .admin-console-table {
   --mat-table-background-color: #ffffff;
   background: #ffffff !important;
   border-color: rgba(15, 23, 42, 0.12) !important;
@@ -165,29 +169,30 @@ mat-tab-group ::ng-deep .mdc-tab--active {
   .mat-mdc-row:hover { background: rgba(15, 23, 42, 0.04) !important; }
 }
 
-/* ---- Status badges (scoped inside Shadow DOM) ---- */
+/* ---- Status badges (rectangular, matching audit style) ---- */
 .status-badge {
   display: inline-block;
-  padding: 5px 14px;
-  border-radius: 20px;
-  font-size: 0.82rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   line-height: 1.5;
   border: none;
   white-space: nowrap;
 }
 
-.status-badge-active      { background: rgba(34, 197, 94, 0.18);  color: #4ade80; }
-.status-badge-suspended   { background: rgba(239, 68, 68, 0.18);   color: #f87171; }
-.status-badge-inactive    { background: rgba(148, 163, 184, 0.18); color: #94a3b8; }
-.status-badge-pending     { background: rgba(251, 191, 36, 0.18);  color: #fbbf24; }
+.status-badge-active      { background: rgba(34, 197, 94, 0.15);  color: #22c55e; }
+.status-badge-suspended   { background: rgba(239, 68, 68, 0.15);  color: #ef4444; }
+.status-badge-inactive    { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+.status-badge-pending     { background: rgba(251, 191, 36, 0.15);  color: #f59e0b; }
 
 /* Light theme overrides */
-:host(.light-theme) .status-badge-active    { background: rgba(22, 163, 74, 0.14);   color: #16a34a; }
-:host(.light-theme) .status-badge-suspended { background: rgba(220, 38, 38, 0.12);   color: #dc2626; }
-:host(.light-theme) .status-badge-inactive  { background: rgba(100, 116, 139, 0.14); color: #64748b; }
-:host(.light-theme) .status-badge-pending   { background: rgba(217, 119, 6, 0.14);   color: #d97706; }
+:host-context(body.header-light-theme) .status-badge-active    { background: rgba(22, 163, 74, 0.10);   color: #16a34a; }
+:host-context(body.header-light-theme) .status-badge-suspended { background: rgba(220, 38, 38, 0.10);   color: #dc2626; }
+:host-context(body.header-light-theme) .status-badge-inactive  { background: rgba(100, 116, 139, 0.10); color: #64748b; }
+:host-context(body.header-light-theme) .status-badge-pending   { background: rgba(217, 119, 6, 0.10);   color: #d97706; }
 
 .muted-hint {
   color: var(--ac-text-muted);

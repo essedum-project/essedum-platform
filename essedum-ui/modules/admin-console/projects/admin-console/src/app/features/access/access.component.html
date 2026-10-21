@@ -1,8 +1,15 @@
 <div class="admin-console-page">
-  <div class="admin-console-toolbar">
-    <h2>Members &amp; Roles</h2>
-    <button mat-raised-button color="primary" (click)="grantRole()">Grant Role</button>
-    <button mat-stroked-button color="primary" *ngIf="canCreateRole" (click)="createRole()" style="margin-left:8px;">Create Role</button>
+  <div class="page-header">
+    <div class="page-header-left">
+      <div>
+        <h2>Members &amp; Roles</h2>
+        <span class="page-subtitle">Manage user roles and access assignments</span>
+      </div>
+    </div>
+    <div class="page-header-actions">
+      <button mat-raised-button color="primary" (click)="grantRole()">Grant Role</button>
+      <button mat-stroked-button color="primary" *ngIf="canCreateRole" (click)="createRole()">Create Role</button>
+    </div>
   </div>
 
   <table mat-table [dataSource]="rows" class="admin-console-table">

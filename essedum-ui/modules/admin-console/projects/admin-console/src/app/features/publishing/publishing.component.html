@@ -1,9 +1,14 @@
 <div class="admin-console-page">
-  <div class="admin-console-toolbar">
-    <h2>My Drafts</h2>
-    <button mat-raised-button color="primary" (click)="newDraft()">
-      New Draft
-    </button>
+  <div class="page-header">
+    <div class="page-header-left">
+      <div>
+        <h2>My Drafts</h2>
+        <span class="page-subtitle">Review and submit your draft assets for approval</span>
+      </div>
+    </div>
+    <div class="page-header-actions">
+      <button mat-raised-button color="primary" (click)="newDraft()">New Draft</button>
+    </div>
   </div>
 
   <table mat-table [dataSource]="versions" class="admin-console-table">
