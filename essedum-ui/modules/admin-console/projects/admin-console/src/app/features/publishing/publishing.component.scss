@@ -90,108 +90,49 @@ mat-tab-group ::ng-deep .mdc-tab--active {
   padding: 16px 0 20px !important;
 }
 
-.admin-console-table {
-  width: 100% !important;
-  background: var(--ac-surface) !important;
-  border: 1px solid var(--ac-border) !important;
-  border-radius: 10px !important;
-  overflow: hidden !important;
-  color: var(--ac-text) !important;
-}
-
-.admin-console-table ::ng-deep .mat-mdc-header-row {
-  background: var(--ac-surface-3) !important;
-  min-height: 48px !important;
-  border-bottom: 1px solid var(--ac-border) !important;
-}
-
-.admin-console-table ::ng-deep .mat-mdc-header-cell {
-  color: #94a3b8 !important;
-  font-weight: 700 !important;
-  font-size: 0.73rem !important;
-  letter-spacing: 0.5px !important;
-  text-transform: uppercase !important;
-  padding: 14px 16px !important;
-}
-
-.admin-console-table ::ng-deep .mat-mdc-cell {
-  color: #e2e8f0 !important;
-  padding: 14px 16px !important;
-  border-bottom: 1px solid var(--ac-border) !important;
-}
-
-.admin-console-table ::ng-deep .mat-mdc-row {
-  transition: background 0.15s ease !important;
-  color: #e2e8f0 !important;
-}
-
-.admin-console-table ::ng-deep .mat-mdc-row:hover {
-  background: var(--ac-row-hover) !important;
-}
-
-/* ── Hover: audit-style deep pierce so Material rows actually highlight ── */
+/* ── Table: audit-style deep pierce ── */
 ::ng-deep .admin-console-table {
+  --mat-table-background-color: #1e293b;
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+
+  .mat-mdc-header-row { background: #2b3a52 !important; min-height: 48px !important; }
+  .mat-mdc-header-cell {
+    color: #94a3b8 !important;
+    font-weight: 600 !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.6px !important;
+    text-transform: uppercase !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+    padding: 16px 20px !important;
+  }
+  .mat-mdc-cell {
+    color: #e2e8f0 !important;
+    font-size: 0.97rem !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+    padding: 16px 20px !important;
+  }
   .mat-mdc-row { background: transparent !important; transition: background 0.1s ease !important; }
   .mat-mdc-row:hover { background: rgba(148, 163, 184, 0.10) !important; }
+  .mat-mdc-row:last-child .mat-mdc-cell { border-bottom: none !important; }
 }
 
-:host(.light-theme) ::ng-deep .admin-console-table .mat-mdc-row:hover {
-  background: rgba(15, 23, 42, 0.04) !important;
-}
+:host-context(body.header-light-theme) ::ng-deep .admin-console-table,
+:host(.light-theme) ::ng-deep .admin-console-table {
+  --mat-table-background-color: #ffffff;
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
 
-.admin-console-table ::ng-deep .mdc-data-table__cell {
-  color: #e2e8f0 !important;
-}
-
-.admin-console-table ::ng-deep .mdc-data-table__header-cell {
-  color: #94a3b8 !important;
-}
-
-/* in-table action buttons */
-::ng-deep .tbl-btn {
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-  cursor: pointer !important;
-  color: #4f8ef7 !important;
-  font-size: 0.8rem !important;
-  font-weight: 500 !important;
-  font-family: inherit !important;
-  padding: 5px 12px !important;
-  border-radius: 6px !important;
-  line-height: 1 !important;
-  transition: background 0.12s ease !important;
-}
-
-::ng-deep .tbl-btn:hover:not(:disabled) {
-  background: rgba(79, 142, 247, 0.12) !important;
-  color: #7aadfb !important;
-}
-
-::ng-deep .tbl-btn:disabled {
-  color: #475569 !important;
-  cursor: default !important;
-  pointer-events: none !important;
-}
-
-:host(.light-theme) ::ng-deep .tbl-btn { color: #2563eb !important; }
-:host(.light-theme) ::ng-deep .tbl-btn:hover:not(:disabled) { color: #1d4ed8 !important; }
-
-:host(.light-theme) .admin-console-table ::ng-deep .mat-mdc-cell {
-  color: #1e293b !important;
-}
-
-:host(.light-theme) .admin-console-table ::ng-deep .mdc-data-table__cell {
-  color: #1e293b !important;
-}
-
-:host(.light-theme) .admin-console-table ::ng-deep .mat-mdc-header-cell {
-  color: #64748b !important;
-}
-
-:host(.light-theme) .admin-console-table ::ng-deep .mdc-data-table__header-cell {
-  color: #64748b !important;
+  .mat-mdc-header-row { background: #f1f5f9 !important; }
+  .mat-mdc-header-cell {
+    color: #64748b !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+  }
+  .mat-mdc-cell {
+    color: #1e293b !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+  }
+  .mat-mdc-row:hover { background: rgba(15, 23, 42, 0.04) !important; }
 }
