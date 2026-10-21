@@ -26,8 +26,10 @@
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let row">
         <button
-          style="background:transparent;border:1.5px solid #f87171;outline:none;cursor:pointer;color:#f87171;font-size:12px;font-weight:600;font-family:inherit;padding:4px 12px;border-radius:20px;letter-spacing:0.3px;"
-          (click)="revoke(row)">Revoke</button>
+          style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.28);color:#f87171;font-size:12px;font-weight:500;font-family:inherit;padding:5px 12px;border-radius:6px;cursor:pointer;outline:none;display:inline-flex;align-items:center;gap:5px;transition:background 0.12s;"
+          (click)="revoke(row)">
+          <i class="fa fa-times" style="font-size:11px;"></i> Revoke
+        </button>
       </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="columns"></tr>

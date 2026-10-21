@@ -23,7 +23,9 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let row">
-            <button mat-button color="warn" *ngIf="canDeleteOrg" (click)="deleteOrg(row)">Delete</button>
+            <button style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.28);color:#f87171;font-size:12px;font-weight:500;font-family:inherit;padding:5px 12px;border-radius:6px;cursor:pointer;outline:none;display:inline-flex;align-items:center;gap:5px;transition:background 0.12s;" *ngIf="canDeleteOrg" (click)="deleteOrg(row)">
+              <i class="fa fa-trash" style="font-size:11px;"></i> Delete
+            </button>
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="orgColumns"></tr>
@@ -52,7 +54,9 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let row">
-            <button mat-button color="warn" *ngIf="canDeleteProject" (click)="deleteProject(row)">Delete</button>
+            <button style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.28);color:#f87171;font-size:12px;font-weight:500;font-family:inherit;padding:5px 12px;border-radius:6px;cursor:pointer;outline:none;display:inline-flex;align-items:center;gap:5px;transition:background 0.12s;" *ngIf="canDeleteProject" (click)="deleteProject(row)">
+              <i class="fa fa-trash" style="font-size:11px;"></i> Delete
+            </button>
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="projectColumns"></tr>

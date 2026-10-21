@@ -1,11 +1,12 @@
 <div class="admin-console-page">
-  <div class="admin-console-toolbar">
-    <h2>Identity Sync Status</h2>
+  <div class="page-header">
+    <div class="page-header-left">
+      <div>
+        <h2>Identity Sync Status</h2>
+        <span class="page-subtitle">Every role change is pushed to Git, Kubernetes, Storage and the Gateway automatically. ✓ = in sync, ⚠ = not caught up yet (retries on its own; use Retry to force it).</span>
+      </div>
+    </div>
   </div>
-  <p class="muted-hint" style="margin-top:-8px;">
-    Every role change is pushed to Git, Kubernetes, Storage and the Gateway automatically.
-    ✓ = in sync, ⚠ = not caught up yet (retries on its own; use Retry to force it).
-  </p>
 
   <table
     mat-table

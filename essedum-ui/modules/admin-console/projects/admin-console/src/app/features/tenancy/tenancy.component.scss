@@ -77,6 +77,12 @@ mat-tab-group ::ng-deep .mat-mdc-tab-list {
 mat-tab-group ::ng-deep .mdc-tab {
   color: var(--ac-text-muted) !important;
   font-weight: 600 !important;
+  font-size: 0.95rem !important;
+}
+
+mat-tab-group ::ng-deep .mdc-tab__text-label {
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
 }
 
 mat-tab-group ::ng-deep .mdc-tab--active {
@@ -129,16 +135,17 @@ mat-tab-group ::ng-deep .mdc-tab--active {
 
 .admin-console-table ::ng-deep .mat-mdc-header-cell {
   color: #94a3b8 !important;
-  font-weight: 700 !important;
-  font-size: 0.73rem !important;
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
   letter-spacing: 0.5px !important;
   text-transform: uppercase !important;
-  padding: 14px 16px !important;
+  padding: 16px 20px !important;
 }
 
 .admin-console-table ::ng-deep .mat-mdc-cell {
   color: #e2e8f0 !important;
-  padding: 14px 16px !important;
+  font-size: 0.97rem !important;
+  padding: 16px 20px !important;
   border-bottom: 1px solid var(--ac-border) !important;
 }
 
@@ -151,17 +158,24 @@ mat-tab-group ::ng-deep .mdc-tab--active {
   background: var(--ac-row-hover) !important;
 }
 
+/* ── Hover: audit-style deep pierce so Material rows actually highlight ── */
+::ng-deep .admin-console-table {
+  .mat-mdc-row { background: transparent !important; transition: background 0.1s ease !important; }
+  .mat-mdc-row:hover { background: rgba(148, 163, 184, 0.10) !important; }
+}
+
+:host(.light-theme) ::ng-deep .admin-console-table .mat-mdc-row:hover {
+  background: rgba(15, 23, 42, 0.04) !important;
+}
+
 .admin-console-table ::ng-deep .mdc-data-table__cell {
   color: #e2e8f0 !important;
+  font-size: 0.97rem !important;
 }
 
 .admin-console-table ::ng-deep .mdc-data-table__header-cell {
   color: #94a3b8 !important;
-}
-
-.admin-console-table ::ng-deep button {
-  color: var(--ac-accent) !important;
-  font-weight: 600 !important;
+  font-size: 0.82rem !important;
 }
 
 :host(.light-theme) .admin-console-table ::ng-deep .mat-mdc-cell {

@@ -1,21 +1,72 @@
-/* Grant Role dialog */
+/* ═══════════════════════════════════════════════════════
+   Grant Role Dialog — dark (default) + light theme
+   ═══════════════════════════════════════════════════════ */
 
-/* Stack fields vertically with gap */
+/* ── Dialog surface & title ────────────────────────────── */
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55) !important;
+}
+
+::ng-deep .mat-mdc-dialog-title {
+  color: #e2e8f0 !important;
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.2px !important;
+  padding: 20px 24px 8px !important;
+  margin: 0 !important;
+}
+
+/* ── Content area ──────────────────────────────────────── */
 ::ng-deep .mat-mdc-dialog-content {
   display: flex !important;
   flex-direction: column !important;
   gap: 14px !important;
-  padding: 20px 24px !important;
+  padding: 12px 24px 8px !important;
   min-width: 440px !important;
+  max-height: 70vh !important;
 }
 
-/* Remove fill-field underline ripple */
+/* ── Form fields (fill variant) ────────────────────────── */
+::ng-deep .mat-mdc-dialog-content .mdc-text-field--filled {
+  background: rgba(148, 163, 184, 0.08) !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+::ng-deep .mat-mdc-dialog-content .mdc-text-field--filled .mdc-floating-label,
+::ng-deep .mat-mdc-dialog-content .mat-mdc-floating-label {
+  color: #94a3b8 !important;
+}
+
+::ng-deep .mat-mdc-dialog-content .mdc-text-field--filled input,
+::ng-deep .mat-mdc-dialog-content .mat-mdc-input-element {
+  color: #e2e8f0 !important;
+  caret-color: #4f8ef7 !important;
+}
+
+::ng-deep .mat-mdc-dialog-content .mat-mdc-select-value-text {
+  color: #e2e8f0 !important;
+}
+
+::ng-deep .mat-mdc-dialog-content .mat-mdc-select-arrow {
+  color: #94a3b8 !important;
+}
+
+/* Remove fill underline ripple */
 ::ng-deep .mdc-text-field--filled .mdc-line-ripple::before,
 ::ng-deep .mdc-text-field--filled .mdc-line-ripple::after {
-  border-bottom: none !important;
+  border-bottom-color: rgba(79, 142, 247, 0.4) !important;
 }
 
-/* Radio group label */
+/* ── Checkbox ──────────────────────────────────────────── */
+::ng-deep .mat-mdc-dialog-content .mdc-form-field label {
+  color: #e2e8f0 !important;
+  font-size: 0.875rem !important;
+}
+
+/* ── Radio group label ─────────────────────────────────── */
 .scope-label {
   font-size: 0.73rem;
   font-weight: 600;
@@ -25,18 +76,88 @@
   margin-bottom: 4px;
 }
 
-/* Radio group row */
-.scope-group {
-  display: flex !important;
-  flex-direction: row !important;
-  gap: 20px !important;
-  align-items: center !important;
-  padding: 4px 0 !important;
+/* ── Dialog actions ────────────────────────────────────── */
+::ng-deep .mat-mdc-dialog-actions {
+  padding: 12px 24px 20px !important;
+  gap: 10px !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.12) !important;
+  justify-content: flex-end !important;
 }
 
-/* Radio button label color */
-::ng-deep .scope-group .mdc-form-field label,
-::ng-deep .scope-group .mat-radio-label-content {
-  color: #e2e8f0 !important;
-  font-size: 0.875rem !important;
+::ng-deep .mat-mdc-dialog-actions button[mat-button] {
+  background: transparent !important;
+  color: #94a3b8 !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  padding: 0 18px !important;
+  height: 38px !important;
+
+  &:hover { background: rgba(148, 163, 184, 0.08) !important; color: #e2e8f0 !important; }
+}
+
+::ng-deep .mat-mdc-dialog-actions button[mat-raised-button][color="primary"] {
+  background: linear-gradient(135deg, #4f8ef7, #2563eb) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  padding: 0 20px !important;
+  height: 38px !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+
+  &:hover { box-shadow: 0 4px 14px rgba(37, 99, 235, 0.5) !important; }
+  &:disabled { opacity: 0.45 !important; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   Light theme overrides
+   ══════════════════════════════════════════════════════════ */
+:host-context(body.header-light-theme) ::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  background: #ffffff !important;
+  color: #1e293b !important;
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.18) !important;
+}
+
+:host-context(body.header-light-theme) ::ng-deep .mat-mdc-dialog-title {
+  color: #0f172a !important;
+}
+
+:host-context(body.header-light-theme) ::ng-deep .mat-mdc-dialog-content .mdc-text-field--filled {
+  background: rgba(15, 23, 42, 0.04) !important;
+}
+
+:host-context(body.header-light-theme) ::ng-deep .mat-mdc-dialog-content .mdc-floating-label,
+:host-context(body.header-light-theme) ::ng-deep .mat-mdc-dialog-content .mat-mdc-floating-label {
+  color: #64748b !important;
+}
+
+:host-context(body.header-light-theme) ::ng-deep .mat-mdc-dialog-content .mat-mdc-input-element,
+:host-context(body.header-light-theme) ::ng-deep .mat-mdc-dialog-content .mdc-text-field--filled input {
+  color: #1e293b !important;
+  caret-color: #2563eb !important;
+}
+
+:host-context(body.header-light-theme) ::ng-deep .mat-mdc-dialog-content .mat-mdc-select-value-text {
+  color: #1e293b !important;
+}
+
+:host-context(body.header-light-theme) ::ng-deep .mat-mdc-dialog-content .mat-mdc-select-arrow {
+  color: #64748b !important;
+}
+
+:host-context(body.header-light-theme) ::ng-deep .mat-mdc-dialog-content .mdc-form-field label {
+  color: #1e293b !important;
+}
+
+:host-context(body.header-light-theme) .scope-label { color: #64748b; }
+
+:host-context(body.header-light-theme) ::ng-deep .mat-mdc-dialog-actions {
+  border-top-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+:host-context(body.header-light-theme) ::ng-deep .mat-mdc-dialog-actions button[mat-button] {
+  color: #64748b !important;
+  border-color: rgba(15, 23, 42, 0.2) !important;
+  &:hover { background: rgba(15, 23, 42, 0.04) !important; color: #1e293b !important; }
 }

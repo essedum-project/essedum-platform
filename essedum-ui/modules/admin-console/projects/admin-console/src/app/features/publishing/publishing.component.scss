@@ -129,6 +129,16 @@ mat-tab-group ::ng-deep .mdc-tab--active {
   background: var(--ac-row-hover) !important;
 }
 
+/* ── Hover: audit-style deep pierce so Material rows actually highlight ── */
+::ng-deep .admin-console-table {
+  .mat-mdc-row { background: transparent !important; transition: background 0.1s ease !important; }
+  .mat-mdc-row:hover { background: rgba(148, 163, 184, 0.10) !important; }
+}
+
+:host(.light-theme) ::ng-deep .admin-console-table .mat-mdc-row:hover {
+  background: rgba(15, 23, 42, 0.04) !important;
+}
+
 .admin-console-table ::ng-deep .mdc-data-table__cell {
   color: #e2e8f0 !important;
 }
