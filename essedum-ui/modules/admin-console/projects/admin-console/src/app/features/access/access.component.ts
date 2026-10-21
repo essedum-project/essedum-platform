@@ -1,8 +1,7 @@
-import { Component, OnInit, ViewEncapsulation, ElementRef, effect } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, map } from 'rxjs';
 import { ApiService } from '../../core/api.service';
-import { ThemeService } from '../../core/theme.service';
 import { RbacRole, RoleAssignment, UserOption } from '../../core/api-models';
 import { GrantRoleDialogComponent } from './grant-role-dialog/grant-role-dialog.component';
 import { UserContextService } from '../../core/user-context.service';
@@ -32,20 +31,7 @@ export class AccessComponent implements OnInit {
     private readonly api: ApiService,
     private readonly dialog: MatDialog,
     private readonly userContext: UserContextService,
-    private readonly themeService: ThemeService,
-    private readonly elementRef: ElementRef,
-  ) {
-    // Apply light-theme class when isDarkTheme is false
-    effect(() => {
-      const isDark = this.themeService.isDarkTheme();
-      const hostElement = this.elementRef.nativeElement;
-      if (isDark) {
-        hostElement.classList.remove('light-theme');
-      } else {
-        hostElement.classList.add('light-theme');
-      }
-    });
-  }
+  ) {}
 
   get canCreateRole(): boolean { return this.rank >= 4; }
 

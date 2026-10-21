@@ -18,21 +18,6 @@
   --mat-table-row-item-outline-color: rgba(148, 163, 184, 0.18);
 }
 
-:host(.light-theme) {
-  --ac-surface: #ffffff;
-  --ac-surface-2: #f8fafc;
-  --ac-surface-3: #f1f5f9;
-  --ac-border: rgba(15, 23, 42, 0.12);
-  --ac-text: #1e293b;
-  --ac-text-muted: #64748b;
-  --ac-row-hover: rgba(15, 23, 42, 0.04);
-  --mat-table-background-color: #ffffff;
-  --mat-table-header-headline-color: #64748b;
-  --mat-table-row-item-label-text-color: #1e293b;
-  --mat-table-footer-supporting-text-color: #1e293b;
-  --mat-table-row-item-outline-color: rgba(15, 23, 42, 0.12);
-}
-
 .admin-console-page { padding: 14px 24px; }
 
 .page-header {
@@ -71,9 +56,12 @@ mat-tab-group {
   margin-top: 20px !important;
 }
 
-mat-tab-group ::ng-deep .mat-mdc-tab-list {
-  border-bottom: 2px solid var(--ac-border) !important;
+mat-tab-group .mat-mdc-tab-list {
+  border-bottom: 2px solid rgba(148, 163, 184, 0.18) !important;
   background: transparent !important;
+}
+body.header-light-theme mat-tab-group .mat-mdc-tab-list {
+  border-bottom: 2px solid rgba(15, 23, 42, 0.12) !important;
 }
 
 mat-tab-group ::ng-deep .mdc-tab {
@@ -95,48 +83,40 @@ mat-tab-group ::ng-deep .mdc-tab--active {
   padding: 16px 0 20px !important;
 }
 
-/* ── Table: audit-style deep pierce ── */
-::ng-deep .admin-console-table {
+/* ── Table: plain selectors (ViewEncapsulation.None = already global) ── */
+.admin-console-table {
   --mat-table-background-color: #1e293b;
   background: #1e293b !important;
   border: 1px solid rgba(148, 163, 184, 0.18) !important;
   border-radius: 12px !important;
   overflow: hidden !important;
-
-  .mat-mdc-header-row { background: #2b3a52 !important; min-height: 48px !important; }
-  .mat-mdc-header-cell {
-    color: #94a3b8 !important;
-    font-weight: 600 !important;
-    font-size: 0.82rem !important;
-    letter-spacing: 0.6px !important;
-    text-transform: uppercase !important;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
-    padding: 16px 20px !important;
-  }
-  .mat-mdc-cell {
-    color: #e2e8f0 !important;
-    font-size: 0.97rem !important;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
-    padding: 16px 20px !important;
-  }
-  .mat-mdc-row { background: transparent !important; transition: background 0.1s ease !important; }
-  .mat-mdc-row:hover { background: rgba(148, 163, 184, 0.10) !important; }
-  .mat-mdc-row:last-child .mat-mdc-cell { border-bottom: none !important; }
 }
+.admin-console-table .mat-mdc-header-row { background: #2b3a52 !important; min-height: 48px !important; }
+.admin-console-table .mat-mdc-header-cell {
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.6px !important;
+  text-transform: uppercase !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+  padding: 16px 20px !important;
+}
+.admin-console-table .mat-mdc-cell {
+  color: #e2e8f0 !important;
+  font-size: 0.97rem !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+  padding: 16px 20px !important;
+}
+.admin-console-table .mat-mdc-row { background: transparent !important; transition: background 0.1s ease !important; }
+.admin-console-table .mat-mdc-row:hover { background: rgba(148, 163, 184, 0.10) !important; }
+.admin-console-table .mat-mdc-row:last-child .mat-mdc-cell { border-bottom: none !important; }
 
-:host-context(body.header-light-theme) ::ng-deep .admin-console-table {
+body.header-light-theme .admin-console-table {
   --mat-table-background-color: #ffffff;
   background: #ffffff !important;
   border-color: rgba(15, 23, 42, 0.12) !important;
-
-  .mat-mdc-header-row { background: #f1f5f9 !important; }
-  .mat-mdc-header-cell {
-    color: #64748b !important;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
-  }
-  .mat-mdc-cell {
-    color: #1e293b !important;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
-  }
-  .mat-mdc-row:hover { background: rgba(15, 23, 42, 0.04) !important; }
 }
+body.header-light-theme .admin-console-table .mat-mdc-header-row { background: #f1f5f9 !important; }
+body.header-light-theme .admin-console-table .mat-mdc-header-cell { color: #64748b !important; border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important; }
+body.header-light-theme .admin-console-table .mat-mdc-cell { color: #1e293b !important; border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important; }
+body.header-light-theme .admin-console-table .mat-mdc-row:hover { background: rgba(15, 23, 42, 0.04) !important; }

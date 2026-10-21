@@ -1,43 +1,16 @@
 :host {
   display: block !important;
   width: 100% !important;
-
-  /* Dark theme (default) */
-  --ac-accent: #4f8ef7;
-  --ac-surface: #1e293b;
-  --ac-surface-2: #243044;
-  --ac-surface-3: #2b3a52;
-  --ac-border: rgba(148, 163, 184, 0.18);
-  --ac-text: #e2e8f0;
-  --ac-text-muted: #94a3b8;
-  --ac-row-hover: rgba(148, 163, 184, 0.10);
-  --mat-table-background-color: #1e293b;
-  --mat-table-header-headline-color: #94a3b8;
-  --mat-table-row-item-label-text-color: #e2e8f0;
-  --mat-table-footer-supporting-text-color: #e2e8f0;
-  --mat-table-row-item-outline-color: rgba(148, 163, 184, 0.18);
-}
-
-:host(.light-theme) {
-  --ac-surface: #ffffff;
-  --ac-surface-2: #f8fafc;
-  --ac-surface-3: #f1f5f9;
-  --ac-border: rgba(15, 23, 42, 0.12);
-  --ac-text: #1e293b;
-  --ac-text-muted: #64748b;
-  --ac-row-hover: rgba(15, 23, 42, 0.04);
-  --mat-table-background-color: #ffffff;
-  --mat-table-header-headline-color: #64748b;
-  --mat-table-row-item-label-text-color: #1e293b;
-  --mat-table-footer-supporting-text-color: #1e293b;
-  --mat-table-row-item-outline-color: rgba(15, 23, 42, 0.12);
 }
 
 .admin-console-page {
   padding: 24px 28px !important;
-  color: var(--ac-text) !important;
-  background: var(--ac-surface) !important;
+  color: #e2e8f0 !important;
   min-height: 100vh;
+}
+
+:host-context(body.header-light-theme) .admin-console-page {
+  color: #1e293b !important;
 }
 
 .admin-console-toolbar {
@@ -52,18 +25,22 @@
   margin: 0 !important;
   font-size: 1.5rem !important;
   font-weight: 700 !important;
-  color: var(--ac-text) !important;
+  color: #e2e8f0 !important;
   flex: 1 !important;
 }
 
-/* ── Icon page header (matches Audit Log) ────────────────── */
+:host-context(body.header-light-theme) .admin-console-toolbar h2 {
+  color: #1e293b !important;
+}
+
+/* ── Icon page header ────────────────── */
 .page-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   padding: 8px 0 12px;
   margin-bottom: 20px;
-  border-bottom: 1px solid var(--ac-border);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
 
   .page-header-left {
     display: flex;
@@ -91,21 +68,21 @@
     font-size: 22px;
     font-weight: 700;
     letter-spacing: -0.3px;
-    color: var(--ac-text);
+    color: #e2e8f0;
     line-height: 1.2;
   }
 
   .page-subtitle {
     display: block;
     font-size: 12px;
-    color: var(--ac-text-muted);
+    color: #94a3b8;
     margin-top: 4px;
     max-width: 640px;
     line-height: 1.5;
   }
 }
 
-:host(.light-theme) .page-header {
+:host-context(body.header-light-theme) .page-header {
   border-bottom-color: rgba(99, 102, 241, 0.12);
 
   .page-title-icon {
@@ -113,93 +90,60 @@
     border-color: rgba(99, 102, 241, 0.18);
     mat-icon { color: #4f46e5; }
   }
+
+  h2 { color: #0f172a; }
+  .page-subtitle { color: #64748b; }
 }
 
 .muted-hint {
-  color: var(--ac-text-muted) !important;
+  color: #94a3b8 !important;
   font-size: 0.875rem !important;
   margin-bottom: 20px !important;
   display: block !important;
 }
 
+:host-context(body.header-light-theme) .muted-hint { color: #64748b !important; }
+
 .empty {
-  color: var(--ac-text-muted) !important;
+  color: #94a3b8 !important;
   font-size: 0.9rem !important;
   padding: 32px 0 !important;
   text-align: center !important;
 }
 
+:host-context(body.header-light-theme) .empty { color: #64748b !important; }
+
+/* ── Table: plain selectors (ViewEncapsulation.None = already global) ── */
 .admin-console-table {
+  --mat-table-background-color: #1e293b;
   width: 100% !important;
-  background: var(--ac-surface) !important;
-  border: 1px solid var(--ac-border) !important;
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
   border-radius: 10px !important;
   overflow: hidden !important;
-  color: var(--ac-text) !important;
-}
-
-.admin-console-table ::ng-deep .mat-mdc-header-row {
-  background: var(--ac-surface-3) !important;
-  min-height: 48px !important;
-  border-bottom: 1px solid var(--ac-border) !important;
-}
-
-.admin-console-table ::ng-deep .mat-mdc-header-cell {
-  color: #94a3b8 !important;
-  font-weight: 600 !important;
-  font-size: 0.82rem !important;
-  letter-spacing: 0.5px !important;
-  text-transform: uppercase !important;
-  padding: 14px 16px !important;
-}
-
-.admin-console-table ::ng-deep .mat-mdc-cell {
-  color: #e2e8f0 !important;
-  font-size: 0.92rem !important;
-  padding: 14px 16px !important;
-  border-bottom: 1px solid var(--ac-border) !important;
-}
-
-.admin-console-table ::ng-deep .mat-mdc-row {
-  transition: background 0.15s ease !important;
-}
-
-.admin-console-table ::ng-deep .mat-mdc-row:hover {
-  background: var(--ac-row-hover) !important;
-}
-
-.admin-console-table ::ng-deep .mat-mdc-row:last-child .mat-mdc-cell {
-  border-bottom: none !important;
-}
-
-.admin-console-table ::ng-deep .mdc-data-table__cell {
   color: #e2e8f0 !important;
 }
+.admin-console-table .mat-mdc-header-row { background: #2b3a52 !important; min-height: 48px !important; border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important; }
+.admin-console-table .mat-mdc-header-cell { color: #94a3b8 !important; font-weight: 600 !important; font-size: 0.82rem !important; letter-spacing: 0.5px !important; text-transform: uppercase !important; padding: 14px 16px !important; }
+.admin-console-table .mat-mdc-cell { color: #e2e8f0 !important; font-size: 0.92rem !important; padding: 14px 16px !important; border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important; }
+.admin-console-table .mat-mdc-row { transition: background 0.15s ease !important; }
+.admin-console-table .mat-mdc-row:hover { background: rgba(148, 163, 184, 0.10) !important; }
+.admin-console-table .mat-mdc-row:last-child .mat-mdc-cell { border-bottom: none !important; }
+.admin-console-table .mdc-data-table__cell { color: #e2e8f0 !important; }
+.admin-console-table .mdc-data-table__header-cell { color: #94a3b8 !important; }
 
-.admin-console-table ::ng-deep .mdc-data-table__header-cell {
-  color: #94a3b8 !important;
-}
-
-/* ---- Light theme overrides ---- */
-:host(.light-theme) .admin-console-table {
-  --mat-table-background-color: #ffffff !important;
-}
-
-:host(.light-theme) .admin-console-table ::ng-deep .mat-mdc-header-row {
-  background: #f1f5f9 !important;
-}
-
-:host(.light-theme) .admin-console-table ::ng-deep .mat-mdc-header-cell,
-:host(.light-theme) .admin-console-table ::ng-deep .mdc-data-table__header-cell {
-  color: #64748b !important;
-  border-bottom-color: rgba(15, 23, 42, 0.12) !important;
-}
-
-:host(.light-theme) .admin-console-table ::ng-deep .mat-mdc-cell,
-:host(.light-theme) .admin-console-table ::ng-deep .mdc-data-table__cell {
+body.header-light-theme .admin-console-table {
+  --mat-table-background-color: #ffffff;
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
   color: #1e293b !important;
-  border-bottom-color: rgba(15, 23, 42, 0.12) !important;
 }
+body.header-light-theme .admin-console-table .mat-mdc-header-row { background: #f1f5f9 !important; border-bottom-color: rgba(15, 23, 42, 0.12) !important; }
+body.header-light-theme .admin-console-table .mat-mdc-header-cell { color: #64748b !important; border-bottom-color: rgba(15, 23, 42, 0.12) !important; }
+body.header-light-theme .admin-console-table .mat-mdc-cell { color: #1e293b !important; border-bottom-color: rgba(15, 23, 42, 0.12) !important; }
+body.header-light-theme .admin-console-table .mat-mdc-row:hover { background: rgba(15, 23, 42, 0.04) !important; }
+body.header-light-theme .admin-console-table .mdc-data-table__cell { color: #1e293b !important; }
+body.header-light-theme .admin-console-table .mdc-data-table__header-cell { color: #64748b !important; }
 
 /* ---- Sync status icons ---- */
 .sync-ok {
@@ -218,7 +162,7 @@
 }
 
 .sync-none {
-  color: var(--ac-text-muted) !important;
+  color: #94a3b8 !important;
   font-size: 1rem !important;
 }
 
@@ -244,9 +188,9 @@
   }
 }
 
-:host(.light-theme) .sync-ok { color: #16a34a !important; }
-:host(.light-theme) .sync-warn { color: #d97706 !important; }
-:host(.light-theme) .sync-warn button {
+:host-context(body.header-light-theme) .sync-ok { color: #16a34a !important; }
+:host-context(body.header-light-theme) .sync-warn { color: #d97706 !important; }
+:host-context(body.header-light-theme) .sync-warn button {
   border-color: #d97706 !important;
   color: #d97706 !important;
 }

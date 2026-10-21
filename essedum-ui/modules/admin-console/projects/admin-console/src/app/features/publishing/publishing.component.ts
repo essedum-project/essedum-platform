@@ -1,9 +1,8 @@
-import { Component, OnInit, ViewEncapsulation, ElementRef, effect } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, switchMap, map } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
-import { ThemeService } from '../../core/theme.service';
 import { AssetVersion } from '../../core/api-models';
 import { DraftDialogComponent, DraftDialogResult } from './draft-dialog/draft-dialog.component';
 
@@ -37,20 +36,7 @@ export class PublishingComponent implements OnInit {
     private readonly api: ApiService,
     private readonly userContext: UserContextService,
     private readonly dialog: MatDialog,
-    private readonly themeService: ThemeService,
-    private readonly elementRef: ElementRef,
-  ) {
-    // Apply light-theme class when isDarkTheme is false
-    effect(() => {
-      const isDark = this.themeService.isDarkTheme();
-      const hostElement = this.elementRef.nativeElement;
-      if (isDark) {
-        hostElement.classList.remove('light-theme');
-      } else {
-        hostElement.classList.add('light-theme');
-      }
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.load();

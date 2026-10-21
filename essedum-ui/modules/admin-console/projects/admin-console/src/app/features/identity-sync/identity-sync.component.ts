@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/api.service';
@@ -21,6 +21,7 @@ interface ProjectRow {
   selector: 'app-identity-sync',
   templateUrl: './identity-sync.component.html',
   styleUrls: ['./identity-sync.component.scss'],
+  encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
 export class IdentitySyncComponent implements OnInit {
