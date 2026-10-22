@@ -27,6 +27,14 @@ export class AccessComponent implements OnInit {
 
   readonly columns = ['userName', 'roleName', 'scopeLabel', 'grantedAt', 'actions'];
 
+  private readonly roleNameMap: { [key: string]: string } = {
+    'viewer': 'AI Consumer(Read only)',
+    'developer': 'AI Engineer',
+    'project_admin': 'AI Project Admin',
+    'org_admin': 'AI Organization Admin',
+    'platform_admin': 'AI Platform Admin',
+  };
+
   constructor(
     private readonly api: ApiService,
     private readonly dialog: MatDialog,
@@ -34,6 +42,10 @@ export class AccessComponent implements OnInit {
   ) {}
 
   get canCreateRole(): boolean { return this.rank >= 4; }
+
+  getDisplayRoleName(roleName: string): string {
+    return this.roleNameMap[roleName.toLowerCase()] || roleName;
+  }
 
   ngOnInit(): void {
     this.api.getAccessContext(this.userContext.userId$.value)
@@ -67,7 +79,7 @@ export class AccessComponent implements OnInit {
             .filter(a => !a.revokedAt)
             .map(a => ({
               ...a,
-              roleName: roles.find(r => r.id === a.roleId)?.name ?? 'unknown',
+              roleName: this.getDisplayRoleName(roles.find(r => r.id === a.roleId)?.name ?? 'unknown'),
               userName: users.find((u: UserOption) => u.id === a.userId)?.name ?? `User #${a.userId}`,
               scopeLabel: a.projectId
                 ? `Project: ${projects.find(p => p.id === a.projectId)?.name ?? '#' + a.projectId}`

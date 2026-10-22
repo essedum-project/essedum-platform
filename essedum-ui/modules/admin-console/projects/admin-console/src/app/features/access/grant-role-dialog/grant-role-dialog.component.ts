@@ -24,6 +24,14 @@ export class GrantRoleDialogComponent implements OnInit {
   wholeOrganization = true;
   projectIds: number[] = [];
 
+  private readonly roleNameMap: { [key: string]: string } = {
+    'viewer': 'AI Consumer(Read only)',
+    'developer': 'AI Engineer',
+    'project_admin': 'AI Project Admin',
+    'org_admin': 'AI Organization Admin',
+    'platform_admin': 'AI Platform Admin',
+  };
+
   constructor(
     private readonly ref: MatDialogRef<GrantRoleDialogComponent>,
     private readonly api: ApiService,
@@ -34,6 +42,10 @@ export class GrantRoleDialogComponent implements OnInit {
     this.api.getUsers().subscribe(users => (this.users = users));
     this.api.getOrganisations().subscribe(orgs => (this.organizations = orgs));
     this.api.getProjects().subscribe(projects => (this.projects = projects));
+  }
+
+  getDisplayRoleName(roleName: string): string {
+    return this.roleNameMap[roleName.toLowerCase()] || roleName;
   }
 
   // Org-scoped grant is org-first: pick the org, then either apply to the

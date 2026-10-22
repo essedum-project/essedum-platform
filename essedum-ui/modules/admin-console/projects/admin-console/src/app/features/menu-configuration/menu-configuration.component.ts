@@ -29,11 +29,11 @@ export class MenuConfigurationComponent implements OnInit {
 
   // Matches rbac_role ranks. null = no filter.
   readonly adminTiers = [
-    { rank: 4, label: 'Admin' },
-    { rank: 3, label: 'Organization Admin' },
-    { rank: 2, label: 'Project Admin' },
-    { rank: 1, label: 'Developer' },
-    { rank: 0, label: 'Viewer' },
+    { rank: 4, label: 'AI Platform Admin' },
+    { rank: 3, label: 'AI Organization Admin' },
+    { rank: 2, label: 'AI Project Admin' },
+    { rank: 1, label: 'AI Engineer' },
+    { rank: 0, label: 'AI Consumer(Read only)' },
   ];
   adminTierFilter: number | null = null;
 

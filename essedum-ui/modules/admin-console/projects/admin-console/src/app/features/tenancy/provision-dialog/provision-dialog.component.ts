@@ -32,6 +32,14 @@ export class ProvisionDialogComponent implements OnInit {
     role: 'New Role',
   };
 
+  private readonly roleDescriptions: { [key: number]: string } = {
+    0: 'AI Consumer(Read only)',
+    1: 'AI Engineer',
+    2: 'AI Project Admin',
+    3: 'AI Organization Admin',
+    4: 'AI Platform Admin',
+  };
+
   constructor(
     private readonly ref: MatDialogRef<ProvisionDialogComponent>,
     private readonly api: ApiService,
@@ -47,6 +55,10 @@ export class ProvisionDialogComponent implements OnInit {
     if (this.kind === 'environment') {
       this.api.getProjects().subscribe(p => (this.projects = p));
     }
+  }
+
+  getRoleDescription(rankValue: number): string {
+    return this.roleDescriptions[rankValue] || 'Unknown';
   }
 
   get valid(): boolean {
