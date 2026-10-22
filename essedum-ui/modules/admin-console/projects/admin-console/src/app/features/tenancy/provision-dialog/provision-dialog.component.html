@@ -46,8 +46,9 @@
 
   <!-- role -->
   <mat-form-field appearance="fill" class="full-width" *ngIf="kind === 'role'">
-    <mat-label>Rank (0 viewer … 4 platform admin)</mat-label>
+    <mat-label>Rank (0 AI Consumer … 4 AI Platform Admin)</mat-label>
     <input matInput type="number" min="0" max="4" [(ngModel)]="rank" name="rank" />
+    <mat-hint>0: AI Consumer(Read only), 1: AI Engineer, 2: AI Project Admin, 3: AI Organization Admin, 4: AI Platform Admin</mat-hint>
   </mat-form-field>
 
 </div>
