@@ -338,6 +338,10 @@ body.header-light-theme .admin-console-table,
 
   /* hide the leading checkmark gutter — selection is shown by accent fill */
   .mat-pseudo-checkbox-minimal { display: none !important; }
+  
+  /* hide duplicate checkmark by hiding mdc checkbox and showing only single selection highlight */
+  .mdc-checkbox { display: none !important; }
+  .mat-mdc-option[aria-selected="true"]::before { display: none !important; }
 }
 
 

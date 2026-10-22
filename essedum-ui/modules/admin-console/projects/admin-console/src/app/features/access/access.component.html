@@ -6,9 +6,9 @@
         <span class="page-subtitle">Manage user roles and access assignments</span>
       </div>
     </div>
-    <div class="page-header-actions">
+    <div class="page-header-actions page-actions-group">
       <button mat-raised-button color="primary" (click)="grantRole()">Grant Role</button>
-      <button mat-stroked-button color="primary" *ngIf="canCreateRole" (click)="createRole()">Create Role</button>
+      <button mat-raised-button color="primary" *ngIf="canCreateRole" (click)="createRole()">Create Role</button>
     </div>
   </div>
 

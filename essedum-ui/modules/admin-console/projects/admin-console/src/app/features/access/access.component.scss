@@ -48,6 +48,32 @@
   }
 }
 
+.page-actions-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+
+  button[mat-raised-button] {
+    background: linear-gradient(135deg, #4f8ef7, #2563eb) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    letter-spacing: 0.3px !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+    border: none !important;
+    padding: 0 24px !important;
+    height: 42px !important;
+    line-height: 42px !important;
+    transition: box-shadow 0.15s ease, transform 0.1s ease !important;
+
+    &:hover {
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.5) !important;
+      transform: translateY(-1px) !important;
+    }
+  }
+}
+
 :host-context(body.header-light-theme) .page-header h2 { color: #0f172a !important; }
 :host-context(body.header-light-theme) .page-header .page-subtitle { color: #64748b; }
 
