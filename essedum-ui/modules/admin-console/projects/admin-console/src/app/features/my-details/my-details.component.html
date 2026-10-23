@@ -1,0 +1,88 @@
+<div class="my-details-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="avatar-wrap">
+      <span class="avatar">{{ initials }}</span>
+    </div>
+    <div class="header-text">
+      <h1 class="page-title">{{ fullName }}</h1>
+      <p class="page-subtitle">{{ user?.user_email }}</p>
+    </div>
+  </div>
+
+  <div class="section-heading">
+    <mat-icon>badge</mat-icon>
+    <span>My Role Assignments</span>
+  </div>
+  <p class="section-desc">
+    Each card represents one org → project → role mapping you hold. Click
+    <strong>Configure Menu</strong> to choose which sidebar items appear when
+    you are active in that role.
+  </p>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="empty-state">
+    <mat-icon class="spin">sync</mat-icon>
+    <span>Loading assignments…</span>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && cards.length === 0" class="empty-state">
+    <mat-icon>inbox</mat-icon>
+    <span>No role assignments found for your account.</span>
+  </div>
+
+  <!-- Cards grid -->
+  <div class="cards-grid" *ngIf="!loading && cards.length > 0">
+    <div class="role-card" *ngFor="let card of cards">
+
+      <!-- Role badge -->
+      <div class="role-badge" [style.background-color]="rankColor(card.roleRank)">
+        <mat-icon>verified_user</mat-icon>
+        <span class="badge-label">{{ rankLabel(card.roleRank) }}</span>
+      </div>
+
+      <div class="card-body">
+        <div class="card-role-name">{{ card.roleName }}</div>
+
+        <div class="card-row" *ngIf="card.orgName">
+          <mat-icon class="row-icon">business</mat-icon>
+          <div>
+            <div class="row-label">Organisation</div>
+            <div class="row-value">{{ card.orgName }}</div>
+          </div>
+        </div>
+
+        <div class="card-row" *ngIf="card.projectName">
+          <mat-icon class="row-icon">folder</mat-icon>
+          <div>
+            <div class="row-label">Project</div>
+            <div class="row-value">{{ card.projectName }}</div>
+          </div>
+        </div>
+
+        <div class="card-row" *ngIf="!card.orgName && !card.projectName">
+          <mat-icon class="row-icon">public</mat-icon>
+          <div>
+            <div class="row-label">Scope</div>
+            <div class="row-value">Platform-wide</div>
+          </div>
+        </div>
+
+        <div class="card-assigned">
+          <mat-icon>event</mat-icon>
+          <span>Granted {{ card.assignment.grantedAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button mat-stroked-button color="primary" (click)="configureMenu(card)">
+          <mat-icon>tune</mat-icon>
+          Configure Menu
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1801,6 +1801,30 @@ export class LandingComponent implements OnInit, AfterViewInit {
           });
         }
       });
+      // Collect roles from other projects in the same portfolio that are not yet in the list,
+      // so the role dropdown shows every role the user holds across all projects.
+      const existingRoleIds = new Set<number>(this.roleList.map((r: any) => r.id));
+      this.processdata.forEach((element: any) => {
+        let portfoliodata2: any;
+        try {
+          portfoliodata2 = JSON.parse(sessionStorage.getItem('portfoliodata') || '').id;
+        } catch (e: any) {}
+        if (element.porfolioId.id == portfoliodata2) {
+          element.projectWithRoles.forEach((element1: any) => {
+            if (element1.projectId.id !== selectedproject1?.id) {
+              element1.roleId.forEach((element2: any) => {
+                if (!existingRoleIds.has(element2.id)) {
+                  existingRoleIds.add(element2.id);
+                  this.roleList.push(element2);
+                }
+              });
+            }
+          });
+        }
+      });
+      this.roleList = this.roleList.sort((a: any, b: any) =>
+        a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+      );
       if (this.portfolioflag == 1) {
         if (this.projectList.length > 0) {
           this.fetchroleflag = 1;
@@ -3333,6 +3357,10 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       return false;
     }
   }
+  goToMyDetails() {
+    this.router.navigate(['landing/admin-console/my-details']);
+  }
+
   toggleProfileInfo() {
     this.showUploadElements = false;
     this.showProfileInfo = !this.showProfileInfo;

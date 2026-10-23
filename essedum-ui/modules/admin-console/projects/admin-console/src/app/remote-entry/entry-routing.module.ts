@@ -11,6 +11,7 @@ import { ApprovalsComponent } from '../features/approvals/approvals.component';
 import { AuditComponent } from '../features/audit/audit.component';
 import { IdentitySyncComponent } from '../features/identity-sync/identity-sync.component';
 import { MenuConfigurationComponent } from '../features/menu-configuration/menu-configuration.component';
+import { MyDetailsComponent } from '../features/my-details/my-details.component';
 import { RankGuard } from '../core/rank.guard';
 
 // Routes mount under `/admin-console/**` per the host manifest (routePath = 'admin-console').
@@ -31,6 +32,7 @@ const routes: Routes = [
       { path: 'audit', component: AuditComponent, canActivate: [RankGuard], data: { minRank: 3 } },
       { path: 'identity-sync', component: IdentitySyncComponent, canActivate: [RankGuard], data: { minRank: 3 } },
       { path: 'menu-configuration', component: MenuConfigurationComponent, canActivate: [RankGuard], data: { minRank: 4 } },
+      { path: 'my-details', component: MyDetailsComponent, canActivate: [RankGuard], data: { minRank: 1 } },
     ],
   },
 ];

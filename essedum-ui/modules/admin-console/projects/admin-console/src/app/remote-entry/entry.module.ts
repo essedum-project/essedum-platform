@@ -1,5 +1,5 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
@@ -40,6 +40,8 @@ import { MenuConfigurationComponent } from '../features/menu-configuration/menu-
 import { MenuItemDialogComponent } from '../features/menu-configuration/menu-item-dialog/menu-item-dialog.component';
 import { RoleMenuDialogComponent } from '../features/menu-configuration/role-menu-dialog/role-menu-dialog.component';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
+import { MyDetailsComponent } from '../features/my-details/my-details.component';
+import { MenuPickerDialogComponent } from '../features/my-details/menu-picker-dialog/menu-picker-dialog.component';
 
 @NgModule({
   declarations: [
@@ -59,6 +61,8 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.
     MenuItemDialogComponent,
     RoleMenuDialogComponent,
     ConfirmDialogComponent,
+    MyDetailsComponent,
+    MenuPickerDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -80,5 +84,6 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.
     EntryRoutingModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  providers: [DatePipe],
 })
 export class EntryModule {}
