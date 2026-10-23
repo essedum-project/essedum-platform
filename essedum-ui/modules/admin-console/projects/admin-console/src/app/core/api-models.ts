@@ -112,13 +112,15 @@ export interface LegacyProject {
   projectdisplayname: string | null;
   description: string | null;
   organisationId: number | null;
+  /** Nested usm_portfolio object serialized by Jackson from the @ManyToOne field. */
+  portfolioId?: { id: number; portfolioName?: string } | null;
 }
 
 // usm_portfolio — legacy org entity used by the shell's org/portfolio dropdown.
 export interface LegacyPortfolio {
   id: number;
   portfolioName: string;
-  status: string | null;
+  status?: string | null;
 }
 
 // Unified display row used in the Orgs tab — merges LegacyOrganisation + LegacyPortfolio.

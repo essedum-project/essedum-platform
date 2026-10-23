@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import type {
   AccessContext, RbacRole, RoleAssignment, Asset, AssetVersion, PromotionEvent, MenuItem,
@@ -195,9 +195,11 @@ export class ApiService {
   }
 
   getPortfolios(): Observable<LegacyPortfolio[]> {
-    return this.http.get<any>('/api/usm-portfolios/page', {
-      params: { page: '0', size: '1000' }
-    }).pipe(map((res: any) => (res?.content ?? res ?? []) as LegacyPortfolio[]));
+    // Try the paginated endpoint first; fall back to empty list on any error so org table still loads.
+    return this.http.get<any>('/api/usm-portfolios', { params: { size: '1000' } }).pipe(
+      map((res: any) => (Array.isArray(res) ? res : (res?.content ?? [])) as LegacyPortfolio[]),
+      catchError(() => of([] as LegacyPortfolio[]))
+    );
   }
 
   // ---- DashConstants: per-role sidebar items (usm_constant table, key = "<Role> Side") ----

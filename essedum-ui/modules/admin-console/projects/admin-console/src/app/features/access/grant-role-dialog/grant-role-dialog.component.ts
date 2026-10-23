@@ -1,7 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
+import { forkJoin } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { ApiService } from '../../../core/api.service';
-import type { RbacRole, LegacyOrganisation, LegacyProject, UserOption } from '../../../core/api-models';
+import type { RbacRole, LegacyOrganisation, LegacyProject, LegacyPortfolio, UserOption } from '../../../core/api-models';
+
+/** Unified entry shown in the Organization dropdown — covers both usm_organisation (RBAC) and usm_portfolio (legacy). */
+interface OrgOption {
+  /** The ID sent to the backend when granting. For RBAC orgs this is usm_organisation.id;
+   *  for legacy portfolios it is usm_portfolio.id shifted by LEGACY_ORG_OFFSET so the
+   *  backend can distinguish them (mirrors the LEGACY_ROLE_ID_OFFSET pattern). */
+  grantId: number;
+  /** Raw usm_organisation.id or usm_portfolio.id — used to match projects. */
+  nativeId: number;
+  name: string;
+  source: 'rbac' | 'legacy';
+}
 
 @Component({
   selector: 'app-grant-role-dialog',
@@ -12,17 +27,19 @@ import type { RbacRole, LegacyOrganisation, LegacyProject, UserOption } from '..
 export class GrantRoleDialogComponent implements OnInit {
   roles: RbacRole[] = [];
   users: UserOption[] = [];
-  organizations: LegacyOrganisation[] = [];
+  /** Unified org list (RBAC + legacy portfolios). */
+  orgOptions: OrgOption[] = [];
   projects: LegacyProject[] = [];
 
   userId: number | null = null;
   roleId: number | null = null;
-  organizationId: number | null = null;
-  // true = org-scoped grant (dynamic — automatically covers future projects
-  // too, per AccessContextService's org→project expansion); false = pick
-  // specific current projects.
+  /** grantId of the selected OrgOption. */
+  selectedOrgGrantId: number | null = null;
   wholeOrganization = true;
   projectIds: number[] = [];
+
+  private rbacOrgs: LegacyOrganisation[] = [];
+  private portfolios: LegacyPortfolio[] = [];
 
   private readonly roleNameMap: { [key: string]: string } = {
     'viewer': 'AI Consumer(Read only)',
@@ -40,20 +57,61 @@ export class GrantRoleDialogComponent implements OnInit {
   ngOnInit(): void {
     this.api.getRoles().subscribe(roles => (this.roles = roles));
     this.api.getUsers().subscribe(users => (this.users = users));
-    this.api.getOrganisations().subscribe(orgs => (this.organizations = orgs));
     this.api.getProjects().subscribe(projects => (this.projects = projects));
+
+    forkJoin([
+      this.api.getOrganisations().pipe(catchError(() => of([] as LegacyOrganisation[]))),
+      this.api.getPortfolios().pipe(catchError(() => of([] as LegacyPortfolio[]))),
+    ]).subscribe(([orgs, portfolios]) => {
+      this.rbacOrgs = orgs;
+      this.portfolios = portfolios;
+      this.buildOrgOptions();
+    });
+  }
+
+  private buildOrgOptions(): void {
+    const rbacEntries: OrgOption[] = this.rbacOrgs.map(o => ({
+      grantId: o.id,
+      nativeId: o.id,
+      name: o.name,
+      source: 'rbac',
+    }));
+    const rbacNames = new Set(this.rbacOrgs.map(o => (o.name || '').toLowerCase()));
+    const legacyEntries: OrgOption[] = (this.portfolios || [])
+      .filter(p => !rbacNames.has((p.portfolioName || '').toLowerCase()))
+      .map(p => ({
+        grantId: p.id,
+        nativeId: p.id,
+        name: p.portfolioName,
+        source: 'legacy' as const,
+      }));
+    this.orgOptions = [...rbacEntries, ...legacyEntries]
+      .sort((a, b) => (a.name || '').toLowerCase() > (b.name || '').toLowerCase() ? 1 : -1);
   }
 
   getDisplayRoleName(roleName: string): string {
     return this.roleNameMap[roleName.toLowerCase()] || roleName;
   }
 
-  // Org-scoped grant is org-first: pick the org, then either apply to the
-  // whole org (dynamic) or pick which of its current projects to grant into.
+  get selectedOrg(): OrgOption | undefined {
+    return this.orgOptions.find(o => o.grantId === this.selectedOrgGrantId);
+  }
+
   get projectsForOrg(): LegacyProject[] {
-    return this.organizationId == null
-      ? []
-      : this.projects.filter(p => p.organisationId === this.organizationId);
+    const org = this.selectedOrg;
+    if (!org) return [];
+    if (org.source === 'rbac') {
+      // RBAC org: match by organisationId. Also check same-named legacy portfolio
+      // for projects linked via portfolioId (best-effort fallback for mixed setups).
+      const portfolioMatch = this.portfolios.find(p => (p.portfolioName || '').toLowerCase() === (org.name || '').toLowerCase());
+      return this.projects.filter(p =>
+        p.organisationId === org.nativeId ||
+        (portfolioMatch != null && p.portfolioId?.id === portfolioMatch.id)
+      );
+    } else {
+      // Legacy portfolio org: match projects linked via portfolioId.
+      return this.projects.filter(p => p.portfolioId?.id === org.nativeId);
+    }
   }
 
   onOrganizationChange(): void {
@@ -62,17 +120,19 @@ export class GrantRoleDialogComponent implements OnInit {
   }
 
   save(): void {
-    if (!this.userId || !this.roleId || !this.organizationId) {
+    if (!this.userId || !this.roleId || !this.selectedOrgGrantId) {
       return;
     }
     if (!this.wholeOrganization && this.projectIds.length === 0) {
       return;
     }
+    const org = this.selectedOrg;
     this.ref.close({
       userId: this.userId,
       roleId: this.roleId,
-      organizationId: this.wholeOrganization ? this.organizationId : null,
+      organizationId: this.wholeOrganization ? org?.nativeId ?? null : null,
       projectIds: this.wholeOrganization ? [] : this.projectIds,
+      isLegacyOrg: org?.source === 'legacy',
     });
   }
 

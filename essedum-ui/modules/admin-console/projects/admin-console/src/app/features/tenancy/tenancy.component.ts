@@ -2,6 +2,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin, of, switchMap } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import type { LegacyOrganisation, LegacyProject, LegacyPortfolio, DisplayOrg, RbacEnvironment } from '../../core/api-models';
@@ -63,7 +64,10 @@ export class TenancyComponent implements OnInit {
   }
 
   private loadOrgs(): void {
-    forkJoin([this.api.getOrganisations(), this.api.getPortfolios()]).subscribe(([orgs, portfolios]) => {
+    forkJoin([
+      this.api.getOrganisations().pipe(catchError(() => of([] as any[]))),
+      this.api.getPortfolios().pipe(catchError(() => of([] as any[]))),
+    ]).subscribe(([orgs, portfolios]) => {
       this.organizations = orgs;
       this.portfolios = portfolios;
       this.buildDisplayOrgs();

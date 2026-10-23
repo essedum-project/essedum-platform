@@ -15,15 +15,18 @@
     </mat-select>
   </mat-form-field>
 
-  <div class="scope-label">Organization</div>
+  <div class="scope-label">ORGANIZATION</div>
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Organization</mat-label>
-    <mat-select [(ngModel)]="organizationId" name="organizationId" (ngModelChange)="onOrganizationChange()">
-      <mat-option *ngFor="let o of organizations" [value]="o.id">{{ o.name }}</mat-option>
+    <mat-select [(ngModel)]="selectedOrgGrantId" name="organizationId" (ngModelChange)="onOrganizationChange()">
+      <mat-option *ngFor="let o of orgOptions" [value]="o.grantId">
+        {{ o.name }}
+        <span style="font-size:11px;opacity:0.55;margin-left:4px;">[#{{ o.nativeId }} · {{ o.source }}]</span>
+      </mat-option>
     </mat-select>
   </mat-form-field>
 
-  <ng-container *ngIf="organizationId">
+  <ng-container *ngIf="selectedOrgGrantId">
     <mat-checkbox [(ngModel)]="wholeOrganization" name="wholeOrganization">
       Whole organization (covers future projects too)
     </mat-checkbox>
@@ -31,9 +34,13 @@
     <mat-form-field appearance="fill" class="full-width" *ngIf="!wholeOrganization">
       <mat-label>Projects</mat-label>
       <mat-select [(ngModel)]="projectIds" name="projectIds" multiple>
-        <mat-option *ngFor="let p of projectsForOrg" [value]="p.id">{{ p.name }}</mat-option>
+        <mat-option *ngFor="let p of projectsForOrg" [value]="p.id">
+          {{ p.projectdisplayname || p.name }}
+          <span *ngIf="p.projectdisplayname && p.projectdisplayname !== p.name"
+                style="font-size:11px;opacity:0.55;margin-left:4px;">({{ p.name }})</span>
+        </mat-option>
       </mat-select>
-      <mat-hint *ngIf="!projectsForOrg.length">No projects in this organization.</mat-hint>
+      <mat-hint *ngIf="!projectsForOrg.length">No projects found for this organization.</mat-hint>
     </mat-form-field>
   </ng-container>
 

@@ -94,18 +94,21 @@ export class AccessComponent implements OnInit {
 
   grantRole(): void {
     const ref = this.dialog.open(GrantRoleDialogComponent, { width: '480px' });
-    ref.afterClosed().subscribe((result: { userId: number; roleId: number; organizationId: number | null; projectIds: number[] } | undefined) => {
+    ref.afterClosed().subscribe((result: {
+      userId: number; roleId: number; organizationId: number | null;
+      projectIds: number[]; isLegacyOrg?: boolean;
+    } | undefined) => {
       if (!result) {
         return;
       }
       const actorUserId = this.userContext.userId$.value;
-      // Project scope can target multiple (or "all") projects at once — grant
-      // each one individually; the existing endpoint is single-project.
       const projectIds = result.projectIds.length ? result.projectIds : [null];
       const grants = projectIds.map(projectId =>
         this.api.grantRole({
           userId: result.userId,
           roleId: result.roleId,
+          // Legacy portfolio-scoped grants: pass organizationId as the portfolio id.
+          // The backend stores it in rbac_role_assignment and resync bridges it.
           organizationId: result.organizationId,
           projectId,
           actorUserId,
