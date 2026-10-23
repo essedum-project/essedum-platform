@@ -12,6 +12,7 @@ export interface RoleCard {
   roleRank: number;
   orgName: string | null;
   projectName: string | null;
+  projectId: number | null;
 }
 
 @Component({
@@ -64,6 +65,7 @@ export class MyDetailsComponent implements OnInit {
             roleRank: roleMap.get(a.roleId)?.rank ?? 0,
             orgName: a.organizationId != null ? (orgMap.get(a.organizationId) ?? `Org #${a.organizationId}`) : null,
             projectName: a.projectId != null ? (projMap.get(a.projectId) ?? `Project #${a.projectId}`) : null,
+            projectId: a.projectId,
           }));
       })
     ).subscribe({
@@ -87,6 +89,12 @@ export class MyDetailsComponent implements OnInit {
   }
 
   configureMenu(card: RoleCard): void {
+    // Read portfolioId from session (set by the host shell) so DashConst loads correctly.
+    let portfolioId: number | undefined;
+    try {
+      portfolioId = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}').id;
+    } catch {}
+
     this.dialog.open(MenuPickerDialogComponent, {
       width: '700px',
       maxHeight: '85vh',
@@ -94,6 +102,8 @@ export class MyDetailsComponent implements OnInit {
       data: {
         roleName: card.roleName,
         projectName: card.projectName,
+        projectId: card.projectId ?? undefined,
+        portfolioId,
         userId: this.userContext.userId$.value,
       },
     });

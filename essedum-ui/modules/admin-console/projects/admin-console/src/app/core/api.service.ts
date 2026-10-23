@@ -193,6 +193,16 @@ export class ApiService {
     return this.http.get<LegacyProject[]>('/api/projects');
   }
 
+  // ---- DashConstants: per-role sidebar items (usm_constant table, key = "<Role> Side") ----
+  // Returns ALL dash-constant records for a project so the menu picker can show every
+  // available sidebar item across all roles.
+  getDashConstants(projectId?: string | number, portfolioId?: string | number): Observable<any[]> {
+    const params: any = {};
+    if (projectId != null) params['projectId'] = String(projectId);
+    if (portfolioId != null) params['portfolioId'] = String(portfolioId);
+    return this.http.get<any[]>('/api/get-dash-constants', { params });
+  }
+
   // ---- environments (rbac_environment) ----
   getEnvironments(projectId: number): Observable<RbacEnvironment[]> {
     return this.http.get<RbacEnvironment[]>(`${this.base}/environments`, { params: { projectId } });
