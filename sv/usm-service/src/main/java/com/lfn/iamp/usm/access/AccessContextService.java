@@ -389,40 +389,52 @@ public class AccessContextService {
 	 *
 	 * @return Combined list of UnifiedRole objects from both systems
 	 */
+	/**
+	 * Legacy role IDs are offset by this amount so they never collide with RBAC
+	 * role IDs. Both tables use auto-increment starting at 1; without the offset
+	 * "IT Portfolio Manager" (usm_role.id=1) collides with "platform_admin"
+	 * (rbac_role.id=1), causing the wrong role to be granted and displayed.
+	 *
+	 * The grant endpoint detects IDs >= LEGACY_ROLE_ID_OFFSET and routes them to
+	 * the legacy bridge instead of the RBAC assignment table.
+	 */
+	public static final int LEGACY_ROLE_ID_OFFSET = 100_000;
+
 	public List<UnifiedRole> listRoles() {
-		// Fetch RBAC roles and convert to UnifiedRole with rank
-		List<UnifiedRole> unifiedRoles = rbacRoleRepository.findAll().stream()
+		// RBAC roles — authoritative, IDs as-is.
+		List<UnifiedRole> result = new java.util.ArrayList<>(rbacRoleRepository.findAll().stream()
 				.map(r -> new UnifiedRole(r.getId(), r.getName(), r.getRank()))
-				.collect(Collectors.toList());
+				.collect(Collectors.toList()));
 
-		// Fetch legacy USM roles and convert to UnifiedRole without rank
-		List<UnifiedRole> legacyRoles = legacyRoleRepository.findAll().stream()
-				.map(r -> new UnifiedRole(r.getId(), r.getName()))
-				.collect(Collectors.toList());
+		java.util.Set<String> seenNames = result.stream()
+				.filter(r -> r.getName() != null)
+				.map(UnifiedRole::getName)
+				.collect(Collectors.toCollection(java.util.HashSet::new));
+		java.util.Set<Integer> seenIds = result.stream()
+				.map(UnifiedRole::getId)
+				.collect(Collectors.toCollection(java.util.HashSet::new));
 
-		// Combine both lists, avoiding duplicates by role name
-		java.util.Set<String> seenNames = new java.util.HashSet<>();
-		for (UnifiedRole role : unifiedRoles) {
-			if (role.getName() != null) {
-				seenNames.add(role.getName());
+		// Legacy USM roles — offset IDs by LEGACY_ROLE_ID_OFFSET to avoid collision.
+		// Only add if the role name isn't already covered by an RBAC role.
+		for (Role r : legacyRoleRepository.findAll()) {
+			if (r.getName() == null || seenNames.contains(r.getName())) {
+				continue;
 			}
+			int offsetId = r.getId() + LEGACY_ROLE_ID_OFFSET;
+			if (seenIds.contains(offsetId)) {
+				continue; // extremely unlikely, but guard anyway
+			}
+			result.add(new UnifiedRole(offsetId, r.getName()));
+			seenNames.add(r.getName());
+			seenIds.add(offsetId);
 		}
 
-		// Add legacy roles that don't already exist in RBAC
-		for (UnifiedRole legacyRole : legacyRoles) {
-			if (legacyRole.getName() != null && !seenNames.contains(legacyRole.getName())) {
-				unifiedRoles.add(legacyRole);
-				seenNames.add(legacyRole.getName());
-			}
-		}
-
-		// Sort by name for consistent ordering
-		unifiedRoles.sort((a, b) -> {
-			String nameA = a.getName() != null ? a.getName() : "";
-			String nameB = b.getName() != null ? b.getName() : "";
-			return nameA.compareToIgnoreCase(nameB);
+		result.sort((a, b) -> {
+			String na = a.getName() != null ? a.getName() : "";
+			String nb = b.getName() != null ? b.getName() : "";
+			return na.compareToIgnoreCase(nb);
 		});
 
-		return Collections.unmodifiableList(unifiedRoles);
+		return Collections.unmodifiableList(result);
 	}
 }

@@ -115,10 +115,19 @@ public class AccessResource {
 
 	@PostMapping("/access/role-assignments")
 	public ResponseEntity<RoleAssignment> grant(@RequestBody GrantRoleRequest request) {
+		// If the roleId carries the legacy offset, strip it back to the real usm_role id
+		// before storing. This prevents the collision between rbac_role and usm_role integer ids.
+		final int OFFSET = AccessContextService.LEGACY_ROLE_ID_OFFSET;
+		boolean isLegacyRole = request.getRoleId() != null && request.getRoleId() >= OFFSET;
+		if (isLegacyRole) {
+			request.setRoleId(request.getRoleId() - OFFSET);
+		}
+
 		// NFR-SEC2: only org_admin+ may manage assignments, and no one may grant a
 		// role higher than their own rank (no self-escalation).
 		int actorRank = requireActorRank(request.getActorUserId(), ORG_ADMIN, "grant a role");
-		int grantedRank = accessContextService.rankOfRole(request.getRoleId());
+		// Legacy roles have no RBAC rank — treat as rank 0 (no escalation risk).
+		int grantedRank = isLegacyRole ? 0 : accessContextService.rankOfRole(request.getRoleId());
 		if (actorRank < grantedRank) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
 					"Cannot grant a role above your own rank (granting rank " + grantedRank + ", have " + actorRank + ")");

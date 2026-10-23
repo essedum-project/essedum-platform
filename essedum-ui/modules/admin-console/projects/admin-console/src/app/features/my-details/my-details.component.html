@@ -15,6 +15,10 @@
     <mat-icon>badge</mat-icon>
     <span>My Role Assignments</span>
     <span class="card-count" *ngIf="!loading">{{ cards.length }}</span>
+    <button mat-icon-button (click)="refresh()" [disabled]="loading"
+            matTooltip="Refresh assignments" class="refresh-btn">
+      <mat-icon [class.spin]="loading">refresh</mat-icon>
+    </button>
   </div>
   <p class="section-desc">
     Each card is one unique org → project → role mapping. Duplicate grants are

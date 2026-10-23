@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, map } from 'rxjs';
 import { ApiService } from '../../core/api.service';
@@ -26,10 +26,12 @@ export interface RoleCard {
   styleUrls: ['./my-details.component.scss'],
   standalone: false,
 })
-export class MyDetailsComponent implements OnInit {
+export class MyDetailsComponent implements OnInit, OnDestroy {
   cards: RoleCard[] = [];
   loading = true;
   user: any = {};
+
+  private readonly onAssignmentsChanged = () => this.load();
 
   constructor(
     private readonly api: ApiService,
@@ -40,7 +42,15 @@ export class MyDetailsComponent implements OnInit {
   ngOnInit(): void {
     try { this.user = JSON.parse(sessionStorage.getItem('user') || '{}'); } catch {}
     this.load();
+    // Refresh when any other component (e.g. Access page) grants or revokes a role
+    window.addEventListener('essedum:assignments-changed', this.onAssignmentsChanged);
   }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('essedum:assignments-changed', this.onAssignmentsChanged);
+  }
+
+  refresh(): void { this.load(); }
 
   get initials(): string {
     return ((this.user?.user_f_name || '')[0] || '') + ((this.user?.user_l_name || '')[0] || '');
@@ -154,6 +164,7 @@ export class MyDetailsComponent implements OnInit {
       const revokeAll = (ids: number[]) => {
         if (ids.length === 0) {
           this.cards = this.cards.filter(c => c !== card);
+          window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
           return;
         }
         const [head, ...tail] = ids;

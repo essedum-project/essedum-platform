@@ -111,12 +111,18 @@ export class AccessComponent implements OnInit {
           actorUserId,
         }),
       );
-      combineLatest(grants).subscribe(() => this.load());
+      combineLatest(grants).subscribe(() => {
+        this.load();
+        window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
+      });
     });
   }
 
   revoke(row: RoleAssignmentRow): void {
-    this.api.revokeRoleAssignment(row.id, this.userContext.userId$.value).subscribe(() => this.load());
+    this.api.revokeRoleAssignment(row.id, this.userContext.userId$.value).subscribe(() => {
+      this.load();
+      window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
+    });
   }
 }
 

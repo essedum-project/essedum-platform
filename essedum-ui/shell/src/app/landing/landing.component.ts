@@ -1,6 +1,7 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   ViewChild,
   HostListener,
   AfterViewInit,
@@ -37,7 +38,7 @@ import { MyProfileComponent } from "./my-profile/my-profile.component";
     styleUrls: ["./landing.component.scss"],
     standalone: false
 })
-export class LandingComponent implements OnInit, AfterViewInit {
+export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild("drawerLeft", { static: true }) drawerLeft: any;
   @ViewChild("drawerRight", { static: true }) drawerRight: any;
   @ViewChild("tabsBox") tabsBox: any;
@@ -475,7 +476,15 @@ export class LandingComponent implements OnInit, AfterViewInit {
     }
   }
 
+  // Refresh role data when admin-console grants or revokes a role assignment.
+  // The event is dispatched by AccessComponent and MyDetailsComponent after any
+  // successful grant/revoke so the shell's role dropdown stays in sync without a page reload.
+  private readonly onAssignmentsChanged = () => {
+    this.setportfolio();
+  };
+
   ngOnInit() {
+    window.addEventListener('essedum:assignments-changed', this.onAssignmentsChanged);
     // Detect if login page already set a theme class on body before localStorage was written
     const bodyHasLight = document.body.classList.contains('header-light-theme');
     const bodyHasDark  = document.body.classList.contains('header-dark-theme');
@@ -3208,6 +3217,10 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         } catch (error) {}
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('essedum:assignments-changed', this.onAssignmentsChanged);
   }
 
   ngAfterViewInit() {
