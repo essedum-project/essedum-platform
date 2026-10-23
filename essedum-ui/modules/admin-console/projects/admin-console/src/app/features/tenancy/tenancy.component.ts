@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
-import type { LegacyOrganisation, LegacyProject, RbacEnvironment } from '../../core/api-models';
+import type { LegacyOrganisation, LegacyProject, LegacyPortfolio, DisplayOrg, RbacEnvironment } from '../../core/api-models';
 import { ProvisionDialogComponent, ProvisionKind } from './provision-dialog/provision-dialog.component';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 
@@ -20,12 +20,16 @@ interface EnvironmentRow extends RbacEnvironment {
   standalone: false,
 })
 export class TenancyComponent implements OnInit {
+  /** Unified org list: RBAC orgs (usm_organisation) + legacy portfolios (usm_portfolio). */
+  displayOrgs: DisplayOrg[] = [];
+  /** Raw RBAC orgs kept for delete and name-lookup. */
   organizations: LegacyOrganisation[] = [];
   projects: LegacyProject[] = [];
+  portfolios: LegacyPortfolio[] = [];
   environmentRows: EnvironmentRow[] = [];
 
-  readonly orgColumns = ['name', 'status', 'actions'];
-  readonly projectColumns = ['name', 'organization', 'description', 'actions'];
+  readonly orgColumns = ['id', 'name', 'source', 'status', 'actions'];
+  readonly projectColumns = ['id', 'name', 'organization', 'description', 'actions'];
   readonly environmentColumns = ['name', 'projectName', 'configRef'];
 
   private readonly tabIndexByName: Record<string, number> = { organizations: 0, projects: 1, environments: 2 };
@@ -59,7 +63,23 @@ export class TenancyComponent implements OnInit {
   }
 
   private loadOrgs(): void {
-    this.api.getOrganisations().subscribe(orgs => (this.organizations = orgs));
+    forkJoin([this.api.getOrganisations(), this.api.getPortfolios()]).subscribe(([orgs, portfolios]) => {
+      this.organizations = orgs;
+      this.portfolios = portfolios;
+      this.buildDisplayOrgs();
+    });
+  }
+
+  private buildDisplayOrgs(): void {
+    const rbacRows: DisplayOrg[] = this.organizations.map(o => ({
+      id: o.id, name: o.name, status: o.status, source: 'rbac' as const, rawOrg: o,
+    }));
+    const rbacNames = new Set(this.organizations.map(o => (o.name || '').toLowerCase()));
+    const legacyRows: DisplayOrg[] = (this.portfolios || [])
+      .filter(p => !rbacNames.has((p.portfolioName || '').toLowerCase()))
+      .map(p => ({ id: p.id, name: p.portfolioName, status: p.status, source: 'legacy' as const }));
+    this.displayOrgs = [...rbacRows, ...legacyRows]
+      .sort((a, b) => (a.name || '').toLowerCase() > (b.name || '').toLowerCase() ? 1 : -1);
   }
 
   private loadProjects(): void {
@@ -67,8 +87,14 @@ export class TenancyComponent implements OnInit {
   }
 
   organizationName(project: LegacyProject): string {
-    const org = this.organizations.find(o => o.id === project.organisationId);
-    return org ? org.name : '—';
+    const rbacOrg = this.organizations.find(o => o.id === project.organisationId);
+    if (rbacOrg) return rbacOrg.name;
+    // Fallback to portfolio name lookup if project was linked via legacy portfolioId
+    return '—';
+  }
+
+  projectDisplayName(project: LegacyProject): string {
+    return project.projectdisplayname || project.name;
   }
 
   private loadEnvironments(): void {
@@ -99,15 +125,24 @@ export class TenancyComponent implements OnInit {
         return;
       }
       if (r.kind === 'organization') {
-        this.api.createOrganization(userId, { name: r.name, status: r.status }).subscribe(() => this.loadOrgs());
+        this.api.createOrganization(userId, { name: r.name, status: r.status }).subscribe(() => {
+          this.loadOrgs();
+          window.dispatchEvent(new CustomEvent('essedum:tenancy-changed'));
+        });
       } else if (r.kind === 'project') {
         this.api
           .createProject(userId, { name: r.name, description: r.description, organisationId: r.organisationId })
-          .subscribe(() => this.loadProjects());
+          .subscribe(() => {
+            this.loadProjects();
+            window.dispatchEvent(new CustomEvent('essedum:tenancy-changed'));
+          });
       } else if (r.kind === 'environment') {
         this.api
           .createEnvironment(userId, { name: r.name, projectId: r.projectId, configRef: r.configRef })
-          .subscribe(() => this.loadEnvironments());
+          .subscribe(() => {
+            this.loadEnvironments();
+            window.dispatchEvent(new CustomEvent('essedum:tenancy-changed'));
+          });
       }
     });
   }
@@ -122,7 +157,7 @@ export class TenancyComponent implements OnInit {
         return;
       }
       this.api.deleteOrganization(row.id, this.userContext.userId$.value).subscribe({
-        next: () => this.loadOrgs(),
+        next: () => { this.loadOrgs(); window.dispatchEvent(new CustomEvent('essedum:tenancy-changed')); },
         error: err => alert(err?.error?.message || 'Could not delete this organization.'),
       });
     });
@@ -138,7 +173,7 @@ export class TenancyComponent implements OnInit {
         return;
       }
       this.api.deleteProject(row.id, this.userContext.userId$.value).subscribe({
-        next: () => this.loadProjects(),
+        next: () => { this.loadProjects(); window.dispatchEvent(new CustomEvent('essedum:tenancy-changed')); },
         error: err => alert(err?.error?.message || 'Could not delete this project.'),
       });
     });

@@ -483,8 +483,70 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     this.setportfolio();
   };
 
+  // Refresh all dropdowns when admin-console creates/deletes an org, project or environment.
+  private readonly onTenancyChanged = () => {
+    this.setportfolio();
+  };
+
+  /**
+   * Supplements the legacy processdata-driven org/project lists with entries from the
+   * RBAC tables so that both old and new data appear in the thumbnail dropdowns.
+   * Called at the end of getrolepage() when both portfoliodata and projectList are ready.
+   * Fully idempotent — deduplicates by name/id so repeated calls add nothing.
+   */
+  private supplementRbacData(): void {
+    // Orgs: add entries from usm_organisation (RBAC) not already in portfoliodata (dedup by name)
+    this.http.get<any[]>('/api/organisations', { params: { size: '1000' } }).subscribe({
+      next: (orgs: any[]) => {
+        const existing = new Set<string>(
+          this.portfoliodata.map((p: any) => (p.portfolioName || '').toLowerCase())
+        );
+        let changed = false;
+        (orgs || []).forEach((org: any) => {
+          if (org.name && !existing.has(org.name.toLowerCase())) {
+            this.portfoliodata.push({ id: org.id, portfolioName: org.name });
+            existing.add(org.name.toLowerCase());
+            changed = true;
+          }
+        });
+        if (changed) {
+          this.portfoliodata = this.portfoliodata.sort((a: any, b: any) =>
+            (a.portfolioName || '').toLowerCase() > (b.portfolioName || '').toLowerCase() ? 1 : -1
+          );
+        }
+      },
+      error: () => {}
+    });
+
+    // Projects: add entries from usm_project not already in projectList (dedup by id)
+    this.http.get<any[]>('/api/projects', { params: { size: '1000' } }).subscribe({
+      next: (projects: any[]) => {
+        const existingIds = new Set<number>(this.projectList.map((p: any) => p.id));
+        let changed = false;
+        (projects || []).forEach((proj: any) => {
+          if (!existingIds.has(proj.id)) {
+            this.projectList.push({
+              id: proj.id,
+              name: proj.name,
+              projectdisplayname: proj.projectdisplayname || proj.name
+            });
+            existingIds.add(proj.id);
+            changed = true;
+          }
+        });
+        if (changed) {
+          this.projectList = this.projectList.sort((a: any, b: any) =>
+            (a.projectdisplayname || '').toLowerCase() > (b.projectdisplayname || '').toLowerCase() ? 1 : -1
+          );
+        }
+      },
+      error: () => {}
+    });
+  }
+
   ngOnInit() {
     window.addEventListener('essedum:assignments-changed', this.onAssignmentsChanged);
+    window.addEventListener('essedum:tenancy-changed', this.onTenancyChanged);
     // Detect if login page already set a theme class on body before localStorage was written
     const bodyHasLight = document.body.classList.contains('header-light-theme');
     const bodyHasDark  = document.body.classList.contains('header-dark-theme');
@@ -1834,6 +1896,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       this.roleList = this.roleList.sort((a: any, b: any) =>
         a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
       );
+      // Merge RBAC orgs/projects that are not yet in the legacy processdata lists.
+      this.supplementRbacData();
       if (this.portfolioflag == 1) {
         if (this.projectList.length > 0) {
           this.fetchroleflag = 1;
@@ -3221,6 +3285,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
 
   ngOnDestroy(): void {
     window.removeEventListener('essedum:assignments-changed', this.onAssignmentsChanged);
+    window.removeEventListener('essedum:tenancy-changed', this.onTenancyChanged);
   }
 
   ngAfterViewInit() {

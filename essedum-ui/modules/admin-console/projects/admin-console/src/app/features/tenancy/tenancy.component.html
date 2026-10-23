@@ -14,10 +14,22 @@
         <button mat-raised-button color="primary" *ngIf="canCreateOrg" (click)="create('organization')">New Organization</button>
         <span *ngIf="!canCreateOrg" class="muted-hint">Only a platform admin can create organizations.</span>
       </div>
-      <table mat-table [dataSource]="organizations" class="admin-console-table">
+      <table mat-table [dataSource]="displayOrgs" class="admin-console-table">
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef style="width:70px;">ID</th>
+          <td mat-cell *matCellDef="let row"><span class="id-chip">#{{ row.id }}</span></td>
+        </ng-container>
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Name</th>
           <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+        </ng-container>
+        <ng-container matColumnDef="source">
+          <th mat-header-cell *matHeaderCellDef style="width:100px;">Type</th>
+          <td mat-cell *matCellDef="let row">
+            <span [ngClass]="row.source === 'rbac' ? 'source-badge source-badge-rbac' : 'source-badge source-badge-legacy'">
+              {{ row.source === 'rbac' ? 'RBAC' : 'Legacy' }}
+            </span>
+          </td>
         </ng-container>
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef>Status</th>
@@ -28,7 +40,8 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let row">
-            <button style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.28);color:#f87171;font-size:12px;font-weight:500;font-family:inherit;padding:5px 12px;border-radius:6px;cursor:pointer;outline:none;display:inline-flex;align-items:center;gap:5px;transition:background 0.12s;" *ngIf="canDeleteOrg" (click)="deleteOrg(row)">
+            <button style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.28);color:#f87171;font-size:12px;font-weight:500;font-family:inherit;padding:5px 12px;border-radius:6px;cursor:pointer;outline:none;display:inline-flex;align-items:center;gap:5px;transition:background 0.12s;"
+                    *ngIf="canDeleteOrg && row.source === 'rbac'" (click)="deleteOrg(row.rawOrg)">
               <i class="fa fa-trash" style="font-size:11px;"></i> Delete
             </button>
           </td>
@@ -44,9 +57,17 @@
         <span *ngIf="!canCreateProject" class="muted-hint">Only an org admin or above can create projects.</span>
       </div>
       <table mat-table [dataSource]="projects" class="admin-console-table">
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef style="width:70px;">ID</th>
+          <td mat-cell *matCellDef="let row"><span class="id-chip">#{{ row.id }}</span></td>
+        </ng-container>
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Name</th>
-          <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+          <td mat-cell *matCellDef="let row">
+            {{ projectDisplayName(row) }}
+            <span *ngIf="row.projectdisplayname && row.projectdisplayname !== row.name"
+                  style="font-size:11px;opacity:0.55;margin-left:6px;">({{ row.name }})</span>
+          </td>
         </ng-container>
         <ng-container matColumnDef="organization">
           <th mat-header-cell *matHeaderCellDef>Organization</th>

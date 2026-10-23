@@ -169,7 +169,7 @@
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedportfolio"
                     (ngModelChange)="onSelection($event)" name="Portfolio" panelClass="profile-select-panel">
                     <mat-option *ngFor="let item of portfoliodata; trackBy: trackByMethod" [value]="item">
-                      {{ item.portfolioName }}
+                      {{ item.portfolioName }}<span style="opacity:0.5;font-size:11px;margin-left:5px;">#{{ item.id }}</span>
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
@@ -182,7 +182,7 @@
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedproject"
                     (ngModelChange)="valuechangeproject1($event)" name="project" panelClass="profile-select-panel">
                     <mat-option *ngFor="let item of projectList; trackBy: trackByMethod" [value]="item">
-                      {{ item.projectdisplayname }}
+                      {{ item.projectdisplayname }}<span style="opacity:0.5;font-size:11px;margin-left:5px;">#{{ item.id }}</span>
                     </mat-option>
                   </mat-select>
                 </mat-form-field>

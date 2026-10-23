@@ -109,8 +109,25 @@ export interface LegacyOrganisation {
 export interface LegacyProject {
   id: number;
   name: string;
+  projectdisplayname: string | null;
   description: string | null;
   organisationId: number | null;
+}
+
+// usm_portfolio — legacy org entity used by the shell's org/portfolio dropdown.
+export interface LegacyPortfolio {
+  id: number;
+  portfolioName: string;
+  status: string | null;
+}
+
+// Unified display row used in the Orgs tab — merges LegacyOrganisation + LegacyPortfolio.
+export interface DisplayOrg {
+  id: number;
+  name: string;
+  status: string | null;
+  source: 'rbac' | 'legacy';
+  rawOrg?: LegacyOrganisation;
 }
 
 export interface RbacEnvironment {

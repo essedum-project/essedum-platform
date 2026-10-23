@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import type {
   AccessContext, RbacRole, RoleAssignment, Asset, AssetVersion, PromotionEvent, MenuItem,
-  LegacyOrganisation, LegacyProject, RbacEnvironment, AuditEvent, UserOption, IdentityTarget, RoleMenu,
+  LegacyOrganisation, LegacyProject, LegacyPortfolio, RbacEnvironment, AuditEvent, UserOption, IdentityTarget, RoleMenu,
 } from './api-models';
 
 // Thin HTTP client over the sv/usm-service RBAC endpoints
@@ -186,11 +187,17 @@ export class ApiService {
 
   // ---- legacy tenancy (existing OrganisationResource/ProjectResource, under /api not /api/usm) ----
   getOrganisations(): Observable<LegacyOrganisation[]> {
-    return this.http.get<LegacyOrganisation[]>('/api/organisations');
+    return this.http.get<LegacyOrganisation[]>('/api/organisations', { params: { size: '1000' } });
   }
 
   getProjects(): Observable<LegacyProject[]> {
-    return this.http.get<LegacyProject[]>('/api/projects');
+    return this.http.get<LegacyProject[]>('/api/projects', { params: { size: '1000' } });
+  }
+
+  getPortfolios(): Observable<LegacyPortfolio[]> {
+    return this.http.get<any>('/api/usm-portfolios/page', {
+      params: { page: '0', size: '1000' }
+    }).pipe(map((res: any) => (res?.content ?? res ?? []) as LegacyPortfolio[]));
   }
 
   // ---- DashConstants: per-role sidebar items (usm_constant table, key = "<Role> Side") ----
