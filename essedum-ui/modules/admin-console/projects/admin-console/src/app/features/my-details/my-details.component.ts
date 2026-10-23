@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, map } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
-import { RoleAssignment, RbacRole, LegacyOrganisation, LegacyProject } from '../../core/api-models';
+import type { RoleAssignment, RbacRole, LegacyOrganisation, LegacyProject } from '../../core/api-models';
 import { MenuPickerDialogComponent } from './menu-picker-dialog/menu-picker-dialog.component';
 
 export interface RoleCard {

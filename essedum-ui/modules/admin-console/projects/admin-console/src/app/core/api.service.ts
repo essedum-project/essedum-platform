@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import {
+import type {
   AccessContext, RbacRole, RoleAssignment, Asset, AssetVersion, PromotionEvent, MenuItem,
   LegacyOrganisation, LegacyProject, RbacEnvironment, AuditEvent, UserOption, IdentityTarget, RoleMenu,
 } from './api-models';

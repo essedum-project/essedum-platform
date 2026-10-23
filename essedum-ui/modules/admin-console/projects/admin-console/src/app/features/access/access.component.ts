@@ -2,7 +2,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, map } from 'rxjs';
 import { ApiService } from '../../core/api.service';
-import { RbacRole, RoleAssignment, UserOption } from '../../core/api-models';
+import type { RbacRole, RoleAssignment, UserOption } from '../../core/api-models';
 import { GrantRoleDialogComponent } from './grant-role-dialog/grant-role-dialog.component';
 import { UserContextService } from '../../core/user-context.service';
 import { ProvisionDialogComponent } from '../tenancy/provision-dialog/provision-dialog.component';

@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
-import { LegacyOrganisation, LegacyProject, RbacEnvironment } from '../../core/api-models';
+import type { LegacyOrganisation, LegacyProject, RbacEnvironment } from '../../core/api-models';
 import { ProvisionDialogComponent, ProvisionKind } from './provision-dialog/provision-dialog.component';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 

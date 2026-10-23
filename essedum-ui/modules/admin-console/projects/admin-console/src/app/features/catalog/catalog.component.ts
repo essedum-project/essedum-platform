@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { combineLatest, switchMap, map } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
-import { Asset, AssetVersion } from '../../core/api-models';
+import type { Asset, AssetVersion } from '../../core/api-models';
 
 interface CatalogRow extends Asset {
   servingVersionNo: number | null;

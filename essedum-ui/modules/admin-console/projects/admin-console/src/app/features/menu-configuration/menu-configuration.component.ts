@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
-import { MenuItem, RoleMenu } from '../../core/api-models';
+import type { MenuItem, RoleMenu } from '../../core/api-models';
 import { MenuItemDialogComponent } from './menu-item-dialog/menu-item-dialog.component';
 import { RoleMenuDialogComponent } from './role-menu-dialog/role-menu-dialog.component';
 

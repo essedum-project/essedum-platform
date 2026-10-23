@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { ApiService } from '../../../core/api.service';
-import { RbacRole, LegacyOrganisation, LegacyProject, UserOption } from '../../../core/api-models';
+import type { RbacRole, LegacyOrganisation, LegacyProject, UserOption } from '../../../core/api-models';
 
 @Component({
   selector: 'app-grant-role-dialog',

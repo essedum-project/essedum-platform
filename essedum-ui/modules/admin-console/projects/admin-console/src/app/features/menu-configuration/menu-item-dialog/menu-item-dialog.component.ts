@@ -2,7 +2,7 @@ import { Component, Inject, OnInit, Optional } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ApiService } from '../../../core/api.service';
 import { UserContextService } from '../../../core/user-context.service';
-import { MenuItem } from '../../../core/api-models';
+import type { MenuItem } from '../../../core/api-models';
 
 @Component({
   selector: 'app-menu-item-dialog',

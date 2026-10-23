@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { catchError, of } from 'rxjs';
 import { ApiService } from '../../../core/api.service';
-import { LegacyProject } from '../../../core/api-models';
+import type { LegacyProject } from '../../../core/api-models';
 
 // Create a new asset-draft, or edit the content of an existing draft.
 // In edit mode the project is fixed (an asset never changes project) and

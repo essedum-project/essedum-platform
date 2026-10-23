@@ -2,7 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { combineLatest, map, of } from 'rxjs';
 import { ApiService } from '../../../core/api.service';
-import { RoleMenu } from '../../../core/api-models';
+import type { RoleMenu } from '../../../core/api-models';
 
 export interface SidebarItem {
   label: string;

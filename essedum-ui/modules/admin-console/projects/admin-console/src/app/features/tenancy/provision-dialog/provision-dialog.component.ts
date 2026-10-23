@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ApiService } from '../../../core/api.service';
-import { LegacyOrganisation, LegacyProject } from '../../../core/api-models';
+import type { LegacyOrganisation, LegacyProject } from '../../../core/api-models';
 
 export type ProvisionKind = 'organization' | 'project' | 'environment' | 'role';
 

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
-import { AuditEvent } from '../../core/api-models';
+import type { AuditEvent } from '../../core/api-models';
 
 @Component({
   selector: 'app-audit',

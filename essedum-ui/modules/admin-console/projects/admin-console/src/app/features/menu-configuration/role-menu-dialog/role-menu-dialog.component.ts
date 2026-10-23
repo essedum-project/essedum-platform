@@ -1,6 +1,6 @@
 import { Component, Inject, Optional } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { RoleMenu } from '../../../core/api-models';
+import type { RoleMenu } from '../../../core/api-models';
 
 // Edit/add a single live sidebar item for a role (usm_constant). Only the
 // top-level label/icon/url are editable here; any nested children in the

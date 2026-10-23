@@ -3,7 +3,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
-import { IdentityTarget, LegacyProject } from '../../core/api-models';
+import type { IdentityTarget, LegacyProject } from '../../core/api-models';
 
 interface SystemCell {
   target?: IdentityTarget;

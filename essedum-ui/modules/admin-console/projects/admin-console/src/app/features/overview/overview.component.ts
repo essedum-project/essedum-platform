@@ -5,7 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import { ThemeService } from '../../core/theme.service';
-import { AuditEvent } from '../../core/api-models';
+import type { AuditEvent } from '../../core/api-models';
 
 interface StatCard {
   label: string;
