@@ -12,7 +12,7 @@ export interface AccessContext {
 export interface RbacRole {
   id: number;
   name: string;
-  rank: number;
+  rank?: number; // Optional: present for RBAC roles, null/undefined for legacy USM roles
 }
 
 export interface RoleAssignment {

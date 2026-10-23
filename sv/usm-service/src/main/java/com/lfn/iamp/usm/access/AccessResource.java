@@ -52,7 +52,7 @@ public class AccessResource {
 	}
 
 	@GetMapping("/roles")
-	public ResponseEntity<List<RbacRole>> listRoles() {
+	public ResponseEntity<List<UnifiedRole>> listRoles() {
 		return ResponseEntity.ok(accessContextService.listRoles());
 	}
 
@@ -137,6 +137,13 @@ public class AccessResource {
 		RoleAssignment saved = accessContextService.grant(request.getUserId(), request.getRoleId(),
 				request.getOrganizationId(), request.getProjectId());
 		return ResponseEntity.ok(saved);
+	}
+
+	/** Backfills the legacy Organization/Project/Role switcher from existing assignments (platform_admin only). */
+	@PostMapping("/access/role-assignments/resync")
+	public ResponseEntity<java.util.Map<String, Integer>> resync(@RequestParam Integer actorUserId) {
+		requireActorRank(actorUserId, PLATFORM_ADMIN, "resync role assignments");
+		return ResponseEntity.ok(java.util.Map.of("processed", accessContextService.resyncLegacyBridge()));
 	}
 
 	@DeleteMapping("/access/role-assignments/{id}")

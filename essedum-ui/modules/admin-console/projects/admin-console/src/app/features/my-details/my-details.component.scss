@@ -51,6 +51,15 @@
   margin-bottom: 6px;
 
   mat-icon { font-size: 20px; width: 20px; height: 20px; color: #6c63ff; }
+
+  .card-count {
+    font-size: 12px;
+    background: rgba(108,99,255,0.2);
+    color: #a78bfa;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
 }
 
 .section-desc {
@@ -103,7 +112,16 @@
   color: #fff;
 
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
-  .badge-label { font-size: 12px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+  .badge-label { font-size: 12px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; flex: 1; }
+
+  .dup-pill {
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    padding: 1px 7px;
+    cursor: default;
+  }
 }
 
 .card-body {
@@ -158,16 +176,32 @@
   mat-icon { font-size: 14px; width: 14px; height: 14px; }
 }
 
+.role-card.revoking {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .card-footer {
   padding: 12px 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  gap: 8px;
 
   button {
-    width: 100%;
+    flex: 1;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 4px;
+    font-size: 12px;
 
-    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    mat-icon { font-size: 15px; width: 15px; height: 15px; }
+  }
+
+  .revoke-btn {
+    flex: 0 0 auto;
   }
 }
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

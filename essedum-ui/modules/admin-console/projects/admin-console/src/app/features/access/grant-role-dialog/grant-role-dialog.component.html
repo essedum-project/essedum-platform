@@ -11,7 +11,7 @@
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Role</mat-label>
     <mat-select [(ngModel)]="roleId" name="roleId">
-      <mat-option *ngFor="let role of roles" [value]="role.id">{{ getDisplayRoleName(role.name) }} (rank {{ role.rank }})</mat-option>
+      <mat-option *ngFor="let role of roles" [value]="role.id">{{ getDisplayRoleName(role.name) }}<span *ngIf="role.rank !== undefined && role.rank !== null"> (rank {{ role.rank }})</span></mat-option>
     </mat-select>
   </mat-form-field>
 

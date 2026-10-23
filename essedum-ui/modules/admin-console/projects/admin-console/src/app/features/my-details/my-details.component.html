@@ -14,11 +14,11 @@
   <div class="section-heading">
     <mat-icon>badge</mat-icon>
     <span>My Role Assignments</span>
+    <span class="card-count" *ngIf="!loading">{{ cards.length }}</span>
   </div>
   <p class="section-desc">
-    Each card represents one org → project → role mapping you hold. Click
-    <strong>Configure Menu</strong> to choose which sidebar items appear when
-    you are active in that role.
+    Each card is one unique org → project → role mapping. Duplicate grants are
+    collapsed — <strong>Revoke</strong> removes all of them at once.
   </p>
 
   <!-- Loading -->
@@ -30,17 +30,22 @@
   <!-- Empty -->
   <div *ngIf="!loading && cards.length === 0" class="empty-state">
     <mat-icon>inbox</mat-icon>
-    <span>No role assignments found for your account.</span>
+    <span>No active role assignments found for your account.</span>
   </div>
 
   <!-- Cards grid -->
   <div class="cards-grid" *ngIf="!loading && cards.length > 0">
-    <div class="role-card" *ngFor="let card of cards">
+    <div class="role-card" *ngFor="let card of cards" [class.revoking]="card.revoking">
 
       <!-- Role badge -->
       <div class="role-badge" [style.background-color]="rankColor(card.roleRank)">
         <mat-icon>verified_user</mat-icon>
         <span class="badge-label">{{ rankLabel(card.roleRank) }}</span>
+        <!-- Duplicate count pill -->
+        <span class="dup-pill" *ngIf="card.ids.length > 1"
+              matTooltip="{{ card.ids.length }} duplicate grants — all will be revoked together">
+          ×{{ card.ids.length }}
+        </span>
       </div>
 
       <div class="card-body">
@@ -72,14 +77,25 @@
 
         <div class="card-assigned">
           <mat-icon>event</mat-icon>
-          <span>Granted {{ card.assignment.grantedAt | date:'mediumDate' }}</span>
+          <span>Granted {{ card.grantedAt | date:'mediumDate' }}</span>
         </div>
       </div>
 
       <div class="card-footer">
-        <button mat-stroked-button color="primary" (click)="configureMenu(card)">
+        <button mat-stroked-button color="primary"
+                [disabled]="card.revoking"
+                (click)="configureMenu(card)">
           <mat-icon>tune</mat-icon>
           Configure Menu
+        </button>
+
+        <button mat-stroked-button color="warn"
+                [disabled]="card.revoking"
+                (click)="revokeCard(card)"
+                class="revoke-btn">
+          <mat-icon *ngIf="!card.revoking">remove_circle_outline</mat-icon>
+          <mat-icon *ngIf="card.revoking" class="spin">sync</mat-icon>
+          {{ card.revoking ? 'Revoking…' : 'Revoke' }}
         </button>
       </div>
     </div>
