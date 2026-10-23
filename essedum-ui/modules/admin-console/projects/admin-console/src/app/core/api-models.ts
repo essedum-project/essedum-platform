@@ -131,3 +131,8 @@ export interface AuditEvent {
   details: string | null;
 }
 
+// Concrete export so webpack treats this module as having runtime exports.
+// Without this, a pure-interface file triggers "module has no exports" in
+// production builds with certain optimisation settings.
+export const API_MODELS_LOADED = true;
+
