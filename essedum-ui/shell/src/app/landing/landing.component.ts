@@ -885,22 +885,12 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
                     item.project_name == dashconstant.project_name &&
                     item.keys == dashconstant.keys
                 );
-                if (res.length > 0 && res[0].value == "Black") {
-                  flag = 1;
-                  this.router.navigate(["./cc/BCC/" + landing.id], {
-                    relativeTo: this.route,
-                  });
-                }
-                if (flag == 0) {
-                  this.router.navigate(["./cc/OCC/" + landing.id], {
-                    relativeTo: this.route,
-                  });
-                }
+                // cc/OCC and cc/BCC are legacy dashboard MFEs — navigate to the
+                // host-owned dashboard which always works regardless of MFE state.
+                this.router.navigate(["/landing/dashboard"]);
               });
             } else {
-              this.router.navigate(["./dynamicDashboard/mapbcc"], {
-                relativeTo: this.route,
-              });
+              this.router.navigate(["/landing/dashboard"]);
             }
           }
         );
@@ -2451,13 +2441,17 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
                 return;               
             }
             // Regular navigation logic
-             else if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url && 
+             else if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url &&
                this.sidebarMenu[0].url.includes('./') && this.sidebarMenu[0].url.length > 2) {
                 let filterUrl = this.sidebarMenu[0].url.replace('./', '');
+                // cc/OCC and cc/BCC are legacy dashboard MFEs — always use host dashboard instead.
+                if (filterUrl.startsWith('cc/OCC') || filterUrl.startsWith('cc/BCC') || filterUrl.startsWith('dynamicDashboard')) {
+                  filterUrl = 'dashboard';
+                }
                 this.router.navigate(["/landing/" + filterUrl]).then(() => {
                   // Clear the flag after navigation is complete
                   setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
-                });            
+                });
             } else {
                 this.router
                   .navigate(["../"], { relativeTo: this.route })
