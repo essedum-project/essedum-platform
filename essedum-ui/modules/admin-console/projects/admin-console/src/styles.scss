@@ -558,5 +558,60 @@ body.header-light-theme .admin-console-shell .mdc-text-field--outlined.mdc-text-
 body.header-light-theme .admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__notch,
 body.header-light-theme .admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__trailing { border-color: rgba(37,99,235,0.5) !important; }
 
+/* ════════════════════════════════════════════════════════════════════════════
+   Configure Sidebar Menu dialog — light theme
+   The dialog renders in a CDK overlay outside the MFE root, so it must be
+   targeted via the body class that the shell applies on theme switch.
+   ════════════════════════════════════════════════════════════════════════════ */
+body.header-light-theme .cdk-overlay-container .picker-dialog,
+body.header-light-theme .mat-mdc-dialog-container .picker-dialog {
+  background: #ffffff;
+  color: #1e293b;
+}
+body.header-light-theme .cdk-overlay-container .picker-header,
+body.header-light-theme .mat-mdc-dialog-container .picker-header {
+  background: #f1f5f9;
+  border-bottom: 1px solid rgba(15,23,42,0.10);
+  color: #1e293b;
+}
+body.header-light-theme .cdk-overlay-container .picker-header button,
+body.header-light-theme .mat-mdc-dialog-container .picker-header button { color: #64748b; }
+
+body.header-light-theme .cdk-overlay-container .picker-context,
+body.header-light-theme .mat-mdc-dialog-container .picker-context { background: #f8fafc; border-bottom: 1px solid rgba(15,23,42,0.08); }
+body.header-light-theme .cdk-overlay-container .ctx-chip,
+body.header-light-theme .mat-mdc-dialog-container .ctx-chip { background: rgba(79,142,247,0.10); color: #1e40af; border-color: rgba(79,142,247,0.25); }
+body.header-light-theme .cdk-overlay-container .ctx-arrow,
+body.header-light-theme .mat-mdc-dialog-container .ctx-arrow { color: #94a3b8; }
+
+body.header-light-theme .cdk-overlay-container .global-notice,
+body.header-light-theme .mat-mdc-dialog-container .global-notice { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.3); color: #92400e; }
+body.header-light-theme .cdk-overlay-container .global-notice mat-icon,
+body.header-light-theme .mat-mdc-dialog-container .global-notice mat-icon { color: #d97706; }
+
+body.header-light-theme .cdk-overlay-container .picker-list,
+body.header-light-theme .mat-mdc-dialog-container .picker-list { background: #ffffff; }
+body.header-light-theme .cdk-overlay-container .picker-row,
+body.header-light-theme .mat-mdc-dialog-container .picker-row { border-bottom-color: rgba(15,23,42,0.08); color: #1e293b; }
+body.header-light-theme .cdk-overlay-container .picker-row:hover,
+body.header-light-theme .mat-mdc-dialog-container .picker-row:hover { background: rgba(15,23,42,0.04); }
+body.header-light-theme .cdk-overlay-container .picker-row.active-row,
+body.header-light-theme .mat-mdc-dialog-container .picker-row.active-row { background: rgba(79,142,247,0.08); }
+body.header-light-theme .cdk-overlay-container .picker-row .row-label,
+body.header-light-theme .mat-mdc-dialog-container .picker-row .row-label { color: #1e293b; }
+body.header-light-theme .cdk-overlay-container .picker-row .row-url,
+body.header-light-theme .mat-mdc-dialog-container .picker-row .row-url { color: #64748b; }
+body.header-light-theme .cdk-overlay-container .category-row,
+body.header-light-theme .mat-mdc-dialog-container .category-row { background: #f1f5f9; color: #64748b; border-bottom-color: rgba(15,23,42,0.08); }
+
+body.header-light-theme .cdk-overlay-container .picker-footer,
+body.header-light-theme .mat-mdc-dialog-container .picker-footer { background: #f8fafc; border-top-color: rgba(15,23,42,0.10); color: #64748b; }
+body.header-light-theme .cdk-overlay-container .footer-note,
+body.header-light-theme .mat-mdc-dialog-container .footer-note { color: #059669; }
+
+/* Material dialog container background in light theme */
+body.header-light-theme .cdk-overlay-container .mat-mdc-dialog-surface,
+body.header-light-theme .mat-mdc-dialog-surface { background: #ffffff !important; }
+
 
 

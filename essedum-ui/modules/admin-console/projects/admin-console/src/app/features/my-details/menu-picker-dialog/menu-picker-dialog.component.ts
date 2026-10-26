@@ -156,7 +156,7 @@ export class MenuPickerDialogComponent implements OnInit {
       this.api.deleteRoleMenu(row.roleMenuId, userId).subscribe({
         next: () => {
           row.active = false; row.roleMenuId = null; row.saving = false;
-          window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
+          window.dispatchEvent(new CustomEvent('essedum:role-menu-changed'));
         },
         error: () => { row.saving = false; },
       });
@@ -171,7 +171,7 @@ export class MenuPickerDialogComponent implements OnInit {
       }).subscribe({
         next: rm => {
           row.active = true; row.roleMenuId = rm.id; row.saving = false;
-          window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
+          window.dispatchEvent(new CustomEvent('essedum:role-menu-changed'));
         },
         error: () => { row.saving = false; },
       });

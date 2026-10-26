@@ -483,6 +483,12 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     this.setportfolio();
   };
 
+  // When the admin-console menu-picker adds/removes a role-menu item, refresh
+  // the sidebar immediately WITHOUT navigating (the user stays on the same page).
+  private readonly onRoleMenuChanged = () => {
+    this._loadRoleMenus(false, /* navigate= */ false);
+  };
+
   // Refresh all dropdowns when admin-console creates/deletes an org, project or environment.
   private readonly onTenancyChanged = () => {
     this.setportfolio();
@@ -582,6 +588,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit() {
     window.addEventListener('essedum:assignments-changed', this.onAssignmentsChanged);
     window.addEventListener('essedum:tenancy-changed', this.onTenancyChanged);
+    window.addEventListener('essedum:role-menu-changed', this.onRoleMenuChanged);
     // Detect if login page already set a theme class on body before localStorage was written
     const bodyHasLight = document.body.classList.contains('header-light-theme');
     const bodyHasDark  = document.body.classList.contains('header-dark-theme');
@@ -2717,8 +2724,9 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   /** Load the admin-configured role-menu for the current role+project.
    *  If items are found, replaces this.sidebarMenu and navigates to the first item
    *  when a role/project change is pending (so the user lands on the right page).
-   *  @param fromError  true when called from the getDashConsts error handler. */
-  private _loadRoleMenus(fromError: boolean): void {
+   *  @param fromError  true when called from the getDashConsts error handler.
+   *  @param navigate   false to skip navigation entirely (e.g. live refresh from menu-picker). */
+  private _loadRoleMenus(fromError: boolean, navigate = true): void {
     try {
       const roleForMenu = JSON.parse(sessionStorage.getItem('role') || 'null');
       const projectForMenu = JSON.parse(sessionStorage.getItem('project') || 'null');
@@ -2730,24 +2738,28 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       this.apisService.getRoleMenus(roleForMenu.name, projectForMenu.name, userForMenu.id)
         .subscribe((roleMenuItems: any[]) => {
           if (roleMenuItems && roleMenuItems.length > 0) {
-            const menuFromRole = roleMenuItems.map((m: any) => ({
-              label: m.label,
-              icon: m.icon || 'circle',
-              // Top-level items that only have children: use first child URL for navigation.
-              url: m.url || (m.children?.length ? m.children[0].url : null),
-              children: m.children || [],
-            }));
-            this.sidebarMenu = menuFromRole;
+            // Filter out malformed items (no label) to prevent nameless icons in sidebar
+            const menuFromRole = roleMenuItems
+              .filter((m: any) => m && m.label)
+              .map((m: any) => ({
+                label: m.label,
+                icon: m.icon && m.icon !== 'circle' ? m.icon : null,
+                // Top-level items that only have children: use first child URL for navigation.
+                url: m.url || (m.children?.length ? m.children[0].url : null),
+                children: m.children || [],
+              }));
+            if (menuFromRole.length > 0) {
+              this.sidebarMenu = menuFromRole;
+            }
 
-            // Navigate to the first configured item when this was triggered by a
-            // role/project change, so the user doesn't stay on whatever DashConsts
-            // navigated to (or the blank /#/ that results when sidebarMenu was []).
+            // Navigate to the first configured item when triggered by a role/project change.
             const roleChanged = sessionStorage.getItem('roleChanged') === 'true';
             const selectionChange = sessionStorage.getItem('selectionChange') || '';
             const navInProgress = sessionStorage.getItem('navigatingInProgress') === 'true';
             const isAdminRole = (roleForMenu.name || '').toLowerCase() === 'admin' ||
                                 (roleForMenu.name || '').toLowerCase() === 'it portfolio manager';
-            if ((roleChanged || selectionChange || fromError) && !navInProgress && !isAdminRole) {
+            if (navigate && menuFromRole.length > 0 &&
+                (roleChanged || selectionChange || fromError) && !navInProgress && !isAdminRole) {
               const first = menuFromRole[0];
               if (first?.url) {
                 const raw = first.url.startsWith('./') ? first.url.slice(2) : first.url.replace(/^\/+/, '');
@@ -3371,6 +3383,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   ngOnDestroy(): void {
     window.removeEventListener('essedum:assignments-changed', this.onAssignmentsChanged);
     window.removeEventListener('essedum:tenancy-changed', this.onTenancyChanged);
+    window.removeEventListener('essedum:role-menu-changed', this.onRoleMenuChanged);
   }
 
   ngAfterViewInit() {

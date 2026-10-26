@@ -196,7 +196,52 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
           }
         }
 
-        return Array.from(seen.values());
+        let allCards = Array.from(seen.values());
+
+        // Synthetic card for the current session role if it's not already in the list.
+        // This covers legacy roles (e.g. "IT Portfolio Manager") that never appear in
+        // rbac_role_assignment and are not returned by getLegacyUserAssignments.
+        try {
+          const sessionRole = JSON.parse(sessionStorage.getItem('role') || 'null');
+          const sessionProject = JSON.parse(sessionStorage.getItem('project') || 'null');
+          if (sessionRole?.name) {
+            const roleLower = sessionRole.name.toLowerCase();
+            const alreadyPresent = allCards.some(c => c.roleName.toLowerCase() === roleLower);
+            if (!alreadyPresent) {
+              const proj = sessionProject?.id != null ? projMap.get(sessionProject.id) : null;
+              const projectName = sessionProject?.projectdisplayname
+                || proj?.projectdisplayname
+                || proj?.portfolioId?.portfolioName
+                || sessionProject?.name
+                || null;
+              const projOrgId2 = (proj as any)?.organisationId as number | null | undefined;
+              let orgName2: string | null = proj?.portfolioId?.portfolioName ?? null;
+              if (!orgName2 && projOrgId2 != null) orgName2 = orgMap.get(projOrgId2) ?? null;
+
+              allCards.push({
+                ids: [],
+                roleName: sessionRole.name,
+                roleRank: null,
+                orgName: orgName2,
+                projectName,
+                projectId: sessionProject?.id ?? null,
+                grantedAt: '',
+                revoking: false,
+                source: 'legacy',
+              });
+            }
+          }
+        } catch { /* ignore */ }
+
+        // Sort: active session row(s) first, then alphabetically by role name.
+        allCards.sort((a, b) => {
+          const aActive = this.isCurrentSession(a) ? 0 : 1;
+          const bActive = this.isCurrentSession(b) ? 0 : 1;
+          if (aActive !== bActive) return aActive - bActive;
+          return a.roleName.toLowerCase().localeCompare(b.roleName.toLowerCase());
+        });
+
+        return allCards;
       })
     ).subscribe({
       next: cards => { this.cards = cards; this.loading = false; this.syncTableData(); },
