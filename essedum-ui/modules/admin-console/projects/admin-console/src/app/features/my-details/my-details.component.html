@@ -33,9 +33,31 @@
     <span>No active role assignments found for your account.</span>
   </div>
 
+  <!-- Filters -->
+  <div class="filter-bar" *ngIf="!loading && cards.length > 0">
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Filter Role</mat-label>
+      <input matInput [(ngModel)]="filterRole" placeholder="e.g. Admin">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Filter Organisation</mat-label>
+      <input matInput [(ngModel)]="filterOrg" placeholder="e.g. Leo1311">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Filter Project</mat-label>
+      <input matInput [(ngModel)]="filterProject" placeholder="e.g. Live Enterprise">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <span class="filter-count" *ngIf="filterRole || filterOrg || filterProject">
+      {{ filteredCards.length }} / {{ cards.length }} shown
+    </span>
+  </div>
+
   <!-- Table -->
   <div class="table-wrap" *ngIf="!loading && cards.length > 0">
-    <table mat-table [dataSource]="cards" class="assignments-table">
+    <table mat-table [dataSource]="filteredCards" class="assignments-table">
 
       <!-- Role column -->
       <ng-container matColumnDef="role">
@@ -43,8 +65,14 @@
         <td mat-cell *matCellDef="let card">
           <div class="role-cell">
             <span class="role-name">{{ card.roleName }}</span>
-            <span class="role-type-badge" [class.rbac-badge]="card.roleRank > 0" [class.legacy-badge]="card.roleRank === 0">
-              {{ card.roleRank > 0 ? 'RBAC · rank ' + card.roleRank : 'Legacy' }}
+            <span class="role-type-badge"
+                  [class.rbac-badge]="card.roleRank != null"
+                  [class.legacy-badge]="card.roleRank == null"
+                  [matTooltip]="rankLabel(card.roleRank)">
+              {{ card.roleRank != null ? 'RBAC · rank ' + card.roleRank : 'Legacy' }}
+            </span>
+            <span class="active-badge" *ngIf="isCurrentSession(card)">
+              <mat-icon>radio_button_checked</mat-icon> Active
             </span>
             <span class="dup-pill" *ngIf="card.ids.length > 1"
                   matTooltip="{{ card.ids.length }} duplicate grants — all will be revoked together">
@@ -104,7 +132,8 @@
             Configure Menu
           </button>
           <button mat-stroked-button color="warn"
-                  [disabled]="card.revoking"
+                  [disabled]="card.revoking || card.ids.length === 0"
+                  [matTooltip]="card.ids.length === 0 ? 'Assigned via legacy system — manage in Org Admin' : ''"
                   (click)="revokeCard(card)"
                   class="action-btn revoke-btn">
             <mat-icon *ngIf="!card.revoking">remove_circle_outline</mat-icon>
@@ -115,7 +144,9 @@
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: tableColumns;" [class.revoking-row]="row.revoking"></tr>
+      <tr mat-row *matRowDef="let row; columns: tableColumns;"
+          [class.revoking-row]="row.revoking"
+          [class.active-session-row]="isCurrentSession(row)"></tr>
     </table>
   </div>
 

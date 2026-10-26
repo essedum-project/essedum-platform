@@ -174,3 +174,14 @@ body.header-light-theme .admin-console-table .mat-mdc-header-row { background: #
 body.header-light-theme .admin-console-table .mat-mdc-header-cell { color: #64748b !important; border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important; }
 body.header-light-theme .admin-console-table .mat-mdc-cell { color: #1e293b !important; border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important; }
 body.header-light-theme .admin-console-table .mat-mdc-row:hover { background: rgba(15, 23, 42, 0.04) !important; }
+
+.admin-console-page .empty-state {
+  color: #94a3b8;
+  padding: 48px 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.6;
+}
+body.header-light-theme .admin-console-page .empty-state {
+  color: #64748b;
+}

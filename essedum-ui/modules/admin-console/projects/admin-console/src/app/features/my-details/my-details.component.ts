@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, map, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import type { RoleAssignment, RbacRole, LegacyOrganisation, LegacyProject } from '../../core/api-models';
@@ -12,12 +13,15 @@ export interface RoleCard {
   // We show one card but track all ids so we can revoke all of them.
   ids: number[];
   roleName: string;
-  roleRank: number;
+  /** null means legacy role (no RBAC rank); 0-4 means RBAC role at that rank level. */
+  roleRank: number | null;
   orgName: string | null;
   projectName: string | null;
   projectId: number | null;
   grantedAt: string;
   revoking: boolean;
+  /** 'rbac' = from rbac_role_assignment; 'legacy' = from usm_user_project_role only */
+  source: 'rbac' | 'legacy';
 }
 
 @Component({
@@ -31,7 +35,22 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
   loading = true;
   user: any = {};
 
+  filterRole = '';
+  filterOrg = '';
+  filterProject = '';
+
   readonly tableColumns = ['role', 'org', 'project', 'user', 'granted', 'actions'];
+
+  get filteredCards(): RoleCard[] {
+    const r = this.filterRole.toLowerCase();
+    const o = this.filterOrg.toLowerCase();
+    const p = this.filterProject.toLowerCase();
+    return this.cards.filter(c =>
+      (!r || c.roleName.toLowerCase().includes(r)) &&
+      (!o || (c.orgName || '').toLowerCase().includes(o)) &&
+      (!p || (c.projectName || '').toLowerCase().includes(p))
+    );
+  }
 
   private readonly onAssignmentsChanged = () => this.load();
 
@@ -64,24 +83,34 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
 
   private load(): void {
     const userId = this.userContext.userId$.value;
+    const userLogin: string = this.user?.user_login ?? '';
+
     combineLatest([
       this.api.getRoleAssignments(userId),
       this.api.getRoles(),
       this.api.getOrganisations(),
       this.api.getProjects(),
+      // Also fetch legacy assignments — fall back to empty on error (old endpoint may be unavailable)
+      userLogin
+        ? this.api.getLegacyUserAssignments(userLogin).pipe(catchError(() => of({})))
+        : of({}),
     ]).pipe(
-      map(([assignments, roles, orgs, projects]) => {
+      map(([assignments, roles, orgs, projects, legacyMap]) => {
         const roleMap = new Map<number, RbacRole>(roles.map(r => [r.id, r]));
         const orgMap = new Map<number, string>(orgs.map(o => [o.id, o.name]));
-        const projMap = new Map<number, string>(projects.map(p => [p.id, p.name]));
+        const projMap = new Map<number, LegacyProject>(projects.map(p => [p.id, p]));
 
-        // Deduplicate: same role+project+org combo → one card, track all ids
+        // Deduplicate: key = roleName(lower)|projectId|orgId — catches RBAC + legacy duplicates
         const seen = new Map<string, RoleCard>();
+
+        // ── Source 1: RBAC assignments ──
         for (const a of assignments.filter(a => !a.revokedAt)) {
-          const roleName = roleMap.get(a.roleId)?.name ?? `Role #${a.roleId}`;
+          const role = roleMap.get(a.roleId);
+          const roleName = role?.name ?? `Role #${a.roleId}`;
           const orgName = a.organizationId != null ? (orgMap.get(a.organizationId) ?? `Org #${a.organizationId}`) : null;
-          const projectName = a.projectId != null ? (projMap.get(a.projectId) ?? `Project #${a.projectId}`) : null;
-          const key = `${a.roleId}|${a.organizationId ?? ''}|${a.projectId ?? ''}`;
+          const proj = a.projectId != null ? projMap.get(a.projectId) : null;
+          const projectName = proj?.name ?? (a.projectId != null ? `Project #${a.projectId}` : null);
+          const key = `${roleName.toLowerCase()}|${a.projectId ?? ''}|${a.organizationId ?? ''}`;
 
           if (seen.has(key)) {
             seen.get(key)!.ids.push(a.id);
@@ -89,15 +118,48 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
             seen.set(key, {
               ids: [a.id],
               roleName,
-              roleRank: roleMap.get(a.roleId)?.rank ?? 0,
+              roleRank: role?.rank != null ? role.rank : null,
               orgName,
               projectName,
               projectId: a.projectId,
               grantedAt: a.grantedAt,
               revoking: false,
+              source: 'rbac',
             });
           }
         }
+
+        // ── Source 2: Legacy assignments from usm_user_project_role ──
+        // legacyMap shape: { [projectId]: Role[] }
+        const legacy = legacyMap as Record<string, any[]>;
+        for (const [projIdStr, roleList] of Object.entries(legacy)) {
+          const projId = parseInt(projIdStr, 10);
+          const proj = projMap.get(projId);
+          const projectName = proj?.name ?? `Project #${projId}`;
+          // Org: from project's portfolioId (legacy) or organisationId (RBAC)
+          const orgName = proj?.portfolioId?.portfolioName
+            ?? (proj?.organisationId != null ? (orgMap.get(proj.organisationId) ?? null) : null);
+
+          for (const legacyRole of (roleList || [])) {
+            const roleName: string = legacyRole?.name ?? legacyRole?.role_name ?? `Role #${legacyRole?.id}`;
+            const key = `${roleName.toLowerCase()}|${projId}|`;
+
+            if (!seen.has(key)) {
+              seen.set(key, {
+                ids: [],   // no rbac_role_assignment id — can't revoke via new API
+                roleName,
+                roleRank: null,  // legacy role — no RBAC rank
+                orgName,
+                projectName,
+                projectId: projId,
+                grantedAt: legacyRole?.time_stamp ?? '',
+                revoking: false,
+                source: 'legacy',
+              });
+            }
+          }
+        }
+
         return Array.from(seen.values());
       })
     ).subscribe({
@@ -106,14 +168,28 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
-  rankLabel(rank: number): string {
+  isCurrentSession(card: RoleCard): boolean {
+    try {
+      const role = JSON.parse(sessionStorage.getItem('role') || 'null');
+      const project = JSON.parse(sessionStorage.getItem('project') || 'null');
+      if (!role) return false;
+      const roleMatch = (role.name || '').toLowerCase() === card.roleName.toLowerCase();
+      const projectMatch = !card.projectName ||
+        (project && (project.name === card.projectName || project.id === card.projectId));
+      return roleMatch && projectMatch;
+    } catch { return false; }
+  }
+
+  rankLabel(rank: number | null): string {
+    if (rank == null) return 'Legacy';
     const map: Record<number, string> = {
       0: 'Consumer', 1: 'Engineer', 2: 'Project Admin', 3: 'Org Admin', 4: 'Platform Admin',
     };
     return map[rank] ?? `Rank ${rank}`;
   }
 
-  rankColor(rank: number): string {
+  rankColor(rank: number | null): string {
+    if (rank == null) return '#9c27b0';
     const map: Record<number, string> = {
       0: '#607d8b', 1: '#1976d2', 2: '#388e3c', 3: '#f57c00', 4: '#7b1fa2',
     };

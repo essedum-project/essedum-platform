@@ -189,7 +189,7 @@
               </div>
 
               <!-- Role -->
-              <div *ngIf="roleList?.length >= 1" (click)="$event.stopPropagation()" class="profile-menu-field-row">
+              <div *ngIf="roleList?.length >= 1 || selectedrole?.name" (click)="$event.stopPropagation()" class="profile-menu-field-row">
                 <span class="profile-menu-field-label">Role</span>
                 <mat-form-field class="profile-form-field" appearance="outline" subscriptSizing="dynamic">
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedrole"

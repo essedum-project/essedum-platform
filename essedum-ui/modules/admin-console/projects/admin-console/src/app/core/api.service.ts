@@ -185,6 +185,14 @@ export class ApiService {
     return this.http.delete<void>(`${this.base}/role-menus/${id}`, { params: { actorUserId } });
   }
 
+  // ---- legacy user-project-role assignments (usm_user_project_role) ----
+  // Returns Map<projectId, Role[]> for the given user login.
+  getLegacyUserAssignments(userLogin: string): Observable<Record<string, any[]>> {
+    return this.http.post<Record<string, any[]>>('/api/user-project-roles/user', userLogin, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   // ---- legacy tenancy (existing OrganisationResource/ProjectResource, under /api not /api/usm) ----
   getOrganisations(): Observable<LegacyOrganisation[]> {
     return this.http.get<LegacyOrganisation[]>('/api/organisations', { params: { size: '1000' } });
