@@ -481,11 +481,15 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   // successful grant/revoke so the shell's role dropdown stays in sync without a page reload.
   private readonly onAssignmentsChanged = () => {
     this.setportfolio();
+    // Also refresh RBAC rank map + role-list sort so newly granted RBAC roles
+    // appear in the dropdown without requiring a logout/login.
+    setTimeout(() => this.supplementRbacData(), 800);
   };
 
   // When the admin-console menu-picker adds/removes a role-menu item, refresh
   // the sidebar immediately WITHOUT navigating (the user stays on the same page).
   private readonly onRoleMenuChanged = () => {
+    console.log('[MENU] onRoleMenuChanged event fired → refreshing sidebar without navigation');
     this._loadRoleMenus(false, /* navigate= */ false);
   };
 
@@ -1408,6 +1412,10 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
+    // Kick off sidebar rebuild for the new role immediately (in parallel with
+    // the permission call + navigation) so the menu is ready when the new page loads.
+    console.log('[MENU] valuechangerole → starting newsidebar() for role:', this.selectedrole?.name);
+    this.newsidebar();
     this.apisService.getPermission("cip").subscribe(
       (resp) => {
         sessionStorage.setItem(
@@ -2078,6 +2086,9 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   newsidebar() {
+    const _role = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return '?'; } })();
+    console.group(`[MENU] newsidebar() — role: ${_role}`);
+    console.log('[MENU] newsidebar: starting getDashConsts');
    this.isSidebarLoading = true;
     // this.removeFilters();
     this.apisService.getDashConsts().subscribe(
@@ -2397,6 +2408,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         
         // Set sidebar menu if we have collected configurations
         if (sidebarMenutemp.length > 0) {
+          console.log('[MENU] newsidebar: setting sidebarMenu from DashConsts —', sidebarMenutemp.length, 'items:', sidebarMenutemp.map((i:any)=>i?.label));
           this.sidebarMenu = sidebarMenutemp;
 
           // RBAC admin tiers (Project Admin and above, bridgeToLegacyUserProjectRole
@@ -2691,7 +2703,8 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         }     
       },
       (error) => {
-        console.error('Error loading sidebar:', error);
+        console.error('[MENU] newsidebar: getDashConsts error — falling back to _loadRoleMenus', error);
+        console.groupEnd();
         // DashConsts failed — still try to load any configured role-menu.
         this._loadRoleMenus(true);
       },
@@ -2715,6 +2728,8 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         // If any items are found they override the DashConsts sidebar AND
         // handle navigation, so RBAC roles with no DashConsts entries don't
         // land on a blank page.
+        console.log('[MENU] newsidebar: getDashConsts complete → calling _loadRoleMenus');
+        console.groupEnd();
         this._loadRoleMenus(false);
       }
     );
@@ -2731,12 +2746,15 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       const roleForMenu = JSON.parse(sessionStorage.getItem('role') || 'null');
       const projectForMenu = JSON.parse(sessionStorage.getItem('project') || 'null');
       const userForMenu = JSON.parse(sessionStorage.getItem('user') || 'null');
+      console.log(`[MENU] _loadRoleMenus(fromError=${fromError}, navigate=${navigate}) role="${roleForMenu?.name}" project="${projectForMenu?.name}"`);
       if (!roleForMenu?.name || !projectForMenu?.name || !userForMenu?.id) {
+        console.log('[MENU] _loadRoleMenus: missing role/project/user — skipping');
         this.isSidebarLoading = false;
         return;
       }
       this.apisService.getRoleMenus(roleForMenu.name, projectForMenu.name, userForMenu.id)
         .subscribe((roleMenuItems: any[]) => {
+          console.log(`[MENU] _loadRoleMenus: getRoleMenus returned ${roleMenuItems?.length ?? 0} items:`, (roleMenuItems||[]).map((m:any)=>m?.label));
           if (roleMenuItems && roleMenuItems.length > 0) {
             // Filter out malformed items (no label) to prevent nameless icons in sidebar
             const menuFromRole = roleMenuItems
@@ -2749,6 +2767,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
                 children: m.children || [],
               }));
             if (menuFromRole.length > 0) {
+              console.log('[MENU] _loadRoleMenus: OVERRIDING sidebarMenu with configured role-menu —', menuFromRole.length, 'items:', menuFromRole.map((i:any)=>i?.label));
               this.sidebarMenu = menuFromRole;
             }
 
@@ -2773,6 +2792,8 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
                 });
               }
             }
+          } else {
+            console.log('[MENU] _loadRoleMenus: no configured role-menu found — keeping current sidebarMenu:', this.sidebarMenu?.map((i:any)=>i?.label));
           }
           this.isSidebarLoading = false;
         });
