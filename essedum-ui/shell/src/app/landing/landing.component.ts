@@ -1412,10 +1412,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
-    // Kick off sidebar rebuild for the new role immediately (in parallel with
-    // the permission call + navigation) so the menu is ready when the new page loads.
-    console.log('[MENU] valuechangerole → starting newsidebar() for role:', this.selectedrole?.name);
-    this.newsidebar();
+    console.log('[MENU] valuechangerole → role changed to:', this.selectedrole?.name);
     this.apisService.getPermission("cip").subscribe(
       (resp) => {
         sessionStorage.setItem(

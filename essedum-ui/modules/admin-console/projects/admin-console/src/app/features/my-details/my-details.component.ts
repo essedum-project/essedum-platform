@@ -285,7 +285,17 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
 
   configureMenu(card: RoleCard): void {
     let portfolioId: number | undefined;
-    try { portfolioId = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}').id; } catch {}
+    // Use the session project's INTERNAL name (not display name) when the card
+    // matches the current session project — this must match what the shell's
+    // _loadRoleMenus uses so the popup reads/writes the same DB records.
+    let projectName = card.projectName;
+    try {
+      portfolioId = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}').id;
+      const sessionProject = JSON.parse(sessionStorage.getItem('project') || 'null');
+      if (sessionProject?.id != null && sessionProject.id === card.projectId && sessionProject.name) {
+        projectName = sessionProject.name;
+      }
+    } catch {}
 
     this.dialog.open(MenuPickerDialogComponent, {
       width: '700px',
@@ -293,7 +303,7 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
       panelClass: 'menu-picker-panel',
       data: {
         roleName: card.roleName,
-        projectName: card.projectName,
+        projectName,
         projectId: card.projectId ?? undefined,
         portfolioId,
         userId: this.userContext.userId$.value,
