@@ -2685,7 +2685,8 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       },
       (error) => {
         console.error('Error loading sidebar:', error);
-        this.isSidebarLoading = false;
+        // DashConsts failed — still try to load any configured role-menu.
+        this._loadRoleMenus(true);
       },
       () => {
         if (
@@ -2695,48 +2696,77 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
           this.sidebarSectionIndex = Number(
             sessionStorage.getItem("sidebarSectionIndex")
           );
-        
-        // Add a small delay before removing the navigation flag to ensure any pending
-        // navigations have completed
+
         setTimeout(() => {
-          // Only remove if not set by another action
-          if (sessionStorage.getItem("navigatingToRoute") && 
+          if (sessionStorage.getItem("navigatingToRoute") &&
               !sessionStorage.getItem("navigatingInProgress")) {
             sessionStorage.removeItem("navigatingToRoute");
           }
         }, 1000);
-        
-        // Check if there is an admin-configured role-menu for the current role+project.
-        // If yes, it takes precedence over the DashConsts-derived sidebar so that
-        // "Configure Menu" in My Details actually takes effect immediately.
-        try {
-          const roleForMenu = JSON.parse(sessionStorage.getItem('role') || 'null');
-          const projectForMenu = JSON.parse(sessionStorage.getItem('project') || 'null');
-          const userForMenu = JSON.parse(sessionStorage.getItem('user') || 'null');
-          if (roleForMenu?.name && projectForMenu?.name && userForMenu?.id) {
-            this.apisService.getRoleMenus(roleForMenu.name, projectForMenu.name, userForMenu.id)
-              .subscribe((roleMenuItems: any[]) => {
-                if (roleMenuItems && roleMenuItems.length > 0) {
-                  // Build sidebar items from configured role-menu, preserving children array
-                  const menuFromRole = roleMenuItems.map((m: any) => ({
-                    label: m.label,
-                    icon: m.icon || 'circle',
-                    url: m.url || (m.children && m.children.length ? m.children[0].url : null),
-                    children: m.children || [],
-                  }));
-                  this.sidebarMenu = menuFromRole;
-                }
-                this.isSidebarLoading = false;
-              });
-          } else {
-            this.isSidebarLoading = false;
-          }
-        } catch {
-          this.isSidebarLoading = false;
-        }
+
+        // Load configured role-menu AFTER DashConsts sidebar is assembled.
+        // If any items are found they override the DashConsts sidebar AND
+        // handle navigation, so RBAC roles with no DashConsts entries don't
+        // land on a blank page.
+        this._loadRoleMenus(false);
       }
     );
 
+  }
+
+  /** Load the admin-configured role-menu for the current role+project.
+   *  If items are found, replaces this.sidebarMenu and navigates to the first item
+   *  when a role/project change is pending (so the user lands on the right page).
+   *  @param fromError  true when called from the getDashConsts error handler. */
+  private _loadRoleMenus(fromError: boolean): void {
+    try {
+      const roleForMenu = JSON.parse(sessionStorage.getItem('role') || 'null');
+      const projectForMenu = JSON.parse(sessionStorage.getItem('project') || 'null');
+      const userForMenu = JSON.parse(sessionStorage.getItem('user') || 'null');
+      if (!roleForMenu?.name || !projectForMenu?.name || !userForMenu?.id) {
+        this.isSidebarLoading = false;
+        return;
+      }
+      this.apisService.getRoleMenus(roleForMenu.name, projectForMenu.name, userForMenu.id)
+        .subscribe((roleMenuItems: any[]) => {
+          if (roleMenuItems && roleMenuItems.length > 0) {
+            const menuFromRole = roleMenuItems.map((m: any) => ({
+              label: m.label,
+              icon: m.icon || 'circle',
+              // Top-level items that only have children: use first child URL for navigation.
+              url: m.url || (m.children?.length ? m.children[0].url : null),
+              children: m.children || [],
+            }));
+            this.sidebarMenu = menuFromRole;
+
+            // Navigate to the first configured item when this was triggered by a
+            // role/project change, so the user doesn't stay on whatever DashConsts
+            // navigated to (or the blank /#/ that results when sidebarMenu was []).
+            const roleChanged = sessionStorage.getItem('roleChanged') === 'true';
+            const selectionChange = sessionStorage.getItem('selectionChange') || '';
+            const navInProgress = sessionStorage.getItem('navigatingInProgress') === 'true';
+            const isAdminRole = (roleForMenu.name || '').toLowerCase() === 'admin' ||
+                                (roleForMenu.name || '').toLowerCase() === 'it portfolio manager';
+            if ((roleChanged || selectionChange || fromError) && !navInProgress && !isAdminRole) {
+              const first = menuFromRole[0];
+              if (first?.url) {
+                const raw = first.url.startsWith('./') ? first.url.slice(2) : first.url.replace(/^\/+/, '');
+                sessionStorage.setItem('navigatingInProgress', 'true');
+                this.router.navigate(['/landing/' + raw]).then(() => {
+                  setTimeout(() => {
+                    sessionStorage.removeItem('navigatingInProgress');
+                    sessionStorage.removeItem('roleChanged');
+                    sessionStorage.removeItem('selectionChange');
+                  }, 500);
+                });
+              }
+            }
+          }
+          this.isSidebarLoading = false;
+        });
+    } catch {
+      this.isSidebarLoading = false;
+    }
   }
   getIdDataObject(secondLevelObj: any) {
     let resObj: any = {};
