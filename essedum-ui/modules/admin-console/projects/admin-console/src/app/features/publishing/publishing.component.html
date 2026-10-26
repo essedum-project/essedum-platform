@@ -60,8 +60,9 @@
     <tr mat-header-row *matHeaderRowDef="columns"></tr>
     <tr mat-row *matRowDef="let row; columns: columns"></tr>
   </table>
+  <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
 
-  <p *ngIf="versions.length === 0" class="empty-state">
+  <p *ngIf="versions.data.length === 0" class="empty-state">
     No drafts yet. Click <strong>New Draft</strong> to create an asset.
   </p>
 </div>

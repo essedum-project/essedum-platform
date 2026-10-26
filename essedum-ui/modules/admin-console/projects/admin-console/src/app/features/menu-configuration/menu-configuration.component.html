@@ -33,7 +33,7 @@
   <div *ngIf="mode === 'admin'" class="role-filter-bar">
     <mat-form-field appearance="fill" class="filter-field filter-field-wide">
       <mat-label>Visible to admin type</mat-label>
-      <mat-select [(ngModel)]="adminTierFilter" name="adminTierFilter">
+      <mat-select [(ngModel)]="adminTierFilter" (ngModelChange)="syncAdminData()" name="adminTierFilter">
         <mat-option [value]="null">All menu items</mat-option>
         <mat-option *ngFor="let tier of adminTiers" [value]="tier.rank">
           {{ tier.label }} (rank {{ tier.rank }})
@@ -43,7 +43,7 @@
     <span class="count-badge">{{ filteredAdminRows.length }} of {{ adminRows.length }} items</span>
   </div>
 
-  <table *ngIf="mode === 'admin'" mat-table [dataSource]="filteredAdminRows" class="admin-console-table">
+  <table *ngIf="mode === 'admin'" mat-table [dataSource]="adminDataSource" class="admin-console-table">
     <ng-container matColumnDef="label">
       <th mat-header-cell *matHeaderCellDef>Label</th>
       <td mat-cell *matCellDef="let row">
@@ -105,6 +105,7 @@
     <tr mat-header-row *matHeaderRowDef="adminColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: adminColumns"></tr>
   </table>
+  <mat-paginator #adminPaginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
 
   <!-- ── Role sidebars (usm_constant, live) ───────────────────────────────── -->
   <ng-container *ngIf="mode === 'role'">
@@ -129,7 +130,7 @@
       </span>
     </div>
 
-    <table mat-table [dataSource]="roleRows" class="admin-console-table">
+    <table mat-table [dataSource]="roleDataSource" class="admin-console-table">
 
       <ng-container matColumnDef="label">
         <th mat-header-cell *matHeaderCellDef>Label</th>
@@ -179,6 +180,7 @@
       <tr mat-header-row *matHeaderRowDef="roleColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: roleColumns"></tr>
     </table>
+    <mat-paginator #rolePaginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
 
     <div *ngIf="roleRows.length === 0 && selectedRole && selectedProject" class="menu-empty-state">
       <mat-icon>menu_open</mat-icon>

@@ -17,6 +17,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 // Routing
 import { EntryRoutingModule } from './entry-routing.module';
@@ -81,6 +82,7 @@ import { MenuPickerDialogComponent } from '../features/my-details/menu-picker-di
     MatTooltipModule,
     MatDialogModule,
     MatCheckboxModule,
+    MatPaginatorModule,
     EntryRoutingModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

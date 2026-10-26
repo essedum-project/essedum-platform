@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import type { MenuItem, RoleMenu } from '../../core/api-models';
@@ -20,11 +22,12 @@ interface MenuItemRow extends MenuItem {
   styleUrls: ['./menu-configuration.component.scss'],
   standalone: false,
 })
-export class MenuConfigurationComponent implements OnInit {
+export class MenuConfigurationComponent implements OnInit, AfterViewInit {
   mode: 'admin' | 'role' = 'admin';
 
   // ----- admin console menu (rbac_menu_item) -----
   adminRows: MenuItemRow[] = [];
+  adminDataSource = new MatTableDataSource<MenuItemRow>([]);
   readonly adminColumns = ['label', 'icon', 'route', 'parentLabel', 'minRoleRank', 'displayOrder', 'actions'];
 
   // Matches rbac_role ranks. null = no filter.
@@ -51,7 +54,16 @@ export class MenuConfigurationComponent implements OnInit {
   selectedRole = '';
   selectedProject = '';
   roleRows: RoleMenu[] = [];
+  roleDataSource = new MatTableDataSource<RoleMenu>([]);
   readonly roleColumns = ['label', 'icon', 'url', 'hasChildren', 'actions'];
+
+  @ViewChild('adminPaginator') adminPaginator!: MatPaginator;
+  @ViewChild('rolePaginator') rolePaginator!: MatPaginator;
+
+  ngAfterViewInit(): void {
+    this.adminDataSource.paginator = this.adminPaginator;
+    this.roleDataSource.paginator = this.rolePaginator;
+  }
 
   constructor(
     private readonly api: ApiService,
@@ -71,6 +83,11 @@ export class MenuConfigurationComponent implements OnInit {
     }
   }
 
+  syncAdminData(): void {
+    this.adminDataSource.data = this.filteredAdminRows;
+    this.adminDataSource.paginator = this.adminPaginator;
+  }
+
   // ----- admin console menu -----
   private loadAdmin(): void {
     this.api.getMenuItems(this.userContext.userId$.value).subscribe(items => {
@@ -80,6 +97,7 @@ export class MenuConfigurationComponent implements OnInit {
           parentLabel: items.find(p => p.id === item.parentId)?.label ?? '—',
         }))
         .sort((a, b) => a.displayOrder - b.displayOrder);
+      this.syncAdminData();
     });
   }
 
@@ -128,7 +146,11 @@ export class MenuConfigurationComponent implements OnInit {
       this.roleRows = [];
       return;
     }
-    this.api.getRoleMenus(this.selectedRole, this.selectedProject, this.userContext.userId$.value).subscribe(rows => (this.roleRows = rows));
+    this.api.getRoleMenus(this.selectedRole, this.selectedProject, this.userContext.userId$.value).subscribe(rows => {
+      this.roleRows = rows;
+      this.roleDataSource.data = rows;
+      this.roleDataSource.paginator = this.rolePaginator;
+    });
   }
 
   addRoleMenu(): void {

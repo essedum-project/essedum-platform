@@ -1,7 +1,9 @@
-import { Component, OnInit, ViewEncapsulation, ElementRef, effect } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ElementRef, effect, ViewChild, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import { ThemeService } from '../../core/theme.service';
@@ -25,7 +27,7 @@ interface StatCard {
   encapsulation: ViewEncapsulation.ShadowDom,
   standalone: false,
 })
-export class OverviewComponent implements OnInit {
+export class OverviewComponent implements OnInit, AfterViewInit {
   // `route` is a sibling segment, navigated relative to this route — the
   // remote is mounted under the host's /landing/admin-console/**, so an
   // absolute '/admin-console/...' link would not resolve.
@@ -36,9 +38,15 @@ export class OverviewComponent implements OnInit {
     { label: 'Pending Approvals', count: 0, route: 'approvals', accent: '#fb923c' },
     { label: 'Menu Items', count: 0, route: 'menu-configuration', accent: '#22c55e' },
   ];
-  recentAudit: AuditEvent[] = [];
+  recentAudit = new MatTableDataSource<AuditEvent>([]);
   readonly auditColumns = ['occurredAt', 'entity', 'action', 'actorName'];
   loading = true;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  ngAfterViewInit(): void {
+    this.recentAudit.paginator = this.paginator;
+  }
 
   constructor(
     private readonly api: ApiService,
@@ -75,7 +83,7 @@ export class OverviewComponent implements OnInit {
       this.cards[2].count = res.members.length;
       this.cards[3].count = res.approvals.length;
       this.cards[4].count = res.menus.length;
-      this.recentAudit = (res.audit || []).slice(0, 8);
+      this.recentAudit.data = (res.audit || []).slice(0, 8);
       this.loading = false;
     });
   }

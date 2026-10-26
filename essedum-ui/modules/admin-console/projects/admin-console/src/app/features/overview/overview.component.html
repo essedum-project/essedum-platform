@@ -23,7 +23,7 @@
     mat-table
     [dataSource]="recentAudit"
     class="admin-console-table"
-    *ngIf="recentAudit.length; else noAudit"
+    *ngIf="recentAudit.data.length; else noAudit"
   >
     <ng-container matColumnDef="occurredAt">
       <th mat-header-cell *matHeaderCellDef>Time</th>
@@ -44,6 +44,7 @@
     <tr mat-header-row *matHeaderRowDef="auditColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: auditColumns"></tr>
   </table>
+  <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
   <ng-template #noAudit>
     <p class="empty">{{ loading ? 'Loading…' : 'No recent activity.' }}</p>
   </ng-template>

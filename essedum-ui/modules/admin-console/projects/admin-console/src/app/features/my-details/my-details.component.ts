@@ -1,5 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { combineLatest, map, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/api.service';
@@ -30,7 +32,7 @@ export interface RoleCard {
   styleUrls: ['./my-details.component.scss'],
   standalone: false,
 })
-export class MyDetailsComponent implements OnInit, OnDestroy {
+export class MyDetailsComponent implements OnInit, OnDestroy, AfterViewInit {
   cards: RoleCard[] = [];
   loading = true;
   user: any = {};
@@ -38,6 +40,9 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
   filterRole = '';
   filterOrg = '';
   filterProject = '';
+
+  tableDataSource = new MatTableDataSource<RoleCard>([]);
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   readonly tableColumns = ['role', 'org', 'project', 'user', 'granted', 'actions'];
 
@@ -50,6 +55,14 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
       (!o || (c.orgName || '').toLowerCase().includes(o)) &&
       (!p || (c.projectName || '').toLowerCase().includes(p))
     );
+  }
+
+  syncTableData(): void {
+    this.tableDataSource.data = this.filteredCards;
+  }
+
+  ngAfterViewInit(): void {
+    this.tableDataSource.paginator = this.paginator;
   }
 
   private readonly onAssignmentsChanged = () => this.load();
@@ -163,7 +176,7 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
         return Array.from(seen.values());
       })
     ).subscribe({
-      next: cards => { this.cards = cards; this.loading = false; },
+      next: cards => { this.cards = cards; this.loading = false; this.syncTableData(); },
       error: () => { this.loading = false; },
     });
   }

@@ -1,6 +1,8 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild, AfterViewInit } from '@angular/core';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import type { IdentityTarget, LegacyProject } from '../../core/api-models';
@@ -24,7 +26,7 @@ interface ProjectRow {
   encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
-export class IdentitySyncComponent implements OnInit {
+export class IdentitySyncComponent implements OnInit, AfterViewInit {
   // target_type -> display column
   readonly systems: { key: string; label: string }[] = [
     { key: 'git_team', label: 'Git' },
@@ -34,8 +36,14 @@ export class IdentitySyncComponent implements OnInit {
   ];
   readonly columns = ['project', 'git_team', 'k8s_rbac', 'storage_iam', 'gateway_key'];
 
-  rows: ProjectRow[] = [];
+  rows = new MatTableDataSource<ProjectRow>([]);
   loading = true;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  ngAfterViewInit(): void {
+    this.rows.paginator = this.paginator;
+  }
 
   constructor(
     private readonly api: ApiService,
@@ -67,7 +75,7 @@ export class IdentitySyncComponent implements OnInit {
         }
         row.cells[t.targetType] = { target: t, status: (t.syncStatus as any) || 'pending' };
       }
-      this.rows = Array.from(byProject.values()).sort((a, b) => a.projectName.localeCompare(b.projectName));
+      this.rows.data = Array.from(byProject.values()).sort((a, b) => a.projectName.localeCompare(b.projectName));
       this.loading = false;
     });
   }

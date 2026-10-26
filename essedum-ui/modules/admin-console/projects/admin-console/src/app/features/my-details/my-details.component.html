@@ -37,27 +37,27 @@
   <div class="filter-bar" *ngIf="!loading && cards.length > 0">
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Filter Role</mat-label>
-      <input matInput [(ngModel)]="filterRole" placeholder="e.g. Admin">
+      <input matInput [(ngModel)]="filterRole" (ngModelChange)="syncTableData()" placeholder="e.g. Admin">
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Filter Organisation</mat-label>
-      <input matInput [(ngModel)]="filterOrg" placeholder="e.g. Leo1311">
+      <input matInput [(ngModel)]="filterOrg" (ngModelChange)="syncTableData()" placeholder="e.g. Leo1311">
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Filter Project</mat-label>
-      <input matInput [(ngModel)]="filterProject" placeholder="e.g. Live Enterprise">
+      <input matInput [(ngModel)]="filterProject" (ngModelChange)="syncTableData()" placeholder="e.g. Live Enterprise">
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
     <span class="filter-count" *ngIf="filterRole || filterOrg || filterProject">
-      {{ filteredCards.length }} / {{ cards.length }} shown
+      {{ tableDataSource.data.length }} / {{ cards.length }} shown
     </span>
   </div>
 
   <!-- Table -->
   <div class="table-wrap" *ngIf="!loading && cards.length > 0">
-    <table mat-table [dataSource]="filteredCards" class="assignments-table">
+    <table mat-table [dataSource]="tableDataSource" class="assignments-table">
 
       <!-- Role column -->
       <ng-container matColumnDef="role">
@@ -148,6 +148,7 @@
           [class.revoking-row]="row.revoking"
           [class.active-session-row]="isCurrentSession(row)"></tr>
     </table>
+    <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
   </div>
 
 </div>

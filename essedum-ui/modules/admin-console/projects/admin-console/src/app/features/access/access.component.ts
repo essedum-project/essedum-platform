@@ -1,6 +1,8 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild, AfterViewInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, map } from 'rxjs';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import type { RbacRole, RoleAssignment, UserOption } from '../../core/api-models';
 import { GrantRoleDialogComponent } from './grant-role-dialog/grant-role-dialog.component';
@@ -20,10 +22,16 @@ interface RoleAssignmentRow extends RoleAssignment {
   encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
-export class AccessComponent implements OnInit {
-  rows: RoleAssignmentRow[] = [];
+export class AccessComponent implements OnInit, AfterViewInit {
+  rows = new MatTableDataSource<RoleAssignmentRow>([]);
   roles: RbacRole[] = [];
   rank = 0;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  ngAfterViewInit(): void {
+    this.rows.paginator = this.paginator;
+  }
 
   readonly columns = ['userName', 'roleName', 'scopeLabel', 'grantedAt', 'actions'];
 
@@ -89,7 +97,7 @@ export class AccessComponent implements OnInit {
             }));
         }),
       )
-      .subscribe(rows => (this.rows = rows));
+      .subscribe(rows => (this.rows.data = rows));
   }
 
   grantRole(): void {

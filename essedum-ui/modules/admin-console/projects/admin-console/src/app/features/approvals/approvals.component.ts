@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { combineLatest, switchMap, map } from 'rxjs';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import type { PromotionEvent } from '../../core/api-models';
@@ -18,10 +20,16 @@ interface PromotionEventRow extends PromotionEvent {
   styleUrls: ['./approvals.component.scss'],
   standalone: false,
 })
-export class ApprovalsComponent implements OnInit {
-  pending: PromotionEventRow[] = [];
+export class ApprovalsComponent implements OnInit, AfterViewInit {
+  pending = new MatTableDataSource<PromotionEventRow>([]);
 
   readonly columns = ['assetName', 'versionNo', 'gate', 'actorName', 'occurredAt', 'actions'];
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  ngAfterViewInit(): void {
+    this.pending.paginator = this.paginator;
+  }
 
   constructor(
     private readonly api: ApiService,
@@ -54,7 +62,7 @@ export class ApprovalsComponent implements OnInit {
           }),
         ),
       )
-      .subscribe(rows => (this.pending = rows));
+      .subscribe(rows => (this.pending.data = rows));
   }
 
   decide(event: PromotionEventRow, action: 'approved' | 'rejected'): void {

@@ -1,6 +1,8 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild, AfterViewInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, switchMap, map } from 'rxjs';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import type { AssetVersion } from '../../core/api-models';
@@ -25,10 +27,16 @@ const GATE_LABEL: Record<string, string> = {
   encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
-export class PublishingComponent implements OnInit {
-  versions: AssetVersionRow[] = [];
+export class PublishingComponent implements OnInit, AfterViewInit {
+  versions = new MatTableDataSource<AssetVersionRow>([]);
   // versionId -> next gate ('project_admin' | 'org_admin' | 'platform_admin' | null)
   nextGateByVersion: Record<number, string | null> = {};
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  ngAfterViewInit(): void {
+    this.versions.paginator = this.paginator;
+  }
 
   readonly columns = ['assetName', 'versionNo', 'status', 'nextGate', 'updatedAt', 'actions'];
 
@@ -60,7 +68,7 @@ export class PublishingComponent implements OnInit {
         ),
       )
       .subscribe(rows => {
-        this.versions = rows;
+        this.versions.data = rows;
         this.nextGateByVersion = {};
         rows.forEach(row =>
           this.api.getNextGate(row.id).subscribe(res => (this.nextGateByVersion[row.id] = res.gate)),

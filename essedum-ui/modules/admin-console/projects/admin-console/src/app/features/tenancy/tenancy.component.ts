@@ -1,8 +1,10 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild, AfterViewInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import type { LegacyOrganisation, LegacyProject, LegacyPortfolio, DisplayOrg, RbacEnvironment } from '../../core/api-models';
@@ -20,14 +22,24 @@ interface EnvironmentRow extends RbacEnvironment {
   encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
-export class TenancyComponent implements OnInit {
+export class TenancyComponent implements OnInit, AfterViewInit {
   /** Unified org list: RBAC orgs (usm_organisation) + legacy portfolios (usm_portfolio). */
-  displayOrgs: DisplayOrg[] = [];
+  orgDataSource = new MatTableDataSource<DisplayOrg>([]);
   /** Raw RBAC orgs kept for delete and name-lookup. */
   organizations: LegacyOrganisation[] = [];
-  projects: LegacyProject[] = [];
+  projectDataSource = new MatTableDataSource<LegacyProject>([]);
   portfolios: LegacyPortfolio[] = [];
-  environmentRows: EnvironmentRow[] = [];
+  envDataSource = new MatTableDataSource<EnvironmentRow>([]);
+
+  @ViewChild('orgPaginator') orgPaginator!: MatPaginator;
+  @ViewChild('projectPaginator') projectPaginator!: MatPaginator;
+  @ViewChild('envPaginator') envPaginator!: MatPaginator;
+
+  ngAfterViewInit(): void {
+    this.orgDataSource.paginator = this.orgPaginator;
+    this.projectDataSource.paginator = this.projectPaginator;
+    this.envDataSource.paginator = this.envPaginator;
+  }
 
   readonly orgColumns = ['id', 'name', 'source', 'status', 'actions'];
   readonly projectColumns = ['id', 'name', 'organization', 'description', 'actions'];
@@ -82,12 +94,12 @@ export class TenancyComponent implements OnInit {
     const legacyRows: DisplayOrg[] = (this.portfolios || [])
       .filter(p => !rbacNames.has((p.portfolioName || '').toLowerCase()))
       .map(p => ({ id: p.id, name: p.portfolioName, status: p.status, source: 'legacy' as const }));
-    this.displayOrgs = [...rbacRows, ...legacyRows]
+    this.orgDataSource.data = [...rbacRows, ...legacyRows]
       .sort((a, b) => (a.name || '').toLowerCase() > (b.name || '').toLowerCase() ? 1 : -1);
   }
 
   private loadProjects(): void {
-    this.api.getProjects().subscribe(projects => (this.projects = projects));
+    this.api.getProjects().subscribe(projects => (this.projectDataSource.data = projects));
   }
 
   organizationName(project: LegacyProject): string {
@@ -118,7 +130,7 @@ export class TenancyComponent implements OnInit {
           ).pipe(switchMap(rows => of(rows.flat())));
         }),
       )
-      .subscribe(rows => (this.environmentRows = rows));
+      .subscribe(rows => (this.envDataSource.data = rows));
   }
 
   create(kind: ProvisionKind): void {
