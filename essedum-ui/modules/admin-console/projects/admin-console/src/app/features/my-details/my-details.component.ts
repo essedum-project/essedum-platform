@@ -123,7 +123,11 @@ export class MyDetailsComponent implements OnInit, OnDestroy, AfterViewInit {
           const roleName = role?.name ?? `Role #${a.roleId}`;
           const orgName = a.organizationId != null ? (orgMap.get(a.organizationId) ?? `Org #${a.organizationId}`) : null;
           const proj = a.projectId != null ? projMap.get(a.projectId) : null;
-          const projectName = proj?.name ?? (a.projectId != null ? `Project #${a.projectId}` : null);
+          // Prefer human-readable display name (what the shell thumbnail shows) over internal name.
+          const projectName = proj?.projectdisplayname
+            || proj?.portfolioId?.portfolioName
+            || proj?.name
+            || (a.projectId != null ? `Project #${a.projectId}` : null);
           const key = `${roleName.toLowerCase()}|${a.projectId ?? ''}|${a.organizationId ?? ''}`;
 
           if (seen.has(key)) {
@@ -149,7 +153,10 @@ export class MyDetailsComponent implements OnInit, OnDestroy, AfterViewInit {
         for (const [projIdStr, roleList] of Object.entries(legacy)) {
           const projId = parseInt(projIdStr, 10);
           const proj = projMap.get(projId);
-          const projectName = proj?.name ?? `Project #${projId}`;
+          const projectName = proj?.projectdisplayname
+            || proj?.portfolioId?.portfolioName
+            || proj?.name
+            || `Project #${projId}`;
           // Org: from project's portfolioId (legacy) or organisationId (RBAC)
           const orgName = proj?.portfolioId?.portfolioName
             ?? (proj?.organisationId != null ? (orgMap.get(proj.organisationId) ?? null) : null);
@@ -188,10 +195,14 @@ export class MyDetailsComponent implements OnInit, OnDestroy, AfterViewInit {
       const project = JSON.parse(sessionStorage.getItem('project') || 'null');
       if (!role || !project) return false;
       const roleMatch = (role.name || '').toLowerCase() === card.roleName.toLowerCase();
-      // Only the row whose project exactly matches the thumbnail selection is active.
-      // "Whole org" and platform-wide rows are intentionally excluded.
-      const projectMatch = card.projectName != null &&
-        (project.name === card.projectName || project.id === card.projectId);
+      // Match by ID (most reliable) OR any display name variant the shell may store.
+      // The shell shows projectdisplayname in the thumbnail but stores the full project
+      // object, so project.projectdisplayname is the canonical human-readable name.
+      const projectMatch = card.projectName != null && card.projectId != null && (
+        project.id === card.projectId ||
+        project.name === card.projectName ||
+        (project.projectdisplayname && project.projectdisplayname === card.projectName)
+      );
       return roleMatch && projectMatch;
     } catch { return false; }
   }

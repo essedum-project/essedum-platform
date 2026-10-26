@@ -219,7 +219,12 @@ body.header-light-theme {
 .revoking-row { opacity: 0.5; pointer-events: none; }
 
 .active-session-row td.mat-cell {
-  background: var(--md-row-active-bg) !important;
+  background: rgba(56,142,60,0.10) !important;
+}
+// Strong left-border accent on the first cell so the row reads as "selected"
+.active-session-row td.mat-cell:first-child {
+  border-left: 3px solid #4caf50 !important;
+  padding-left: 13px !important; // compensate for border so content doesn't shift
 }
 
 // ── Paginator ─────────────────────────────────────────────────────────────────
@@ -244,17 +249,23 @@ mat-paginator.mat-mdc-paginator {
 .active-badge {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  font-size: 10px;
+  gap: 5px;
+  font-size: 12px;
   font-weight: 700;
-  color: #388e3c;
-  background: rgba(56,142,60,0.15);
-  padding: 2px 7px;
-  border-radius: 10px;
-  letter-spacing: 0.3px;
-  border: 1px solid rgba(56,142,60,0.25);
+  color: #fff;
+  background: #388e3c;
+  padding: 4px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.4px;
+  box-shadow: 0 2px 8px rgba(56,142,60,0.4);
 
-  mat-icon { font-size: 10px; width: 10px; height: 10px; }
+  mat-icon { font-size: 13px; width: 13px; height: 13px; }
+}
+
+body.header-light-theme .active-badge {
+  color: #fff;
+  background: #2e7d32;
+  box-shadow: 0 2px 6px rgba(46,125,50,0.35);
 }
 
 .role-cell {
@@ -289,7 +300,6 @@ mat-paginator.mat-mdc-paginator {
 body.header-light-theme {
   .role-type-badge.rbac-badge { color: #1565c0; background: rgba(21,101,192,0.10); border-color: rgba(21,101,192,0.2); }
   .role-type-badge.legacy-badge { color: #7b1fa2; background: rgba(123,31,162,0.10); border-color: rgba(123,31,162,0.2); }
-  .active-badge { color: #2e7d32; background: rgba(46,125,50,0.10); border-color: rgba(46,125,50,0.2); }
   .scope-chip { color: #5a52e0; background: rgba(90,82,224,0.10); }
   .dup-pill { color: #bf360c; background: rgba(191,54,12,0.10); }
 }
