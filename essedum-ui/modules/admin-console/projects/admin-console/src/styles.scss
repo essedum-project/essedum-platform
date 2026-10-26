@@ -27,6 +27,12 @@
   --mat-table-row-item-label-text-color: #e2e8f0;
   --mat-table-footer-supporting-text-color: #e2e8f0;
   --mat-table-row-item-outline-color: rgba(148, 163, 184, 0.18);
+
+  /* Paginator tokens — cascade to all mat-paginator inside the shell */
+  --mat-paginator-container-background-color: #1e293b;
+  --mat-paginator-container-text-color: #94a3b8;
+  --mat-paginator-select-trigger-text-color: #e2e8f0;
+  --mdc-icon-button-icon-color: #94a3b8;
 }
 
 /* ---- light overrides (P1: now using local class, not body class) ---- */
@@ -47,6 +53,12 @@
   --mat-table-row-item-label-text-color: #1e293b;
   --mat-table-footer-supporting-text-color: #1e293b;
   --mat-table-row-item-outline-color: rgba(15, 23, 42, 0.12);
+
+  /* Paginator tokens — light override */
+  --mat-paginator-container-background-color: #f1f5f9;
+  --mat-paginator-container-text-color: #64748b;
+  --mat-paginator-select-trigger-text-color: #1e293b;
+  --mdc-icon-button-icon-color: #64748b;
 }
 
 /* Fallback: also support body classes for compatibility */
@@ -65,6 +77,10 @@ body.header-light-theme .cdk-overlay-container {
   --mat-table-row-item-label-text-color: #1e293b;
   --mat-table-footer-supporting-text-color: #1e293b;
   --mat-table-row-item-outline-color: rgba(15, 23, 42, 0.12);
+  --mat-paginator-container-background-color: #f1f5f9;
+  --mat-paginator-container-text-color: #64748b;
+  --mat-paginator-select-trigger-text-color: #1e293b;
+  --mdc-icon-button-icon-color: #64748b;
 }
 
 .admin-console-shell { 
@@ -433,84 +449,112 @@ body.header-light-theme .admin-console-table,
 .cdk-overlay-dark-backdrop { background: rgba(2, 6, 23, 0.55); }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   Paginator — flat rules, no SCSS nesting (avoids build-tool compat issues).
-   Uses both the Material CSS custom property AND a direct background override
-   because Angular Material 17+ renders a host element that can ignore
-   descendant rules when the component uses its own shadow-like encapsulation.
+   Paginator — scoped under .admin-console-shell for definitive specificity.
+   The token block above (on .admin-console-shell) already sets
+   --mat-paginator-container-background-color so the var() cascade is correct.
+   These rules add direct background/color overrides as a failsafe.
    ════════════════════════════════════════════════════════════════════════════ */
 
-/* ── Dark default ── */
-mat-paginator,
-.mat-mdc-paginator {
+/* ── Dark default (scoped + direct) ── */
+.admin-console-shell mat-paginator,
+.admin-console-shell .mat-mdc-paginator {
   --mat-paginator-container-background-color: #1e293b;
   --mat-paginator-container-text-color: #94a3b8;
   --mat-paginator-select-trigger-text-color: #e2e8f0;
+  background: #1e293b !important;
   background-color: #1e293b !important;
   color: #94a3b8 !important;
   border-top: 1px solid rgba(148, 163, 184, 0.18) !important;
   border-radius: 0 0 12px 12px !important;
 }
-mat-paginator .mat-mdc-paginator-range-label,
-mat-paginator .mat-mdc-paginator-page-size-label,
-.mat-mdc-paginator .mat-mdc-paginator-range-label,
-.mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #94a3b8 !important; font-size: 12px !important; }
+.admin-console-shell mat-paginator .mat-mdc-paginator-outer-container,
+.admin-console-shell mat-paginator .mat-mdc-paginator-container,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-outer-container,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-container { background: #1e293b !important; }
 
-mat-paginator .mat-mdc-select-value,
-mat-paginator .mat-mdc-select-value-text,
-mat-paginator .mat-mdc-select-min-line,
-.mat-mdc-paginator .mat-mdc-select-value,
-.mat-mdc-paginator .mat-mdc-select-value-text,
-.mat-mdc-paginator .mat-mdc-select-min-line { color: #e2e8f0 !important; font-size: 12px !important; }
+.admin-console-shell mat-paginator .mat-mdc-paginator-range-label,
+.admin-console-shell mat-paginator .mat-mdc-paginator-page-size-label,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-range-label,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #94a3b8 !important; font-size: 12px !important; }
 
-mat-paginator .mat-mdc-form-field .mat-mdc-text-field-wrapper,
-.mat-mdc-paginator .mat-mdc-form-field .mat-mdc-text-field-wrapper { background: transparent !important; }
+.admin-console-shell mat-paginator .mat-mdc-select-value,
+.admin-console-shell mat-paginator .mat-mdc-select-value-text,
+.admin-console-shell mat-paginator .mat-mdc-select-min-line,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-select-value,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-select-value-text,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-select-min-line { color: #e2e8f0 !important; font-size: 12px !important; }
 
-mat-paginator .mat-mdc-icon-button,
-.mat-mdc-paginator .mat-mdc-icon-button { color: #94a3b8 !important; --mdc-icon-button-icon-color: #94a3b8; }
-mat-paginator .mat-mdc-icon-button:not([disabled]):hover,
-.mat-mdc-paginator .mat-mdc-icon-button:not([disabled]):hover { color: #4f8ef7 !important; background: rgba(79,142,247,0.10) !important; }
-mat-paginator .mat-mdc-icon-button[disabled],
-.mat-mdc-paginator .mat-mdc-icon-button[disabled] { color: #334155 !important; opacity: 0.4; }
+.admin-console-shell mat-paginator .mat-mdc-form-field .mat-mdc-text-field-wrapper,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-form-field .mat-mdc-text-field-wrapper { background: transparent !important; }
 
-mat-paginator .mdc-notched-outline__leading,
-mat-paginator .mdc-notched-outline__notch,
-mat-paginator .mdc-notched-outline__trailing,
-.mat-mdc-paginator .mdc-notched-outline__leading,
-.mat-mdc-paginator .mdc-notched-outline__notch,
-.mat-mdc-paginator .mdc-notched-outline__trailing { border-color: rgba(148,163,184,0.20) !important; }
+.admin-console-shell mat-paginator .mat-mdc-icon-button,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button { color: #94a3b8 !important; --mdc-icon-button-icon-color: #94a3b8 !important; }
+.admin-console-shell mat-paginator .mat-mdc-icon-button svg,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button svg,
+.admin-console-shell mat-paginator .mat-mdc-icon-button .mat-icon,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #94a3b8 !important; fill: #94a3b8 !important; }
+.admin-console-shell mat-paginator .mat-mdc-icon-button:not([disabled]):hover,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button:not([disabled]):hover { color: #4f8ef7 !important; background: rgba(79,142,247,0.10) !important; }
+.admin-console-shell mat-paginator .mat-mdc-icon-button[disabled],
+.admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button[disabled] { color: #334155 !important; opacity: 0.4; }
+
+.admin-console-shell mat-paginator .mdc-notched-outline__leading,
+.admin-console-shell mat-paginator .mdc-notched-outline__notch,
+.admin-console-shell mat-paginator .mdc-notched-outline__trailing,
+.admin-console-shell .mat-mdc-paginator .mdc-notched-outline__leading,
+.admin-console-shell .mat-mdc-paginator .mdc-notched-outline__notch,
+.admin-console-shell .mat-mdc-paginator .mdc-notched-outline__trailing { border-color: rgba(148,163,184,0.20) !important; }
 
 /* ── Light theme override ── */
-body.header-light-theme mat-paginator,
-body.header-light-theme .mat-mdc-paginator,
+body.header-light-theme .admin-console-shell mat-paginator,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator,
 .admin-console-shell.light-theme mat-paginator,
 .admin-console-shell.light-theme .mat-mdc-paginator {
   --mat-paginator-container-background-color: #f1f5f9;
   --mat-paginator-container-text-color: #64748b;
   --mat-paginator-select-trigger-text-color: #1e293b;
+  background: #f1f5f9 !important;
   background-color: #f1f5f9 !important;
   color: #64748b !important;
   border-top: 1px solid rgba(15,23,42,0.12) !important;
 }
-body.header-light-theme mat-paginator .mat-mdc-paginator-range-label,
-body.header-light-theme mat-paginator .mat-mdc-paginator-page-size-label,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-range-label,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-page-size-label,
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-paginator-outer-container,
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-paginator-container,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-outer-container,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-container,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-paginator-outer-container,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-paginator-container,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-paginator-outer-container,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-paginator-container { background: #f1f5f9 !important; }
+
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-paginator-range-label,
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-paginator-page-size-label,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-range-label,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-page-size-label,
 .admin-console-shell.light-theme mat-paginator .mat-mdc-paginator-range-label,
 .admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-paginator-range-label { color: #64748b !important; }
 
-body.header-light-theme mat-paginator .mat-mdc-select-value,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-select-value,
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-select-value,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-select-value,
 .admin-console-shell.light-theme mat-paginator .mat-mdc-select-value,
 .admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-select-value { color: #1e293b !important; }
 
-body.header-light-theme mat-paginator .mat-mdc-icon-button,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button,
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-icon-button,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button,
 .admin-console-shell.light-theme mat-paginator .mat-mdc-icon-button,
-.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b; }
-body.header-light-theme mat-paginator .mat-mdc-icon-button:not([disabled]):hover,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button:not([disabled]):hover { color: #2563eb !important; background: rgba(37,99,235,0.08) !important; }
-body.header-light-theme mat-paginator .mat-mdc-icon-button[disabled],
-body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button[disabled] { color: #cbd5e1 !important; }
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b !important; }
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-icon-button svg,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button svg,
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-icon-button .mat-icon,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button .mat-icon,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-icon-button svg,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-icon-button svg { color: #64748b !important; fill: #64748b !important; }
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-icon-button:not([disabled]):hover,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button:not([disabled]):hover,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-icon-button:not([disabled]):hover { color: #2563eb !important; background: rgba(37,99,235,0.08) !important; }
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-icon-button[disabled],
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button[disabled],
+.admin-console-shell.light-theme mat-paginator .mat-mdc-icon-button[disabled] { color: #cbd5e1 !important; }
 
 /* ════════════════════════════════════════════════════════════════════════════
    Form fields — borderless outline style for all filter bars across every

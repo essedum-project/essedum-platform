@@ -755,7 +755,7 @@
                   </li>
                 </ol>
                 <!-- No-menu banner: shown when the active role has no sidebar items configured -->
-                <div class="no-menu-banner" *ngIf="visibleSidebarMenu.length === 0 && selectedrole?.name && !loadingRouteConfig">
+                <div class="no-menu-banner" *ngIf="visibleSidebarMenu.length === 0 && selectedrole?.name && !loadingRouteConfig && !isSidebarLoading">
                   <div class="no-menu-banner__icon">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
                       <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 5a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V8a1 1 0 0 1 1-1zm0 9a1.25 1.25 0 1 1 0-2.5A1.25 1.25 0 0 1 12 16z" fill="currentColor"/>

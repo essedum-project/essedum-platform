@@ -228,21 +228,39 @@ body.header-light-theme {
 }
 
 // ── Paginator ─────────────────────────────────────────────────────────────────
+// Use direct dark colors with fallbacks — do not rely on --md-header-bg which
+// is only defined once MyDetailsComponent has been instantiated.
 mat-paginator.mat-mdc-paginator {
-  background: var(--md-header-bg) !important;
-  color: var(--md-text-muted) !important;
-  border-top: 1px solid var(--md-border);
+  --mat-paginator-container-background-color: #162032;
+  background: #162032 !important;
+  background-color: #162032 !important;
+  color: var(--md-text-muted, #94a3b8) !important;
+  border-top: 1px solid var(--md-border, rgba(255,255,255,0.08));
+
+  .mat-mdc-paginator-outer-container,
+  .mat-mdc-paginator-container { background: #162032 !important; }
 
   .mat-mdc-select-value,
   .mat-mdc-paginator-range-label,
   .mat-mdc-paginator-page-size-label {
-    color: var(--md-text-muted) !important;
+    color: var(--md-text-muted, #94a3b8) !important;
   }
   .mat-mdc-icon-button {
-    color: var(--md-text-muted) !important;
-    &:not([disabled]):hover { color: var(--md-accent) !important; }
+    color: var(--md-text-muted, #94a3b8) !important;
+    --mdc-icon-button-icon-color: #94a3b8 !important;
+    &:not([disabled]):hover { color: var(--md-accent, #6c63ff) !important; }
     &[disabled] { opacity: 0.3; }
   }
+}
+
+body.header-light-theme mat-paginator.mat-mdc-paginator {
+  --mat-paginator-container-background-color: #eef2f7;
+  background: #eef2f7 !important;
+  background-color: #eef2f7 !important;
+  color: var(--md-text-muted, #718096) !important;
+  .mat-mdc-paginator-outer-container,
+  .mat-mdc-paginator-container { background: #eef2f7 !important; }
+  .mat-mdc-icon-button { color: var(--md-text-muted, #718096) !important; --mdc-icon-button-icon-color: #718096 !important; }
 }
 
 // ── Badges & pills ────────────────────────────────────────────────────────────
