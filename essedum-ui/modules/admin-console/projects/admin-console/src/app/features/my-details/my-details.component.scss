@@ -48,7 +48,7 @@
   font-size: 16px;
   font-weight: 600;
   color: var(--text-primary, #e0e0e0);
-  margin-bottom: 6px;
+  margin-bottom: 20px;
 
   mat-icon { font-size: 20px; width: 20px; height: 20px; color: #6c63ff; }
 
@@ -66,12 +66,6 @@
   }
 }
 
-.section-desc {
-  font-size: 13px;
-  color: var(--text-secondary, #9e9e9e);
-  margin: 0 0 24px;
-}
-
 .empty-state {
   display: flex;
   align-items: center;
@@ -84,126 +78,120 @@
   mat-icon { font-size: 28px; width: 28px; height: 28px; }
 }
 
-.spin { animation: spin 1s linear infinite; }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.role-card {
-  background: var(--surface, #1a1f2e);
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: box-shadow 0.2s, transform 0.2s;
-
-  &:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    transform: translateY(-2px);
-  }
 }
 
-.role-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  color: #fff;
+.assignments-table {
+  width: 100%;
+  background: var(--surface, #1a1f2e);
 
-  mat-icon { font-size: 18px; width: 18px; height: 18px; }
-  .badge-label { font-size: 12px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; flex: 1; }
-
-  .dup-pill {
+  th.mat-header-cell {
     font-size: 11px;
     font-weight: 700;
-    background: rgba(0,0,0,0.25);
-    border-radius: 10px;
-    padding: 1px 7px;
-    cursor: default;
-  }
-}
-
-.card-body {
-  padding: 16px;
-  flex: 1;
-
-  .card-role-name {
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--text-primary, #e0e0e0);
-    margin-bottom: 14px;
-  }
-}
-
-.card-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 12px;
-
-  .row-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    color: #6c63ff;
-    margin-top: 2px;
-  }
-
-  .row-label {
-    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
     color: var(--text-secondary, #9e9e9e);
-    margin-bottom: 2px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 12px 16px;
   }
 
-  .row-value {
-    font-size: 14px;
+  td.mat-cell {
+    padding: 12px 16px;
+    font-size: 13px;
     color: var(--text-primary, #e0e0e0);
-    font-weight: 500;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    vertical-align: middle;
   }
+
+  tr.mat-row:last-child td.mat-cell { border-bottom: none; }
+  tr.mat-row:hover td.mat-cell { background: rgba(108,99,255,0.04); }
 }
 
-.card-assigned {
+.revoking-row { opacity: 0.5; pointer-events: none; }
+
+.role-cell {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: var(--text-secondary, #9e9e9e);
-  margin-top: 6px;
+  flex-wrap: wrap;
 
-  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  .role-name { font-weight: 600; }
 }
 
-.role-card.revoking {
-  opacity: 0.6;
-  pointer-events: none;
+.role-type-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.3px;
+
+  &.rbac-badge {
+    background: rgba(25, 118, 210, 0.18);
+    color: #64b5f6;
+  }
+  &.legacy-badge {
+    background: rgba(156, 39, 176, 0.18);
+    color: #ce93d8;
+  }
 }
 
-.card-footer {
-  padding: 12px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+.dup-pill {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(245, 124, 0, 0.18);
+  color: #ffb74d;
+  border-radius: 10px;
+  padding: 1px 6px;
+  cursor: default;
+}
+
+.muted { color: var(--text-secondary, #9e9e9e); font-size: 12px; }
+
+.scope-chip {
+  font-size: 11px;
+  background: rgba(108,99,255,0.15);
+  color: #a78bfa;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.user-cell {
   display: flex;
+  align-items: center;
   gap: 8px;
 
-  button {
-    flex: 1;
-    display: flex;
+  .user-avatar {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    font-size: 12px;
-
-    mat-icon { font-size: 15px; width: 15px; height: 15px; }
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6c63ff, #a78bfa);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
   }
+}
 
-  .revoke-btn {
-    flex: 0 0 auto;
+.actions-header { text-align: right; }
+
+.actions-cell {
+  text-align: right;
+  white-space: nowrap;
+
+  .action-btn {
+    font-size: 11px;
+    padding: 0 10px;
+    height: 30px;
+    line-height: 30px;
+    margin-left: 6px;
+
+    mat-icon { font-size: 14px; width: 14px; height: 14px; }
   }
 }
 

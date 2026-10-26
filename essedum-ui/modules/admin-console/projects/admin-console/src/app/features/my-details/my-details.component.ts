@@ -31,6 +31,8 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
   loading = true;
   user: any = {};
 
+  readonly tableColumns = ['role', 'org', 'project', 'user', 'granted', 'actions'];
+
   private readonly onAssignmentsChanged = () => this.load();
 
   constructor(

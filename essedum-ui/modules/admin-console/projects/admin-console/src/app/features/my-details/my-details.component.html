@@ -20,10 +20,6 @@
       <mat-icon [class.spin]="loading">refresh</mat-icon>
     </button>
   </div>
-  <p class="section-desc">
-    Each card is one unique org → project → role mapping. Duplicate grants are
-    collapsed — <strong>Revoke</strong> removes all of them at once.
-  </p>
 
   <!-- Loading -->
   <div *ngIf="loading" class="empty-state">
@@ -37,72 +33,90 @@
     <span>No active role assignments found for your account.</span>
   </div>
 
-  <!-- Cards grid -->
-  <div class="cards-grid" *ngIf="!loading && cards.length > 0">
-    <div class="role-card" *ngFor="let card of cards" [class.revoking]="card.revoking">
+  <!-- Table -->
+  <div class="table-wrap" *ngIf="!loading && cards.length > 0">
+    <table mat-table [dataSource]="cards" class="assignments-table">
 
-      <!-- Role badge -->
-      <div class="role-badge" [style.background-color]="rankColor(card.roleRank)">
-        <mat-icon>verified_user</mat-icon>
-        <span class="badge-label">{{ rankLabel(card.roleRank) }}</span>
-        <!-- Duplicate count pill -->
-        <span class="dup-pill" *ngIf="card.ids.length > 1"
-              matTooltip="{{ card.ids.length }} duplicate grants — all will be revoked together">
-          ×{{ card.ids.length }}
-        </span>
-      </div>
-
-      <div class="card-body">
-        <div class="card-role-name">{{ card.roleName }}</div>
-
-        <div class="card-row" *ngIf="card.orgName">
-          <mat-icon class="row-icon">business</mat-icon>
-          <div>
-            <div class="row-label">Organisation</div>
-            <div class="row-value">{{ card.orgName }}</div>
+      <!-- Role column -->
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef>Role</th>
+        <td mat-cell *matCellDef="let card">
+          <div class="role-cell">
+            <span class="role-name">{{ card.roleName }}</span>
+            <span class="role-type-badge" [class.rbac-badge]="card.roleRank > 0" [class.legacy-badge]="card.roleRank === 0">
+              {{ card.roleRank > 0 ? 'RBAC · rank ' + card.roleRank : 'Legacy' }}
+            </span>
+            <span class="dup-pill" *ngIf="card.ids.length > 1"
+                  matTooltip="{{ card.ids.length }} duplicate grants — all will be revoked together">
+              ×{{ card.ids.length }}
+            </span>
           </div>
-        </div>
+        </td>
+      </ng-container>
 
-        <div class="card-row" *ngIf="card.projectName">
-          <mat-icon class="row-icon">folder</mat-icon>
-          <div>
-            <div class="row-label">Project</div>
-            <div class="row-value">{{ card.projectName }}</div>
+      <!-- Org column -->
+      <ng-container matColumnDef="org">
+        <th mat-header-cell *matHeaderCellDef>Organisation</th>
+        <td mat-cell *matCellDef="let card">
+          <span *ngIf="card.orgName">{{ card.orgName }}</span>
+          <span *ngIf="!card.orgName" class="muted">—</span>
+        </td>
+      </ng-container>
+
+      <!-- Project column -->
+      <ng-container matColumnDef="project">
+        <th mat-header-cell *matHeaderCellDef>Project</th>
+        <td mat-cell *matCellDef="let card">
+          <span *ngIf="card.projectName">{{ card.projectName }}</span>
+          <span *ngIf="!card.projectName && !card.orgName" class="scope-chip">Platform-wide</span>
+          <span *ngIf="!card.projectName && card.orgName" class="muted">Whole org</span>
+        </td>
+      </ng-container>
+
+      <!-- User column -->
+      <ng-container matColumnDef="user">
+        <th mat-header-cell *matHeaderCellDef>User</th>
+        <td mat-cell *matCellDef="let card">
+          <div class="user-cell">
+            <span class="user-avatar">{{ initials }}</span>
+            <span>{{ fullName }}</span>
           </div>
-        </div>
+        </td>
+      </ng-container>
 
-        <div class="card-row" *ngIf="!card.orgName && !card.projectName">
-          <mat-icon class="row-icon">public</mat-icon>
-          <div>
-            <div class="row-label">Scope</div>
-            <div class="row-value">Platform-wide</div>
-          </div>
-        </div>
+      <!-- Granted column -->
+      <ng-container matColumnDef="granted">
+        <th mat-header-cell *matHeaderCellDef>Granted</th>
+        <td mat-cell *matCellDef="let card">
+          <span class="muted">{{ card.grantedAt | date:'mediumDate' }}</span>
+        </td>
+      </ng-container>
 
-        <div class="card-assigned">
-          <mat-icon>event</mat-icon>
-          <span>Granted {{ card.grantedAt | date:'mediumDate' }}</span>
-        </div>
-      </div>
+      <!-- Actions column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="actions-header">Actions</th>
+        <td mat-cell *matCellDef="let card" class="actions-cell">
+          <button mat-stroked-button color="primary"
+                  [disabled]="card.revoking"
+                  (click)="configureMenu(card)"
+                  class="action-btn">
+            <mat-icon>tune</mat-icon>
+            Configure Menu
+          </button>
+          <button mat-stroked-button color="warn"
+                  [disabled]="card.revoking"
+                  (click)="revokeCard(card)"
+                  class="action-btn revoke-btn">
+            <mat-icon *ngIf="!card.revoking">remove_circle_outline</mat-icon>
+            <mat-icon *ngIf="card.revoking" class="spin">sync</mat-icon>
+            {{ card.revoking ? 'Revoking…' : 'Revoke' }}
+          </button>
+        </td>
+      </ng-container>
 
-      <div class="card-footer">
-        <button mat-stroked-button color="primary"
-                [disabled]="card.revoking"
-                (click)="configureMenu(card)">
-          <mat-icon>tune</mat-icon>
-          Configure Menu
-        </button>
-
-        <button mat-stroked-button color="warn"
-                [disabled]="card.revoking"
-                (click)="revokeCard(card)"
-                class="revoke-btn">
-          <mat-icon *ngIf="!card.revoking">remove_circle_outline</mat-icon>
-          <mat-icon *ngIf="card.revoking" class="spin">sync</mat-icon>
-          {{ card.revoking ? 'Revoking…' : 'Revoke' }}
-        </button>
-      </div>
-    </div>
+      <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: tableColumns;" [class.revoking-row]="row.revoking"></tr>
+    </table>
   </div>
 
 </div>

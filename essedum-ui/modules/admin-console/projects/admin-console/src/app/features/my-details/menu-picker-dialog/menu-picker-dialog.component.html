@@ -22,7 +22,7 @@
       <mat-icon>public</mat-icon>
       Platform-wide
     </div>
-    <span class="active-count" *ngIf="!loading">{{ activeCount }} / {{ rows.length }}</span>
+    <span class="active-count" *ngIf="!loading">{{ activeCount }} / {{ rows.length - categoryCount }}</span>
   </div>
 
   <p class="picker-hint">
@@ -43,43 +43,44 @@
     </div>
 
     <div class="picker-list" *ngIf="!loading && rows.length > 0">
-      <div
-        class="picker-row"
-        *ngFor="let row of rows"
-        [class.active]="row.active"
-        [class.child-row]="row.depth > 0"
-        (click)="toggle(row)"
-      >
-        <!-- depth indent -->
-        <div class="depth-indent" [style.width.px]="row.depth * 16"></div>
+      <ng-container *ngFor="let row of rows">
 
-        <!-- child connector line -->
-        <div class="child-line" *ngIf="row.depth > 0"></div>
-
-        <!-- icon -->
-        <div class="row-icon-wrap">
-          <i *ngIf="row.item.icon" class="fa fa-{{ row.item.icon }} fa-fw"></i>
-          <mat-icon *ngIf="!row.item.icon">{{ row.hasChildren ? 'folder' : 'link' }}</mat-icon>
+        <!-- Category header row -->
+        <div class="category-header" *ngIf="row.isCategory">
+          <mat-icon>label_outline</mat-icon>
+          <span>{{ row.item.label }}</span>
         </div>
 
-        <!-- label + url -->
-        <div class="row-info">
-          <div class="row-label">
-            {{ row.item.label }}
-            <span class="parent-badge" *ngIf="row.hasChildren && row.depth === 0">parent</span>
+        <!-- Normal item row -->
+        <div *ngIf="!row.isCategory"
+          class="picker-row"
+          [class.active]="row.active"
+          [class.child-row]="row.depth > 0"
+          (click)="toggle(row)"
+        >
+          <div class="depth-indent" [style.width.px]="row.depth * 16"></div>
+          <div class="child-line" *ngIf="row.depth > 0"></div>
+          <div class="row-icon-wrap">
+            <i *ngIf="row.item.icon" class="fa fa-{{ row.item.icon }} fa-fw"></i>
+            <mat-icon *ngIf="!row.item.icon">{{ row.hasChildren ? 'folder' : 'link' }}</mat-icon>
           </div>
-          <div class="row-route" *ngIf="row.item.url">{{ row.item.url }}</div>
-        </div>
-
-        <!-- toggle -->
-        <div class="row-toggle">
-          <mat-icon *ngIf="row.saving" class="spin saving-icon">sync</mat-icon>
-          <div *ngIf="!row.saving" class="toggle-chip" [class.on]="row.active">
-            <mat-icon>{{ row.active ? 'check_circle' : 'add_circle_outline' }}</mat-icon>
-            <span>{{ row.active ? 'Added' : 'Add' }}</span>
+          <div class="row-info">
+            <div class="row-label">
+              {{ row.item.label }}
+              <span class="parent-badge" *ngIf="row.hasChildren && row.depth === 0">parent</span>
+            </div>
+            <div class="row-route" *ngIf="row.item.url">{{ row.item.url }}</div>
+          </div>
+          <div class="row-toggle">
+            <mat-icon *ngIf="row.saving" class="spin saving-icon">sync</mat-icon>
+            <div *ngIf="!row.saving" class="toggle-chip" [class.on]="row.active">
+              <mat-icon>{{ row.active ? 'check_circle' : 'add_circle_outline' }}</mat-icon>
+              <span>{{ row.active ? 'Added' : 'Add' }}</span>
+            </div>
           </div>
         </div>
-      </div>
+
+      </ng-container>
     </div>
   </div>
 
@@ -139,6 +140,14 @@
   mat-icon { font-size: 22px; width: 22px; height: 22px; }
 }
 .picker-list { display: flex; flex-direction: column; gap: 4px; }
+.category-header {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+  color: #7e8393; padding: 12px 4px 4px; margin-top: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  &:first-child { margin-top: 0; padding-top: 4px; }
+}
 .picker-row {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 12px; border-radius: 8px;

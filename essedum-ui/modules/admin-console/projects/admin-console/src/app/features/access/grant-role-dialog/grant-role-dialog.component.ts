@@ -55,7 +55,12 @@ export class GrantRoleDialogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.api.getRoles().subscribe(roles => (this.roles = roles));
+    this.api.getRoles().subscribe(roles => {
+      // RBAC roles (rank defined) first sorted by rank, then legacy sorted by name
+      const rbac = roles.filter(r => r.rank != null).sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
+      const legacy = roles.filter(r => r.rank == null).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1);
+      this.roles = [...rbac, ...legacy];
+    });
     this.api.getUsers().subscribe(users => (this.users = users));
     this.api.getProjects().subscribe(projects => (this.projects = projects));
 
@@ -127,13 +132,28 @@ export class GrantRoleDialogComponent implements OnInit {
       return;
     }
     const org = this.selectedOrg;
-    this.ref.close({
-      userId: this.userId,
-      roleId: this.roleId,
-      organizationId: this.wholeOrganization ? org?.nativeId ?? null : null,
-      projectIds: this.wholeOrganization ? [] : this.projectIds,
-      isLegacyOrg: org?.source === 'legacy',
-    });
+    const isLegacy = org?.source === 'legacy';
+
+    // For legacy portfolio orgs: the backend's bridgeAssignment() cannot resolve projects
+    // via organisationId (legacy projects link via portfolioId, not organisationId).
+    // Pass explicit project IDs so each grant is project-scoped and the bridge fires correctly.
+    if (isLegacy && this.wholeOrganization) {
+      this.ref.close({
+        userId: this.userId,
+        roleId: this.roleId,
+        organizationId: null,
+        projectIds: this.projectsForOrg.map(p => p.id),
+        isLegacyOrg: true,
+      });
+    } else {
+      this.ref.close({
+        userId: this.userId,
+        roleId: this.roleId,
+        organizationId: this.wholeOrganization ? org?.nativeId ?? null : null,
+        projectIds: this.wholeOrganization ? [] : this.projectIds,
+        isLegacyOrg: isLegacy,
+      });
+    }
   }
 
   cancel(): void {

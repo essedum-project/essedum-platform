@@ -494,7 +494,42 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
    * Called at the end of getrolepage() when both portfoliodata and projectList are ready.
    * Fully idempotent — deduplicates by name/id so repeated calls add nothing.
    */
+  /** Map from role name (lowercase) → rank for RBAC roles, built in supplementRbacData(). */
+  rbacRoleRankMap = new Map<string, number>();
+
+  /** Returns a short label to show next to a role name in the dropdown. */
+  getRoleTypeLabel(role: any): string {
+    const rank = this.rbacRoleRankMap.get((role?.name || '').toLowerCase());
+    if (rank != null) return `[RBAC · rank ${rank}]`;
+    return '[Legacy]';
+  }
+
   private supplementRbacData(): void {
+    // Roles: fetch RBAC roles to build rank map for dropdown labels
+    this.http.get<any[]>('/api/usm/roles').subscribe({
+      next: (rbacRoles: any[]) => {
+        this.rbacRoleRankMap.clear();
+        (rbacRoles || []).forEach((r: any) => {
+          if (r.name && r.rank != null) {
+            this.rbacRoleRankMap.set(r.name.toLowerCase(), r.rank);
+          }
+        });
+        // Re-sort roleList: RBAC roles first (by rank), then legacy (alphabetical)
+        this.roleList = [
+          ...this.roleList
+            .filter((r: any) => this.rbacRoleRankMap.has((r.name || '').toLowerCase()))
+            .sort((a: any, b: any) =>
+              (this.rbacRoleRankMap.get(a.name.toLowerCase()) ?? 99) -
+              (this.rbacRoleRankMap.get(b.name.toLowerCase()) ?? 99)
+            ),
+          ...this.roleList
+            .filter((r: any) => !this.rbacRoleRankMap.has((r.name || '').toLowerCase()))
+            .sort((a: any, b: any) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1),
+        ];
+      },
+      error: () => {}
+    });
+
     // Orgs: add entries from usm_organisation (RBAC) not already in portfoliodata (dedup by name)
     this.http.get<any[]>('/api/organisations', { params: { size: '1000' } }).subscribe({
       next: (orgs: any[]) => {

@@ -18,7 +18,15 @@ export interface PickerRow {
   roleMenuId: number | null;
   saving: boolean;
   hasChildren: boolean;
+  /** When true this row is a visual category separator, not a toggleable item. */
+  isCategory?: boolean;
 }
+
+/** Only these sidebar items (from DashConst) are shown in the menu picker. */
+const ALLOWED_SIDEBAR_LABELS = new Set([
+  'dashboard', 'pipelines', 'agent directory', 'vibe studio',
+  'datasets', 'models', 'connections', 'adapters',
+]);
 
 @Component({
   selector: 'app-menu-picker-dialog',
@@ -66,45 +74,59 @@ export class MenuPickerDialogComponent implements OnInit {
           './admin-console/menu-configuration',
         ]);
 
-        const addRow = (item: SidebarItem, depth: number) => {
-          const key = item.url || item.label;
-          if (!key || skipUrls.has(item.url ?? '') || seen.has(key)) return;
-          seen.add(key);
-          rows.push({
-            item,
-            depth,
-            active: item.url ? activeMap.has(item.url) : false,
-            roleMenuId: item.url ? (activeMap.get(item.url) ?? null) : null,
-            saving: false,
-            hasChildren: !!(item.children?.length),
-          });
-        };
+        const makeCategory = (label: string): PickerRow => ({
+          item: { label, icon: null, url: null },
+          depth: 0, active: false, roleMenuId: null, saving: false,
+          hasChildren: false, isCategory: true,
+        });
 
-        const flatten = (items: SidebarItem[], depth = 0) => {
-          for (const item of items) {
-            addRow(item, depth);
-            if (item.children?.length) flatten(item.children, depth + 1);
-          }
-        };
-
-        // ── Source 1: DashConst sidebar items (Dashboard, Pipelines, LiteLLM, etc.) ──
+        // ── Source 1: DashConst sidebar items — whitelist only ──
+        const appRows: PickerRow[] = [];
+        const seenApp = new Set<string>();
         const sideConsts = dashConsts.filter(
           dc => dc.keys && dc.keys.includes('Side') && !dc.keys.includes('SideConfiguration')
         );
         for (const dc of sideConsts) {
           try {
             const parsed: SidebarItem = JSON.parse(dc.value);
-            if (parsed) flatten([parsed]);
+            if (!parsed?.label) continue;
+            if (!ALLOWED_SIDEBAR_LABELS.has(parsed.label.toLowerCase())) continue;
+            const key = parsed.url || parsed.label;
+            if (seenApp.has(key) || skipUrls.has(parsed.url ?? '')) continue;
+            seenApp.add(key);
+            seen.add(key);
+            appRows.push({
+              item: parsed,
+              depth: 0,
+              active: parsed.url ? activeMap.has(parsed.url) : false,
+              roleMenuId: parsed.url ? (activeMap.get(parsed.url) ?? null) : null,
+              saving: false,
+              hasChildren: false,
+            });
           } catch {}
         }
+        if (appRows.length) {
+          rows.push(makeCategory('Application'));
+          rows.push(...appRows);
+        }
 
-        // ── Source 2: RBAC admin-console menu items (Overview, Tenancy, Access, etc.) ──
+        // ── Source 2: RBAC admin-console menu items ──
+        const adminRows: PickerRow[] = [];
         for (const mi of rbacItems) {
-          if (!mi.route) continue;
-          addRow(
-            { label: mi.label, icon: mi.icon ?? null, url: mi.route },
-            mi.parentId != null ? 1 : 0,
-          );
+          if (!mi.route || skipUrls.has(mi.route) || seen.has(mi.route)) continue;
+          seen.add(mi.route);
+          adminRows.push({
+            item: { label: mi.label, icon: mi.icon ?? null, url: mi.route },
+            depth: mi.parentId != null ? 1 : 0,
+            active: activeMap.has(mi.route),
+            roleMenuId: activeMap.get(mi.route) ?? null,
+            saving: false,
+            hasChildren: false,
+          });
+        }
+        if (adminRows.length) {
+          rows.push(makeCategory('Admin Console'));
+          rows.push(...adminRows);
         }
 
         return rows;
@@ -115,10 +137,11 @@ export class MenuPickerDialogComponent implements OnInit {
     });
   }
 
-  get activeCount(): number { return this.rows.filter(r => r.active).length; }
+  get activeCount(): number { return this.rows.filter(r => !r.isCategory && r.active).length; }
+  get categoryCount(): number { return this.rows.filter(r => r.isCategory).length; }
 
   toggle(row: PickerRow): void {
-    if (row.saving) return;
+    if (row.saving || row.isCategory) return;
     row.saving = true;
     const { roleName, projectName, userId } = this.data;
 
