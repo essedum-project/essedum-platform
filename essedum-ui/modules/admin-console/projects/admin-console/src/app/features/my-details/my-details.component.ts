@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -31,7 +31,7 @@ export interface RoleCard {
   templateUrl: './my-details.component.html',
   styleUrls: ['./my-details.component.scss'],
   standalone: false,
-  encapsulation: 2, // ViewEncapsulation.None — allows global CSS like approvals/publishing pages
+  encapsulation: ViewEncapsulation.None,
 })
 export class MyDetailsComponent implements OnInit, OnDestroy, AfterViewInit {
   cards: RoleCard[] = [];
