@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -33,7 +33,7 @@ export interface RoleCard {
   standalone: false,
   encapsulation: ViewEncapsulation.None,
 })
-export class MyDetailsComponent implements OnInit, OnDestroy, AfterViewInit {
+export class MyDetailsComponent implements OnInit, OnDestroy {
   cards: RoleCard[] = [];
   loading = true;
   user: any = {};
@@ -43,7 +43,14 @@ export class MyDetailsComponent implements OnInit, OnDestroy, AfterViewInit {
   filterProject = '';
 
   tableDataSource = new MatTableDataSource<RoleCard>([]);
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  // Setter instead of a plain @ViewChild so the paginator connects even when
+  // it is rendered late (it lives inside *ngIf="!loading && cards.length > 0").
+  @ViewChild(MatPaginator) set paginator(pag: MatPaginator) {
+    if (pag) {
+      this.tableDataSource.paginator = pag;
+    }
+  }
 
   readonly tableColumns = ['role', 'org', 'project', 'user', 'granted', 'actions'];
 
@@ -60,10 +67,6 @@ export class MyDetailsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   syncTableData(): void {
     this.tableDataSource.data = this.filteredCards;
-  }
-
-  ngAfterViewInit(): void {
-    this.tableDataSource.paginator = this.paginator;
   }
 
   private readonly onAssignmentsChanged = () => this.load();
@@ -121,8 +124,20 @@ export class MyDetailsComponent implements OnInit, OnDestroy, AfterViewInit {
         for (const a of assignments.filter(a => !a.revokedAt)) {
           const role = roleMap.get(a.roleId);
           const roleName = role?.name ?? `Role #${a.roleId}`;
-          const orgName = a.organizationId != null ? (orgMap.get(a.organizationId) ?? `Org #${a.organizationId}`) : null;
           const proj = a.projectId != null ? projMap.get(a.projectId) : null;
+          // Org: explicit assignment org → project's own org → project's portfolio name
+          let orgName: string | null = null;
+          if (a.organizationId != null) {
+            orgName = orgMap.get(a.organizationId) ?? `Org #${a.organizationId}`;
+          } else if (proj) {
+            const p = proj as any;
+            if (p.organisationId != null) {
+              orgName = orgMap.get(p.organisationId) ?? null;
+            }
+            if (!orgName && p.portfolioId?.portfolioName) {
+              orgName = p.portfolioId.portfolioName;
+            }
+          }
           // Prefer human-readable display name (what the shell thumbnail shows) over internal name.
           const projectName = proj?.projectdisplayname
             || proj?.portfolioId?.portfolioName

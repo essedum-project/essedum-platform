@@ -302,6 +302,12 @@ export class ApisService {
     );
   }
 
+  getRoleMenus(role: string, project: string, actorUserId: number): Observable<any[]> {
+    return this.http.get<any[]>('/api/usm/role-menus', { params: { role, project, actorUserId } }).pipe(
+      catchError(() => of([])),
+    );
+  }
+
   /* *************DST API *********** */
   DSTService(): Observable<any> {
     return this.https

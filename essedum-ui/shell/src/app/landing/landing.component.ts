@@ -2706,11 +2706,37 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
           }
         }, 1000);
         
-        // Reset sidebar loading flag now that everything is complete
-        this.isSidebarLoading = false;
+        // Check if there is an admin-configured role-menu for the current role+project.
+        // If yes, it takes precedence over the DashConsts-derived sidebar so that
+        // "Configure Menu" in My Details actually takes effect immediately.
+        try {
+          const roleForMenu = JSON.parse(sessionStorage.getItem('role') || 'null');
+          const projectForMenu = JSON.parse(sessionStorage.getItem('project') || 'null');
+          const userForMenu = JSON.parse(sessionStorage.getItem('user') || 'null');
+          if (roleForMenu?.name && projectForMenu?.name && userForMenu?.id) {
+            this.apisService.getRoleMenus(roleForMenu.name, projectForMenu.name, userForMenu.id)
+              .subscribe((roleMenuItems: any[]) => {
+                if (roleMenuItems && roleMenuItems.length > 0) {
+                  // Build sidebar items from configured role-menu, preserving children array
+                  const menuFromRole = roleMenuItems.map((m: any) => ({
+                    label: m.label,
+                    icon: m.icon || 'circle',
+                    url: m.url || (m.children && m.children.length ? m.children[0].url : null),
+                    children: m.children || [],
+                  }));
+                  this.sidebarMenu = menuFromRole;
+                }
+                this.isSidebarLoading = false;
+              });
+          } else {
+            this.isSidebarLoading = false;
+          }
+        } catch {
+          this.isSidebarLoading = false;
+        }
       }
-    ); 
-      
+    );
+
   }
   getIdDataObject(secondLevelObj: any) {
     let resObj: any = {};
