@@ -140,6 +140,13 @@ export class MenuPickerDialogComponent implements OnInit {
   get activeCount(): number { return this.rows.filter(r => !r.isCategory && r.active).length; }
   get categoryCount(): number { return this.rows.filter(r => r.isCategory).length; }
 
+  /** Resolve the deepest navigable URL in an item tree so clicks actually navigate. */
+  private resolveNavUrl(item: SidebarItem): string | null {
+    if (!item.children || item.children.length === 0) return item.url || null;
+    const childUrl = this.resolveNavUrl(item.children[0]);
+    return childUrl || item.url || null;
+  }
+
   toggle(row: PickerRow): void {
     if (row.saving || row.isCategory) return;
     row.saving = true;
@@ -147,7 +154,10 @@ export class MenuPickerDialogComponent implements OnInit {
 
     if (row.active && row.roleMenuId != null) {
       this.api.deleteRoleMenu(row.roleMenuId, userId).subscribe({
-        next: () => { row.active = false; row.roleMenuId = null; row.saving = false; },
+        next: () => {
+          row.active = false; row.roleMenuId = null; row.saving = false;
+          window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
+        },
         error: () => { row.saving = false; },
       });
     } else if (!row.active) {
@@ -156,9 +166,13 @@ export class MenuPickerDialogComponent implements OnInit {
         project: projectName ?? '',
         label: row.item.label,
         icon: row.item.icon ?? null,
-        url: row.item.url ?? null,
+        url: this.resolveNavUrl(row.item),
+        children: row.item.children ?? [],
       }).subscribe({
-        next: rm => { row.active = true; row.roleMenuId = rm.id; row.saving = false; },
+        next: rm => {
+          row.active = true; row.roleMenuId = rm.id; row.saving = false;
+          window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
+        },
         error: () => { row.saving = false; },
       });
     } else {

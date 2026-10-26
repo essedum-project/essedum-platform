@@ -170,7 +170,7 @@ export class ApiService {
   }
 
   createRoleMenu(actorUserId: number, body: {
-    role: string; project: string; label: string; icon: string | null; url: string | null;
+    role: string; project: string; label: string; icon: string | null; url: string | null; children?: any[];
   }): Observable<RoleMenu> {
     return this.http.post<RoleMenu>(`${this.base}/role-menus`, body, { params: { actorUserId } });
   }

@@ -1,5 +1,7 @@
 package com.lfn.iamp.usm.menu;
 
+import java.util.List;
+
 /**
  * A flat view of one legacy sidebar menu item stored in usm_constant
  * (item = "&lt;Role&gt; Side", item_value = JSON). This is the live source the
@@ -15,6 +17,11 @@ public class RoleMenuDto {
 	private String icon;
 	private String url;
 	private boolean hasChildren;
+	/**
+	 * Full children array from the sidebar JSON — preserved on create so that
+	 * navigation works for items whose real URL lives in a child node.
+	 */
+	private List<Object> children;
 
 	public Integer getId() {
 		return id;
@@ -70,5 +77,13 @@ public class RoleMenuDto {
 
 	public void setHasChildren(boolean hasChildren) {
 		this.hasChildren = hasChildren;
+	}
+
+	public List<Object> getChildren() {
+		return children;
+	}
+
+	public void setChildren(List<Object> children) {
+		this.children = children;
 	}
 }

@@ -31,6 +31,7 @@ export interface RoleCard {
   templateUrl: './my-details.component.html',
   styleUrls: ['./my-details.component.scss'],
   standalone: false,
+  encapsulation: 2, // ViewEncapsulation.None — allows global CSS like approvals/publishing pages
 })
 export class MyDetailsComponent implements OnInit, OnDestroy, AfterViewInit {
   cards: RoleCard[] = [];
@@ -185,10 +186,12 @@ export class MyDetailsComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       const role = JSON.parse(sessionStorage.getItem('role') || 'null');
       const project = JSON.parse(sessionStorage.getItem('project') || 'null');
-      if (!role) return false;
+      if (!role || !project) return false;
       const roleMatch = (role.name || '').toLowerCase() === card.roleName.toLowerCase();
-      const projectMatch = !card.projectName ||
-        (project && (project.name === card.projectName || project.id === card.projectId));
+      // Only the row whose project exactly matches the thumbnail selection is active.
+      // "Whole org" and platform-wide rows are intentionally excluded.
+      const projectMatch = card.projectName != null &&
+        (project.name === card.projectName || project.id === card.projectId);
       return roleMatch && projectMatch;
     } catch { return false; }
   }

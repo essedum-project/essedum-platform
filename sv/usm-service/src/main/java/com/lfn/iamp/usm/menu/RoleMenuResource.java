@@ -90,14 +90,14 @@ public class RoleMenuResource {
 		return ResponseEntity.ok(projects);
 	}
 
-	/** The top-level sidebar items for a role in a project. */
+	/** The top-level sidebar items for a role in a project (global — shared by all users with that role+project). */
 	@GetMapping("/role-menus")
 	public ResponseEntity<List<RoleMenuDto>> list(@RequestParam String role, @RequestParam String project,
 			@RequestParam Integer actorUserId) {
 		requirePlatformAdmin(actorUserId);
 		List<RoleMenuDto> rows = new ArrayList<>();
-		for (DashConstant dc : dashConstantRepository.findAllDashConstantsbyItemAndProject(role + SIDE_SUFFIX,
-				project)) {
+		for (DashConstant dc : dashConstantRepository.findAllDashConstantsbyItemAndProject(
+				role + SIDE_SUFFIX, project)) {
 			rows.add(toDto(dc, role));
 		}
 		return ResponseEntity.ok(rows);
@@ -121,7 +121,7 @@ public class RoleMenuResource {
 		return ResponseEntity.ok(toDto(dc, stripSide(dc.getKeys())));
 	}
 
-	/** Add a new top-level item to a role's menu, cloning the project linkage from a sibling. */
+	/** Add a new top-level item globally for a role+project (affects all users with that role+project). */
 	@PostMapping("/role-menus")
 	public ResponseEntity<RoleMenuDto> create(@RequestParam Integer actorUserId, @RequestBody RoleMenuDto body) {
 		requirePlatformAdmin(actorUserId);
@@ -129,7 +129,7 @@ public class RoleMenuResource {
 		DashConstant dc = new DashConstant();
 		dc.setKeys(item);
 		dc.setProject_name(body.getProject());
-		// Clone project_id / portfolio_id from an existing row of the same role+project.
+		// Clone project_id / portfolio_id from a global sibling (no userId filter).
 		List<DashConstant> siblings = dashConstantRepository.findAllDashConstantsbyItemAndProject(item,
 				body.getProject());
 		if (!siblings.isEmpty()) {
@@ -140,20 +140,28 @@ public class RoleMenuResource {
 		node.put("label", body.getLabel());
 		node.put("icon", body.getIcon() == null ? "" : body.getIcon());
 		node.put("url", body.getUrl() == null ? "" : body.getUrl());
-		node.set("children", objectMapper.createArrayNode());
+		// Preserve children from request so navigation works for items whose real
+		// URL lives inside a child node (e.g. Datasets → first child URL).
+		if (body.getChildren() != null && !body.getChildren().isEmpty()) {
+			node.set("children", objectMapper.valueToTree(body.getChildren()));
+		} else {
+			node.set("children", objectMapper.createArrayNode());
+		}
 		dc.setValue(writeValue(node));
 		DashConstant saved = dashConstantRepository.save(dc);
-		auditService.record("role_menu", "created", null, null,
-				"menu '" + body.getLabel() + "' added to " + item + " / " + body.getProject());
+		auditService.record("role_menu", "created", actorUserId, "User #" + actorUserId,
+				"menu '" + body.getLabel() + "' added to " + item + " / " + body.getProject() + " for user " + actorUserId);
 		return ResponseEntity.ok(toDto(saved, body.getRole()));
 	}
 
 	@DeleteMapping("/role-menus/{id}")
 	public ResponseEntity<Void> delete(@PathVariable Integer id, @RequestParam Integer actorUserId) {
 		requirePlatformAdmin(actorUserId);
-		dashConstantRepository.findById(id).ifPresent(dc -> auditService.record("role_menu", "deleted", actorUserId,
-				"User #" + actorUserId, "menu row " + id + " removed from " + dc.getKeys() + " / " + dc.getProject_name()));
-		dashConstantRepository.deleteById(id);
+		dashConstantRepository.findById(id).ifPresent(dc -> {
+			auditService.record("role_menu", "deleted", actorUserId,
+					"User #" + actorUserId, "menu row " + id + " removed from " + dc.getKeys() + " / " + dc.getProject_name());
+			dashConstantRepository.deleteById(id);
+		});
 		return ResponseEntity.noContent().build();
 	}
 
