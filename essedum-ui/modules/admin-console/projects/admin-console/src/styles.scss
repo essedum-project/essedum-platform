@@ -432,5 +432,110 @@ body.header-light-theme .admin-console-table,
 /* ---- dialog backdrop: darken the page behind so the surface reads clearly ---- */
 .cdk-overlay-dark-backdrop { background: rgba(2, 6, 23, 0.55); }
 
+/* ════════════════════════════════════════════════════════════════════════════
+   Paginator — global, covers every admin-console page in both themes.
+   mat-paginator sits outside the table DOM so table-scoped CSS can't reach it;
+   these rules must live here.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Dark default */
+mat-paginator.mat-mdc-paginator,
+.admin-console-shell mat-paginator,
+.admin-console-shell .mat-mdc-paginator {
+  background: #1e293b !important;
+  color: #94a3b8 !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.18) !important;
+  border-radius: 0 0 12px 12px !important;
+
+  /* text labels */
+  .mat-mdc-paginator-range-label,
+  .mat-mdc-paginator-page-size-label {
+    color: #94a3b8 !important;
+    font-size: 12px !important;
+  }
+
+  /* items-per-page select value */
+  .mat-mdc-select-value,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-min-line {
+    color: #e2e8f0 !important;
+    font-size: 12px !important;
+  }
+
+  /* select trigger background */
+  .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+    background: transparent !important;
+  }
+
+  /* nav icon buttons */
+  .mat-mdc-icon-button {
+    color: #94a3b8 !important;
+    --mdc-icon-button-icon-color: #94a3b8;
+
+    &:not([disabled]):hover {
+      color: #4f8ef7 !important;
+      background: rgba(79, 142, 247, 0.10) !important;
+    }
+    &[disabled],
+    &.mat-mdc-button-disabled {
+      color: #334155 !important;
+      --mdc-icon-button-icon-color: #334155;
+      opacity: 0.5;
+    }
+
+    .mat-mdc-button-persistent-ripple { display: none; }
+  }
+
+  /* select trigger outline (outline appearance) */
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: rgba(148, 163, 184, 0.22) !important;
+  }
+}
+
+/* Light theme override */
+body.header-light-theme mat-paginator.mat-mdc-paginator,
+body.header-light-theme .admin-console-shell mat-paginator,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator,
+.admin-console-shell.light-theme mat-paginator.mat-mdc-paginator,
+.admin-console-shell.light-theme .mat-mdc-paginator {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.12) !important;
+
+  .mat-mdc-paginator-range-label,
+  .mat-mdc-paginator-page-size-label {
+    color: #64748b !important;
+  }
+
+  .mat-mdc-select-value,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-min-line {
+    color: #1e293b !important;
+  }
+
+  .mat-mdc-icon-button {
+    color: #64748b !important;
+    --mdc-icon-button-icon-color: #64748b;
+
+    &:not([disabled]):hover {
+      color: #2563eb !important;
+      background: rgba(37, 99, 235, 0.08) !important;
+    }
+    &[disabled],
+    &.mat-mdc-button-disabled {
+      color: #cbd5e1 !important;
+      --mdc-icon-button-icon-color: #cbd5e1;
+    }
+  }
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: rgba(15, 23, 42, 0.18) !important;
+  }
+}
+
 
 
