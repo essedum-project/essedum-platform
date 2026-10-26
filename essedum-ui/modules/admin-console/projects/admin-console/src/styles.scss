@@ -433,109 +433,130 @@ body.header-light-theme .admin-console-table,
 .cdk-overlay-dark-backdrop { background: rgba(2, 6, 23, 0.55); }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   Paginator — global, covers every admin-console page in both themes.
-   mat-paginator sits outside the table DOM so table-scoped CSS can't reach it;
-   these rules must live here.
+   Paginator — flat rules, no SCSS nesting (avoids build-tool compat issues).
+   Uses both the Material CSS custom property AND a direct background override
+   because Angular Material 17+ renders a host element that can ignore
+   descendant rules when the component uses its own shadow-like encapsulation.
    ════════════════════════════════════════════════════════════════════════════ */
 
-/* Dark default */
-mat-paginator.mat-mdc-paginator,
-.admin-console-shell mat-paginator,
-.admin-console-shell .mat-mdc-paginator {
-  background: #1e293b !important;
+/* ── Dark default ── */
+mat-paginator,
+.mat-mdc-paginator {
+  --mat-paginator-container-background-color: #1e293b;
+  --mat-paginator-container-text-color: #94a3b8;
+  --mat-paginator-select-trigger-text-color: #e2e8f0;
+  background-color: #1e293b !important;
   color: #94a3b8 !important;
   border-top: 1px solid rgba(148, 163, 184, 0.18) !important;
   border-radius: 0 0 12px 12px !important;
-
-  /* text labels */
-  .mat-mdc-paginator-range-label,
-  .mat-mdc-paginator-page-size-label {
-    color: #94a3b8 !important;
-    font-size: 12px !important;
-  }
-
-  /* items-per-page select value */
-  .mat-mdc-select-value,
-  .mat-mdc-select-value-text,
-  .mat-mdc-select-min-line {
-    color: #e2e8f0 !important;
-    font-size: 12px !important;
-  }
-
-  /* select trigger background */
-  .mat-mdc-form-field .mat-mdc-text-field-wrapper {
-    background: transparent !important;
-  }
-
-  /* nav icon buttons */
-  .mat-mdc-icon-button {
-    color: #94a3b8 !important;
-    --mdc-icon-button-icon-color: #94a3b8;
-
-    &:not([disabled]):hover {
-      color: #4f8ef7 !important;
-      background: rgba(79, 142, 247, 0.10) !important;
-    }
-    &[disabled],
-    &.mat-mdc-button-disabled {
-      color: #334155 !important;
-      --mdc-icon-button-icon-color: #334155;
-      opacity: 0.5;
-    }
-
-    .mat-mdc-button-persistent-ripple { display: none; }
-  }
-
-  /* select trigger outline (outline appearance) */
-  .mdc-notched-outline__leading,
-  .mdc-notched-outline__notch,
-  .mdc-notched-outline__trailing {
-    border-color: rgba(148, 163, 184, 0.22) !important;
-  }
 }
+mat-paginator .mat-mdc-paginator-range-label,
+mat-paginator .mat-mdc-paginator-page-size-label,
+.mat-mdc-paginator .mat-mdc-paginator-range-label,
+.mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #94a3b8 !important; font-size: 12px !important; }
 
-/* Light theme override */
-body.header-light-theme mat-paginator.mat-mdc-paginator,
-body.header-light-theme .admin-console-shell mat-paginator,
-body.header-light-theme .admin-console-shell .mat-mdc-paginator,
-.admin-console-shell.light-theme mat-paginator.mat-mdc-paginator,
+mat-paginator .mat-mdc-select-value,
+mat-paginator .mat-mdc-select-value-text,
+mat-paginator .mat-mdc-select-min-line,
+.mat-mdc-paginator .mat-mdc-select-value,
+.mat-mdc-paginator .mat-mdc-select-value-text,
+.mat-mdc-paginator .mat-mdc-select-min-line { color: #e2e8f0 !important; font-size: 12px !important; }
+
+mat-paginator .mat-mdc-form-field .mat-mdc-text-field-wrapper,
+.mat-mdc-paginator .mat-mdc-form-field .mat-mdc-text-field-wrapper { background: transparent !important; }
+
+mat-paginator .mat-mdc-icon-button,
+.mat-mdc-paginator .mat-mdc-icon-button { color: #94a3b8 !important; --mdc-icon-button-icon-color: #94a3b8; }
+mat-paginator .mat-mdc-icon-button:not([disabled]):hover,
+.mat-mdc-paginator .mat-mdc-icon-button:not([disabled]):hover { color: #4f8ef7 !important; background: rgba(79,142,247,0.10) !important; }
+mat-paginator .mat-mdc-icon-button[disabled],
+.mat-mdc-paginator .mat-mdc-icon-button[disabled] { color: #334155 !important; opacity: 0.4; }
+
+mat-paginator .mdc-notched-outline__leading,
+mat-paginator .mdc-notched-outline__notch,
+mat-paginator .mdc-notched-outline__trailing,
+.mat-mdc-paginator .mdc-notched-outline__leading,
+.mat-mdc-paginator .mdc-notched-outline__notch,
+.mat-mdc-paginator .mdc-notched-outline__trailing { border-color: rgba(148,163,184,0.20) !important; }
+
+/* ── Light theme override ── */
+body.header-light-theme mat-paginator,
+body.header-light-theme .mat-mdc-paginator,
+.admin-console-shell.light-theme mat-paginator,
 .admin-console-shell.light-theme .mat-mdc-paginator {
-  background: #f1f5f9 !important;
+  --mat-paginator-container-background-color: #f1f5f9;
+  --mat-paginator-container-text-color: #64748b;
+  --mat-paginator-select-trigger-text-color: #1e293b;
+  background-color: #f1f5f9 !important;
   color: #64748b !important;
-  border-top: 1px solid rgba(15, 23, 42, 0.12) !important;
-
-  .mat-mdc-paginator-range-label,
-  .mat-mdc-paginator-page-size-label {
-    color: #64748b !important;
-  }
-
-  .mat-mdc-select-value,
-  .mat-mdc-select-value-text,
-  .mat-mdc-select-min-line {
-    color: #1e293b !important;
-  }
-
-  .mat-mdc-icon-button {
-    color: #64748b !important;
-    --mdc-icon-button-icon-color: #64748b;
-
-    &:not([disabled]):hover {
-      color: #2563eb !important;
-      background: rgba(37, 99, 235, 0.08) !important;
-    }
-    &[disabled],
-    &.mat-mdc-button-disabled {
-      color: #cbd5e1 !important;
-      --mdc-icon-button-icon-color: #cbd5e1;
-    }
-  }
-
-  .mdc-notched-outline__leading,
-  .mdc-notched-outline__notch,
-  .mdc-notched-outline__trailing {
-    border-color: rgba(15, 23, 42, 0.18) !important;
-  }
+  border-top: 1px solid rgba(15,23,42,0.12) !important;
 }
+body.header-light-theme mat-paginator .mat-mdc-paginator-range-label,
+body.header-light-theme mat-paginator .mat-mdc-paginator-page-size-label,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-range-label,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-page-size-label,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-paginator-range-label,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-paginator-range-label { color: #64748b !important; }
+
+body.header-light-theme mat-paginator .mat-mdc-select-value,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-select-value,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-select-value,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-select-value { color: #1e293b !important; }
+
+body.header-light-theme mat-paginator .mat-mdc-icon-button,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-icon-button,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b; }
+body.header-light-theme mat-paginator .mat-mdc-icon-button:not([disabled]):hover,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button:not([disabled]):hover { color: #2563eb !important; background: rgba(37,99,235,0.08) !important; }
+body.header-light-theme mat-paginator .mat-mdc-icon-button[disabled],
+body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button[disabled] { color: #cbd5e1 !important; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Form fields — borderless outline style for all filter bars across every
+   admin-console page. Removes the outline border, keeps label + input readable.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Remove outline border from all mat-form-field outline fields */
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline__leading,
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline__notch,
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline__trailing,
+.mdc-text-field--outlined .mdc-notched-outline__leading,
+.mdc-text-field--outlined .mdc-notched-outline__notch,
+.mdc-text-field--outlined .mdc-notched-outline__trailing { border-color: transparent !important; }
+
+/* Subtle bottom border only — gives a clean underline feel without a full box */
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline__trailing,
+.mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-bottom-color: rgba(148,163,184,0.25) !important;
+}
+
+/* Slight background tint so the field region is still distinct */
+.admin-console-shell .mdc-text-field--outlined .mat-mdc-text-field-wrapper,
+.admin-console-shell .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+  background: rgba(148,163,184,0.06) !important;
+  border-radius: 8px !important;
+}
+
+/* On hover/focus, show a faint accent border */
+.admin-console-shell .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__leading,
+.admin-console-shell .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__notch,
+.admin-console-shell .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__trailing,
+.admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__leading,
+.admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__notch,
+.admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__trailing { border-color: rgba(79,142,247,0.5) !important; }
+
+/* Light theme field overrides */
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined .mat-mdc-text-field-wrapper,
+body.header-light-theme .admin-console-shell .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+  background: rgba(15,23,42,0.04) !important;
+}
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__leading,
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__notch,
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__trailing,
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__leading,
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__notch,
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__trailing { border-color: rgba(37,99,235,0.5) !important; }
 
 
 
