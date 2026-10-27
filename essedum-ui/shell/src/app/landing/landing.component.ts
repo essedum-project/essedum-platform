@@ -1519,14 +1519,19 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         // ── RBAC role navigation ──────────────────────────────────────────────
         // Admin-tier RBAC roles land on the admin-console overview.
         // App-tier RBAC roles land on the first item in their role menu (dashboard).
+        // newsidebar() is called AFTER navigate() resolves: ActivationEnd fires
+        // during navigation and cancels all in-flight requests, so calling it
+        // before navigate() would cancel the fresh menu fetch.
         if (this.roleMenuSvc.isRbacRole(this.selectedrole.name)) {
-          // Load the sidebar for the new role before navigating so there is no flash.
-          this.newsidebar();
-          if (this.roleMenuSvc.isRbacAdminRole(this.selectedrole.name)) {
-            this.router.navigate(["/landing/admin-console/overview"]);
-          } else {
-            this.router.navigate(["/landing/dashboard"]);
-          }
+          const dest = this.roleMenuSvc.isRbacAdminRole(this.selectedrole.name)
+            ? "/landing/admin-console/overview"
+            : "/landing/dashboard";
+          this.router.navigate([dest]).then(() => {
+            // Role switch is intentional: sessionStorage already holds the chosen
+            // role, so the stale-role guard is not needed here.
+            this._rbacCheckPending = false;
+            this.newsidebar();
+          });
           return;
         }
         // ─────────────────────────────────────────────────────────────────────

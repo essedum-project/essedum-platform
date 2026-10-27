@@ -73,30 +73,20 @@ export class RoleMenuService {
     return ADMIN_ROLE_NAMES.has((roleName || '').toLowerCase().trim());
   }
 
-  private _filterAndMap(items: any[], roleName: string): RoleMenuItem[] {
-    const isAdmin = this.isRbacAdminRole(roleName);
+  private _filterAndMap(items: any[], _roleName: string): RoleMenuItem[] {
+    const mapped = items.map(item => ({
+      label: item.label,
+      icon: item.icon ?? null,
+      // Normalise: BE seeds use "/route", shell expects "./route"
+      url: item.route
+        ? (item.route.startsWith('/') ? '.' + item.route : item.route)
+        : '',
+      children: [],
+    }));
 
-    const filtered = items
-      .filter(item => {
-        const route: string = (item.route || '').toLowerCase();
-        const isAdminRoute = route.includes('admin-console') || route.includes('admin_console');
-        return isAdmin ? isAdminRoute : !isAdminRoute;
-      })
-      .map(item => ({
-        label: item.label,
-        icon: item.icon ?? null,
-        // Normalise: BE seeds use "/route", shell expects "./route"
-        url: item.route
-          ? (item.route.startsWith('/') ? '.' + item.route : item.route)
-          : '',
-        children: [],
-      }));
-
-    // Non-admin roles with no configured product routes fall back to Dashboard
-    // so the sidebar isn't left empty when the user switches to developer/viewer.
-    if (!isAdmin && filtered.length === 0) {
+    if (mapped.length === 0) {
       return [{ label: 'Dashboard', icon: null, url: './dashboard', children: [] }];
     }
-    return filtered;
+    return mapped;
   }
 }
