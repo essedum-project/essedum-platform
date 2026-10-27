@@ -11,30 +11,35 @@ export interface RoleMenuItem {
 }
 
 /**
- * Roles whose sidebar is purely admin-console routes (rank >= 2).
- * All other RBAC roles get product routes.
+ * Active RBAC roles in rbac_role table (rbac.xml rbac-17 + rbac-21).
+ * Admin tier (rank >= 2): sidebar shows admin-console routes.
+ * App tier (rank 0-1): sidebar shows product routes.
+ * Lowercase match.
  */
 const ADMIN_ROLE_NAMES = new Set([
-  'admin', 'ai platform admin',
-  'organization admin', 'ai organisation admin',
-  'project admin', 'ai project admin',
+  // rank 4 — platform
+  'admin',
+  // rank 3 — org
+  'organization admin',
+  // rank 2 — project
+  'project admin',
 ]);
 
 /**
- * All role names that should use this new menu system (bypass legacy DashConsts).
- * Lowercase match. Extend as new roles are added to the DB.
+ * All RBAC role names that use rbac_menu_item-based sidebar (bypass legacy DashConsts).
+ * Must stay in sync with rbac_role.name values in the DB.
  */
 const RBAC_ROLE_NAMES = new Set([
   // Rank 0
-  'viewer', 'ai client', 'ai consumer(read only)',
+  'ai client',
   // Rank 1
-  'developer', 'ai engineer',
+  'developer',
   // Rank 2
-  'project admin', 'ai project admin',
+  'project admin',
   // Rank 3
-  'organization admin', 'ai organisation admin',
+  'organization admin',
   // Rank 4
-  'admin', 'ai platform admin',
+  'admin',
 ]);
 
 @Injectable({ providedIn: 'root' })
@@ -71,7 +76,7 @@ export class RoleMenuService {
   private _filterAndMap(items: any[], roleName: string): RoleMenuItem[] {
     const isAdmin = this.isRbacAdminRole(roleName);
 
-    return items
+    const filtered = items
       .filter(item => {
         const route: string = (item.route || '').toLowerCase();
         const isAdminRoute = route.includes('admin-console') || route.includes('admin_console');
@@ -86,5 +91,12 @@ export class RoleMenuService {
           : '',
         children: [],
       }));
+
+    // Non-admin roles with no configured product routes fall back to Dashboard
+    // so the sidebar isn't left empty when the user switches to developer/viewer.
+    if (!isAdmin && filtered.length === 0) {
+      return [{ label: 'Dashboard', icon: null, url: './dashboard', children: [] }];
+    }
+    return filtered;
   }
 }

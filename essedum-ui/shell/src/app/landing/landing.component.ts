@@ -400,6 +400,9 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   filterData: any;
   mfeRouteTitle: any;
   isSidebarLoading = false;
+  /** True while supplementRbacData() hasn't yet confirmed the correct RBAC role.
+   *  Prevents newsidebar() from fetching a menu for a stale sessionStorage role. */
+  private _rbacCheckPending = true;
 
   constructor(
     private router: Router,
@@ -550,6 +553,54 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id; } catch { return null; }
     })();
 
+    // Orgs: merge usm_organisation entries into portfoliodata (dedup by name)
+    this.http.get<any[]>('/api/organisations', { params: { size: '1000' } }).subscribe({
+      next: (orgs: any[]) => {
+        const existing = new Set<string>(
+          this.portfoliodata.map((p: any) => (p.portfolioName || '').toLowerCase())
+        );
+        let changed = false;
+        (orgs || []).forEach((org: any) => {
+          if (org.name && !existing.has(org.name.toLowerCase())) {
+            this.portfoliodata.push({ id: org.id, portfolioName: org.name });
+            existing.add(org.name.toLowerCase());
+            changed = true;
+          }
+        });
+        if (changed) {
+          this.portfoliodata = this.portfoliodata.sort((a: any, b: any) =>
+            (a.portfolioName || '').toLowerCase() > (b.portfolioName || '').toLowerCase() ? 1 : -1
+          );
+        }
+      },
+      error: () => {}
+    });
+
+    // Projects: merge usm_project entries into projectList (dedup by id)
+    this.http.get<any[]>('/api/projects', { params: { size: '1000' } }).subscribe({
+      next: (projects: any[]) => {
+        const existingIds = new Set<number>(this.projectList.map((p: any) => p.id));
+        let changed = false;
+        (projects || []).forEach((proj: any) => {
+          if (!existingIds.has(proj.id)) {
+            this.projectList.push({
+              id: proj.id,
+              name: proj.name,
+              projectdisplayname: proj.projectdisplayname || proj.name
+            });
+            existingIds.add(proj.id);
+            changed = true;
+          }
+        });
+        if (changed) {
+          this.projectList = this.projectList.sort((a: any, b: any) =>
+            (a.projectdisplayname || '').toLowerCase() > (b.projectdisplayname || '').toLowerCase() ? 1 : -1
+          );
+        }
+      },
+      error: () => {}
+    });
+
     // Step 1: fetch all RBAC roles to build the rank map + id→name lookup
     this.http.get<any[]>('/api/usm/roles').subscribe({
       next: (rbacRoles: any[]) => {
@@ -591,66 +642,27 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               // Keep current role if it's still valid; otherwise default to highest-ranked
               const cur = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null'); } catch { return null; } })();
               const curStillValid = cur?.name && rbacList.some(r => r.name.toLowerCase() === cur.name.toLowerCase());
-              if (!curStillValid) {
+              // Always prefer the highest-ranked role on initial load.
+              const needsUpgrade = curStillValid && rbacList[0].name.toLowerCase() !== (cur?.name || '').toLowerCase();
+              this._rbacCheckPending = false;
+              if (!curStillValid || needsUpgrade) {
                 this.valuechangerole(rbacList[0]);
+              } else {
+                // Role confirmed unchanged — now safe to load the sidebar.
+                this.newsidebar();
               }
             } else {
               this._sortLegacyRoleList(); // no RBAC assignments — keep legacy list
+              this._rbacCheckPending = false;
+              this.newsidebar();
             }
           },
-          error: () => { this._sortLegacyRoleList(); }
+          error: () => { this._sortLegacyRoleList(); this._rbacCheckPending = false; this.newsidebar(); }
         });
       },
       error: () => {}
     });
 
-    // Orgs: add entries from usm_organisation (RBAC) not already in portfoliodata (dedup by name)
-    this.http.get<any[]>('/api/organisations', { params: { size: '1000' } }).subscribe({
-      next: (orgs: any[]) => {
-        const existing = new Set<string>(
-          this.portfoliodata.map((p: any) => (p.portfolioName || '').toLowerCase())
-        );
-        let changed = false;
-        (orgs || []).forEach((org: any) => {
-          if (org.name && !existing.has(org.name.toLowerCase())) {
-            this.portfoliodata.push({ id: org.id, portfolioName: org.name });
-            existing.add(org.name.toLowerCase());
-            changed = true;
-          }
-        });
-        if (changed) {
-          this.portfoliodata = this.portfoliodata.sort((a: any, b: any) =>
-            (a.portfolioName || '').toLowerCase() > (b.portfolioName || '').toLowerCase() ? 1 : -1
-          );
-        }
-      },
-      error: () => {}
-    });
-
-    // Projects: add entries from usm_project not already in projectList (dedup by id)
-    this.http.get<any[]>('/api/projects', { params: { size: '1000' } }).subscribe({
-      next: (projects: any[]) => {
-        const existingIds = new Set<number>(this.projectList.map((p: any) => p.id));
-        let changed = false;
-        (projects || []).forEach((proj: any) => {
-          if (!existingIds.has(proj.id)) {
-            this.projectList.push({
-              id: proj.id,
-              name: proj.name,
-              projectdisplayname: proj.projectdisplayname || proj.name
-            });
-            existingIds.add(proj.id);
-            changed = true;
-          }
-        });
-        if (changed) {
-          this.projectList = this.projectList.sort((a: any, b: any) =>
-            (a.projectdisplayname || '').toLowerCase() > (b.projectdisplayname || '').toLowerCase() ? 1 : -1
-          );
-        }
-      },
-      error: () => {}
-    });
   }
 
   ngOnInit() {
@@ -1494,6 +1506,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         // Admin-tier RBAC roles land on the admin-console overview.
         // App-tier RBAC roles land on the first item in their role menu (dashboard).
         if (this.roleMenuSvc.isRbacRole(this.selectedrole.name)) {
+          // Load the sidebar for the new role before navigating so there is no flash.
+          this.newsidebar();
           if (this.roleMenuSvc.isRbacAdminRole(this.selectedrole.name)) {
             this.router.navigate(["/landing/admin-console/overview"]);
           } else {
@@ -2163,8 +2177,19 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     const _role = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return '?'; } })();
     console.group(`[MENU] newsidebar() — role: ${_role}`);
 
-    // ── RBAC role: fetch menu from BE, skip all legacy/DashConsts logic ─────
+    // ── RBAC role: fetch menu from rbac_menu_item via /api/usm/menu ──────────
+    // Admin roles (rank ≥ 2) → filter keeps admin-console routes only.
+    // Non-admin roles (Developer, AI Client) → filter keeps product routes only.
+    // Items seeded per rank in rbac_menu_item; see rbac.xml rbac-22.
     if (this.roleMenuSvc.isRbacRole(_role)) {
+      // Defer if supplementRbacData() hasn't confirmed the correct role yet —
+      // avoids a flash of the stale sessionStorage role's menu at startup.
+      if (this._rbacCheckPending) {
+        this.isSidebarLoading = true;
+        console.log('[MENU] newsidebar: RBAC check pending — deferring menu load');
+        console.groupEnd();
+        return;
+      }
       const _userId = (() => { try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id; } catch { return null; } })();
       this.isSidebarLoading = true;
       this.roleMenuSvc.getMenuForRole(_role, _userId).subscribe(items => {
@@ -4215,11 +4240,18 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
 
   /** Fetch the data-driven RBAC menu once and cache it as sidebar nodes. */
   private loadRbacMenu(): void {
+    // For RBAC roles the sidebar comes entirely from newsidebar() / sidebarMenu.
+    // The legacy rbacMenuNodes system is not used, so skip it to prevent the
+    // "Role & Access Management" fallback from appearing alongside the real menu.
+    let role: any = null;
+    try { role = JSON.parse(sessionStorage.getItem("role") || "null"); } catch { role = null; }
+    if (this.roleMenuSvc.isRbacRole(role?.name)) {
+      this.rbacMenuNodes = [];
+      return;
+    }
     if (this.rbacMenuFetched) return;
     this.rbacMenuFetched = true;
-    let role: any = null;
     let userId: number | null = null;
-    try { role = JSON.parse(sessionStorage.getItem("role") || "null"); } catch { role = null; }
     try {
       const parsed = JSON.parse(sessionStorage.getItem("user") || "null");
       userId = parsed && typeof parsed === "object" ? Number(parsed.user_login ?? parsed.id) : Number(parsed);
@@ -4227,7 +4259,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
     const isAdmin = !!(role && (role.roleadmin || role.name === "Admin"));
     const fallback = () => {
       if (isAdmin) {
-        this.rbacMenuNodes = [{ label: "Role & Access Management (new)", icon: "shield", url: "./admin-console/tenancy" }];
+        this.rbacMenuNodes = [{ label: "Role & Access Management", icon: "shield", url: "./admin-console/tenancy" }];
       }
     };
     if (!userId || !Number.isFinite(userId)) { fallback(); return; }

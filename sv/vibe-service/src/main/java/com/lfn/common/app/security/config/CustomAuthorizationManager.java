@@ -68,7 +68,13 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				AntPathRequestMatcher.antMatcher("/api/email/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/event/trigger/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/sre-availability-cal/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/usm-notificationss/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/usm-notificationss").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/organisations/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/organisations").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/projects").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/usm-portfolios/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/usm-portfolios").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/registerUser").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/userss/resetPassword").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/userss/checkemail").matcher(authorizationContext.getRequest()).isMatch() ||
