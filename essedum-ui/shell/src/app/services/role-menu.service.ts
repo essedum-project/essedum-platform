@@ -12,10 +12,12 @@ export interface RoleMenuItem {
 
 /**
  * Active RBAC roles in rbac_role table (rbac.xml rbac-17 + rbac-21).
- * Admin tier (rank >= 2): sidebar shows admin-console routes.
- * App tier (rank 0-1): sidebar shows product routes.
+ * Admin tier (rank >= 1): sidebar shows admin-console routes.
+ * App tier (rank 0 — AI Client only): sidebar shows product routes.
  * Lowercase match.
  */
+// Roles that use the admin-console sidebar (rank >= 1).
+// AI Client (rank 0) is the only role that uses the product sidebar instead.
 const ADMIN_ROLE_NAMES = new Set([
   // rank 4 — platform
   'admin',
@@ -23,6 +25,8 @@ const ADMIN_ROLE_NAMES = new Set([
   'organization admin',
   // rank 2 — project
   'project admin',
+  // rank 1 — AI Engineer (sees My Drafts + Asset Catalog in admin-console sidebar)
+  'developer',
 ]);
 
 /**
@@ -54,11 +58,11 @@ export class RoleMenuService {
    * Returns all items the user CAN see (gated by their highest rank).
    * FE then narrows to what the CURRENTLY SELECTED role tier should see.
    */
-  getMenuForRole(_roleName: string, userId: number | null | undefined, roleRank?: number): Observable<RoleMenuItem[]> {
+  getMenuForRole(roleName: string, userId: number | null | undefined, roleRank?: number): Observable<RoleMenuItem[]> {
     if (!userId) return of([]);
 
     return this.http.get<any[]>(`/api/usm/menu?userId=${userId}`).pipe(
-      map(items => this._filterAndMap(items || [], roleRank ?? 0)),
+      map(items => this._filterAndMap(items || [], roleRank ?? 0, roleName)),
       catchError(() => of([]))
     );
   }
@@ -73,9 +77,35 @@ export class RoleMenuService {
     return ADMIN_ROLE_NAMES.has((roleName || '').toLowerCase().trim());
   }
 
-  private _filterAndMap(items: any[], roleRank: number): RoleMenuItem[] {
+  private _filterAndMap(items: any[], roleRank: number, roleName: string = ''): RoleMenuItem[] {
+    // rank >= 1 (AI Engineer, Project Admin, Org Admin, Admin) → admin-console routes
+    // rank 0 (AI Client) → product routes
+    const isAdminTier = roleRank >= 1;
+    const roleNameLower = roleName.toLowerCase().trim();
+
     const mapped = items
-      .filter(item => (item.minRoleRank ?? 0) <= roleRank)
+      .filter(item => {
+        // Role-override column: CSV of role names (e.g. 'Developer,Organization Admin,Admin').
+        // When set, the item is gated by role name instead of min_role_rank.
+        // The backend always returns role-override items; we filter here where the
+        // acting role is known.
+        const itemRoles: string[] = (item.roles || '')
+          .split(',')
+          .map((r: string) => r.trim().toLowerCase())
+          .filter(Boolean);
+        if (itemRoles.length > 0) {
+          return itemRoles.includes(roleNameLower);
+        }
+        // Rank-based default: min_role_rank <= roleRank (max_role_rank nullable upper bound)
+        return (item.minRoleRank ?? 0) <= roleRank &&
+               (item.maxRoleRank == null || roleRank <= item.maxRoleRank);
+      })
+      // Route-tier split: admin-console routes for rank 1+, product routes for rank 0.
+      .filter(item => {
+        const route = (item.route || '').toLowerCase();
+        const isAdminRoute = route.startsWith('/admin-console');
+        return isAdminTier ? isAdminRoute : !isAdminRoute;
+      })
       .map(item => ({
         label: item.label,
         icon: item.icon ?? null,
@@ -86,9 +116,6 @@ export class RoleMenuService {
         children: [],
       }));
 
-    if (mapped.length === 0) {
-      return [{ label: 'Dashboard', icon: null, url: './dashboard', children: [] }];
-    }
     return mapped;
   }
 }
