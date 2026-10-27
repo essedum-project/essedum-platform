@@ -511,33 +511,83 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
 
   /** Returns a short label to show next to a role name in the dropdown. */
   getRoleTypeLabel(role: any): string {
+    if (this.roleMenuSvc.isRbacRole(role?.name)) return ''; // clean label for our 5 RBAC roles
     const rank = this.rbacRoleRankMap.get((role?.name || '').toLowerCase());
     if (rank != null) return `[RBAC · rank ${rank}]`;
     return '[Legacy]';
   }
 
+  /**
+   * Re-sorts the legacy roleList with RBAC roles first.
+   * Used as fallback when no RBAC assignments are found.
+   */
+  private _sortLegacyRoleList(): void {
+    this.roleList = [
+      ...this.roleList
+        .filter((r: any) => this.rbacRoleRankMap.has((r.name || '').toLowerCase()))
+        .sort((a: any, b: any) =>
+          (this.rbacRoleRankMap.get(a.name.toLowerCase()) ?? 99) -
+          (this.rbacRoleRankMap.get(b.name.toLowerCase()) ?? 99)
+        ),
+      ...this.roleList
+        .filter((r: any) => !this.rbacRoleRankMap.has((r.name || '').toLowerCase()))
+        .sort((a: any, b: any) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1),
+    ];
+  }
+
   private supplementRbacData(): void {
-    // Roles: fetch RBAC roles to build rank map for dropdown labels
+    const userId = (() => {
+      try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id; } catch { return null; }
+    })();
+
+    // Step 1: fetch all RBAC roles to build the rank map + id→name lookup
     this.http.get<any[]>('/api/usm/roles').subscribe({
       next: (rbacRoles: any[]) => {
         this.rbacRoleRankMap.clear();
+        const roleNameById = new Map<number, string>();
         (rbacRoles || []).forEach((r: any) => {
           if (r.name && r.rank != null) {
             this.rbacRoleRankMap.set(r.name.toLowerCase(), r.rank);
           }
+          if (r.id != null) roleNameById.set(r.id, r.name);
         });
-        // Re-sort roleList: RBAC roles first (by rank), then legacy (alphabetical)
-        this.roleList = [
-          ...this.roleList
-            .filter((r: any) => this.rbacRoleRankMap.has((r.name || '').toLowerCase()))
-            .sort((a: any, b: any) =>
-              (this.rbacRoleRankMap.get(a.name.toLowerCase()) ?? 99) -
-              (this.rbacRoleRankMap.get(b.name.toLowerCase()) ?? 99)
-            ),
-          ...this.roleList
-            .filter((r: any) => !this.rbacRoleRankMap.has((r.name || '').toLowerCase()))
-            .sort((a: any, b: any) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1),
-        ];
+
+        if (!userId) { this._sortLegacyRoleList(); return; }
+
+        // Step 2: fetch this user's RBAC assignments and build a clean role list
+        this.http.get<any[]>(`/api/usm/role-assignments?actorUserId=${userId}`).subscribe({
+          next: (assignments: any[]) => {
+            const active = (assignments || []).filter((a: any) => !a.revokedAt);
+            const seen = new Set<string>();
+            const rbacList: any[] = [];
+
+            for (const a of active) {
+              const roleName = roleNameById.get(a.roleId);
+              if (!roleName) continue;
+              const key = roleName.toLowerCase();
+              if (seen.has(key)) continue;
+              if (!this.roleMenuSvc.isRbacRole(roleName)) continue; // only our 5 RBAC roles
+              seen.add(key);
+              rbacList.push({ name: roleName, rank: this.rbacRoleRankMap.get(key) ?? 0, id: a.roleId });
+            }
+
+            // Highest rank (most privileged) first
+            rbacList.sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
+
+            if (rbacList.length > 0) {
+              this.roleList = rbacList;
+              // Keep current role if it's still valid; otherwise default to highest-ranked
+              const cur = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null'); } catch { return null; } })();
+              const curStillValid = cur?.name && rbacList.some(r => r.name.toLowerCase() === cur.name.toLowerCase());
+              if (!curStillValid) {
+                this.valuechangerole(rbacList[0]);
+              }
+            } else {
+              this._sortLegacyRoleList(); // no RBAC assignments — keep legacy list
+            }
+          },
+          error: () => { this._sortLegacyRoleList(); }
+        });
       },
       error: () => {}
     });
