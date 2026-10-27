@@ -211,3 +211,57 @@ body.header-light-theme .admin-console-table .mat-mdc-row:hover { background: rg
   padding: 1px 6px;
   white-space: nowrap;
 }
+
+
+/* ── Paginator theme ─────────────────────────────────────────────────────── */
+mat-paginator,
+.mat-mdc-paginator {
+  --mat-paginator-container-background-color: #1e293b;
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #94a3b8 !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+mat-paginator .mat-mdc-paginator-outer-container,
+mat-paginator .mat-mdc-paginator-container,
+.mat-mdc-paginator .mat-mdc-paginator-outer-container,
+.mat-mdc-paginator .mat-mdc-paginator-container { background: #1e293b !important; }
+mat-paginator .mat-mdc-paginator-range-label,
+mat-paginator .mat-mdc-paginator-page-size-label,
+.mat-mdc-paginator .mat-mdc-paginator-range-label,
+.mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #94a3b8 !important; }
+mat-paginator .mat-mdc-select-value,
+.mat-mdc-paginator .mat-mdc-select-value { color: #e2e8f0 !important; }
+mat-paginator .mat-mdc-icon-button,
+.mat-mdc-paginator .mat-mdc-icon-button { color: #94a3b8 !important; --mdc-icon-button-icon-color: #94a3b8 !important; }
+mat-paginator .mat-mdc-icon-button svg,
+mat-paginator .mat-mdc-icon-button .mat-icon,
+.mat-mdc-paginator .mat-mdc-icon-button svg,
+.mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #94a3b8 !important; fill: #94a3b8 !important; }
+mat-paginator .mat-mdc-icon-button[disabled],
+.mat-mdc-paginator .mat-mdc-icon-button[disabled] { opacity: 0.35; }
+
+body.header-light-theme mat-paginator,
+body.header-light-theme .mat-mdc-paginator {
+  --mat-paginator-container-background-color: #f1f5f9;
+  background: #f1f5f9 !important;
+  background-color: #f1f5f9 !important;
+  color: #64748b !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+}
+body.header-light-theme mat-paginator .mat-mdc-paginator-outer-container,
+body.header-light-theme mat-paginator .mat-mdc-paginator-container,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-outer-container,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-container { background: #f1f5f9 !important; }
+body.header-light-theme mat-paginator .mat-mdc-paginator-range-label,
+body.header-light-theme mat-paginator .mat-mdc-paginator-page-size-label,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-range-label,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #64748b !important; }
+body.header-light-theme mat-paginator .mat-mdc-select-value,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-select-value { color: #1e293b !important; }
+body.header-light-theme mat-paginator .mat-mdc-icon-button,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b !important; }
+body.header-light-theme mat-paginator .mat-mdc-icon-button svg,
+body.header-light-theme mat-paginator .mat-mdc-icon-button .mat-icon,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button svg,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #64748b !important; fill: #64748b !important; }

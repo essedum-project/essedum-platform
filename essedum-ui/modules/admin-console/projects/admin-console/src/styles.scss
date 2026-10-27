@@ -690,6 +690,13 @@ mat-paginator .mat-mdc-icon-button,
   color: #94a3b8 !important;
   --mdc-icon-button-icon-color: #94a3b8 !important;
 }
+mat-paginator .mat-mdc-icon-button svg,
+mat-paginator .mat-mdc-icon-button .mat-icon,
+.mat-mdc-paginator .mat-mdc-icon-button svg,
+.mat-mdc-paginator .mat-mdc-icon-button .mat-icon {
+  color: #94a3b8 !important;
+  fill: #94a3b8 !important;
+}
 mat-paginator .mat-mdc-icon-button[disabled],
 .mat-mdc-paginator .mat-mdc-icon-button[disabled] { opacity: 0.35; }
 

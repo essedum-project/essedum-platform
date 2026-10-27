@@ -168,6 +168,8 @@ mat-paginator.mat-mdc-paginator {
     &:not([disabled]):hover { color: #4f8ef7 !important; }
     &[disabled] { opacity: 0.3; }
   }
+  .mat-mdc-icon-button svg,
+  .mat-mdc-icon-button .mat-icon { color: #94a3b8 !important; fill: #94a3b8 !important; }
 }
 
 body.header-light-theme mat-paginator.mat-mdc-paginator {
