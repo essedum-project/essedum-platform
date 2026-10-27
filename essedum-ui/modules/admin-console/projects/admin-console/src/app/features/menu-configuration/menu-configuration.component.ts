@@ -53,10 +53,17 @@ export class MenuConfigurationComponent implements OnInit, AfterViewInit {
     const roleNameLower = (tier?.roleName ?? '').toLowerCase();
 
     return this.adminRows.filter(row => {
+      // Route-tier split: mirrors role-menu.service._filterAndMap.
+      // rank 0 (AI Client)  → product routes only (route does NOT start with /admin-console)
+      // rank 1+ (all others) → admin-console routes only
+      const route = (row.route || '').toLowerCase();
+      const isAdminRoute = route.startsWith('/admin-console');
+      if (rank === 0 ? isAdminRoute : !isAdminRoute) return false;
+
+      // Role-override CSV takes priority over min_role_rank gate.
       const itemRoles: string[] = ((row as any).roles || '')
         .split(',').map((r: string) => r.trim().toLowerCase()).filter(Boolean);
       if (itemRoles.length > 0) {
-        // Role-override gate: match by role name, not by rank
         return itemRoles.includes(roleNameLower);
       }
       // Rank-based default gate (with optional upper bound)

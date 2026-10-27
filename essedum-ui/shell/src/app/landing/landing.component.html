@@ -323,30 +323,7 @@
                   (menuItemClick)="onSidebarMenuItemClick($event.event, $event.item)">
                 </app-sidebar-menu-text>
 </div>
-                <!-- Loading state: shown while RBAC menu is being fetched for a new role -->
-                <div *ngIf="isSidebarLoading" style="
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    flex: 1;
-                    gap: 12px;
-                    padding-top: 16px;
-                  ">
-                  <div style="
-                      width: 24px; height: 24px;
-                      border: 3px solid rgba(255,255,255,0.25);
-                      border-top-color: rgba(255,255,255,0.85);
-                      border-radius: 50%;
-                      animation: rbac-spin 0.7s linear infinite;
-                    "></div>
-                </div>
-                <style>
-                  @keyframes rbac-spin { to { transform: rotate(360deg); } }
-                </style>
-
                 <!-- Sidenav Icons menu bar -->
-                <ng-container *ngIf="!isSidebarLoading">
                 <ng-container *ngFor="let item of visibleSidebarMenu; let i = index">
                 <div class="a-height sidebar-item-container" [class.sidebar-border]="
                     item.label == highlightedLabel &&
@@ -548,7 +525,6 @@
                   </div>
                 </div>
                 </ng-container>
-                </ng-container> <!-- /!isSidebarLoading -->
               </mat-nav-list>
             </mat-sidenav>
             <!-- righside container starts-->

@@ -2321,6 +2321,14 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       if (!this.roleMenuSvc.isRbacAdminRole(_role)) {
         this.currentrole = _role;
       }
+      // Fast path: menu already loaded for this role (sidebar click, URL change, any
+      // in-app navigation). Return immediately — never touch isSidebarLoading so the
+      // sidebar stays visible without a flicker.
+      if (this._loadedMenuRole === _role && this.sidebarMenu.length > 0) {
+        console.log('[MENU] newsidebar: menu stable for', _role, '— no-op');
+        console.groupEnd();
+        return;
+      }
       // Defer if supplementRbacData() hasn't confirmed the correct role yet —
       // avoids a flash of the stale sessionStorage role's menu at startup.
       if (this._rbacCheckPending) {
@@ -2329,17 +2337,12 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         console.groupEnd();
         return;
       }
-      // In-app navigation: restore from snapshot instantly so the sidebar
-      // never flashes empty between route changes.
-      if (this._loadedMenuRole === _role) {
-        if (this._menuSnapshot.length > 0) {
-          this.sidebarMenu = [...this._menuSnapshot];
-        }
-        if (this.sidebarMenu.length > 0) {
-          console.log('[MENU] newsidebar: snapshot restored for', _role, '— skipping fetch');
-          console.groupEnd();
-          return;
-        }
+      // Snapshot restore: role matches but sidebarMenu was temporarily cleared.
+      if (this._loadedMenuRole === _role && this._menuSnapshot.length > 0) {
+        this.sidebarMenu = [...this._menuSnapshot];
+        console.log('[MENU] newsidebar: snapshot restored for', _role);
+        console.groupEnd();
+        return;
       }
       const _userId = (() => { try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id; } catch { return null; } })();
       this.isSidebarLoading = true;
