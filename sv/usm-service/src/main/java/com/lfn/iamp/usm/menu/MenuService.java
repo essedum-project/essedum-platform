@@ -30,11 +30,18 @@ public class MenuService {
 		// surface it to the role it's acting as. Role matching is applied
 		// client-side where the acting role is known; the labels returned here
 		// are non-sensitive and every screen is still auth-gated server-side.
+		//max_role_rank check applies only to the rank gate, not the role override
 		return menuItemRepository.findAll().stream()
-				.filter(item -> item.getMinRoleRank() <= rank
+				.filter(item -> (item.getMinRoleRank() <= rank
+						&& (item.getMaxRoleRank() == null
+						|| rank <= item.getMaxRoleRank()))
 						|| (item.getRoles() != null && !item.getRoles().trim().isEmpty()))
 				.sorted(Comparator.comparing(MenuItem::getParentId, Comparator.nullsFirst(Integer::compareTo))
 						.thenComparing(MenuItem::getDisplayOrder))
 				.collect(Collectors.toList());
 	}
 }
+
+
+
+

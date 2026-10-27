@@ -44,6 +44,10 @@ public class MenuItem implements Serializable {
 	@Column(name = "min_role_rank")
 	private Integer minRoleRank;
 
+	// ADDED — nullable; null means no upper bound
+	@Column(name = "max_role_rank")
+	private Integer maxRoleRank;
+
 	@NotNull
 	@Column(name = "display_order")
 	private Integer displayOrder;

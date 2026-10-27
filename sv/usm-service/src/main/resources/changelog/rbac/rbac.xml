@@ -458,4 +458,123 @@
 		<sql>UPDATE rbac_menu_item SET display_order = 0 WHERE route = '/admin-console/overview'</sql>
 	</changeSet>
 
+	<!-- rbac-19: add max_role_rank so items can be bounded to a specific tier.
+     NULL = no upper bound. Filter becomes: min_role_rank <= userRank AND
+     (max_role_rank IS NULL OR userRank <= max_role_rank). -->
+	<changeSet author="Essedum (rbac)" id="rbac-19">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="rbac_menu_item" columnName="max_role_rank"/></not>
+		</preConditions>
+		<addColumn tableName="rbac_menu_item">
+			<column name="max_role_rank" type="INT"/>
+		</addColumn>
+	</changeSet>
+
+	<!-- rbac-20: all items are unbounded above — max_role_rank stays NULL for every
+         row (Admin sees everything). No UPDATE needed; new column defaults to NULL.
+         Placeholder to keep ID sequence intact. -->
+	<changeSet author="Essedum (rbac)" id="rbac-20">
+		<preConditions onFail="MARK_RAN">
+			<columnExists tableName="rbac_menu_item" columnName="max_role_rank"/>
+		</preConditions>
+		<sql>SELECT 1</sql>
+	</changeSet>
+
+	<!-- rbac-21: rename 'Viewer' → 'AI Client' in rbac_role and rename the matching
+         usm_constant sidebar key so DashConstant lookups continue to work. -->
+	<changeSet author="Essedum (rbac)" id="rbac-21">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">
+				SELECT CASE WHEN EXISTS (
+					SELECT 1 FROM rbac_role WHERE name = 'Viewer'
+				) THEN 1 ELSE 0 END
+			</sqlCheck>
+		</preConditions>
+		<sql>UPDATE rbac_role SET name = 'AI Client' WHERE name = 'Viewer'</sql>
+		<sql>UPDATE usm_constant SET item = 'AI Client Side' WHERE item = 'Viewer Side'</sql>
+	</changeSet>
+
+	<!-- rbac-22: seed AI Client (rank 0) product sidebar menu items.
+         All admin-console items have min_role_rank >= 1, so MenuService.menuFor()
+         returns ONLY these product entries for rank 0 — no admin console links leak.
+         appendRbacMenu() URL-dedup prevents duplicates for higher-rank users who
+         already received the same routes from DashConstant. -->
+	<changeSet author="Essedum (rbac)" id="rbac-22">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM rbac_menu_item WHERE min_role_rank = 0
+			</sqlCheck>
+		</preConditions>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Dashboard"/>
+			<column name="route"         value="/dashboard"/>
+			<column name="icon"          value="tachometer"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="1"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Pipelines"/>
+			<column name="route"         value="/agent/pipeline"/>
+			<column name="icon"          value="wpexplorer"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="2"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Datasets"/>
+			<column name="route"         value="/data/datasets"/>
+			<column name="icon"          value="table"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="3"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Models"/>
+			<column name="route"         value="/data/models"/>
+			<column name="icon"          value="superpowers"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="4"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Connections"/>
+			<column name="route"         value="/data/connections"/>
+			<column name="icon"          value="plug"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="5"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Adapters"/>
+			<column name="route"         value="/integration/implementations"/>
+			<column name="icon"          value="exchange"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="6"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Agent Directory"/>
+			<column name="route"         value="/agent/directory"/>
+			<column name="icon"          value="address-book"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="7"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Vibe Studio"/>
+			<column name="route"         value="/vibe/editor"/>
+			<column name="icon"          value="code"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="8"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Agent MCP Pipelines"/>
+			<column name="route"         value="/agent/pipeline"/>
+			<column name="icon"          value="share-alt"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="9"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Skills"/>
+			<column name="route"         value="/agent/skills"/>
+			<column name="icon"          value="star"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="10"/>
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>
