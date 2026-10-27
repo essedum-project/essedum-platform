@@ -79,6 +79,7 @@ export interface MenuItem {
   label: string;
   route: string;
   minRoleRank: number;
+  maxRoleRank?: number | null;
   displayOrder: number;
   icon?: string | null;
   // Optional comma-separated role-override (§7). Blank = rank-based default.

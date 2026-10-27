@@ -77,7 +77,18 @@
     <ng-container matColumnDef="minRoleRank">
       <th mat-header-cell *matHeaderCellDef>Min Rank</th>
       <td mat-cell *matCellDef="let row">
-        <span class="rank-badge" [ngClass]="'rank-' + row.minRoleRank">{{ row.minRoleRank }}</span>
+        <span *ngIf="row.minRoleRank < 99" class="rank-badge" [ngClass]="'rank-' + row.minRoleRank">{{ row.minRoleRank }}</span>
+        <span *ngIf="row.minRoleRank >= 99" class="rank-badge rank-rolegated" title="Visibility controlled by Roles column">role-gated</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="roles">
+      <th mat-header-cell *matHeaderCellDef>Roles</th>
+      <td mat-cell *matCellDef="let row">
+        <ng-container *ngIf="row.roles; else noRoles">
+          <span *ngFor="let r of row.roles.split(',')" class="role-chip">{{ r.trim() }}</span>
+        </ng-container>
+        <ng-template #noRoles><span class="empty-val">—</span></ng-template>
       </td>
     </ng-container>
 

@@ -28,24 +28,41 @@ export class MenuConfigurationComponent implements OnInit, AfterViewInit {
   // ----- admin console menu (rbac_menu_item) -----
   adminRows: MenuItemRow[] = [];
   adminDataSource = new MatTableDataSource<MenuItemRow>([]);
-  readonly adminColumns = ['label', 'icon', 'route', 'parentLabel', 'minRoleRank', 'displayOrder', 'actions'];
+  readonly adminColumns = ['label', 'icon', 'route', 'parentLabel', 'minRoleRank', 'roles', 'displayOrder', 'actions'];
 
   // Matches rbac_role ranks. null = no filter.
   readonly adminTiers = [
-    { rank: 4, label: 'AI Platform Admin' },
-    { rank: 3, label: 'AI Organization Admin' },
-    { rank: 2, label: 'AI Project Admin' },
-    { rank: 1, label: 'AI Engineer' },
-    { rank: 0, label: 'AI Client' },
+    { rank: 4, label: 'AI Platform Admin',    roleName: 'admin' },
+    { rank: 3, label: 'AI Organization Admin', roleName: 'organization admin' },
+    { rank: 2, label: 'AI Project Admin',      roleName: 'project admin' },
+    { rank: 1, label: 'AI Engineer',           roleName: 'developer' },
+    { rank: 0, label: 'AI Client',             roleName: 'ai client' },
   ];
   adminTierFilter: number | null = null;
 
-  /** Items the chosen tier would actually see, i.e. minRoleRank at or below it. */
+  /** Items the chosen tier would actually see.
+   *  Mirrors role-menu.service._filterAndMap: role-override CSV takes priority
+   *  over the min_role_rank rank gate, so items like My Drafts (min_role_rank=99,
+   *  roles='Developer,Organization Admin,Admin') appear for the right tiers. */
   get filteredAdminRows(): MenuItemRow[] {
     if (this.adminTierFilter === null) {
       return this.adminRows;
     }
-    return this.adminRows.filter(row => (row.minRoleRank ?? 0) <= this.adminTierFilter!);
+    const rank = this.adminTierFilter;
+    const tier = this.adminTiers.find(t => t.rank === rank);
+    const roleNameLower = (tier?.roleName ?? '').toLowerCase();
+
+    return this.adminRows.filter(row => {
+      const itemRoles: string[] = ((row as any).roles || '')
+        .split(',').map((r: string) => r.trim().toLowerCase()).filter(Boolean);
+      if (itemRoles.length > 0) {
+        // Role-override gate: match by role name, not by rank
+        return itemRoles.includes(roleNameLower);
+      }
+      // Rank-based default gate (with optional upper bound)
+      return (row.minRoleRank ?? 0) <= rank &&
+             (row.maxRoleRank == null || rank <= row.maxRoleRank);
+    });
   }
 
   // ----- role menus (usm_constant) -----
