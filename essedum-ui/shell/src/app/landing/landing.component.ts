@@ -372,14 +372,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   sidebarMenuToggle: boolean = false;
   sidebarMenuPopupWidth = "130px";
 
-  sidebarMenu: any = [
-    { label: "Dashboard", icon: "tachometer", url: "./" },
-    {
-      label: "Configuration",
-      icon: "map-signs",
-      url: "./iamp-usm/dashconstant",
-    },
-  ];
+  sidebarMenu: any = [];
   location = "";
   clickeditem: any;
   res: any;
