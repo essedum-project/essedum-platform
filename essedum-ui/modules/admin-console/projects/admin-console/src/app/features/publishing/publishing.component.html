@@ -7,7 +7,7 @@
       </div>
     </div>
     <div class="page-header-actions page-actions-group">
-      <button mat-raised-button color="primary" (click)="newDraft()">New Draft</button>
+      <button *ngIf="canCreate" mat-raised-button color="primary" (click)="newDraft()">New Draft</button>
     </div>
   </div>
 
@@ -63,6 +63,7 @@
   <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
 
   <p *ngIf="versions.data.length === 0" class="empty-state">
-    No drafts yet. Click <strong>New Draft</strong> to create an asset.
+    <ng-container *ngIf="canCreate">No drafts yet. Click <strong>New Draft</strong> to create an asset.</ng-container>
+    <ng-container *ngIf="!canCreate">No drafts are visible for your current role.</ng-container>
   </p>
 </div>

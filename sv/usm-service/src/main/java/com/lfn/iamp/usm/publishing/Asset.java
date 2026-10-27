@@ -48,4 +48,8 @@ public class Asset implements Serializable {
 
 	@Column(name = "current_version_id")
 	private Integer currentVersionId;
+
+	/** Populated at creation; used to enforce edit-ownership. */
+	@Column(name = "created_by")
+	private Integer createdBy;
 }

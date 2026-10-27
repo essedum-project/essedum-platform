@@ -2,6 +2,7 @@ package com.lfn.iamp.usm.access;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -86,7 +87,7 @@ public class AccessContextService {
 				.max(Integer::compareTo)
 				.orElse(0);
 
-		// Platform admins reach everything.
+		// Platform admins reach everything — directProjectIds = all projects too.
 		if (highestRank >= PLATFORM_ADMIN_RANK) {
 			List<Integer> allProjectIds = projectRepository.findAll().stream()
 					.map(Project::getId)
@@ -94,7 +95,7 @@ public class AccessContextService {
 			List<Integer> allOrganizationIds = organisationRepository.findAll().stream()
 					.map(Organisation::getId)
 					.collect(Collectors.toList());
-			return new AccessContext(userId, highestRank, allProjectIds, allOrganizationIds);
+			return new AccessContext(userId, highestRank, allProjectIds, allOrganizationIds, allProjectIds);
 		}
 
 		List<Integer> organizationIds = active.stream()
@@ -103,11 +104,17 @@ public class AccessContextService {
 				.distinct()
 				.collect(Collectors.toList());
 
-		List<Integer> projectIds = active.stream()
+		// Capture the raw project-level grants BEFORE org expansion.
+		// Draft visibility is limited to this set only.
+		List<Integer> directProjectIds = active.stream()
 				.map(RoleAssignment::getProjectId)
 				.filter(id -> id != null)
 				.distinct()
 				.collect(Collectors.toList());
+
+		// reachableProjectIds starts from direct grants, then org grants expand it
+		// for published-asset access (§4 visibility query).
+		List<Integer> projectIds = new ArrayList<>(directProjectIds);
 
 		// Org-scoped grants now expand to every project in that org, using the
 		// organisation_id column added on usm_project (§11 phase-2 migration,
@@ -124,7 +131,7 @@ public class AccessContextService {
 			}
 		}
 
-		return new AccessContext(userId, highestRank, projectIds, organizationIds);
+		return new AccessContext(userId, highestRank, projectIds, organizationIds, directProjectIds);
 	}
 
 	/** Highest rank across a fixed set of gates — used by the approvals queue (§6). */

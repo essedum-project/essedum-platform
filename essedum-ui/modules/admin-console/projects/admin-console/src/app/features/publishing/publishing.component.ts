@@ -8,6 +8,9 @@ import { UserContextService } from '../../core/user-context.service';
 import type { AssetVersion } from '../../core/api-models';
 import { DraftDialogComponent, DraftDialogResult } from './draft-dialog/draft-dialog.component';
 
+/** Minimum rank to create a draft — mirrors rbac_menu_item.min_role_rank for "My Drafts". */
+const MIN_RANK_CREATE = 1;
+
 interface AssetVersionRow extends AssetVersion {
   assetName: string;
   assetScope: string;
@@ -31,6 +34,8 @@ export class PublishingComponent implements OnInit, AfterViewInit {
   versions = new MatTableDataSource<AssetVersionRow>([]);
   // versionId -> next gate ('project_admin' | 'org_admin' | 'platform_admin' | null)
   nextGateByVersion: Record<number, string | null> = {};
+  /** The caller's highest role rank — drives "New Draft" visibility. */
+  userRank = 0;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -48,6 +53,10 @@ export class PublishingComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.load();
+    // Resolve rank once so the template can show/hide "New Draft".
+    this.userContext.userId$
+      .pipe(switchMap(uid => this.api.getAccessContext(uid)))
+      .subscribe(ctx => (this.userRank = ctx?.highestRank ?? 0));
   }
 
   private load(): void {
@@ -159,5 +168,10 @@ export class PublishingComponent implements OnInit, AfterViewInit {
 
   canEdit(version: AssetVersionRow): boolean {
     return version.status === 'draft' || version.status === 'rejected';
+  }
+
+  /** "New Draft" is only visible to users with rank ≥ 1 (Developer+). */
+  get canCreate(): boolean {
+    return this.userRank >= MIN_RANK_CREATE;
   }
 }

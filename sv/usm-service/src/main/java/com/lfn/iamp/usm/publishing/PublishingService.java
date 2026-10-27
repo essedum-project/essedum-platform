@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.lfn.iamp.usm.access.AccessContext;
 import com.lfn.iamp.usm.access.AccessContextService;
 import com.lfn.iamp.usm.audit.AuditService;
 
@@ -47,32 +48,60 @@ public class PublishingService {
 	}
 
 	public List<AssetVersion> listDraftsForUser(Integer userId) {
-		List<Integer> projectIds = accessContextService.resolve(userId).getReachableProjectIds();
-		List<Integer> assetIds = assetRepository.findByProjectIdIn(projectIds).stream()
+		// Drafts are only visible to DIRECT project members — not to users who
+		// reach the project transitively via an org-scoped grant.
+		AccessContext ctx = accessContextService.resolve(userId);
+		List<Integer> assetIds = assetRepository.findByProjectIdIn(ctx.getDirectProjectIds()).stream()
 				.map(Asset::getId)
 				.collect(Collectors.toList());
-		return assetVersionRepository.findByAssetIdIn(assetIds).stream()
-				.filter(v -> "draft".equals(v.getStatus()) || "rejected".equals(v.getStatus())
-						|| "in_review".equals(v.getStatus()))
-				.collect(Collectors.toList());
+		// Return only the highest version_no per asset — editDraft now writes a new
+		// row on every save, so an asset can have both a rejected v1 and a draft v2.
+		// My Drafts should show the latest, not both.
+		Map<Integer, AssetVersion> latestPerAsset = new HashMap<>();
+		for (AssetVersion v : assetVersionRepository.findByAssetIdIn(assetIds)) {
+			if (!"draft".equals(v.getStatus()) && !"rejected".equals(v.getStatus())
+					&& !"in_review".equals(v.getStatus())) {
+				continue;
+			}
+			AssetVersion current = latestPerAsset.get(v.getAssetId());
+			if (current == null || v.getVersionNo() > current.getVersionNo()) {
+				latestPerAsset.put(v.getAssetId(), v);
+			}
+		}
+		return new ArrayList<>(latestPerAsset.values());
 	}
 
 	/**
-	 * Assets reachable by the user's projects, plus every publicly-scoped
-	 * asset regardless of project reach — the §4 visibleAssets query, minus
-	 * the "only published current version" filter (that's applied by callers
-	 * that care, e.g. a future public asset directory; drafts/approvals want
-	 * all statuses).
+	 * Assets reachable by the user's projects, plus every publicly-scoped asset
+	 * regardless of project reach — the §4 visibleAssets query.
+	 * Pure-draft assets (currentVersionId=null, never approved) are restricted to
+	 * direct project members only; org-expanded membership is sufficient only for
+	 * assets that already have an approved serving version.
 	 */
 	public List<Asset> listAssetsForUser(Integer userId) {
-		List<Integer> projectIds = accessContextService.resolve(userId).getReachableProjectIds();
-		List<Asset> reachable = new ArrayList<>(assetRepository.findByProjectIdIn(projectIds));
+		AccessContext ctx = accessContextService.resolve(userId);
+		List<Integer> reachableIds = ctx.getReachableProjectIds();
+		List<Integer> directIds = ctx.getDirectProjectIds();
+
+		List<Asset> reachable = assetRepository.findByProjectIdIn(reachableIds).stream()
+				.filter(a -> a.getCurrentVersionId() != null || directIds.contains(a.getProjectId()))
+				.collect(Collectors.toCollection(ArrayList::new));
+
 		for (Asset publicAsset : assetRepository.findByScope(PromotionGate.SCOPE_PUBLIC)) {
 			if (reachable.stream().noneMatch(a -> a.getId().equals(publicAsset.getId()))) {
 				reachable.add(publicAsset);
 			}
 		}
 		return reachable;
+	}
+
+	/**
+	 * Single-asset lookup with the same visibility rules as listAssetsForUser —
+	 * returns empty if the asset does not exist or the user cannot see it.
+	 */
+	public java.util.Optional<Asset> findAssetForUser(Integer assetId, Integer userId) {
+		return assetRepository.findById(assetId)
+				.filter(asset -> listAssetsForUser(userId).stream().anyMatch(a -> a.getId().equals(assetId)));
 	}
 
 	/**
@@ -97,11 +126,22 @@ public class PublishingService {
 	@Transactional
 	public AssetVersion createDraft(Integer projectId, String assetType, String name, String payloadRef,
 			Integer actorId, String actorName) {
+		// Rank ≥ 1 (Developer) required; viewer (rank 0) gets 403 via resource layer,
+		// but also guard here as defense-in-depth.
+		AccessContext ctx = accessContextService.resolve(actorId);
+		if (ctx.getHighestRank() < 1 || !ctx.getReachableProjectIds().contains(projectId)) {
+			throw new IllegalStateException(
+					"Rank ≥ 1 (Developer) and project membership required to create a draft in project " + projectId);
+		}
+
 		Asset asset = new Asset();
 		asset.setProjectId(projectId);
 		asset.setAssetType(assetType == null || assetType.isBlank() ? "generic" : assetType);
 		asset.setName(name);
-		asset.setScope(PromotionGate.SCOPE_DRAFT);
+		// Scope starts at "project" — the lowest promotion target.
+		// Draft-ness is carried by asset_version.status, not asset.scope.
+		asset.setScope(PromotionGate.SCOPE_PROJECT);
+		asset.setCreatedBy(actorId);
 		Asset savedAsset = assetRepository.save(asset);
 
 		AssetVersion version = newVersion(savedAsset.getId(), 1, payloadRef);
@@ -112,27 +152,44 @@ public class PublishingService {
 		return savedVersion;
 	}
 
-	/** Edit a draft/rejected version in place — same version row, new bytes, re-opens the draft. §5. */
+	/**
+	 * Edit a draft — writes a NEW asset_version row with version_no+1 and
+	 * re-sets status to "draft". The old row is left intact (immutable history).
+	 * Each save increments version_no. Only the original creator may edit;
+	 * admins approve/reject but do not author.
+	 */
 	@Transactional
 	public AssetVersion editDraft(Integer versionId, String name, String payloadRef, Integer actorId,
 			String actorName) {
-		AssetVersion version = requireVersion(versionId);
-		if (!("draft".equals(version.getStatus()) || "rejected".equals(version.getStatus()))) {
+		AssetVersion current = requireVersion(versionId);
+		if (!("draft".equals(current.getStatus()) || "rejected".equals(current.getStatus()))) {
 			throw new IllegalStateException("Only draft or rejected versions can be edited: v" + versionId);
 		}
-		version.setPayloadRef(payloadRef);
-		version.setContentDigest(digest(name, payloadRef));
-		version.setStatus("draft");
-		version.setUpdatedAt(Instant.now());
-		AssetVersion saved = assetVersionRepository.save(version);
+
+		// Only the creator may edit a draft.
+		Asset asset = assetRepository.findById(current.getAssetId())
+				.orElseThrow(() -> new IllegalArgumentException("No such asset: " + current.getAssetId()));
+		if (asset.getCreatedBy() != null && !asset.getCreatedBy().equals(actorId)) {
+			throw new IllegalStateException(
+					"Only the creator (user " + asset.getCreatedBy() + ") may edit this draft");
+		}
+
+		// Each save writes a new version row with an incremented version_no.
+		int nextNo = assetVersionRepository.findByAssetIdIn(Arrays.asList(asset.getId())).stream()
+				.map(AssetVersion::getVersionNo)
+				.max(Comparator.naturalOrder())
+				.orElse(0) + 1;
+
+		// Use name as the digest salt so a rename also registers as a content change.
+		AssetVersion newVersion = newVersion(asset.getId(), nextNo, payloadRef, name);
+		AssetVersion saved = assetVersionRepository.save(newVersion);
 
 		if (name != null && !name.isBlank()) {
-			assetRepository.findById(version.getAssetId()).ifPresent(asset -> {
-				asset.setName(name);
-				assetRepository.save(asset);
-			});
+			asset.setName(name);
+			assetRepository.save(asset);
 		}
-		auditService.record("asset_version", "edited", actorId, actorName, "version " + versionId + " edited");
+		auditService.record("asset_version", "edited", actorId, actorName,
+				"new draft v" + nextNo + " written for asset " + asset.getName() + " (from v" + versionId + ")");
 		return saved;
 	}
 
@@ -295,12 +352,16 @@ public class PublishingService {
 	}
 
 	private AssetVersion newVersion(Integer assetId, int versionNo, String payloadRef) {
+		return newVersion(assetId, versionNo, payloadRef, assetId + ":v" + versionNo);
+	}
+
+	private AssetVersion newVersion(Integer assetId, int versionNo, String payloadRef, String digestSalt) {
 		AssetVersion version = new AssetVersion();
 		version.setAssetId(assetId);
 		version.setVersionNo(versionNo);
 		version.setStatus("draft");
 		version.setPayloadRef(payloadRef);
-		version.setContentDigest(digest(assetId + ":v" + versionNo, payloadRef));
+		version.setContentDigest(digest(digestSalt, payloadRef));
 		version.setUpdatedAt(Instant.now());
 		return version;
 	}
