@@ -416,6 +416,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
    *  sidebar never flashes empty while a re-fetch is in progress. */
   private _menuSnapshot: any[] = [];
 
+
+  
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -1605,6 +1607,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
           this.sidebarMenu = [];
           this._menuSnapshot = [];
           this._loadedMenuRole = '';
+          sessionStorage.removeItem('_rbac_sidebar_role');
+          sessionStorage.removeItem('_rbac_sidebar_menu');
           this.isSidebarLoading = true;
           this._rbacCheckPending = false;
 
@@ -1618,6 +1622,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
             this.sidebarMenu = items;
             this._menuSnapshot = [...items];
             this._loadedMenuRole = _switchRoleName;
+            sessionStorage.setItem('_rbac_sidebar_role', _switchRoleName);
+            sessionStorage.setItem('_rbac_sidebar_menu', JSON.stringify(items));
             this.isSidebarLoading = false;
 
             // Navigate to the first item the menu exposes, or fall back to the
@@ -2322,6 +2328,24 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         console.groupEnd();
         return;
       }
+      // sessionStorage restore: shouldReuseRoute=false re-creates LandingComponent on every
+      // navigation, resetting _loadedMenuRole and _menuSnapshot. Restore from sessionStorage
+      // so the sidebar never re-fetches the API on URL change or menu-item click.
+      const _ssRole = sessionStorage.getItem('_rbac_sidebar_role');
+      const _ssMenuRaw = sessionStorage.getItem('_rbac_sidebar_menu');
+      if (_ssRole === _role && _ssMenuRaw) {
+        try {
+          const _ssCached = JSON.parse(_ssMenuRaw);
+          if (Array.isArray(_ssCached) && _ssCached.length > 0) {
+            this.sidebarMenu = [..._ssCached];
+            this._menuSnapshot = [..._ssCached];
+            this._loadedMenuRole = _role;
+            console.log('[MENU] newsidebar: restored from sessionStorage for', _role, '— no API call');
+            console.groupEnd();
+            return;
+          }
+        } catch {}
+      }
       // Defer if supplementRbacData() hasn't confirmed the correct role yet —
       // avoids a flash of the stale sessionStorage role's menu at startup.
       if (this._rbacCheckPending) {
@@ -2343,6 +2367,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         this.sidebarMenu = items;
         this._menuSnapshot = [...items]; // save for instant restore on next in-app nav
         this._loadedMenuRole = _role;
+        sessionStorage.setItem('_rbac_sidebar_role', _role);
+        sessionStorage.setItem('_rbac_sidebar_menu', JSON.stringify(items));
         console.log('[MENU] RBAC menu for', _role, '→', items.map(i => i.label));
         this.isSidebarLoading = false;
         console.groupEnd();
