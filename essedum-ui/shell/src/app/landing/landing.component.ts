@@ -4216,7 +4216,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
     try { role = JSON.parse(sessionStorage.getItem("role") || "null"); } catch { role = null; }
     try {
       const parsed = JSON.parse(sessionStorage.getItem("user") || "null");
-      userId = parsed && typeof parsed === "object" ? Number(parsed.id) : Number(parsed);
+      userId = parsed && typeof parsed === "object" ? Number(parsed.user_login ?? parsed.id) : Number(parsed);
     } catch { userId = null; }
     const isAdmin = !!(role && (role.roleadmin || role.name === "Admin"));
     const fallback = () => {
