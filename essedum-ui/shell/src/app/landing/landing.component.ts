@@ -728,19 +728,12 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
 
-    // 2. Filter roleList: show platform-wide + org-wide + project-specific roles for
-    //    the selected scope. Roles from completely different org/project combos are hidden.
-    const scopedAssignments = this._rbacAssignmentsCache.filter(a => {
-      const orgMatch = a.organizationId == null ||
-        (selOrgId != null && Number(a.organizationId) === selOrgId);
-      const projMatch = a.projectId == null ||
-        (selProjectId != null && Number(a.projectId) === selProjectId);
-      return orgMatch && projMatch;
-    });
-
+    // 2. Build roleList from ALL assignments so every role the user holds appears
+    //    in the dropdown regardless of which org/project is currently selected.
+    //    Scope filtering above handles projectList; roles must never be hidden by it.
     const seen = new Set<string>();
     const scopedRoles: any[] = [];
-    for (const a of scopedAssignments) {
+    for (const a of this._rbacAssignmentsCache) {
       const roleName = this._rbacRoleNameByIdCache.get(a.roleId);
       if (!roleName) continue;
       const key = roleName.toLowerCase();
