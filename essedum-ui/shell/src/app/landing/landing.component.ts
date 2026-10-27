@@ -403,6 +403,12 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   /** True while supplementRbacData() hasn't yet confirmed the correct RBAC role.
    *  Prevents newsidebar() from fetching a menu for a stale sessionStorage role. */
   private _rbacCheckPending = true;
+  /** Set to true once supplementRbacData confirms the user has RBAC role assignments.
+   *  Stops legacy checkDefaultRole* functions from overriding the RBAC-selected role. */
+  private _rbacUser = false;
+  /** Role name whose menu is currently loaded in sidebarMenu. Used to skip
+   *  redundant HTTP calls when newsidebar() is called during in-app navigation. */
+  private _loadedMenuRole = '';
 
   constructor(
     private router: Router,
@@ -638,17 +644,24 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
             rbacList.sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
 
             if (rbacList.length > 0) {
+              this._rbacUser = true; // block legacy checkDefaultRole* from overriding
+              // Clear legacy default sidebarMenu so Dashboard/Configuration don't flash
+              // while the RBAC menu HTTP call is in progress.
+              if (this.sidebarMenu.length <= 2 &&
+                  this.sidebarMenu.every((i: any) => i.label === 'Dashboard' || i.label === 'Configuration')) {
+                this.sidebarMenu = [];
+              }
               this.roleList = rbacList;
-              // Keep current role if it's still valid; otherwise default to highest-ranked
+              // Keep current role if it is still in the user's assignment list.
+              // Only auto-select the highest-ranked role on first login (nothing in sessionStorage yet).
               const cur = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null'); } catch { return null; } })();
               const curStillValid = cur?.name && rbacList.some(r => r.name.toLowerCase() === cur.name.toLowerCase());
-              // Always prefer the highest-ranked role on initial load.
-              const needsUpgrade = curStillValid && rbacList[0].name.toLowerCase() !== (cur?.name || '').toLowerCase();
               this._rbacCheckPending = false;
-              if (!curStillValid || needsUpgrade) {
+              if (!curStillValid) {
+                // No role yet (first login) or revoked — default to highest-ranked.
                 this.valuechangerole(rbacList[0]);
               } else {
-                // Role confirmed unchanged — now safe to load the sidebar.
+                // User already has a valid role chosen — just refresh the sidebar for that role.
                 this.newsidebar();
               }
             } else {
@@ -1489,6 +1502,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       console.error("JSON.stringify error - ", e.message);
     }
     console.log('[MENU] valuechangerole → role changed to:', this.selectedrole?.name);
+    this._loadedMenuRole = ''; // invalidate menu cache so the new role's menu is fetched
     this.apisService.getPermission("cip").subscribe(
       (resp) => {
         sessionStorage.setItem(
@@ -1641,6 +1655,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       console.error("JSON.parse error - ", e.message);
     }
     this.apisService.getDashConsts().subscribe((response) => {
+      if (this._rbacUser) return; // RBAC user — supplementRbacData handles role selection
       let name = this.selectedportfolio.portfolioName + "default";
       response = response.filter((item) => item.keys && item.keys == name);
       let value: any = this.defaultprojectroles.filter(
@@ -1671,6 +1686,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
   chkdefrol() {
+    if (this._rbacUser) return; // RBAC user — supplementRbacData handles role selection
     let project: any;
     try {
       project = JSON.parse(sessionStorage.getItem("project") || "");
@@ -1713,6 +1729,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     let pname = project.name;
     this.apisService.getDashConsts().subscribe((response) => {
+      if (this._rbacUser) return; // RBAC user — supplementRbacData handles role selection
       response = response.filter(
         (item) => item.keys && item.keys == pname + "prodefaultrole"
       );
@@ -2190,10 +2207,17 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         console.groupEnd();
         return;
       }
+      // Skip HTTP call if the menu is already loaded for this role (in-app navigation).
+      if (this._loadedMenuRole === _role && this.sidebarMenu.length > 0) {
+        console.log('[MENU] newsidebar: menu already loaded for', _role, '— skipping fetch');
+        console.groupEnd();
+        return;
+      }
       const _userId = (() => { try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id; } catch { return null; } })();
       this.isSidebarLoading = true;
       this.roleMenuSvc.getMenuForRole(_role, _userId).subscribe(items => {
         this.sidebarMenu = items;
+        this._loadedMenuRole = _role; // cache: menu is now loaded for this role
         console.log('[MENU] RBAC menu for', _role, '→', items.map(i => i.label));
         this.isSidebarLoading = false;
         console.groupEnd();
