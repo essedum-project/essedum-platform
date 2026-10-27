@@ -483,9 +483,13 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   // successful grant/revoke so the shell's role dropdown stays in sync without a page reload.
   private readonly onAssignmentsChanged = () => {
     this.setportfolio();
-    // Also refresh RBAC rank map + role-list sort so newly granted RBAC roles
-    // appear in the dropdown without requiring a logout/login.
-    setTimeout(() => this.supplementRbacData(), 800);
+    // Refresh RBAC role list so newly granted roles appear without logout.
+    setTimeout(() => {
+      this.supplementRbacData();
+      // Also refresh sidebar in case the current role's menu changed.
+      const role = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return ''; } })();
+      if (this.roleMenuSvc.isRbacRole(role)) this.newsidebar();
+    }, 800);
   };
 
   // When the admin-console menu-picker adds/removes a role-menu item, refresh
@@ -555,9 +559,11 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         if (!userId) { this._sortLegacyRoleList(); return; }
 
         // Step 2: fetch this user's RBAC assignments and build a clean role list
-        this.http.get<any[]>(`/api/usm/role-assignments?actorUserId=${userId}`).subscribe({
+        // The endpoint scopes results to the actor; platform admins get all — filter by userId.
+        this.http.get<any[]>(`/api/usm/access/role-assignments?actorUserId=${userId}`).subscribe({
           next: (assignments: any[]) => {
-            const active = (assignments || []).filter((a: any) => !a.revokedAt);
+            const active = (assignments || [])
+              .filter((a: any) => !a.revokedAt && (a.userId == null || a.userId === userId));
             const seen = new Set<string>();
             const rbacList: any[] = [];
 
@@ -2151,14 +2157,13 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     const _role = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return '?'; } })();
     console.group(`[MENU] newsidebar() — role: ${_role}`);
 
-    // ── RBAC role: bypass all DashConsts/legacy logic ────────────────────────
+    // ── RBAC role: fetch menu from BE, skip all legacy/DashConsts logic ─────
     if (this.roleMenuSvc.isRbacRole(_role)) {
+      const _userId = (() => { try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id; } catch { return null; } })();
       this.isSidebarLoading = true;
-      this.roleMenuSvc.getMenuForRole(_role).subscribe(items => {
-        if (items && items.length > 0) {
-          this.sidebarMenu = items;
-          console.log('[MENU] newsidebar: RBAC menu loaded for', _role, '→', items.map(i => i.label));
-        }
+      this.roleMenuSvc.getMenuForRole(_role, _userId).subscribe(items => {
+        this.sidebarMenu = items;
+        console.log('[MENU] RBAC menu for', _role, '→', items.map(i => i.label));
         this.isSidebarLoading = false;
         console.groupEnd();
       });
