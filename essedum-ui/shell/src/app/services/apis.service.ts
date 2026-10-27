@@ -297,7 +297,7 @@ export class ApisService {
    * replace the legacy DashConsts-driven sidebar.
    */
   getRbacMenu(userId: number): Observable<any[]> {
-    return this.http.get<any[]>("/api/usm/menu", { params: { userId } }).pipe(
+    return this.http.get<any[]>("/api/usm/menu", { params: { actorUserId: userId } }).pipe(
       catchError(() => of([])),
     );
   }

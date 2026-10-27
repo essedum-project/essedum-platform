@@ -46,13 +46,13 @@ export class RoleMenuService {
    * Admin-tier roles (rank ≥ 2) get admin-console routes only.
    * App-tier roles (rank 0-1) get product routes only.
    *
-   * BE endpoint: GET /api/usm/menu-items?userId={userId}
+   * BE endpoint: GET /api/usm/menu-items?actorUserId={userId}
    * Returns items already rank-filtered on the server.
    */
   getMenuForRole(roleName: string, userId: number | null | undefined): Observable<RoleMenuItem[]> {
     if (!userId) return of([]);
 
-    return this.http.get<any[]>(`/api/usm/menu-items?userId=${userId}`).pipe(
+    return this.http.get<any[]>(`/api/usm/menu-items?actorUserId=${userId}`).pipe(
       map(items => this._filterAndMap(items || [], roleName)),
       catchError(() => of([]))
     );
