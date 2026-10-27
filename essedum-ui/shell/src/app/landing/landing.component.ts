@@ -23,6 +23,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatMenuTrigger } from "@angular/material/menu";
 import { Subscription, interval } from "rxjs";
 import { MenuService } from "../services/menu.service";
+import { RoleMenuService } from "../services/role-menu.service";
 import { HttpClient } from "@angular/common/http";
 import { Title } from "@angular/platform-browser";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
@@ -410,7 +411,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     private dialog: MatDialog,
     private sanitizer: DomSanitizer,
     private appOAuthService: AppOAuthService,
-    private mfeappConfigSvc: AppConfigService // private messageService: MessageService
+    private mfeappConfigSvc: AppConfigService, // private messageService: MessageService
+    private roleMenuSvc: RoleMenuService
   ) {
     this.router.routeReuseStrategy.shouldReuseRoute = function () {
       return false;
@@ -1426,6 +1428,19 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         let navUrl = nav.slice(0, nav.indexOf("pfolio"));
 
 
+        // ── RBAC role navigation ──────────────────────────────────────────────
+        // Admin-tier RBAC roles land on the admin-console overview.
+        // App-tier RBAC roles land on the first item in their role menu (dashboard).
+        if (this.roleMenuSvc.isRbacRole(this.selectedrole.name)) {
+          if (this.roleMenuSvc.isRbacAdminRole(this.selectedrole.name)) {
+            this.router.navigate(["/landing/admin-console/overview"]);
+          } else {
+            this.router.navigate(["/landing/dashboard"]);
+          }
+          return;
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         // Admin lands on the new admin-console overview (replaces the legacy
         // iamp-usm/portfoliolist landing — plan §7/§10 cutover).
         if (this.selectedrole.name === "admin" || this.selectedrole.name === "Admin") {
@@ -2085,6 +2100,22 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   newsidebar() {
     const _role = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return '?'; } })();
     console.group(`[MENU] newsidebar() — role: ${_role}`);
+
+    // ── RBAC role: bypass all DashConsts/legacy logic ────────────────────────
+    if (this.roleMenuSvc.isRbacRole(_role)) {
+      this.isSidebarLoading = true;
+      this.roleMenuSvc.getMenuForRole(_role).subscribe(items => {
+        if (items && items.length > 0) {
+          this.sidebarMenu = items;
+          console.log('[MENU] newsidebar: RBAC menu loaded for', _role, '→', items.map(i => i.label));
+        }
+        this.isSidebarLoading = false;
+        console.groupEnd();
+      });
+      return;
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     console.log('[MENU] newsidebar: starting getDashConsts');
    this.isSidebarLoading = true;
     // this.removeFilters();

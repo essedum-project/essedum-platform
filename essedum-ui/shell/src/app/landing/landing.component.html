@@ -214,10 +214,6 @@
                   <i class="fa fa-user" aria-hidden="true"></i>
                   <span>&nbsp;Profile</span>
                 </button>
-                <button mat-menu-item (click)="goToMyDetails()" class="profile-action-btn profile-action-btn--profile">
-                  <i class="fa fa-id-badge" aria-hidden="true"></i>
-                  <span>&nbsp;My Details</span>
-                </button>
               </div>
             </mat-menu>
           </div>
@@ -773,18 +769,18 @@
                       </div>
                       <div class="no-menu-banner__step">
                         <span class="no-menu-banner__step-num">2</span>
-                        <span>Click <strong>My Details</strong></span>
+                        <span>Go to <strong>Admin Console → Access</strong></span>
                       </div>
                       <div class="no-menu-banner__step">
                         <span class="no-menu-banner__step-num">3</span>
-                        <span>Find the row for <strong>{{ selectedrole?.name }}</strong> and click <strong>Configure Menu</strong></span>
+                        <span>Assign the <strong>{{ selectedrole?.name }}</strong> role to configure its menu</span>
                       </div>
                     </div>
-                    <a class="no-menu-banner__link" [routerLink]="['/landing/admin-console/my-details']">
+                    <a class="no-menu-banner__link" [routerLink]="['/landing/admin-console/access']">
                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
                         <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" fill="currentColor"/>
                       </svg>
-                      Go to My Details →
+                      Go to Access →
                     </a>
                   </div>
                 </div>
