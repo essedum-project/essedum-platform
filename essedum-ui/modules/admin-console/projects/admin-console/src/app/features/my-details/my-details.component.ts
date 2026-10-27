@@ -2,8 +2,7 @@ import { Component, OnInit, OnDestroy, ViewChild, ViewEncapsulation } from '@ang
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
-import { combineLatest, map, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { combineLatest, map } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { RoleNameUtil } from '../../core/role-name.util';
 import { UserContextService } from '../../core/user-context.service';
@@ -16,15 +15,12 @@ export interface RoleCard {
   // We show one card but track all ids so we can revoke all of them.
   ids: number[];
   roleName: string;
-  /** null means legacy role (no RBAC rank); 0-4 means RBAC role at that rank level. */
   roleRank: number | null;
   orgName: string | null;
   projectName: string | null;
   projectId: number | null;
   grantedAt: string;
   revoking: boolean;
-  /** 'rbac' = from rbac_role_assignment; 'legacy' = from usm_user_project_role only */
-  source: 'rbac' | 'legacy';
 }
 
 @Component({
@@ -101,27 +97,20 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
 
   private load(): void {
     const userId = this.userContext.userId$.value;
-    const userLogin: string = this.user?.user_login ?? '';
 
     combineLatest([
       this.api.getRoleAssignments(userId),
       this.api.getRoles(),
       this.api.getOrganisations(),
       this.api.getProjects(),
-      // Also fetch legacy assignments — fall back to empty on error (old endpoint may be unavailable)
-      userLogin
-        ? this.api.getLegacyUserAssignments(userLogin).pipe(catchError(() => of({})))
-        : of({}),
     ]).pipe(
-      map(([assignments, roles, orgs, projects, legacyMap]) => {
+      map(([assignments, roles, orgs, projects]) => {
         const roleMap = new Map<number, RbacRole>(roles.map(r => [r.id, r]));
         const orgMap = new Map<number, string>(orgs.map(o => [o.id, o.name]));
         const projMap = new Map<number, LegacyProject>(projects.map(p => [p.id, p]));
 
-        // Deduplicate: key = roleName(lower)|projectId|orgId — catches RBAC + legacy duplicates
+        // Deduplicate: key = roleName(lower)|projectId|orgId
         const seen = new Map<string, RoleCard>();
-
-        // ── Source 1: RBAC assignments ──
         for (const a of assignments.filter(a => !a.revokedAt)) {
           const role = roleMap.get(a.roleId);
           const roleName = role?.name ?? `Role #${a.roleId}`;
@@ -158,81 +147,11 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
               projectId: a.projectId,
               grantedAt: a.grantedAt,
               revoking: false,
-              source: 'rbac',
             });
           }
         }
 
-        // ── Source 2: Legacy assignments from usm_user_project_role ──
-        // legacyMap shape: { [projectId]: Role[] }
-        const legacy = legacyMap as Record<string, any[]>;
-        for (const [projIdStr, roleList] of Object.entries(legacy)) {
-          const projId = parseInt(projIdStr, 10);
-          const proj = projMap.get(projId);
-          const projectName = proj?.projectdisplayname
-            || proj?.portfolioId?.portfolioName
-            || proj?.name
-            || `Project #${projId}`;
-          // Org: from project's portfolioId (legacy) or organisationId (RBAC)
-          const orgName = proj?.portfolioId?.portfolioName
-            ?? (proj?.organisationId != null ? (orgMap.get(proj.organisationId) ?? null) : null);
-
-          for (const legacyRole of (roleList || [])) {
-            const roleName: string = legacyRole?.name ?? legacyRole?.role_name ?? `Role #${legacyRole?.id}`;
-            const key = `${roleName.toLowerCase()}|${projId}|`;
-
-            if (!seen.has(key)) {
-              seen.set(key, {
-                ids: [],   // no rbac_role_assignment id — can't revoke via new API
-                roleName,
-                roleRank: null,  // legacy role — no RBAC rank
-                orgName,
-                projectName,
-                projectId: projId,
-                grantedAt: legacyRole?.time_stamp ?? '',
-                revoking: false,
-                source: 'legacy',
-              });
-            }
-          }
-        }
-
         let allCards = Array.from(seen.values());
-
-        // Synthetic card for the current session role if it's not already in the list.
-        // This covers legacy roles (e.g. "IT Portfolio Manager") that never appear in
-        // rbac_role_assignment and are not returned by getLegacyUserAssignments.
-        try {
-          const sessionRole = JSON.parse(sessionStorage.getItem('role') || 'null');
-          const sessionProject = JSON.parse(sessionStorage.getItem('project') || 'null');
-          if (sessionRole?.name) {
-            const roleLower = sessionRole.name.toLowerCase();
-            const alreadyPresent = allCards.some(c => c.roleName.toLowerCase() === roleLower);
-            if (!alreadyPresent) {
-              const proj = sessionProject?.id != null ? projMap.get(sessionProject.id) : null;
-              const projectName = sessionProject?.projectdisplayname
-                || proj?.projectdisplayname
-                || proj?.portfolioId?.portfolioName
-                || sessionProject?.name
-                || null;
-              const projOrgId2 = (proj as any)?.organisationId as number | null | undefined;
-              let orgName2: string | null = proj?.portfolioId?.portfolioName ?? null;
-              if (!orgName2 && projOrgId2 != null) orgName2 = orgMap.get(projOrgId2) ?? null;
-
-              allCards.push({
-                ids: [],
-                roleName: sessionRole.name,
-                roleRank: null,
-                orgName: orgName2,
-                projectName,
-                projectId: sessionProject?.id ?? null,
-                grantedAt: '',
-                revoking: false,
-                source: 'legacy',
-              });
-            }
-          }
-        } catch { /* ignore */ }
 
         // Sort: active session row(s) first, then alphabetically by role name.
         allCards.sort((a, b) => {
@@ -269,11 +188,7 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
   }
 
   rankLabel(rank: number | null): string {
-    if (rank == null) return 'Legacy';
-    const map: Record<number, string> = {
-      0: 'AI Client', 1: 'AI Engineer', 2: 'Project Admin', 3: 'Org Admin', 4: 'Admin',
-    };
-    return map[rank] ?? `Rank ${rank}`;
+    return RoleNameUtil.getDisplayNameByRank(rank);
   }
 
   rankColor(rank: number | null): string {

@@ -38,7 +38,13 @@ export class MenuItemDialogComponent implements OnInit {
     this.api.getMenuItems(this.userContext.userId$.value).subscribe(items => {
       this.candidateParents = items.filter(item => item.id !== this.existing?.id);
     });
-    this.api.getRoleNames().subscribe(names => (this.roleOptions = names));
+    // Only the 5 RBAC roles (rank defined), sorted by rank for a consistent order.
+    this.api.getRoles().subscribe(roles => {
+      this.roleOptions = roles
+        .filter(r => r.rank != null)
+        .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
+        .map(r => r.name);
+    });
   }
 
   save(): void {

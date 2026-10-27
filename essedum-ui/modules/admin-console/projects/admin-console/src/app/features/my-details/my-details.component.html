@@ -65,11 +65,9 @@
         <td mat-cell *matCellDef="let card">
           <div class="role-cell">
             <span class="role-name">{{ card.roleName }}</span>
-            <span class="role-type-badge"
-                  [class.rbac-badge]="card.roleRank != null"
-                  [class.legacy-badge]="card.roleRank == null"
-                  [matTooltip]="rankLabel(card.roleRank)">
-              {{ card.roleRank != null ? 'RBAC · rank ' + card.roleRank : 'Legacy' }}
+            <span class="role-type-badge rbac-badge"
+                  [matTooltip]="'Rank ' + card.roleRank">
+              {{ rankLabel(card.roleRank) }}
             </span>
             <span class="active-badge" *ngIf="isCurrentSession(card)">
               <mat-icon>radio_button_checked</mat-icon> Active
@@ -133,7 +131,6 @@
           </button>
           <button mat-stroked-button color="warn"
                   [disabled]="card.revoking || card.ids.length === 0"
-                  [matTooltip]="card.ids.length === 0 ? 'Assigned via legacy system — manage in Org Admin' : ''"
                   (click)="revokeCard(card)"
                   class="action-btn revoke-btn">
             <mat-icon *ngIf="!card.revoking">remove_circle_outline</mat-icon>

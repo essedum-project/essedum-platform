@@ -47,18 +47,18 @@ export class RoleMenuService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Fetches sidebar items for the user from the BE and filters them by role tier.
-   * Admin-tier roles (rank ≥ 2) get admin-console routes only.
-   * App-tier roles (rank 0-1) get product routes only.
+   * Fetches sidebar items for the user from the BE and filters them to the
+   * items visible at the selected role's rank (minRoleRank <= roleRank).
    *
    * BE endpoint: GET /api/usm/menu?userId={userId}
-   * Returns items already rank-filtered on the server by the user's highest rank.
+   * Returns all items the user CAN see (gated by their highest rank).
+   * FE then narrows to what the CURRENTLY SELECTED role tier should see.
    */
-  getMenuForRole(roleName: string, userId: number | null | undefined): Observable<RoleMenuItem[]> {
+  getMenuForRole(_roleName: string, userId: number | null | undefined, roleRank?: number): Observable<RoleMenuItem[]> {
     if (!userId) return of([]);
 
     return this.http.get<any[]>(`/api/usm/menu?userId=${userId}`).pipe(
-      map(items => this._filterAndMap(items || [], roleName)),
+      map(items => this._filterAndMap(items || [], roleRank ?? 0)),
       catchError(() => of([]))
     );
   }
@@ -73,16 +73,18 @@ export class RoleMenuService {
     return ADMIN_ROLE_NAMES.has((roleName || '').toLowerCase().trim());
   }
 
-  private _filterAndMap(items: any[], _roleName: string): RoleMenuItem[] {
-    const mapped = items.map(item => ({
-      label: item.label,
-      icon: item.icon ?? null,
-      // Normalise: BE seeds use "/route", shell expects "./route"
-      url: item.route
-        ? (item.route.startsWith('/') ? '.' + item.route : item.route)
-        : '',
-      children: [],
-    }));
+  private _filterAndMap(items: any[], roleRank: number): RoleMenuItem[] {
+    const mapped = items
+      .filter(item => (item.minRoleRank ?? 0) <= roleRank)
+      .map(item => ({
+        label: item.label,
+        icon: item.icon ?? null,
+        // Normalise: BE seeds use "/route", shell expects "./route"
+        url: item.route
+          ? (item.route.startsWith('/') ? '.' + item.route : item.route)
+          : '',
+        children: [],
+      }));
 
     if (mapped.length === 0) {
       return [{ label: 'Dashboard', icon: null, url: './dashboard', children: [] }];

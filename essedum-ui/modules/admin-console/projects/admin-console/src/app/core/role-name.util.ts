@@ -1,11 +1,17 @@
 /** Centralized RBAC role name mapping — single source of truth. */
 export class RoleNameUtil {
   private static readonly ROLE_NAME_MAP: { [key: string]: string } = {
+    // Legacy DB key names (pre-rbac-17)
     'viewer': 'AI Client',
     'developer': 'AI Engineer',
     'project_admin': 'AI Project Admin',
     'org_admin': 'AI Organization Admin',
     'platform_admin': 'AI Platform Admin',
+    // Current DB names (after rbac-17 + rbac-21 renames)
+    'admin': 'AI Platform Admin',
+    'organization admin': 'AI Organization Admin',
+    'project admin': 'AI Project Admin',
+    'ai client': 'AI Client',
   };
 
   private static readonly RANK_LABEL_MAP: { [key: number]: string } = {

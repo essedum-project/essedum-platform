@@ -2196,7 +2196,9 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   newsidebar() {
-    const _role = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return '?'; } })();
+    const _roleObj = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null'); } catch { return null; } })();
+    const _role: string = _roleObj?.name ?? '?';
+    const _roleRank: number = _roleObj?.rank ?? 0;
     console.group(`[MENU] newsidebar() — role: ${_role}`);
 
     // ── RBAC role: fetch menu from rbac_menu_item via /api/usm/menu ──────────
@@ -2220,7 +2222,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       const _userId = (() => { try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id; } catch { return null; } })();
       this.isSidebarLoading = true;
-      this.roleMenuSvc.getMenuForRole(_role, _userId).subscribe(items => {
+      this.roleMenuSvc.getMenuForRole(_role, _userId, _roleRank).subscribe(items => {
         this.sidebarMenu = items;
         this._loadedMenuRole = _role; // cache: menu is now loaded for this role
         console.log('[MENU] RBAC menu for', _role, '→', items.map(i => i.label));

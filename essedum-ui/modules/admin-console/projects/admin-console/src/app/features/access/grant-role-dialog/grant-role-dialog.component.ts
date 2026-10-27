@@ -49,10 +49,10 @@ export class GrantRoleDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.api.getRoles().subscribe(roles => {
-      // RBAC roles (rank defined) first sorted by rank, then legacy sorted by name
-      const rbac = roles.filter(r => r.rank != null).sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
-      const legacy = roles.filter(r => r.rank == null).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1);
-      this.roles = [...rbac, ...legacy];
+      // Only the 5 new RBAC roles (rank defined), sorted lowest → highest rank
+      this.roles = roles
+        .filter(r => r.rank != null)
+        .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
     });
     this.api.getUsers().subscribe(users => (this.users = users));
     this.api.getProjects().subscribe(projects => (this.projects = projects));
