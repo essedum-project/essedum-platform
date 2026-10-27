@@ -577,4 +577,16 @@
 		</insert>
 	</changeSet>
 
+
+	<!-- rbac-23: track the user who created each asset so that edit-ownership
+	     can be enforced server-side. Nullable to stay compatible with rows
+	     that predate this column. -->
+	<changeSet author="Essedum (rbac)" id="rbac-23">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="rbac_asset" columnName="created_by" /></not>
+		</preConditions>
+		<addColumn tableName="rbac_asset">
+			<column name="created_by" type="INT" />
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>
