@@ -750,40 +750,6 @@
                     </span>
                   </li>
                 </ol>
-                <!-- No-menu banner: shown when the active role has no sidebar items configured -->
-                <div class="no-menu-banner" *ngIf="visibleSidebarMenu.length === 0 && selectedrole?.name && !loadingRouteConfig && !isSidebarLoading">
-                  <div class="no-menu-banner__icon">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
-                      <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 5a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V8a1 1 0 0 1 1-1zm0 9a1.25 1.25 0 1 1 0-2.5A1.25 1.25 0 0 1 12 16z" fill="currentColor"/>
-                    </svg>
-                  </div>
-                  <div class="no-menu-banner__body">
-                    <h3 class="no-menu-banner__title">No menu configured for <strong>{{ selectedrole?.name }}</strong></h3>
-                    <p class="no-menu-banner__desc">
-                      This role does not have any sidebar items set up yet. A platform admin can configure which items appear in the sidebar for this role.
-                    </p>
-                    <div class="no-menu-banner__steps">
-                      <div class="no-menu-banner__step">
-                        <span class="no-menu-banner__step-num">1</span>
-                        <span>Open your profile menu <strong>(top-right avatar)</strong></span>
-                      </div>
-                      <div class="no-menu-banner__step">
-                        <span class="no-menu-banner__step-num">2</span>
-                        <span>Go to <strong>Admin Console → Access</strong></span>
-                      </div>
-                      <div class="no-menu-banner__step">
-                        <span class="no-menu-banner__step-num">3</span>
-                        <span>Assign the <strong>{{ selectedrole?.name }}</strong> role to configure its menu</span>
-                      </div>
-                    </div>
-                    <a class="no-menu-banner__link" [routerLink]="['/landing/admin-console/access']">
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
-                        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" fill="currentColor"/>
-                      </svg>
-                      Go to Access →
-                    </a>
-                  </div>
-                </div>
 
                 <router-outlet class="selector-3-65"></router-outlet>
                 <!-- </div> -->
