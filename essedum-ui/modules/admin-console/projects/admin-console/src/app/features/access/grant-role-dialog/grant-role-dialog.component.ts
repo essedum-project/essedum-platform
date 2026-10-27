@@ -4,6 +4,7 @@ import { forkJoin } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { ApiService } from '../../../core/api.service';
+import { RoleNameUtil } from '../../../core/role-name.util';
 import type { RbacRole, LegacyOrganisation, LegacyProject, LegacyPortfolio, UserOption } from '../../../core/api-models';
 
 /** Unified entry shown in the Organization dropdown — covers both usm_organisation (RBAC) and usm_portfolio (legacy). */
@@ -40,14 +41,6 @@ export class GrantRoleDialogComponent implements OnInit {
 
   private rbacOrgs: LegacyOrganisation[] = [];
   private portfolios: LegacyPortfolio[] = [];
-
-  private readonly roleNameMap: { [key: string]: string } = {
-    'viewer': 'AI Consumer(Read only)',
-    'developer': 'AI Engineer',
-    'project_admin': 'AI Project Admin',
-    'org_admin': 'AI Organization Admin',
-    'platform_admin': 'AI Platform Admin',
-  };
 
   constructor(
     private readonly ref: MatDialogRef<GrantRoleDialogComponent>,
@@ -95,7 +88,7 @@ export class GrantRoleDialogComponent implements OnInit {
   }
 
   getDisplayRoleName(roleName: string): string {
-    return this.roleNameMap[roleName.toLowerCase()] || roleName;
+    return RoleNameUtil.getDisplayNameByRoleName(roleName);
   }
 
   get selectedOrg(): OrgOption | undefined {

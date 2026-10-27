@@ -36,7 +36,7 @@ export class MenuConfigurationComponent implements OnInit, AfterViewInit {
     { rank: 3, label: 'AI Organization Admin' },
     { rank: 2, label: 'AI Project Admin' },
     { rank: 1, label: 'AI Engineer' },
-    { rank: 0, label: 'AI Consumer(Read only)' },
+    { rank: 0, label: 'AI Client' },
   ];
   adminTierFilter: number | null = null;
 

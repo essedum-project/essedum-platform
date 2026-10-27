@@ -196,7 +196,7 @@
                     (ngModelChange)="valuechangerole($event); clearsession()" name="role"
                     panelClass="profile-select-panel matOptionPopup">
                     <mat-option *ngFor="let item of roleList; trackBy: trackByMethod" [value]="item" [id]="'role-' + item.name">
-                      {{ item.name }} <span style="font-size:11px;opacity:0.55;">{{ getRoleTypeLabel(item) }}</span>
+                      {{ getDisplayRoleName(item.name) }} <span style="font-size:11px;opacity:0.55;">{{ getRoleTypeLabel(item) }}</span>
                     </mat-option>
                   </mat-select>
                 </mat-form-field>

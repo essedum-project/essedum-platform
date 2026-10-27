@@ -4,6 +4,7 @@ import { combineLatest, map } from 'rxjs';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
+import { RoleNameUtil } from '../../core/role-name.util';
 import type { RbacRole, RoleAssignment, UserOption } from '../../core/api-models';
 import { GrantRoleDialogComponent } from './grant-role-dialog/grant-role-dialog.component';
 import { UserContextService } from '../../core/user-context.service';
@@ -35,14 +36,6 @@ export class AccessComponent implements OnInit, AfterViewInit {
 
   readonly columns = ['userName', 'roleName', 'scopeLabel', 'grantedAt', 'actions'];
 
-  private readonly roleNameMap: { [key: string]: string } = {
-    'viewer': 'AI Consumer(Read only)',
-    'developer': 'AI Engineer',
-    'project_admin': 'AI Project Admin',
-    'org_admin': 'AI Organization Admin',
-    'platform_admin': 'AI Platform Admin',
-  };
-
   constructor(
     private readonly api: ApiService,
     private readonly dialog: MatDialog,
@@ -52,7 +45,7 @@ export class AccessComponent implements OnInit, AfterViewInit {
   get canCreateRole(): boolean { return this.rank >= 4; }
 
   getDisplayRoleName(roleName: string): string {
-    return this.roleNameMap[roleName.toLowerCase()] || roleName;
+    return RoleNameUtil.getDisplayNameByRoleName(roleName);
   }
 
   ngOnInit(): void {

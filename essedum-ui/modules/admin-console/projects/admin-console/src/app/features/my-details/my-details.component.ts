@@ -5,6 +5,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { combineLatest, map, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/api.service';
+import { RoleNameUtil } from '../../core/role-name.util';
 import { UserContextService } from '../../core/user-context.service';
 import type { RoleAssignment, RbacRole, LegacyOrganisation, LegacyProject } from '../../core/api-models';
 import { MenuPickerDialogComponent } from './menu-picker-dialog/menu-picker-dialog.component';
@@ -268,19 +269,11 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
   }
 
   rankLabel(rank: number | null): string {
-    if (rank == null) return 'Legacy';
-    const map: Record<number, string> = {
-      0: 'Consumer', 1: 'Engineer', 2: 'Project Admin', 3: 'Org Admin', 4: 'Platform Admin',
-    };
-    return map[rank] ?? `Rank ${rank}`;
+    return RoleNameUtil.getDisplayNameByRank(rank);
   }
 
   rankColor(rank: number | null): string {
-    if (rank == null) return '#9c27b0';
-    const map: Record<number, string> = {
-      0: '#607d8b', 1: '#1976d2', 2: '#388e3c', 3: '#f57c00', 4: '#7b1fa2',
-    };
-    return map[rank] ?? '#607d8b';
+    return RoleNameUtil.getRankColor(rank);
   }
 
   configureMenu(card: RoleCard): void {

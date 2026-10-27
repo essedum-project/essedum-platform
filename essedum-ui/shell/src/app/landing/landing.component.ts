@@ -24,6 +24,7 @@ import { MatMenuTrigger } from "@angular/material/menu";
 import { Subscription, interval } from "rxjs";
 import { MenuService } from "../services/menu.service";
 import { RoleMenuService } from "../services/role-menu.service";
+import { RoleNameUtil } from "../services/role-name.util";
 import { HttpClient } from "@angular/common/http";
 import { Title } from "@angular/platform-browser";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
@@ -512,6 +513,11 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   /** Map from role name (lowercase) → rank for RBAC roles, built in supplementRbacData(). */
   rbacRoleRankMap = new Map<string, number>();
+
+  /** Returns display name for a role (e.g., 'developer' → 'AI Engineer'). */
+  getDisplayRoleName(roleName: string): string {
+    return RoleNameUtil.getDisplayNameByRoleName(roleName);
+  }
 
   /** Returns a short label to show next to a role name in the dropdown. */
   getRoleTypeLabel(role: any): string {
