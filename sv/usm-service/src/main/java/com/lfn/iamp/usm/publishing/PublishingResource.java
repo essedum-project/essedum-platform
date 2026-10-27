@@ -58,7 +58,7 @@ public class PublishingResource {
 		return ResponseEntity.ok(publishingService.listVersionsForUser(userId));
 	}
 
-	/** Create an asset + its first draft version. §5. */
+	/** Create an asset + its first draft version. §5. Requires rank ≥ 1 (Developer). */
 	@PostMapping("/assets")
 	public ResponseEntity<?> create(@RequestBody CreateDraftRequest request) {
 		// project_id and name are required; return 400 naming the missing field.
@@ -130,8 +130,15 @@ public class PublishingResource {
 		return ResponseEntity.ok(Collections.singletonMap("gate", gate));
 	}
 
+	/** Submit for review. Requires rank ≥ 1 (Developer). */
 	@PostMapping("/assets/versions/{id}/submit")
 	public ResponseEntity<PromotionEvent> submit(@PathVariable Integer id, @RequestBody SubmitRequest request) {
+		int rank = accessContextService.highestRank(request.getActorId());
+		if (rank < 1) {
+			throw new org.springframework.web.server.ResponseStatusException(
+					org.springframework.http.HttpStatus.FORBIDDEN,
+					"Insufficient role to submit for review (needs rank 1, have " + rank + ")");
+		}
 		PromotionEvent event = publishingService.submit(id, request.getActorId(), request.getActorName(),
 				request.getNote());
 		return ResponseEntity.ok(event);
@@ -145,7 +152,7 @@ public class PublishingResource {
 
 	@PostMapping("/approvals/{versionId}/decision")
 	public ResponseEntity<PromotionEvent> decide(@PathVariable Integer versionId,
-			@RequestBody DecisionRequest request) {
+	                                             @RequestBody DecisionRequest request) {
 		int viewerRank = accessContextService.highestRank(request.getActorId());
 		PromotionEvent event = publishingService.decide(versionId, request.getGate(), request.getAction(),
 				request.getActorId(), request.getActorName(), request.getNote(), viewerRank);

@@ -60,4 +60,7 @@ public class AssetVersion implements Serializable {
 	@NotNull
 	@Column(name = "updated_at")
 	private Instant updatedAt;
+
+	@Column(name = "creator_id")
+	private Integer creatorId;
 }

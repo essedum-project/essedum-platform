@@ -12,8 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.lfn.iamp.usm.access.AccessContext;
 import com.lfn.iamp.usm.access.AccessContextService;
@@ -38,8 +40,8 @@ public class PublishingService {
 	private final AuditService auditService;
 
 	public PublishingService(AssetRepository assetRepository, AssetVersionRepository assetVersionRepository,
-			PromotionEventRepository promotionEventRepository, AccessContextService accessContextService,
-			AuditService auditService) {
+	                         PromotionEventRepository promotionEventRepository, AccessContextService accessContextService,
+	                         AuditService auditService) {
 		this.assetRepository = assetRepository;
 		this.assetVersionRepository = assetVersionRepository;
 		this.promotionEventRepository = promotionEventRepository;
@@ -125,7 +127,7 @@ public class PublishingService {
 	/** Create a brand-new asset and its first draft version (§5: everything starts as a draft). */
 	@Transactional
 	public AssetVersion createDraft(Integer projectId, String assetType, String name, String payloadRef,
-			Integer actorId, String actorName) {
+	                                Integer actorId, String actorName) {
 		// Rank ≥ 1 (Developer) required; viewer (rank 0) gets 403 via resource layer,
 		// but also guard here as defense-in-depth.
 		AccessContext ctx = accessContextService.resolve(actorId);
@@ -144,7 +146,7 @@ public class PublishingService {
 		asset.setCreatedBy(actorId);
 		Asset savedAsset = assetRepository.save(asset);
 
-		AssetVersion version = newVersion(savedAsset.getId(), 1, payloadRef);
+		AssetVersion version = newVersion(savedAsset.getId(), 1, payloadRef, actorId);
 		AssetVersion savedVersion = assetVersionRepository.save(version);
 
 		auditService.record("asset", "created", actorId, actorName,
@@ -160,7 +162,7 @@ public class PublishingService {
 	 */
 	@Transactional
 	public AssetVersion editDraft(Integer versionId, String name, String payloadRef, Integer actorId,
-			String actorName) {
+	                              String actorName) {
 		AssetVersion current = requireVersion(versionId);
 		if (!("draft".equals(current.getStatus()) || "rejected".equals(current.getStatus()))) {
 			throw new IllegalStateException("Only draft or rejected versions can be edited: v" + versionId);
@@ -206,7 +208,7 @@ public class PublishingService {
 				.map(AssetVersion::getVersionNo)
 				.max(Comparator.naturalOrder())
 				.orElse(0) + 1;
-		AssetVersion version = newVersion(assetId, nextNo, payloadRef);
+		AssetVersion version = newVersion(assetId, nextNo, payloadRef, actorId);
 		AssetVersion saved = assetVersionRepository.save(version);
 		auditService.record("asset_version", "created", actorId, actorName,
 				"new draft v" + nextNo + " opened on asset " + asset.getName());
@@ -258,9 +260,14 @@ public class PublishingService {
 	/** Approve moves the serving pointer and widens scope; reject sends the version back to draft. §5. */
 	@Transactional
 	public PromotionEvent decide(Integer versionId, String gate, String action, Integer actorId, String actorName,
-			String note, Integer viewerRank) {
+	                             String note, Integer viewerRank) {
+		if (note == null || note.isBlank()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "note is required for approval or rejection");
+		}
 		if (viewerRank < PromotionGate.requiredRank(gate)) {
-			throw new IllegalStateException("Viewer rank " + viewerRank + " cannot decide at gate " + gate);
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"Insufficient role to decide at gate " + gate + " (needs rank "
+							+ PromotionGate.requiredRank(gate) + ", have " + viewerRank + ")");
 		}
 		AssetVersion version = requireVersion(versionId);
 
@@ -355,6 +362,12 @@ public class PublishingService {
 		return newVersion(assetId, versionNo, payloadRef, assetId + ":v" + versionNo);
 	}
 
+	private AssetVersion newVersion(Integer assetId, int versionNo, String payloadRef, Integer creatorId) {
+		AssetVersion version = newVersion(assetId, versionNo, payloadRef, assetId + ":v" + versionNo);
+		version.setCreatorId(creatorId);
+		return version;
+	}
+
 	private AssetVersion newVersion(Integer assetId, int versionNo, String payloadRef, String digestSalt) {
 		AssetVersion version = new AssetVersion();
 		version.setAssetId(assetId);
@@ -367,7 +380,7 @@ public class PublishingService {
 	}
 
 	private PromotionEvent newEvent(Integer versionId, String gate, String action, Integer actorId, String actorName,
-			String note) {
+	                                String note) {
 		PromotionEvent event = new PromotionEvent();
 		event.setAssetVersionId(versionId);
 		event.setGate(gate);
