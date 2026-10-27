@@ -36,6 +36,14 @@ export class AccessComponent implements OnInit, AfterViewInit {
 
   readonly columns = ['userName', 'roleName', 'scopeLabel', 'grantedAt', 'actions'];
 
+  private readonly roleNameMap: { [key: string]: string } = {
+    'viewer': 'AI Client',
+    'developer': 'AI Engineer',
+    'project_admin': 'AI Project Admin',
+    'org_admin': 'AI Organization Admin',
+    'platform_admin': 'AI Platform Admin',
+  };
+
   constructor(
     private readonly api: ApiService,
     private readonly dialog: MatDialog,

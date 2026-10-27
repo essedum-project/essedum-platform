@@ -269,7 +269,11 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
   }
 
   rankLabel(rank: number | null): string {
-    return RoleNameUtil.getDisplayNameByRank(rank);
+    if (rank == null) return 'Legacy';
+    const map: Record<number, string> = {
+      0: 'AI Client', 1: 'AI Engineer', 2: 'Project Admin', 3: 'Org Admin', 4: 'Admin',
+    };
+    return map[rank] ?? `Rank ${rank}`;
   }
 
   rankColor(rank: number | null): string {
