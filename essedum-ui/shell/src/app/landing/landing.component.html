@@ -1,4 +1,12 @@
 <div class="selector-3-1">
+  <!-- RBAC init overlay: covers all intermediate role/nav transitions on fresh login.
+       Dismissed once the correct role + menu are confirmed ready. -->
+  <div *ngIf="pageInitializing"
+       style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;
+              background:var(--background-colour,#060c1a);
+              display:flex;align-items:center;justify-content:center;">
+    <div class="rbac-spinner"></div>
+  </div>
   <mat-drawer-container style="overflow: hidden" class="example-container bgcolor2 selector-3-2" autosize="">
     <mat-drawer #drawerLeft="" class="example-sidenav selector-3-3" [ngStyle]="{
         'background-color': bgColorType == 2 ? '#8626C3' : 'var(--header-color)'

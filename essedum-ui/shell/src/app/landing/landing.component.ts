@@ -393,6 +393,12 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   filterData: any;
   mfeRouteTitle: any;
   isSidebarLoading = false;
+  /** True from fresh login until the correct RBAC role+menu fully loads.
+   *  A full-screen overlay hides intermediate navigations so only the final settled state is visible.
+   *  Backed by sessionStorage so it persists across component recreations during the nav chain. */
+  pageInitializing = false;
+  /** Listener registered when pageInitializing=true. Removed in ngOnDestroy or when event fires. */
+  private _initCompleteHandler: (() => void) | null = null;
   /** True while supplementRbacData() hasn't yet confirmed the correct RBAC role.
    *  Prevents newsidebar() from fetching a menu for a stale sessionStorage role. */
   private _rbacCheckPending = true;
@@ -412,6 +418,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   /** Set to true once supplementRbacData confirms the user has RBAC role assignments.
    *  Stops legacy checkDefaultRole* functions from overriding the RBAC-selected role. */
   private _rbacUser = false;
+  /** Set to true in ngOnDestroy so zombie HTTP callbacks don't navigate after the component is gone. */
+  private _destroyed = false;
   /** Role name whose menu is currently loaded in sidebarMenu. Used to skip
    *  redundant HTTP calls when newsidebar() is called during in-app navigation. */
   private _loadedMenuRole = '';
@@ -618,7 +626,9 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
             const _pendingRoleRaw = sessionStorage.getItem('_rbac_pending_switch_role');
             if (_pendingRoleRaw) {
               sessionStorage.removeItem('_rbac_pending_switch_role');
-              try { this.valuechangerole(JSON.parse(_pendingRoleRaw)); } catch {}
+              if (!this._destroyed) {
+                try { this.valuechangerole(JSON.parse(_pendingRoleRaw)); } catch {}
+              }
             }
           }
           this._pendingAutoSwitchOrgId = null;
@@ -824,6 +834,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
                 try { const t = sessionStorage.getItem('_rbac_last_auto_switch'); return !!t && (Date.now() - parseInt(t)) < 10000; } catch { return false; }
               })();
               if ((!curStillValid || !currentOrgHasAssignments || !_sessionInit) && !recentManualSwitch && !_recentAutoSwitch) {
+                if (this._destroyed) { this._rbacDataLoading = false; return; } // zombie guard
                 // Mark session initialized BEFORE navigating so the recreated component
                 // skips the auto-switch and restores the menu from sessionStorage cache.
                 sessionStorage.setItem('_rbac_session_initialized', '1');
@@ -992,6 +1003,42 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
+    // ── RBAC init overlay ────────────────────────────────────────────────────
+    // Persist overlay across component recreations (shouldReuseRoute=false destroys on every nav).
+    this.pageInitializing = sessionStorage.getItem('_rbac_page_initializing') === '1';
+
+    // Also detect stale re-login at startup (before any async calls):
+    // _rbac_session_initialized is still '1' from the previous session, but the login API
+    // reset 'role' to a default (e.g. Developer) so _rbac_sidebar_role and role don't match.
+    if (!this.pageInitializing) {
+      const _niRole = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return null; } })();
+      if (_niRole && this.roleMenuSvc.isRbacRole(_niRole)) {
+        const _niSessionInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
+        const _niSidebarRole = sessionStorage.getItem('_rbac_sidebar_role') || '';
+        const _freshLogin  = !_niSessionInit;
+        const _staleRelogin = _niSessionInit && !!_niSidebarRole && _niSidebarRole.toLowerCase() !== _niRole.toLowerCase();
+        if (_freshLogin || _staleRelogin) {
+          sessionStorage.setItem('_rbac_page_initializing', '1');
+          this.pageInitializing = true;
+        }
+      }
+    }
+    // When overlay is active, listen for the 'rbac-init-complete' event dispatched once the
+    // correct role+menu are fully loaded. Works across component instances via sessionStorage + events.
+    if (this.pageInitializing) {
+      const _niRoleForLog = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return '?'; } })();
+      console.log('[OVERLAY] pageInitializing=true — role:', _niRoleForLog, '_rbac_sidebar_role:', sessionStorage.getItem('_rbac_sidebar_role'));
+      this._initCompleteHandler = () => {
+        console.log('[OVERLAY] rbac-init-complete received → hiding overlay');
+        this.pageInitializing = false;
+        if (this._initCompleteHandler) {
+          window.removeEventListener('rbac-init-complete', this._initCompleteHandler);
+          this._initCompleteHandler = null;
+        }
+      };
+      window.addEventListener('rbac-init-complete', this._initCompleteHandler);
+    }
+    // ────────────────────────────────────────────────────────────────────────
     window.addEventListener('essedum:assignments-changed', this.onAssignmentsChanged);
     window.addEventListener('essedum:tenancy-changed', this.onTenancyChanged);
     window.addEventListener('essedum:role-menu-changed', this.onRoleMenuChanged);
@@ -1177,6 +1224,9 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       // RBAC auto-switch fires. Clear sidebar cache, blank the role dropdown, show spinners.
       if (sessionStorage.getItem('_rbac_session_initialized') !== '1' &&
           this.selectedrole?.name && this.roleMenuSvc.isRbacRole(this.selectedrole.name)) {
+        // Activate the full-screen overlay so all intermediate navigations are hidden.
+        sessionStorage.setItem('_rbac_page_initializing', '1');
+        this.pageInitializing = true;
         this.selectedrole = {};
         this.isRoleLoading = true;
         this.isProjectLoading = true;
@@ -1664,7 +1714,15 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       this.user = JSON.parse(sessionStorage.getItem("user") || "");
       this.role = JSON.parse(sessionStorage.getItem("role") || "");
-      this.selectedrole = this.role;
+      // On a fresh RBAC login (_rbac_session_initialized not yet set) suppress the role
+      // from the thumbnail immediately — the auto-switch will set the correct role shortly.
+      // This prevents a single-frame flash of the default role (e.g. "developer") in the UI.
+      const _fcSessionInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
+      if (!_fcSessionInit && this.role?.name && this.roleMenuSvc.isRbacRole(this.role.name)) {
+        this.selectedrole = {};
+      } else {
+        this.selectedrole = this.role;
+      }
       this.selectedproject = JSON.parse(
         sessionStorage.getItem("project") || ""
       );
@@ -1712,6 +1770,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     sessionStorage.removeItem('_rbac_portfolio_list');
     sessionStorage.removeItem('_rbac_project_list');
     sessionStorage.removeItem('_rbac_role_list');
+    sessionStorage.removeItem('_rbac_page_initializing');
     this.router.navigate(["../logout"]);
   }
   setHighlightedLabel(item: any) {
@@ -1890,6 +1949,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       },
       (err) => {},
       () => {
+        if (this._destroyed) return; // zombie guard: component was destroyed mid-flight
         let nav = this.route.snapshot["_routerState"].url.toString();
         let navUrl = nav.slice(0, nav.indexOf("pfolio"));
 
@@ -1939,6 +1999,16 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
                 : '/landing/dashboard';
             }
             this.router.navigate([dest]);
+            // Dismiss init overlay after navigate + delay so intermediate navigations and
+            // MFE initialization complete before the overlay lifts. 2000ms covers:
+            //   - any zombie callbacks that trigger a 2nd navigation (~200ms)
+            //   - MFE lazy-load + first render (~500-1000ms)
+            console.log('[OVERLAY] valuechangerole→getMenuForRole: navigate to', dest, '— overlay dismisses in 2000ms');
+            setTimeout(() => {
+              console.log('[OVERLAY] 2000ms timer fired from valuechangerole path → dispatching rbac-init-complete');
+              sessionStorage.removeItem('_rbac_page_initializing');
+              window.dispatchEvent(new Event('rbac-init-complete'));
+            }, 2000);
           });
           return;
         }
@@ -2380,6 +2450,15 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.roleMenuSvc.isRbacRole(_grpRoleName)) {
       const _grpSessionInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
       if (_grpSessionInit && !this._pendingAutoSwitchOrgId) {
+        // Detect re-login without logout: login API may have reset role to a default (e.g. "developer")
+        // while _rbac_session_initialized is stale from the previous session.
+        // If the cached sidebar role doesn't match the current role, re-validate via supplementRbacData.
+        const _ssSidebarRole = sessionStorage.getItem('_rbac_sidebar_role');
+        if (_ssSidebarRole && _ssSidebarRole.toLowerCase() !== (_grpRoleName || '').toLowerCase()) {
+          sessionStorage.removeItem('_rbac_session_initialized');
+          this.supplementRbacData();
+          return;
+        }
         this._rbacCheckPending = false;
         try {
           const _ssOrgList = sessionStorage.getItem('_rbac_portfolio_list');
@@ -2693,6 +2772,17 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
             this._menuSnapshot = [..._ssCached];
             this._loadedMenuRole = _role;
             this.isSidebarLoading = false;
+            // Menu confirmed ready via session cache — dismiss the init overlay.
+            // 2000ms delay matches the valuechangerole path so both timers fire at the
+            // same time and the earlier one wins (both are safe to fire, second is a no-op).
+            if (sessionStorage.getItem('_rbac_page_initializing') === '1') {
+              console.log('[OVERLAY] newsidebar restore for', _role, '— overlay dismisses in 2000ms');
+              setTimeout(() => {
+                console.log('[OVERLAY] 2000ms timer fired from newsidebar restore path → dispatching rbac-init-complete');
+                sessionStorage.removeItem('_rbac_page_initializing');
+                window.dispatchEvent(new Event('rbac-init-complete'));
+              }, 2000);
+            }
             console.log('[MENU] newsidebar: restored from sessionStorage for', _role, '— no API call');
             console.groupEnd();
             return;
@@ -4047,9 +4137,14 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   }
 
   ngOnDestroy(): void {
+    this._destroyed = true;
     window.removeEventListener('essedum:assignments-changed', this.onAssignmentsChanged);
     window.removeEventListener('essedum:tenancy-changed', this.onTenancyChanged);
     window.removeEventListener('essedum:role-menu-changed', this.onRoleMenuChanged);
+    if (this._initCompleteHandler) {
+      window.removeEventListener('rbac-init-complete', this._initCompleteHandler);
+      this._initCompleteHandler = null;
+    }
   }
 
   ngAfterViewInit() {
