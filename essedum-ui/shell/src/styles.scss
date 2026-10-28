@@ -885,6 +885,26 @@ body.header-light-theme .header-welcome-label {
   font-size: 12px; font-weight: 600;
   color: rgba(255,255,255,0.75);
   white-space: nowrap; min-width: 64px; flex-shrink: 0;
+  display: flex; align-items: center; gap: 5px;
+}
+
+// ── Dropdown loading spinner ──────────────────────────────────────────────────
+.dropdown-spinner {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-top-color: rgba(255,255,255,0.85);
+  border-radius: 50%;
+  animation: dropdown-spin 0.7s linear infinite;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+@keyframes dropdown-spin {
+  to { transform: rotate(360deg); }
+}
+body.header-light-theme .dropdown-spinner {
+  border-color: rgba(35,79,153,0.2);
+  border-top-color: #234f99;
 }
 
 // ── mat-form-field inside profile menu — DARK (default) ───────────────────────

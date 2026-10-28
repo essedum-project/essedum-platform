@@ -163,11 +163,15 @@
 
               <!-- Organization (formerly Portfolio) — portfolios are promoted to
                    first-class Organizations per the roadmap §1 tenancy schema. -->
-              <div *ngIf="portfoliodata?.length >= 1" (click)="$event.stopPropagation()" class="profile-menu-field-row">
-                <span class="profile-menu-field-label">Organization</span>
+              <div *ngIf="portfoliodata?.length >= 1 || isOrgLoading" (click)="$event.stopPropagation()" class="profile-menu-field-row">
+                <span class="profile-menu-field-label">
+                  Organization
+                  <span *ngIf="isOrgLoading" class="dropdown-spinner" aria-label="Loading organizations"></span>
+                </span>
                 <mat-form-field class="profile-form-field" appearance="outline" subscriptSizing="dynamic">
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedportfolio"
-                    (ngModelChange)="onSelection($event)" name="Portfolio" panelClass="profile-select-panel">
+                    (ngModelChange)="onSelection($event)" name="Portfolio" panelClass="profile-select-panel"
+                    [disabled]="isOrgLoading">
                     <mat-option *ngFor="let item of portfoliodata; trackBy: trackByMethod" [value]="item">
                       {{ item.portfolioName }} &nbsp;[#{{ item.id }}]
                     </mat-option>
@@ -176,11 +180,15 @@
               </div>
 
               <!-- Project / Customer -->
-              <div *ngIf="projectList.length >= 1" (click)="$event.stopPropagation()" class="profile-menu-field-row">
-                <span class="profile-menu-field-label">{{ role1 ? 'Customer' : 'Project' }}</span>
+              <div *ngIf="projectList.length >= 1 || isProjectLoading" (click)="$event.stopPropagation()" class="profile-menu-field-row">
+                <span class="profile-menu-field-label">
+                  {{ role1 ? 'Customer' : 'Project' }}
+                  <span *ngIf="isProjectLoading" class="dropdown-spinner" aria-label="Loading projects"></span>
+                </span>
                 <mat-form-field class="profile-form-field" appearance="outline" subscriptSizing="dynamic">
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedproject"
-                    (ngModelChange)="valuechangeproject1($event)" name="project" panelClass="profile-select-panel">
+                    (ngModelChange)="valuechangeproject1($event)" name="project" panelClass="profile-select-panel"
+                    [disabled]="isProjectLoading">
                     <mat-option *ngFor="let item of projectList; trackBy: trackByMethod" [value]="item">
                       {{ item.projectdisplayname }} &nbsp;[#{{ item.id }}]
                     </mat-option>
@@ -189,12 +197,16 @@
               </div>
 
               <!-- Role -->
-              <div *ngIf="roleList?.length >= 1 || selectedrole?.name" (click)="$event.stopPropagation()" class="profile-menu-field-row">
-                <span class="profile-menu-field-label">Role</span>
+              <div *ngIf="roleList?.length >= 1 || selectedrole?.name || isRoleLoading" (click)="$event.stopPropagation()" class="profile-menu-field-row">
+                <span class="profile-menu-field-label">
+                  Role
+                  <span *ngIf="isRoleLoading" class="dropdown-spinner" aria-label="Loading roles"></span>
+                </span>
                 <mat-form-field class="profile-form-field" appearance="outline" subscriptSizing="dynamic">
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedrole"
                     (ngModelChange)="valuechangerole($event); clearsession()" name="role"
-                    panelClass="profile-select-panel matOptionPopup">
+                    panelClass="profile-select-panel matOptionPopup"
+                    [disabled]="isRoleLoading">
                     <mat-option *ngFor="let item of roleList; trackBy: trackByMethod" [value]="item" [id]="'role-' + item.name">
                       {{ getDisplayRoleName(item.name) }} <span style="font-size:11px;opacity:0.55;">{{ getRoleTypeLabel(item) }}</span>
                     </mat-option>
