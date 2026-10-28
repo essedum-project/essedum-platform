@@ -541,14 +541,47 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     this._loadRoleMenus(false, /* navigate= */ false);
   };
 
-  // Refresh all dropdowns when admin-console creates/deletes an org, project or environment.
+  // Refresh org+project thumbnail dropdowns when admin-console creates/deletes an org or project.
+  // Does NOT clear _rbac_session_initialized — that would break the sidebar's sessionStorage
+  // fast-path and cause a visible menu refresh on every subsequent navigation.
+  // Instead, re-fetches org and project lists directly and updates the in-memory + cached state.
   private readonly onTenancyChanged = () => {
-    // Clear stale RBAC caches so getrolepage() calls supplementRbacData() with fresh API data
-    // instead of restoring the deleted org/project from the stale sessionStorage fast-path.
-    sessionStorage.removeItem('_rbac_session_initialized');
-    sessionStorage.removeItem('_rbac_portfolio_list');
-    sessionStorage.removeItem('_rbac_project_list');
-    this.setportfolio();
+    // Re-fetch org list: removes deleted orgs, adds new ones
+    this.isOrgLoading = true;
+    this.http.get<any[]>('/api/organisations', { params: { size: '1000' } }).subscribe({
+      next: (orgs: any[]) => {
+        const freshOrgNames = new Set((orgs || []).map((o: any) => (o.name || '').toLowerCase()));
+        const freshOrgIds = new Set((orgs || []).map((o: any) => String(o.id)));
+        // Keep truly-legacy entries (not covered by any current RBAC org) + rebuild RBAC portion fresh
+        const legacyOnly = this.portfoliodata.filter((p: any) =>
+          !freshOrgNames.has((p.portfolioName || '').toLowerCase()) && !freshOrgIds.has(String(p.id))
+        );
+        const rbacEntries = (orgs || []).map((o: any) => ({ id: o.id, portfolioName: o.name }));
+        this.portfoliodata = [...legacyOnly, ...rbacEntries].sort((a: any, b: any) =>
+          (a.portfolioName || '').toLowerCase() > (b.portfolioName || '').toLowerCase() ? 1 : -1
+        );
+        sessionStorage.setItem('_rbac_portfolio_list', JSON.stringify(this.portfoliodata));
+        this.isOrgLoading = false;
+      },
+      error: () => { this.isOrgLoading = false; }
+    });
+
+    // Re-fetch project list: removes deleted projects, adds new ones
+    this.isProjectLoading = true;
+    this.http.get<any[]>('/api/projects', { params: { size: '1000' } }).subscribe({
+      next: (projects: any[]) => {
+        this._allRbacProjects = (projects || []).map((p: any) => ({
+          id: p.id, name: p.name, projectdisplayname: p.projectdisplayname || p.name,
+          organisationId: p.organisationId ?? null,
+        }));
+        if (this._rbacAssignmentsCache.length) {
+          this._applyRbacScope();
+          sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+        }
+        this.isProjectLoading = false;
+      },
+      error: () => { this.isProjectLoading = false; }
+    });
   };
 
   /**
@@ -627,12 +660,20 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
             sessionStorage.setItem('tempdata', JSON.stringify(pendingOrg));
             // Apply the role switch that was deferred because the org wasn't in sessionStorage yet.
             // Now that the correct org is saved, valuechangerole() navigates with the right context —
-            // the recreated component reads leo1311 from sessionStorage and won't re-trigger auto-switch.
+            // the recreated component reads the correct org from sessionStorage and won't re-trigger auto-switch.
             const _pendingRoleRaw = sessionStorage.getItem('_rbac_pending_switch_role');
             if (_pendingRoleRaw) {
               sessionStorage.removeItem('_rbac_pending_switch_role');
               if (!this._destroyed) {
-                try { this.valuechangerole(JSON.parse(_pendingRoleRaw)); } catch {}
+                try {
+                  // If projects are already loaded, apply scope filter and cache before navigating
+                  // so the new component's fast-path restore gets the correctly filtered project list.
+                  if (this._allRbacProjects.length > 0 && this._rbacAssignmentsCache.length > 0) {
+                    this._applyRbacScope();
+                    sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+                  }
+                  this.valuechangerole(JSON.parse(_pendingRoleRaw));
+                } catch {}
               }
             }
           }
@@ -681,8 +722,13 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
           }
           this._pendingAutoSwitchProjectId = null;
         }
-        // Re-apply org/project scope filter now that projects are fully loaded
-        if (this._rbacAssignmentsCache.length) this._applyRbacScope();
+        // Re-apply org/project scope filter now that projects are fully loaded.
+        // Also re-save _rbac_project_list so the fast-path cache is correct when
+        // assignments finished before projects (parallel fetch race).
+        if (this._rbacAssignmentsCache.length) {
+          this._applyRbacScope();
+          sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+        }
         this.isProjectLoading = false;
       },
       error: () => { this.isProjectLoading = false; }
