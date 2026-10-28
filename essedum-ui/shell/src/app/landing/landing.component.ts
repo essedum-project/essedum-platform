@@ -909,14 +909,19 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
                 sessionStorage.setItem('_rbac_session_initialized', '1');
                 // Timestamp the auto-switch so concurrent component recreations don't re-fire it.
                 sessionStorage.setItem('_rbac_last_auto_switch', Date.now().toString());
+                // Use the scoped role list (filtered to current org+project) so the
+                // auto-selected role matches what appears in the dropdown. rbacList[0]
+                // is the global highest-rank role which may not be assigned for the
+                // current project — that would leave the dropdown field blank.
+                const _autoSwitchRole = this.roleList.length > 0 ? this.roleList[0] : rbacList[0];
                 if (this._pendingAutoSwitchOrgId != null) {
                   // Org not yet in sessionStorage (parallel fetch — assignments arrived before orgs).
                   // Store the target role; the orgs callback will call valuechangerole() AFTER
                   // saving the correct org so the next component reads the right org from sessionStorage.
-                  sessionStorage.setItem('_rbac_pending_switch_role', JSON.stringify(rbacList[0]));
+                  sessionStorage.setItem('_rbac_pending_switch_role', JSON.stringify(_autoSwitchRole));
                 } else {
                   // Org is already in sessionStorage — safe to switch immediately.
-                  this.valuechangerole(rbacList[0]);
+                  this.valuechangerole(_autoSwitchRole);
                 }
               } else {
                 // Role is valid, session already initialized, and user didn't just manually switch.
@@ -969,13 +974,27 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       console.log('[RBAC] _applyRbacScope: _allRbacProjects empty — projects HTTP not yet complete, filter deferred');
     }
 
-    // 2. Build roleList from ALL assignments so every role the user holds (including
-    //    project-specific ones like AI Client) always appears in the dropdown, regardless
-    //    of which org/project is currently selected. The _cascadeProjectChange path already
-    //    does its own scoped filtering when a project is explicitly chosen.
+    // 2. Build roleList scoped to the current org + project.
+    //    When a project is selected, use the same filter as _cascadeProjectChange so
+    //    only roles assigned for that org+project context (including global/unscoped
+    //    assignments) appear in the dropdown. This prevents ALL of the user's roles
+    //    across all orgs/projects from showing on first login when only a subset
+    //    applies to the currently selected context.
+    //    Fall back to ALL assignments only when no project is selected yet.
+    const selProjId = this.selectedproject?.id != null ? Number(this.selectedproject.id) : null;
+    const assignmentsForRoles = selProjId != null
+      ? this._rbacAssignmentsCache.filter(a => {
+          const orgMatch = a.organizationId == null ||
+            (selOrgId != null && Number(a.organizationId) === selOrgId);
+          const projMatch = a.projectId == null ||
+            (selProjId != null && Number(a.projectId) === selProjId);
+          return orgMatch && projMatch;
+        })
+      : this._rbacAssignmentsCache;
+
     const seen = new Set<string>();
     const scopedRoles: any[] = [];
-    for (const a of this._rbacAssignmentsCache) {
+    for (const a of assignmentsForRoles) {
       const roleName = this._rbacRoleNameByIdCache.get(a.roleId);
       if (!roleName) continue;
       const key = roleName.toLowerCase();
@@ -2803,11 +2822,10 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     // Non-admin roles (Developer, AI Client) → filter keeps product routes only.
     // Items seeded per rank in rbac_menu_item; see rbac.xml rbac-22.
     if (this.roleMenuSvc.isRbacRole(_role)) {
-      // For non-admin RBAC roles (AI Engineer, AI Client etc.), make the shell sidebar
-      // visible by ensuring currentrole matches. Admin roles use admin-console's own sidebar.
-      if (!this.roleMenuSvc.isRbacAdminRole(_role)) {
-        this.currentrole = _role;
-      }
+      // For ALL RBAC roles, do NOT set currentrole to the role name.
+      // The shell sidebar (main sidenav) shows when selectedrole.name != currentrole.
+      // Setting currentrole = _role would hide the main sidenav and show app-sidebar instead,
+      // which has no RBAC items — causing the sidebar to visually vanish for AI Client etc.
       // Fast path: menu already loaded for this role (sidebar click, URL change, any
       // in-app navigation). Return immediately — never touch isSidebarLoading so the
       // sidebar stays visible without a flicker.
