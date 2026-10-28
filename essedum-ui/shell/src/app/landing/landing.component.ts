@@ -799,6 +799,11 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               this.isRoleLoading = false;
               this._rbacCheckPending = false;
               this._rbacDataLoading = false;
+              // Persist dropdown lists so fast-path component recreations (shouldReuseRoute=false)
+              // can restore org/project/role dropdowns without calling supplementRbacData again.
+              sessionStorage.setItem('_rbac_role_list', JSON.stringify(this.roleList));
+              sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+              sessionStorage.setItem('_rbac_portfolio_list', JSON.stringify(this.portfoliodata));
               // User changed org while RBAC data was still loading — cascade from their selection.
               if (this._pendingOrgClick) {
                 const _pendingOrg = this._pendingOrgClick;
@@ -813,10 +818,17 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               // sessionStorage currently holds — this prevents a stale Developer (or other
               // lower-rank) role from persisting into a new login session.
               const _sessionInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
-              if ((!curStillValid || !currentOrgHasAssignments || !_sessionInit) && !recentManualSwitch) {
+              // Guard: prevent double auto-switch when the component is recreated before
+              // _rbac_session_initialized is written (getDashConsts race on fast re-render).
+              const _recentAutoSwitch = (() => {
+                try { const t = sessionStorage.getItem('_rbac_last_auto_switch'); return !!t && (Date.now() - parseInt(t)) < 10000; } catch { return false; }
+              })();
+              if ((!curStillValid || !currentOrgHasAssignments || !_sessionInit) && !recentManualSwitch && !_recentAutoSwitch) {
                 // Mark session initialized BEFORE navigating so the recreated component
                 // skips the auto-switch and restores the menu from sessionStorage cache.
                 sessionStorage.setItem('_rbac_session_initialized', '1');
+                // Timestamp the auto-switch so concurrent component recreations don't re-fire it.
+                sessionStorage.setItem('_rbac_last_auto_switch', Date.now().toString());
                 if (this._pendingAutoSwitchOrgId != null) {
                   // Org not yet in sessionStorage (parallel fetch — assignments arrived before orgs).
                   // Store the target role; the orgs callback will call valuechangerole() AFTER
@@ -922,6 +934,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       : [...this._allRbacProjects];
 
     this.isProjectLoading = false;
+    // Persist so fast-path restore on next component recreation shows correct project list.
+    sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
 
     if (this.projectList.length > 0) {
       this.selectedproject = this.projectList[0];
@@ -969,6 +983,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (scopedRoles.length > 0) {
       this.roleList = scopedRoles;
+      // Persist so fast-path restore on next component recreation shows correct role list.
+      sessionStorage.setItem('_rbac_role_list', JSON.stringify(scopedRoles));
       // Auto-select highest-ranked role and load its menu
       this._lastManualRoleSwitch = 0; // allow auto-selection
       this.valuechangerole(scopedRoles[0]);
@@ -1156,6 +1172,22 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.fetchCredentials()) {
       this.router.navigate(["../login"], { relativeTo: this.route });
     } else {
+      // On a brand-new login (_rbac_session_initialized not yet set), start everything
+      // from empty so no stale "Developer" role or sidebar menus flash before the
+      // RBAC auto-switch fires. Clear sidebar cache, blank the role dropdown, show spinners.
+      if (sessionStorage.getItem('_rbac_session_initialized') !== '1' &&
+          this.selectedrole?.name && this.roleMenuSvc.isRbacRole(this.selectedrole.name)) {
+        this.selectedrole = {};
+        this.isRoleLoading = true;
+        this.isProjectLoading = true;
+        this.projectList = [];
+        this.roleList = [];
+        // Purge stale sidebar cache so newsidebar() can't restore a previous session's menus.
+        sessionStorage.removeItem('_rbac_sidebar_role');
+        sessionStorage.removeItem('_rbac_sidebar_menu');
+        sessionStorage.removeItem('_rbac_role_list');
+        sessionStorage.removeItem('_rbac_project_list');
+      }
       this.setportfolio();
       this.setHeaders();
       this.setSidebarToHeaders();
@@ -1676,6 +1708,10 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     sessionStorage.removeItem('_rbac_pending_switch_role');
     sessionStorage.removeItem('_rbac_sidebar_role');
     sessionStorage.removeItem('_rbac_sidebar_menu');
+    sessionStorage.removeItem('_rbac_last_auto_switch');
+    sessionStorage.removeItem('_rbac_portfolio_list');
+    sessionStorage.removeItem('_rbac_project_list');
+    sessionStorage.removeItem('_rbac_role_list');
     this.router.navigate(["../logout"]);
   }
   setHighlightedLabel(item: any) {
@@ -2337,28 +2373,29 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     else sessionStorage.setItem("theme", theme);
     this.setTheme();
     this.checkRole();
-    this.apisService.getDashConsts().subscribe((response) => {
-      // Guard: skip ALL legacy sidebar/role processing for RBAC roles.
-      // Without this guard, getrolepage() overwrites the RBAC sidebar (~2s after component
-      // recreation) with legacy DashConst content, wiping the sidebar and causing
-      // checkDefaultRole1() to fire valuechangerole() again, which removes the top bar too.
-      const _grpRoleName = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
-      if (this.roleMenuSvc.isRbacRole(_grpRoleName)) {
-        // Session already initialized: the correct org/role was resolved in this browser session.
-        // Skip the full 4-HTTP-call supplementRbacData chain — just restore the menu from cache.
-        // This prevents menu from reloading on every sidebar click (shouldReuseRoute=false means
-        // LandingComponent is recreated on each navigation → getrolepage fires → without this guard
-        // supplementRbacData ran every click, causing the menu to flash and valuechangerole to re-fire).
-        const _grpSessionInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
-        if (_grpSessionInit && !this._pendingAutoSwitchOrgId) {
-          this._rbacCheckPending = false;
-          this.newsidebar();
-        } else {
-          // First load or org switch still pending: run full RBAC resolution.
-          this.supplementRbacData();
-        }
-        return;
+    // Early RBAC guard: getDashConsts() returns 403 for RBAC users. The 403 fires
+    // handleAPIError — not the next() callback — so a guard inside subscribe() is too late.
+    // Bail out here to prevent the TypeError crash and restore dropdowns from sessionStorage.
+    const _grpRoleName = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
+    if (this.roleMenuSvc.isRbacRole(_grpRoleName)) {
+      const _grpSessionInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
+      if (_grpSessionInit && !this._pendingAutoSwitchOrgId) {
+        this._rbacCheckPending = false;
+        try {
+          const _ssOrgList = sessionStorage.getItem('_rbac_portfolio_list');
+          if (_ssOrgList) { const _o = JSON.parse(_ssOrgList); if (Array.isArray(_o) && _o.length) this.portfoliodata = _o; }
+          const _ssProjList = sessionStorage.getItem('_rbac_project_list');
+          if (_ssProjList) { const _p = JSON.parse(_ssProjList); if (Array.isArray(_p) && _p.length) this.projectList = _p; }
+          const _ssRoleList = sessionStorage.getItem('_rbac_role_list');
+          if (_ssRoleList) { const _r = JSON.parse(_ssRoleList); if (Array.isArray(_r) && _r.length) { this.roleList = _r; this.isRoleLoading = false; } }
+        } catch {}
+        this.newsidebar();
+      } else {
+        this.supplementRbacData();
       }
+      return; // Never call getDashConsts() for RBAC users
+    }
+    this.apisService.getDashConsts().subscribe((response) => {
       //  this.getNotifications();
       response = response.filter(
         (item) =>
@@ -2629,12 +2666,26 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         console.groupEnd();
         return;
       }
+      // Defer if supplementRbacData() hasn't confirmed the correct role yet.
+      // This check MUST come before the sessionStorage restore below — on a fresh login
+      // the cached sidebar may still hold a stale role (e.g. "Developer") from the
+      // previous session. Restoring it before RBAC confirmation would flash the wrong
+      // menus and load Developer-era page content before the auto-switch fires.
+      if (this._rbacCheckPending) {
+        this.isSidebarLoading = true;
+        console.log('[MENU] newsidebar: RBAC check pending — deferring menu load');
+        console.groupEnd();
+        return;
+      }
       // sessionStorage restore: LandingComponent is recreated on every navigation
       // (shouldReuseRoute=false), so in-memory state is lost. Restore instantly from
       // sessionStorage before falling through to the API call — prevents blank sidebar.
+      // Only restore when the session is already confirmed (_rbac_session_initialized='1')
+      // so a fresh login never loads a stale sidebar from a previous session.
       const _ssRole = sessionStorage.getItem('_rbac_sidebar_role');
       const _ssMenuRaw = sessionStorage.getItem('_rbac_sidebar_menu');
-      if (_ssRole === _role && _ssMenuRaw) {
+      const _ssSessionConfirmed = sessionStorage.getItem('_rbac_session_initialized') === '1';
+      if (_ssRole === _role && _ssMenuRaw && _ssSessionConfirmed) {
         try {
           const _ssCached = JSON.parse(_ssMenuRaw);
           if (Array.isArray(_ssCached) && _ssCached.length > 0) {
@@ -2647,14 +2698,6 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
             return;
           }
         } catch {}
-      }
-      // Defer if supplementRbacData() hasn't confirmed the correct role yet —
-      // avoids a flash of the stale sessionStorage role's menu at startup.
-      if (this._rbacCheckPending) {
-        this.isSidebarLoading = true;
-        console.log('[MENU] newsidebar: RBAC check pending — deferring menu load');
-        console.groupEnd();
-        return;
       }
       // Snapshot restore: role matches but sidebarMenu was temporarily cleared.
       if (this._loadedMenuRole === _role && this._menuSnapshot.length > 0) {
