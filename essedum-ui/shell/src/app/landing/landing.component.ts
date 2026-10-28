@@ -436,6 +436,10 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   /** Org selected by the user while supplementRbacData() was still in flight.
    *  Processed when supplementRbacData() completes so the cascade fires correctly. */
   private _pendingOrgClick: any = null;
+  /** Best project-scoped assignment (organizationId=null) stored when the assignments
+   *  callback fires before _allRbacProjects is loaded. The projects callback uses it to
+   *  derive the target org (via project.organisationId) and complete the auto-switch. */
+  private _pendingOrgDeriveAssignment: any = null;
 
   /** Loading states for the three profile-menu dropdowns. */
   isOrgLoading = false;
@@ -744,6 +748,39 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         } else {
           console.log('[RBAC] projects callback: assignments not yet cached — projectList stays empty until assignments callback runs _applyRbacScope()');
         }
+        // Deferred org derivation: assignments arrived before projects, so the auto-switch
+        // couldn't derive the org from a project-scoped assignment (organizationId=null).
+        // Now that _allRbacProjects is populated, resolve the target org and complete the switch.
+        if (this._pendingOrgDeriveAssignment && !this._destroyed) {
+          const _pda = this._pendingOrgDeriveAssignment;
+          this._pendingOrgDeriveAssignment = null;
+          const proj = this._allRbacProjects.find((p: any) => Number(p.id) === Number(_pda.projectId));
+          if (proj?.organisationId != null) {
+            const derivedOrgId = Number(proj.organisationId);
+            const targetOrg = this.portfoliodata.find((p: any) => Number(p.id) === derivedOrgId);
+            console.log('[RBAC] projects callback: deferred org derive → proj #' + proj.id + ' → org #' + derivedOrgId, targetOrg ? `"${targetOrg.portfolioName}"` : '(not in portfoliodata yet)');
+            if (targetOrg) {
+              this.selectedportfolio = targetOrg;
+              sessionStorage.setItem('portfoliodata', JSON.stringify(targetOrg));
+              sessionStorage.setItem('tempdata', JSON.stringify(targetOrg));
+              this._pendingAutoSwitchOrgId = null;
+            } else {
+              this._pendingAutoSwitchOrgId = derivedOrgId; // real id replaces sentinel -1
+            }
+            this.selectedproject = proj;
+            sessionStorage.setItem('project', JSON.stringify(proj));
+            this._applyRbacScope();
+            sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+            // Complete the role switch: use pending role stored by the auto-switch block
+            const _pendingRole = sessionStorage.getItem('_rbac_pending_switch_role');
+            if (_pendingRole && this._pendingAutoSwitchOrgId == null) {
+              sessionStorage.removeItem('_rbac_pending_switch_role');
+              try { this.valuechangerole(JSON.parse(_pendingRole)); } catch {}
+            }
+            // If org wasn't in portfoliodata (sentinel -1 → real id), the orgs callback
+            // will call valuechangerole once it arrives and clears _pendingAutoSwitchOrgId.
+          }
+        }
         this.isProjectLoading = false;
       },
       error: () => { this.isProjectLoading = false; }
@@ -831,14 +868,41 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
                 active.some(a => a.organizationId != null && Number(a.organizationId) === curOrgId);
               if ((!curStillValid || !currentOrgHasAssignments) && !recentManualSwitch) {
                 if (!currentOrgHasAssignments) {
-                  // Best assignment = highest-rank role that is scoped to a specific org+project
-                  const topAssignment = [...active]
+                  // Primary: assignments that explicitly carry both an organizationId and projectId.
+                  let topAssignment: any = [...active]
                     .filter(a => a.organizationId != null && a.projectId != null)
                     .sort((a, b) => {
                       const rankA = this.rbacRoleRankMap.get((roleNameById.get(a.roleId) || '').toLowerCase()) ?? -1;
                       const rankB = this.rbacRoleRankMap.get((roleNameById.get(b.roleId) || '').toLowerCase()) ?? -1;
                       return rankB - rankA;
                     })[0];
+                  // Fallback: project-scoped assignments (organizationId=null, projectId!=null).
+                  // Derive the target org via _allRbacProjects.organisationId so the correct org
+                  // is selected even when assignments are stored without an explicit organizationId.
+                  if (!topAssignment) {
+                    const projScoped = [...active]
+                      .filter(a => a.organizationId == null && a.projectId != null)
+                      .sort((a, b) => {
+                        const rankA = this.rbacRoleRankMap.get((roleNameById.get(a.roleId) || '').toLowerCase()) ?? -1;
+                        const rankB = this.rbacRoleRankMap.get((roleNameById.get(b.roleId) || '').toLowerCase()) ?? -1;
+                        return rankB - rankA;
+                      });
+                    if (this._allRbacProjects.length > 0) {
+                      for (const a of projScoped) {
+                        const proj = this._allRbacProjects.find((p: any) => Number(p.id) === Number(a.projectId));
+                        if (proj?.organisationId != null) {
+                          topAssignment = { ...a, organizationId: proj.organisationId };
+                          break;
+                        }
+                      }
+                    } else if (projScoped.length > 0) {
+                      // _allRbacProjects not yet loaded (parallel fetch) — defer to projects callback.
+                      // Use sentinel orgId (-1) so the role switch below stores the pending role
+                      // instead of calling valuechangerole prematurely with the wrong org.
+                      this._pendingOrgDeriveAssignment = projScoped[0];
+                      this._pendingAutoSwitchOrgId = -1;
+                    }
+                  }
                   console.log('[RBAC] auto-switch: current org #' + curOrgId + ' has no assignments → selecting topAssignment:', topAssignment ? `org #${topAssignment.organizationId} project #${topAssignment.projectId} role "${roleNameById.get(topAssignment.roleId)}"` : 'none found');
                   if (topAssignment) {
                     const targetOrg = (this.portfoliodata || []).find((p: any) =>
