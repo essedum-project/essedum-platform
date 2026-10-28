@@ -892,19 +892,10 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     const isRbacOrg = selOrgId != null &&
       this._rbacAssignmentsCache.some(a => a.organizationId != null && Number(a.organizationId) === selOrgId);
 
-    if (isRbacOrg) {
-      const orgProjectIds = new Set<number>(
-        this._rbacAssignmentsCache
-          .filter(a => Number(a.organizationId) === selOrgId && a.projectId != null)
-          .map(a => Number(a.projectId))
-      );
-      if (orgProjectIds.size > 0 && this._allRbacProjects.length > 0) {
-        this.projectList = this._allRbacProjects.filter(p => orgProjectIds.has(Number(p.id)));
-      } else if (selOrgId != null && this._allRbacProjects.length > 0) {
-        // No project-specific assignments (e.g. Admin): filter by project's organisationId
-        const byOrg = this._allRbacProjects.filter(p => p.organisationId != null && Number(p.organisationId) === selOrgId);
-        if (byOrg.length > 0) this.projectList = byOrg;
-      }
+    // Filter projects by organisationId — show only projects that belong to the selected org.
+    if (isRbacOrg && selOrgId != null && this._allRbacProjects.length > 0) {
+      const byOrg = this._allRbacProjects.filter(p => p.organisationId != null && Number(p.organisationId) === selOrgId);
+      if (byOrg.length > 0) this.projectList = byOrg;
     }
 
     // 2. Build roleList from ALL assignments so every role the user holds (including
@@ -942,19 +933,11 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     this.roleList = [];
     this.selectedproject = {};
 
-    // Collect project IDs scoped to this org from the cached assignments
-    const orgAssignments = this._rbacAssignmentsCache.filter(a =>
-      a.organizationId == null || (orgId != null && Number(a.organizationId) === orgId)
-    );
-    const orgProjectIds = new Set<number>(
-      orgAssignments.filter(a => a.projectId != null).map(a => Number(a.projectId))
-    );
-
-    if (orgProjectIds.size > 0 && this._allRbacProjects.length > 0) {
-      // Project-specific assignments exist: show only those projects
-      this.projectList = this._allRbacProjects.filter(p => orgProjectIds.has(Number(p.id)));
-    } else if (orgId != null && this._allRbacProjects.length > 0) {
-      // No project-specific assignments (e.g. Admin): filter by project's organisationId
+    // Filter projects by the selected org's organisationId — show all projects that belong
+    // to this org, regardless of which specific project assignments the user has.
+    // Assignment-based filtering caused projects from other orgs to bleed through via
+    // global (organizationId=null) assignments.
+    if (orgId != null && this._allRbacProjects.length > 0) {
       const byOrg = this._allRbacProjects.filter(p => p.organisationId != null && Number(p.organisationId) === orgId);
       this.projectList = byOrg.length > 0 ? byOrg : [...this._allRbacProjects];
     } else {
