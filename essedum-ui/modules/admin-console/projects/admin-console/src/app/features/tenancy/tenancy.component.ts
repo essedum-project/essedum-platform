@@ -7,7 +7,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
-import type { LegacyOrganisation, LegacyProject, LegacyPortfolio, DisplayOrg, RbacEnvironment } from '../../core/api-models';
+import type { LegacyOrganisation, LegacyProject, DisplayOrg, RbacEnvironment } from '../../core/api-models';
 import { ProvisionDialogComponent, ProvisionKind } from './provision-dialog/provision-dialog.component';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 
@@ -23,12 +23,11 @@ interface EnvironmentRow extends RbacEnvironment {
   standalone: false,
 })
 export class TenancyComponent implements OnInit, AfterViewInit {
-  /** Unified org list: RBAC orgs (usm_organisation) + legacy portfolios (usm_portfolio). */
+  /** Unified org list: RBAC orgs only (usm_organisation). */
   orgDataSource = new MatTableDataSource<DisplayOrg>([]);
   /** Raw RBAC orgs kept for delete and name-lookup. */
   organizations: LegacyOrganisation[] = [];
-  projectDataSource = new MatTableDataSource<LegacyProject>([]);
-  portfolios: LegacyPortfolio[] = [];
+  projectDataSource = new MatTableDataSource<LegacyProject>();
   envDataSource = new MatTableDataSource<EnvironmentRow>([]);
 
   @ViewChild('orgPaginator') orgPaginator!: MatPaginator;
@@ -76,25 +75,15 @@ export class TenancyComponent implements OnInit, AfterViewInit {
   }
 
   private loadOrgs(): void {
-    forkJoin([
-      this.api.getOrganisations().pipe(catchError(() => of([] as any[]))),
-      this.api.getPortfolios().pipe(catchError(() => of([] as any[]))),
-    ]).subscribe(([orgs, portfolios]) => {
+    this.api.getOrganisations().pipe(catchError(() => of([] as LegacyOrganisation[]))).subscribe(orgs => {
       this.organizations = orgs;
-      this.portfolios = portfolios;
       this.buildDisplayOrgs();
     });
   }
 
   private buildDisplayOrgs(): void {
-    const rbacRows: DisplayOrg[] = this.organizations.map(o => ({
-      id: o.id, name: o.name, status: o.status, source: 'rbac' as const, rawOrg: o,
-    }));
-    const rbacNames = new Set(this.organizations.map(o => (o.name || '').toLowerCase()));
-    const legacyRows: DisplayOrg[] = (this.portfolios || [])
-      .filter(p => !rbacNames.has((p.portfolioName || '').toLowerCase()))
-      .map(p => ({ id: p.id, name: p.portfolioName, status: p.status, source: 'legacy' as const }));
-    this.orgDataSource.data = [...rbacRows, ...legacyRows]
+    this.orgDataSource.data = this.organizations
+      .map(o => ({ id: o.id, name: o.name, status: o.status, source: 'rbac' as const, rawOrg: o }))
       .sort((a, b) => (a.name || '').toLowerCase() > (b.name || '').toLowerCase() ? 1 : -1);
   }
 

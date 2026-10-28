@@ -543,6 +543,11 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Refresh all dropdowns when admin-console creates/deletes an org, project or environment.
   private readonly onTenancyChanged = () => {
+    // Clear stale RBAC caches so getrolepage() calls supplementRbacData() with fresh API data
+    // instead of restoring the deleted org/project from the stale sessionStorage fast-path.
+    sessionStorage.removeItem('_rbac_session_initialized');
+    sessionStorage.removeItem('_rbac_portfolio_list');
+    sessionStorage.removeItem('_rbac_project_list');
     this.setportfolio();
   };
 
@@ -657,7 +662,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         });
         // Cache all RBAC projects for scope-based filtering (used by _applyRbacScope)
         this._allRbacProjects = (projects || []).map((p: any) => ({
-          id: p.id, name: p.name, projectdisplayname: p.projectdisplayname || p.name
+          id: p.id, name: p.name, projectdisplayname: p.projectdisplayname || p.name,
+          organisationId: p.organisationId ?? null,
         }));
         if (changed) {
           this.projectList = this.projectList.sort((a: any, b: any) =>
@@ -894,6 +900,10 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       );
       if (orgProjectIds.size > 0 && this._allRbacProjects.length > 0) {
         this.projectList = this._allRbacProjects.filter(p => orgProjectIds.has(Number(p.id)));
+      } else if (selOrgId != null && this._allRbacProjects.length > 0) {
+        // No project-specific assignments (e.g. Admin): filter by project's organisationId
+        const byOrg = this._allRbacProjects.filter(p => p.organisationId != null && Number(p.organisationId) === selOrgId);
+        if (byOrg.length > 0) this.projectList = byOrg;
       }
     }
 
@@ -940,9 +950,16 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       orgAssignments.filter(a => a.projectId != null).map(a => Number(a.projectId))
     );
 
-    this.projectList = orgProjectIds.size > 0 && this._allRbacProjects.length > 0
-      ? this._allRbacProjects.filter(p => orgProjectIds.has(Number(p.id)))
-      : [...this._allRbacProjects];
+    if (orgProjectIds.size > 0 && this._allRbacProjects.length > 0) {
+      // Project-specific assignments exist: show only those projects
+      this.projectList = this._allRbacProjects.filter(p => orgProjectIds.has(Number(p.id)));
+    } else if (orgId != null && this._allRbacProjects.length > 0) {
+      // No project-specific assignments (e.g. Admin): filter by project's organisationId
+      const byOrg = this._allRbacProjects.filter(p => p.organisationId != null && Number(p.organisationId) === orgId);
+      this.projectList = byOrg.length > 0 ? byOrg : [...this._allRbacProjects];
+    } else {
+      this.projectList = [...this._allRbacProjects];
+    }
 
     this.isProjectLoading = false;
     // Persist so fast-path restore on next component recreation shows correct project list.
