@@ -34,6 +34,8 @@ export class PublishingComponent implements OnInit, AfterViewInit {
   versions = new MatTableDataSource<AssetVersionRow>([]);
   // versionId -> next gate ('project_admin' | 'org_admin' | 'platform_admin' | null)
   nextGateByVersion: Record<number, string | null> = {};
+  // versionId -> latest rejection note 
+  rejectionNoteByVersion: Record<number, string> = {};
   /** The caller's highest role rank — drives "New Draft" visibility. */
   userRank = 0;
 
@@ -79,9 +81,21 @@ export class PublishingComponent implements OnInit, AfterViewInit {
       .subscribe(rows => {
         this.versions.data = rows;
         this.nextGateByVersion = {};
-        rows.forEach(row =>
-          this.api.getNextGate(row.id).subscribe(res => (this.nextGateByVersion[row.id] = res.gate)),
-        );
+        this.rejectionNoteByVersion = {};
+        rows.forEach(row => {
+          this.api.getNextGate(row.id).subscribe(res => (this.nextGateByVersion[row.id] = res.gate));
+          //  load the rejection note for rejected versions so it appears in My Drafts
+          if (row.status === 'rejected') {
+            this.api.getVersionEvents(row.id).subscribe(events => {
+              const latest = events
+                .filter(e => e.action === 'rejected')
+                .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt))[0];
+              if (latest?.note) {
+                this.rejectionNoteByVersion[row.id] = latest.note;
+              }
+            });
+          }
+        });
       });
   }
 
@@ -168,6 +182,22 @@ export class PublishingComponent implements OnInit, AfterViewInit {
 
   canEdit(version: AssetVersionRow): boolean {
     return version.status === 'draft' || version.status === 'rejected';
+  }
+
+  /** Returns the rejection note for a rejected version  Empty string when none loaded yet. */
+  rejectionNote(versionId: number): string {
+    return this.rejectionNoteByVersion[versionId] ?? '';
+  }
+
+  /** Human-readable label for asset_version.status — TC-083 requires "in review" not "in_review". */
+  statusLabel(status: string): string {
+    const map: Record<string, string> = {
+      draft: 'Draft',
+      in_review: 'In Review',
+      published: 'Published',
+      rejected: 'Rejected',
+    };
+    return map[status] ?? status;
   }
 
   /** "New Draft" is only visible to users with rank ≥ 1 (Developer+). */

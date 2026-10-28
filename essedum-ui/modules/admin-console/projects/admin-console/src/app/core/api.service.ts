@@ -128,6 +128,11 @@ export class ApiService {
     return this.http.post<PromotionEvent>(`${this.base}/assets/versions/${versionId}/submit`, payload);
   }
 
+  // Full append-only promotion event history for a version ( audit trail / rejection note).
+  getVersionEvents(versionId: number): Observable<PromotionEvent[]> {
+    return this.http.get<PromotionEvent[]>(`${this.base}/assets/versions/${versionId}/events`);
+  }
+
   getApprovals(userId: number): Observable<PromotionEvent[]> {
     return this.http.get<PromotionEvent[]>(`${this.base}/approvals`, { params: { userId } });
   }

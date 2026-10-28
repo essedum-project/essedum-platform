@@ -76,9 +76,12 @@ public class PublishingService {
 	/**
 	 * Assets reachable by the user's projects, plus every publicly-scoped asset
 	 * regardless of project reach — the §4 visibleAssets query.
-	 * Pure-draft assets (currentVersionId=null, never approved) are restricted to
-	 * direct project members only; org-expanded membership is sufficient only for
-	 * assets that already have an approved serving version.
+	 *
+	 * Scope-based visibility rules :
+	 *   scope=project   → only direct project members (not org-expanded)
+	 *   scope=org       → any member of the same org (org-expanded reachableIds)
+	 *   scope=public    → all authenticated users (added unconditionally below)
+	 *   no currentVersion (pure draft) → only direct project members
 	 */
 	public List<Asset> listAssetsForUser(Integer userId) {
 		AccessContext ctx = accessContextService.resolve(userId);
@@ -86,7 +89,18 @@ public class PublishingService {
 		List<Integer> directIds = ctx.getDirectProjectIds();
 
 		List<Asset> reachable = assetRepository.findByProjectIdIn(reachableIds).stream()
-				.filter(a -> a.getCurrentVersionId() != null || directIds.contains(a.getProjectId()))
+				.filter(a -> {
+					if (a.getCurrentVersionId() == null) {
+						// Pure draft — only direct project members can see it
+						return directIds.contains(a.getProjectId());
+					}
+					// project scope: only direct project members 
+					if (PromotionGate.SCOPE_PROJECT.equals(a.getScope())) {
+						return directIds.contains(a.getProjectId());
+					}
+					// org/public scope: org-expanded visibility is fine
+					return true;
+				})
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		for (Asset publicAsset : assetRepository.findByScope(PromotionGate.SCOPE_PUBLIC)) {
@@ -131,9 +145,9 @@ public class PublishingService {
 		// Rank ≥ 1 (Developer) required; viewer (rank 0) gets 403 via resource layer,
 		// but also guard here as defense-in-depth.
 		AccessContext ctx = accessContextService.resolve(actorId);
-		if (ctx.getHighestRank() < 1 || !ctx.getReachableProjectIds().contains(projectId)) {
+		if (ctx.getHighestRank() < 1 || !ctx.getDirectProjectIds().contains(projectId)) {
 			throw new IllegalStateException(
-					"Rank ≥ 1 (Developer) and project membership required to create a draft in project " + projectId);
+					"Rank ≥ 1 (Developer) and direct project membership required to create a draft in project " + projectId);
 		}
 
 		Asset asset = new Asset();
@@ -240,6 +254,12 @@ public class PublishingService {
 	@Transactional
 	public PromotionEvent submit(Integer versionId, Integer actorId, String actorName, String note) {
 		AssetVersion version = requireVersion(versionId);
+		//  only draft or rejected versions may be submitted
+		if (!"draft".equals(version.getStatus()) && !"rejected".equals(version.getStatus())) {
+			throw new IllegalStateException(
+					"Only draft or rejected versions can be submitted (version " + versionId
+					+ " has status=" + version.getStatus() + ")");
+		}
 		String gate = nextGateForVersion(versionId);
 		if (gate == null) {
 			throw new IllegalStateException("Version " + versionId + " is already public — nothing to submit");
@@ -268,6 +288,10 @@ public class PublishingService {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
 					"Insufficient role to decide at gate " + gate + " (needs rank "
 							+ PromotionGate.requiredRank(gate) + ", have " + viewerRank + ")");
+		}
+		//  a note is mandatory for every approve/reject decision
+		if (note == null || note.isBlank()) {
+			throw new IllegalArgumentException("A note is required for approve/reject decisions");
 		}
 		AssetVersion version = requireVersion(versionId);
 
@@ -330,6 +354,13 @@ public class PublishingService {
 		}
 		pending.sort(Comparator.comparing(PromotionEvent::getOccurredAt));
 		return pending;
+	}
+
+	/** All promotion events for a version — the append-only audit trail  */
+	public List<PromotionEvent> getVersionEvents(Integer versionId) {
+		List<PromotionEvent> events = promotionEventRepository.findByAssetVersionId(versionId);
+		events.sort(Comparator.comparing(PromotionEvent::getOccurredAt));
+		return events;
 	}
 
 	private boolean hasApproval(List<PromotionEvent> events, String gate) {

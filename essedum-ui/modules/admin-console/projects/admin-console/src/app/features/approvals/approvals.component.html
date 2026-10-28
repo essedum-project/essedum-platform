@@ -30,7 +30,7 @@
     <ng-container matColumnDef="gate">
       <th mat-header-cell *matHeaderCellDef>Gate</th>
       <td mat-cell *matCellDef="let row">
-        <span class="gate-badge" [ngClass]="'gate-' + (row.gate | lowercase)">{{ row.gate }}</span>
+        <span class="gate-badge" [ngClass]="'gate-' + (row.gate | lowercase)">{{ gateLabel(row.gate) }}</span>
       </td>
     </ng-container>
 

@@ -92,10 +92,15 @@ public class PublishingResource {
 
 	/**
 	 * Edit a draft — creates a new asset_version row. Returns 403 when
-	 * the actor is not the original creator.
+	 * the actor does not have rank ≥ 1 or is not the original creator.
 	 */
 	@PutMapping("/assets/versions/{id}")
-	public ResponseEntity<AssetVersion> edit(@PathVariable Integer id, @RequestBody EditDraftRequest request) {
+	public ResponseEntity<?> edit(@PathVariable Integer id, @RequestBody EditDraftRequest request) {
+		int rank = accessContextService.highestRank(request.getActorId());
+		if (rank < 1) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Collections.singletonMap("message", "Rank ≥ 1 (Developer) required to edit a draft"));
+		}
 		AssetVersion version = publishingService.editDraft(id, request.getName(), request.getPayloadRef(),
 				request.getActorId(), request.getActorName());
 		return ResponseEntity.ok(version);
@@ -115,9 +120,14 @@ public class PublishingResource {
 				.body(Collections.singletonMap("message", ex.getMessage()));
 	}
 
-	/** Open a fresh draft version on a published asset (live keeps serving). §5. */
+	/** Open a fresh draft version on a published asset (live keeps serving). §5. Requires rank ≥ 1. */
 	@PostMapping("/assets/{id}/versions")
-	public ResponseEntity<AssetVersion> newVersion(@PathVariable Integer id, @RequestBody EditDraftRequest request) {
+	public ResponseEntity<?> newVersion(@PathVariable Integer id, @RequestBody EditDraftRequest request) {
+		int rank = accessContextService.highestRank(request.getActorId());
+		if (rank < 1) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Collections.singletonMap("message", "Rank ≥ 1 (Developer) required to create a new version"));
+		}
 		AssetVersion version = publishingService.createNewVersion(id, request.getPayloadRef(), request.getActorId(),
 				request.getActorName());
 		return ResponseEntity.ok(version);
@@ -141,7 +151,7 @@ public class PublishingResource {
 		}
 		PromotionEvent event = publishingService.submit(id, request.getActorId(), request.getActorName(),
 				request.getNote());
-		return ResponseEntity.ok(event);
+		return ResponseEntity.accepted().body(event);
 	}
 
 	@GetMapping("/approvals")
@@ -157,5 +167,11 @@ public class PublishingResource {
 		PromotionEvent event = publishingService.decide(versionId, request.getGate(), request.getAction(),
 				request.getActorId(), request.getActorName(), request.getNote(), viewerRank);
 		return ResponseEntity.ok(event);
+	}
+
+	/** Full append-only promotion event history for a version — the  audit trail. */
+	@GetMapping("/assets/versions/{id}/events")
+	public ResponseEntity<List<PromotionEvent>> versionEvents(@PathVariable Integer id) {
+		return ResponseEntity.ok(publishingService.getVersionEvents(id));
 	}
 }

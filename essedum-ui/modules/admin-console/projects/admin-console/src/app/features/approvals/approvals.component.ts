@@ -65,7 +65,26 @@ export class ApprovalsComponent implements OnInit, AfterViewInit {
       .subscribe(rows => (this.pending.data = rows));
   }
 
+  gateLabel(gate: string): string {
+    const map: Record<string, string> = {
+      project_admin: 'Project',
+      org_admin: 'Organization',
+      platform_admin: 'Public',
+    };
+    return map[gate] ?? gate;
+  }
+
   decide(event: PromotionEventRow, action: 'approved' | 'rejected'): void {
+    //  a note is mandatory for every approve/reject decision
+    const label = action === 'approved' ? 'approval' : 'rejection';
+    const note = window.prompt(`Enter a ${label} note (required):`);
+    if (note === null) {
+      return; // user cancelled
+    }
+    if (!note.trim()) {
+      alert(`A ${label} note is required.`);
+      return;
+    }
     const userId = this.userContext.userId$.value;
     this.api
       .decideApproval(event.assetVersionId, {
@@ -73,8 +92,11 @@ export class ApprovalsComponent implements OnInit, AfterViewInit {
         action,
         actorId: userId,
         actorName: `User #${userId}`,
-        note: '',
+        note: note.trim(),
       })
-      .subscribe(() => this.load());
+      .subscribe({
+        next: () => this.load(),
+        error: err => alert(err?.error?.message || `Failed to ${action} the submission.`),
+      });
   }
 }

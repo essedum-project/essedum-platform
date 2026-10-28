@@ -23,7 +23,15 @@
     <ng-container matColumnDef="status">
       <th mat-header-cell *matHeaderCellDef>Status</th>
       <td mat-cell *matCellDef="let row">
-        <span [ngClass]="'status-badge status-badge-' + row.status">{{ row.status }}</span>
+        <span [ngClass]="'status-badge status-badge-' + row.status">{{ statusLabel(row.status) }}</span>
+        <!-- show rejection note from the admin when the version is rejected -->
+        <span
+          *ngIf="row.status === 'rejected' && rejectionNote(row.id)"
+          class="rejection-note"
+          [matTooltip]="rejectionNote(row.id)"
+          style="display:block;font-size:11px;color:#b52a2a;margin-top:3px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default;">
+          <i class="fa fa-comment" style="margin-right:3px;"></i>{{ rejectionNote(row.id) }}
+        </span>
       </td>
     </ng-container>
     <ng-container matColumnDef="nextGate">
@@ -41,18 +49,14 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let row">
-        <button
+        <button *ngIf="canEdit(row)"
           style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.28);color:#4f8ef7;font-size:12px;font-weight:500;font-family:inherit;padding:5px 12px;border-radius:6px;cursor:pointer;outline:none;display:inline-flex;align-items:center;gap:5px;margin-right:6px;transition:background 0.12s;"
-          [style.opacity]="!canEdit(row) ? '0.35' : '1'"
-          [style.cursor]="!canEdit(row) ? 'not-allowed' : 'pointer'"
-          [disabled]="!canEdit(row)" (click)="edit(row)">
+          (click)="edit(row)">
           <i class="fa fa-pencil" style="font-size:11px;"></i> Edit
         </button>
-        <button
+        <button *ngIf="canSubmit(row)"
           style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.28);color:#4f8ef7;font-size:12px;font-weight:500;font-family:inherit;padding:5px 12px;border-radius:6px;cursor:pointer;outline:none;display:inline-flex;align-items:center;gap:5px;transition:background 0.12s;"
-          [style.opacity]="!canSubmit(row) ? '0.35' : '1'"
-          [style.cursor]="!canSubmit(row) ? 'not-allowed' : 'pointer'"
-          [disabled]="!canSubmit(row)" (click)="submit(row)">
+          (click)="submit(row)">
           <i class="fa fa-paper-plane" style="font-size:11px;"></i> Submit
         </button>
       </td>
