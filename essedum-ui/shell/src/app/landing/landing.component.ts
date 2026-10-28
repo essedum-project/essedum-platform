@@ -2840,10 +2840,23 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       // previous session. Restoring it before RBAC confirmation would flash the wrong
       // menus and load Developer-era page content before the auto-switch fires.
       if (this._rbacCheckPending) {
-        this.isSidebarLoading = true;
-        console.log('[MENU] newsidebar: RBAC check pending — deferring menu load');
-        console.groupEnd();
-        return;
+        // Short-circuit: if the session is already confirmed and the cached role matches
+        // the current role, we can restore immediately instead of deferring.
+        // This prevents the double newsidebar() call on manual RBAC role switches:
+        //   1st call (ngOnInit) would defer → isSidebarLoading=true flicker
+        //   2nd call (getrolepage fast-path) would then restore — now collapsed into one.
+        const _earlyRole = sessionStorage.getItem('_rbac_sidebar_role');
+        const _earlyMenu = sessionStorage.getItem('_rbac_sidebar_menu');
+        const _earlyInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
+        if (_earlyRole === _role && _earlyMenu && _earlyInit) {
+          // Fall through to the sessionStorage restore block below (don't return).
+          this._rbacCheckPending = false;
+        } else {
+          this.isSidebarLoading = true;
+          console.log('[MENU] newsidebar: RBAC check pending — deferring menu load');
+          console.groupEnd();
+          return;
+        }
       }
       // sessionStorage restore: LandingComponent is recreated on every navigation
       // (shouldReuseRoute=false), so in-memory state is lost. Restore instantly from
