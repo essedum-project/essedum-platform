@@ -396,6 +396,10 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   /** True while supplementRbacData() hasn't yet confirmed the correct RBAC role.
    *  Prevents newsidebar() from fetching a menu for a stale sessionStorage role. */
   private _rbacCheckPending = true;
+  /** Guard: true while a supplementRbacData() call is in flight.
+   *  Prevents concurrent HTTP chains from racing each other (setProjectTheme and getrolepage
+   *  both call getDashConsts which both trigger supplementRbacData in the same component). */
+  private _rbacDataLoading = false;
   /** Timestamp (Date.now()) of the last deliberate role switch by the user.
    *  Prevents supplementRbacData() from auto-switching after a manual selection. */
   private _lastManualRoleSwitch = 0;
@@ -421,6 +425,9 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   /** Set by the first-login auto-switch when portfoliodata hasn't loaded yet.
    *  The orgs callback completes the org switch once it arrives. */
   private _pendingAutoSwitchOrgId: number | null = null;
+  /** Org selected by the user while supplementRbacData() was still in flight.
+   *  Processed when supplementRbacData() completes so the cascade fires correctly. */
+  private _pendingOrgClick: any = null;
 
   /** Loading states for the three profile-menu dropdowns. */
   isOrgLoading = false;
@@ -572,6 +579,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private supplementRbacData(): void {
+    if (this._rbacDataLoading) return; // concurrent call already in flight — skip
+    this._rbacDataLoading = true;
     const userId = (() => {
       try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id; } catch { return null; }
     })();
@@ -603,6 +612,14 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
             this.selectedportfolio = pendingOrg;
             sessionStorage.setItem('portfoliodata', JSON.stringify(pendingOrg));
             sessionStorage.setItem('tempdata', JSON.stringify(pendingOrg));
+            // Apply the role switch that was deferred because the org wasn't in sessionStorage yet.
+            // Now that the correct org is saved, valuechangerole() navigates with the right context —
+            // the recreated component reads leo1311 from sessionStorage and won't re-trigger auto-switch.
+            const _pendingRoleRaw = sessionStorage.getItem('_rbac_pending_switch_role');
+            if (_pendingRoleRaw) {
+              sessionStorage.removeItem('_rbac_pending_switch_role');
+              try { this.valuechangerole(JSON.parse(_pendingRoleRaw)); } catch {}
+            }
           }
           this._pendingAutoSwitchOrgId = null;
         }
@@ -715,7 +732,24 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               // Auto-switch: fire when no valid role saved (first/fresh login) OR when the current
               // org has no RBAC assignments for this user (e.g. a "dummy" org showing even though
               // the user has a valid role from a previous session on a different org).
-              const curOrgId = this.selectedportfolio?.id != null ? Number(this.selectedportfolio.id) : null;
+              //
+              // IMPORTANT: this.selectedportfolio / this.selectedproject may be undefined when
+              // supplementRbacData() fires (from getDashConsts callback) before getUserInfoData()'s
+              // callback has completed. Both HTTP calls start in parallel — getDashConsts typically
+              // resolves faster, so selectedportfolio is still undefined at this point.
+              // Without the sessionStorage fallback: curOrgId = null → currentOrgHasAssignments = false
+              // → valuechangerole() fires on every navigation, creating an infinite navigation loop.
+              // sessionStorage portfoliodata/tempdata always reflect the last confirmed org context
+              // (written by valuechangerole() and the org switch logic).
+              const _ssPortfolio = (() => { try { return JSON.parse(sessionStorage.getItem('portfoliodata') || 'null') || JSON.parse(sessionStorage.getItem('tempdata') || 'null'); } catch { return null; } })();
+              const _ssProject   = (() => { try { return JSON.parse(sessionStorage.getItem('project') || 'null'); } catch { return null; } })();
+              const curOrgId     = this.selectedportfolio?.id != null ? Number(this.selectedportfolio.id)
+                                 : (_ssPortfolio?.id != null ? Number(_ssPortfolio.id) : null);
+              const curProjectId = this.selectedproject?.id != null ? Number(this.selectedproject.id)
+                                 : (_ssProject?.id != null ? Number(_ssProject.id) : null);
+              // Sync in-memory fields from sessionStorage so downstream code has a consistent reference.
+              if (this.selectedportfolio == null && _ssPortfolio != null) this.selectedportfolio = _ssPortfolio;
+              if ((this.selectedproject == null || Object.keys(this.selectedproject).length === 0) && _ssProject != null) this.selectedproject = _ssProject;
               const currentOrgHasAssignments = curOrgId != null &&
                 active.some(a => a.organizationId != null && Number(a.organizationId) === curOrgId);
               if ((!curStillValid || !currentOrgHasAssignments) && !recentManualSwitch) {
@@ -764,25 +798,51 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               this._applyRbacScope();
               this.isRoleLoading = false;
               this._rbacCheckPending = false;
-              if ((!curStillValid || !currentOrgHasAssignments) && !recentManualSwitch) {
-                // No role yet, role revoked, or user was on a wrong/dummy org — default to highest rank.
-                this.valuechangerole(rbacList[0]);
+              this._rbacDataLoading = false;
+              // User changed org while RBAC data was still loading — cascade from their selection.
+              if (this._pendingOrgClick) {
+                const _pendingOrg = this._pendingOrgClick;
+                this._pendingOrgClick = null;
+                this._rbacUser = true;
+                sessionStorage.setItem('_rbac_session_initialized', '1');
+                this._cascadeOrgChange(_pendingOrg);
+                return;
+              }
+              // First-load detection: '_rbac_session_initialized' is cleared on logout.
+              // When NOT set we ALWAYS switch to the highest-rank role regardless of what
+              // sessionStorage currently holds — this prevents a stale Developer (or other
+              // lower-rank) role from persisting into a new login session.
+              const _sessionInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
+              if ((!curStillValid || !currentOrgHasAssignments || !_sessionInit) && !recentManualSwitch) {
+                // Mark session initialized BEFORE navigating so the recreated component
+                // skips the auto-switch and restores the menu from sessionStorage cache.
+                sessionStorage.setItem('_rbac_session_initialized', '1');
+                if (this._pendingAutoSwitchOrgId != null) {
+                  // Org not yet in sessionStorage (parallel fetch — assignments arrived before orgs).
+                  // Store the target role; the orgs callback will call valuechangerole() AFTER
+                  // saving the correct org so the next component reads the right org from sessionStorage.
+                  sessionStorage.setItem('_rbac_pending_switch_role', JSON.stringify(rbacList[0]));
+                } else {
+                  // Org is already in sessionStorage — safe to switch immediately.
+                  this.valuechangerole(rbacList[0]);
+                }
               } else {
-                // Role is already set and still valid, OR the user just manually selected
-                // a role (recentManualSwitch guard): refresh the sidebar without overriding.
+                // Role is valid, session already initialized, and user didn't just manually switch.
+                sessionStorage.setItem('_rbac_session_initialized', '1');
                 this.newsidebar();
               }
             } else {
               this._sortLegacyRoleList(); // no RBAC assignments — keep legacy list
               this._rbacCheckPending = false;
               this.isRoleLoading = false;
+              this._rbacDataLoading = false;
               this.newsidebar();
             }
           },
-          error: () => { this._sortLegacyRoleList(); this._rbacCheckPending = false; this.isRoleLoading = false; this.newsidebar(); }
+          error: () => { this._sortLegacyRoleList(); this._rbacCheckPending = false; this.isRoleLoading = false; this._rbacDataLoading = false; this.newsidebar(); }
         });
       },
-      error: () => { this.isRoleLoading = false; }
+      error: () => { this.isRoleLoading = false; this._rbacDataLoading = false; }
     });
 
   }
@@ -1046,6 +1106,17 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       );
     }
     this.sidebariconcolor = false;
+    // Sync selectedportfolio from sessionStorage immediately so the org thumbnail dropdown
+    // shows the correct org right away. getUserInfoData() sets it later (async HTTP), but
+    // the thumbnail needs it on first render. Without this, the org dropdown shows blank
+    // until the HTTP callback fires (visually jarring and causes supplementRbacData to
+    // read curOrgId=null and false-trigger auto-switch before the callback arrives).
+    if (this.selectedportfolio == null) {
+      try {
+        this.selectedportfolio = JSON.parse(sessionStorage.getItem('portfoliodata') || 'null') ||
+                                  JSON.parse(sessionStorage.getItem('tempdata') || 'null');
+      } catch {}
+    }
     this.newsidebar();
     this.openedLeft = false;
     let activeProfiles;
@@ -1538,10 +1609,14 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       // Show loading states instead — the ongoing supplementRbacData() will cascade once done.
       const _earlyClickRole = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null'); } catch { return null; } })();
       if (_earlyClickRole?.name && this.roleMenuSvc.isRbacRole(_earlyClickRole.name)) {
+        this._pendingOrgClick = data; // cascade when supplementRbacData() completes
         this.projectList = [];
         this.roleList = [];
         this.isProjectLoading = true;
         this.isRoleLoading = true;
+        // supplementRbacData() may not run again after session init (fast path) —
+        // call it explicitly so _pendingOrgClick is processed and spinners clear.
+        if (!this._rbacDataLoading) this.supplementRbacData();
         return;
       }
       this.fetchRolesforUser();
@@ -1596,6 +1671,11 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     localStorage.removeItem("organization");
     sessionStorage.removeItem("tempdata");
     sessionStorage.removeItem("sidebarbreadcrumb");
+    // Clear RBAC session flags so the next login always auto-selects the highest-rank role
+    sessionStorage.removeItem('_rbac_session_initialized');
+    sessionStorage.removeItem('_rbac_pending_switch_role');
+    sessionStorage.removeItem('_rbac_sidebar_role');
+    sessionStorage.removeItem('_rbac_sidebar_menu');
     this.router.navigate(["../logout"]);
   }
   setHighlightedLabel(item: any) {
@@ -2264,7 +2344,19 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       // checkDefaultRole1() to fire valuechangerole() again, which removes the top bar too.
       const _grpRoleName = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
       if (this.roleMenuSvc.isRbacRole(_grpRoleName)) {
-        this.supplementRbacData();
+        // Session already initialized: the correct org/role was resolved in this browser session.
+        // Skip the full 4-HTTP-call supplementRbacData chain — just restore the menu from cache.
+        // This prevents menu from reloading on every sidebar click (shouldReuseRoute=false means
+        // LandingComponent is recreated on each navigation → getrolepage fires → without this guard
+        // supplementRbacData ran every click, causing the menu to flash and valuechangerole to re-fire).
+        const _grpSessionInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
+        if (_grpSessionInit && !this._pendingAutoSwitchOrgId) {
+          this._rbacCheckPending = false;
+          this.newsidebar();
+        } else {
+          // First load or org switch still pending: run full RBAC resolution.
+          this.supplementRbacData();
+        }
         return;
       }
       //  this.getNotifications();
@@ -2402,6 +2494,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getNotifications() {
+    const _gnRole = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
+    if (this.roleMenuSvc.isRbacRole(_gnRole)) return;
     this.destroySubscription();
     this.roleName = JSON.parse(sessionStorage.getItem("role") || "").name;
     let dashconstant: any = new Object();
@@ -3626,6 +3720,8 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   }
 
   checkDisplaySidebar() {
+    const _cdsRole = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
+    if (this.roleMenuSvc.isRbacRole(_cdsRole)) return;
     let project: any;
     try {
       project = JSON.parse(sessionStorage.getItem("project") || "");
@@ -3667,6 +3763,11 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
     });
   }
   setProjectTheme() {
+    // For RBAC roles, theme is not stored in DashConsts. Skip the HTTP call entirely to
+    // prevent handleAPIError crashes (TypeError: Cannot set properties of undefined) when
+    // getDashConsts returns a 403 — the error handler fires regardless of the next-callback guard.
+    const _sptRole = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
+    if (this.roleMenuSvc.isRbacRole(_sptRole)) return;
     this.apisService.getDashConsts().subscribe((response) => {
       let projecttheme = response.filter(
         (item) => item.keys == "Project Theme"
@@ -3834,6 +3935,10 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
 
     let filteredRows: any;
 
+    // For RBAC roles, DashConsts tab/header config does not apply. Skip the HTTP call entirely
+    // to prevent handleAPIError crashes when getDashConsts returns a 403.
+    const _cdcRole = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
+    if (this.roleMenuSvc.isRbacRole(_cdcRole)) return;
     this.apisService.getDashConsts().subscribe((res) => {
       this.dashConstantCheckResponse = res;
       let filteredArray = [];
@@ -4025,8 +4130,12 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   }
   checkRole() {
     // Guard: RBAC roles must not be overwritten with legacy project roles from processdata.
+    // Also skip when _rbacUser is true (supplementRbacData confirmed RBAC assignments exist)
+    // or when _rbacCheckPending is true (supplementRbacData hasn't fired yet — we must not
+    // overwrite sessionStorage role with a legacy default before the RBAC check completes,
+    // as that causes "Developer" to appear in the console on first login).
     const _chkRoleName = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
-    if (this.roleMenuSvc.isRbacRole(_chkRoleName)) return;
+    if (this._rbacUser || this._rbacCheckPending || this.roleMenuSvc.isRbacRole(_chkRoleName)) return;
     let test = false;
     let roles;
     this.processdata.map((ele) => {
