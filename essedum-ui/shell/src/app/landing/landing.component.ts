@@ -680,7 +680,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
           this._pendingAutoSwitchOrgId = null;
         }
         this.isOrgLoading = false;
-      },
+        },
       error: () => { this.isOrgLoading = false; }
     });
 
@@ -743,6 +743,14 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
           console.log('[RBAC] projects callback: applied scope → projectList:', this.projectList.map((p: any) => `${p.name||p.projectdisplayname}[#${p.id}]`));
         } else {
           console.log('[RBAC] projects callback: assignments not yet cached — projectList stays empty until assignments callback runs _applyRbacScope()');
+        }
+        // Deferred org-click: assignments arrived before projects so _cascadeOrgChange was
+        // skipped (race condition — _allRbacProjects was empty at that point).
+        // Now that _allRbacProjects is populated, complete the cascade.
+        if (this._pendingOrgClick && this._rbacAssignmentsCache.length > 0 && !this._destroyed) {
+          const _pendingOrg = this._pendingOrgClick;
+          this._pendingOrgClick = null;
+          this._cascadeOrgChange(_pendingOrg);
         }
         this.isProjectLoading = false;
       },
@@ -885,11 +893,16 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               sessionStorage.setItem('_rbac_portfolio_list', JSON.stringify(this.portfoliodata));
               // User changed org while RBAC data was still loading — cascade from their selection.
               if (this._pendingOrgClick) {
-                const _pendingOrg = this._pendingOrgClick;
-                this._pendingOrgClick = null;
                 this._rbacUser = true;
                 sessionStorage.setItem('_rbac_session_initialized', '1');
-                this._cascadeOrgChange(_pendingOrg);
+                if (this._allRbacProjects.length > 0) {
+                  // Projects already loaded — cascade immediately.
+                  const _pendingOrg = this._pendingOrgClick;
+                  this._pendingOrgClick = null;
+                  this._cascadeOrgChange(_pendingOrg);
+                }
+                // else: _allRbacProjects not yet loaded (projects HTTP still in flight).
+                // _pendingOrgClick stays set; the projects callback will cascade once ready.
                 return;
               }
               // First-load detection: '_rbac_session_initialized' is cleared on logout.
@@ -1023,26 +1036,48 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     this.roleList = [];
     this.selectedproject = {};
 
-    // Filter projects by the selected org's organisationId — show all projects that belong
-    // to this org, regardless of which specific project assignments the user has.
-    // Assignment-based filtering caused projects from other orgs to bleed through via
-    // global (organizationId=null) assignments.
-    if (orgId != null && this._allRbacProjects.length > 0) {
-      const byOrg = this._allRbacProjects.filter(p => p.organisationId != null && Number(p.organisationId) === orgId);
-      this.projectList = byOrg.length > 0 ? byOrg : [...this._allRbacProjects];
-    } else {
-      this.projectList = [...this._allRbacProjects];
+    const applyOrgProjects = (filteredProjects: any[]) => {
+      if (this._destroyed) { this.isProjectLoading = false; return; }
+      this.projectList = filteredProjects;
+      this.isProjectLoading = false;
+      sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+      if (this.projectList.length > 0) {
+        // Prefer a project the user has an explicit assignment for; fall back to first.
+        const preferredProject = this.projectList.find((proj: any) =>
+          this._rbacAssignmentsCache.some(a =>
+            a.projectId != null && Number(a.projectId) === Number(proj.id)
+          )
+        );
+        this.selectedproject = preferredProject || this.projectList[0];
+        sessionStorage.setItem('project', JSON.stringify(this.selectedproject));
+        this._cascadeProjectChange(this.selectedproject, orgId);
+      }
+    };
+
+    if (orgId == null || this._allRbacProjects.length === 0) {
+      applyOrgProjects([...this._allRbacProjects]);
+      return;
     }
 
-    this.isProjectLoading = false;
-    // Persist so fast-path restore on next component recreation shows correct project list.
-    sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
-
-    if (this.projectList.length > 0) {
-      this.selectedproject = this.projectList[0];
-      sessionStorage.setItem('project', JSON.stringify(this.selectedproject));
-      this._cascadeProjectChange(this.selectedproject, orgId);
+    // Fast path: use organisationId field when it is populated in project data.
+    const byOrg = this._allRbacProjects.filter((p: any) => p.organisationId != null && Number(p.organisationId) === orgId);
+    if (byOrg.length > 0) {
+      applyOrgProjects(byOrg);
+      return;
     }
+
+    // Fallback: organisationId field unreliable for this org — ask the backend directly
+    // which project IDs belong to it, then cross-reference _allRbacProjects.
+    this.http.get<number[]>(`/api/getPortfolioProjects/${orgId}`).subscribe({
+      next: (ids: number[]) => {
+        const idSet = new Set((ids || []).map(Number));
+        const filtered = idSet.size > 0
+          ? this._allRbacProjects.filter((p: any) => idSet.has(Number(p.id)))
+          : [...this._allRbacProjects];
+        applyOrgProjects(filtered);
+      },
+      error: () => { applyOrgProjects([...this._allRbacProjects]); }
+    });
   }
 
   /**

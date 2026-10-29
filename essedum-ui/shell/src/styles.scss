@@ -939,7 +939,8 @@ body.header-light-theme .dropdown-spinner {
   border-radius: 14px !important;
   border: 1px solid rgba(255,255,255,0.12) !important;
   box-shadow: 0 12px 32px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset !important;
-  overflow: hidden !important;
+  overflow-y: auto !important;
+  max-height: 260px !important;
 }
 .profile-select-panel .mat-mdc-option {
   color: rgba(255,255,255,0.88) !important;
@@ -1019,7 +1020,8 @@ body.header-light-theme .profile-select-panel {
   border: 1px solid rgba(35,79,153,0.14) !important;
   box-shadow: 0 10px 28px rgba(35,79,153,0.14) !important;
   border-radius: 14px !important;
-  overflow: hidden !important;
+  overflow-y: auto !important;
+  max-height: 260px !important;
 }
 body.header-light-theme .profile-select-panel .mat-mdc-option {
   color: #1e293b !important;
