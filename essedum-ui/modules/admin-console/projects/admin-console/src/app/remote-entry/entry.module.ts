@@ -35,6 +35,7 @@ import { PublishingComponent } from '../features/publishing/publishing.component
 import { DraftDialogComponent } from '../features/publishing/draft-dialog/draft-dialog.component';
 import { CatalogComponent } from '../features/catalog/catalog.component';
 import { ApprovalsComponent } from '../features/approvals/approvals.component';
+import { ApproveRejectDialogComponent } from '../features/approvals/approve-reject-dialog/approve-reject-dialog.component';
 import { AuditComponent } from '../features/audit/audit.component';
 import { IdentitySyncComponent } from '../features/identity-sync/identity-sync.component';
 import { MenuConfigurationComponent } from '../features/menu-configuration/menu-configuration.component';
@@ -56,6 +57,7 @@ import { MenuPickerDialogComponent } from '../features/my-details/menu-picker-di
     DraftDialogComponent,
     CatalogComponent,
     ApprovalsComponent,
+    ApproveRejectDialogComponent,
     AuditComponent,
     IdentitySyncComponent,
     MenuConfigurationComponent,

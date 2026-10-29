@@ -2,9 +2,11 @@ import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { combineLatest, switchMap, map } from 'rxjs';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatDialog } from '@angular/material/dialog';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import type { PromotionEvent } from '../../core/api-models';
+import { ApproveRejectDialogComponent, ApproveRejectDialogResult } from './approve-reject-dialog/approve-reject-dialog.component';
 
 interface PromotionEventRow extends PromotionEvent {
   assetName: string;
@@ -34,6 +36,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit {
   constructor(
     private readonly api: ApiService,
     private readonly userContext: UserContextService,
+    private readonly dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -75,28 +78,26 @@ export class ApprovalsComponent implements OnInit, AfterViewInit {
   }
 
   decide(event: PromotionEventRow, action: 'approved' | 'rejected'): void {
-    //  a note is mandatory for every approve/reject decision
-    const label = action === 'approved' ? 'approval' : 'rejection';
-    const note = window.prompt(`Enter a ${label} note (required):`);
-    if (note === null) {
-      return; // user cancelled
-    }
-    if (!note.trim()) {
-      alert(`A ${label} note is required.`);
-      return;
-    }
-    const userId = this.userContext.userId$.value;
-    this.api
-      .decideApproval(event.assetVersionId, {
-        gate: event.gate,
-        action,
-        actorId: userId,
-        actorName: `User #${userId}`,
-        note: note.trim(),
-      })
-      .subscribe({
-        next: () => this.load(),
-        error: err => alert(err?.error?.message || `Failed to ${action} the submission.`),
+    this.dialog
+      .open(ApproveRejectDialogComponent, { width: '480px', data: { action } })
+      .afterClosed()
+      .subscribe((result: ApproveRejectDialogResult | undefined) => {
+        if (!result) {
+          return;
+        }
+        const userId = this.userContext.userId$.value;
+        this.api
+          .decideApproval(event.assetVersionId, {
+            gate: event.gate,
+            action,
+            actorId: userId,
+            actorName: `User #${userId}`,
+            note: result.note,
+          })
+          .subscribe({
+            next: () => this.load(),
+            error: err => alert(err?.error?.message || `Failed to ${action} the submission.`),
+          });
       });
   }
 }

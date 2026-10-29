@@ -45,7 +45,7 @@ export class PublishingComponent implements OnInit, AfterViewInit {
     this.versions.paginator = this.paginator;
   }
 
-  readonly columns = ['assetName', 'versionNo', 'status', 'nextGate', 'updatedAt', 'actions'];
+  readonly columns = ['assetName', 'versionNo', 'status', 'comments', 'nextGate', 'updatedAt', 'actions'];
 
   constructor(
     private readonly api: ApiService,
