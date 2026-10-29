@@ -96,31 +96,31 @@ CREATE TABLE IF NOT EXISTS rbac_menu_item (
 -- rbac-6-seed (explicit ids, matches the Liquibase seed exactly)
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order)
 SELECT 1, NULL, 'Admin Console', '/admin-console', 0, 1
-WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item);
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item);
 
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order)
 SELECT 2, 1, 'Organizations & Projects', '/admin-console/tenancy', 2, 1
-WHERE (SELECT COUNT(*) FROM rbac_menu_item) = 1;
+    WHERE (SELECT COUNT(*) FROM rbac_menu_item) = 1;
 
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order)
 SELECT 3, 1, 'Members & Roles', '/admin-console/access', 2, 2
-WHERE (SELECT COUNT(*) FROM rbac_menu_item) = 2;
+    WHERE (SELECT COUNT(*) FROM rbac_menu_item) = 2;
 
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order)
 SELECT 4, 1, 'My Drafts', '/admin-console/publishing', 1, 3
-WHERE (SELECT COUNT(*) FROM rbac_menu_item) = 3;
+    WHERE (SELECT COUNT(*) FROM rbac_menu_item) = 3;
 
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order)
 SELECT 5, 1, 'Approvals', '/admin-console/approvals', 2, 4
-WHERE (SELECT COUNT(*) FROM rbac_menu_item) = 4;
+    WHERE (SELECT COUNT(*) FROM rbac_menu_item) = 4;
 
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order)
 SELECT 6, 1, 'Audit Log', '/admin-console/audit', 3, 5
-WHERE (SELECT COUNT(*) FROM rbac_menu_item) = 5;
+    WHERE (SELECT COUNT(*) FROM rbac_menu_item) = 5;
 
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order)
 SELECT 7, 1, 'Menu Configuration', '/admin-console/menu-configuration', 4, 6
-WHERE (SELECT COUNT(*) FROM rbac_menu_item) = 6;
+    WHERE (SELECT COUNT(*) FROM rbac_menu_item) = 6;
 
 -- rbac-7
 CREATE TABLE IF NOT EXISTS rbac_audit_event (
@@ -187,12 +187,12 @@ UPDATE rbac_menu_item SET icon='th-list'        WHERE route='/admin-console/menu
 -- rbac-14: Identity Sync Status menu entry
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order, icon)
 SELECT 9, 1, 'Identity Sync', '/admin-console/identity-sync', 3, 7, 'refresh'
-WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/identity-sync');
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/identity-sync');
 
 -- rbac-15: Asset Catalog (marketplace) menu entry
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order, icon)
 SELECT 10, 1, 'Asset Catalog', '/admin-console/catalog', 1, 8, 'shopping-bag'
-WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/catalog');
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/catalog');
 
 -- rbac-16: Promote portfolios to first-class Organizations (§1 tenancy schema).
 -- Each portfolio becomes the organisation its projects belong to (1:1 by id);
@@ -200,7 +200,108 @@ WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/cat
 -- usm_portfolio stays in place but dormant.
 UPDATE usm_organisation o JOIN usm_portfolio p ON p.id = o.id SET o.name = p.portfolio_name;
 INSERT INTO usm_organisation (id, name, status)
-  SELECT p.id, p.portfolio_name, 'active' FROM usm_portfolio p
-  WHERE NOT EXISTS (SELECT 1 FROM usm_organisation o WHERE o.id = p.id);
+SELECT p.id, p.portfolio_name, 'active' FROM usm_portfolio p
+WHERE NOT EXISTS (SELECT 1 FROM usm_organisation o WHERE o.id = p.id);
 UPDATE usm_project SET organisation_id = portfolio_id
-  WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL;
+WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL;
+
+-- rbac-19: add max_role_rank for upper-bound filtering
+SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rbac_menu_item' AND COLUMN_NAME='max_role_rank');
+SET @d := IF(@c=0,'ALTER TABLE rbac_menu_item ADD COLUMN max_role_rank INT NULL','SELECT 1'); PREPARE s FROM @d; EXECUTE s; DEALLOCATE PREPARE s;
+
+-- rbac-21: rename 'Viewer' → 'AI Client' in rbac_role and usm_constant
+UPDATE rbac_role SET name = 'Admin'              WHERE name = 'platform_admin';
+UPDATE rbac_role SET name = 'Organization Admin' WHERE name = 'org_admin';
+UPDATE rbac_role SET name = 'Project Admin'      WHERE name = 'project_admin';
+UPDATE rbac_role SET name = 'Developer'          WHERE name = 'developer';
+UPDATE rbac_role SET name = 'AI Client'          WHERE name IN ('viewer','Viewer');
+UPDATE usm_constant SET item = 'Admin Side'              WHERE item = 'platform_admin Side';
+UPDATE usm_constant SET item = 'Organization Admin Side' WHERE item = 'org_admin Side';
+UPDATE usm_constant SET item = 'Project Admin Side'      WHERE item = 'project_admin Side';
+UPDATE usm_constant SET item = 'Developer Side'          WHERE item = 'developer Side';
+UPDATE usm_constant SET item = 'AI Client Side'          WHERE item IN ('viewer Side','Viewer Side');
+
+-- rbac-24: re-seed any admin-console menu items accidentally deleted via Menu Configuration UI
+INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+SELECT 'Overview', '/admin-console/overview', 1, 0, 'tachometer', NULL, NULL
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/overview');
+
+INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+SELECT 'Organizations & Projects', '/admin-console/tenancy', 2, 1, 'sitemap', NULL, NULL
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/tenancy');
+
+INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+SELECT 'Members & Roles', '/admin-console/access', 2, 2, 'users', NULL, NULL
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/access');
+
+INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+SELECT 'My Drafts', '/admin-console/publishing', 99, 3, 'file-text-o', NULL, NULL
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/publishing');
+
+INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+SELECT 'Approvals', '/admin-console/approvals', 2, 4, 'check-square-o', NULL, NULL
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/approvals');
+
+INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+SELECT 'Audit Log', '/admin-console/audit', 3, 5, 'history', NULL, NULL
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/audit');
+
+INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+SELECT 'Asset Catalog', '/admin-console/catalog', 1, 8, 'shopping-bag', NULL, NULL
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/catalog');
+
+INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+SELECT 'Identity Sync', '/admin-console/identity-sync', 3, 7, 'refresh', NULL, NULL
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/identity-sync');
+
+INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+SELECT 'Menu Configuration', '/admin-console/menu-configuration', 4, 6, 'th-list', NULL, NULL
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/menu-configuration');
+
+-- rbac-26: My Drafts visibility (roles-override CSV) + Asset Catalog min_role_rank
+UPDATE rbac_menu_item
+SET min_role_rank = 99, roles = 'Developer,Organization Admin,Admin'
+WHERE route = '/admin-console/publishing';
+
+UPDATE rbac_menu_item
+SET min_role_rank = 1, roles = NULL
+WHERE route = '/admin-console/catalog';
+
+-- rbac-27: fix Overview (min_role_rank 2→1 so Developer/rank-1 sees it) and
+--          My Drafts (add Project Admin to roles CSV so all admin-console tiers see it)
+UPDATE rbac_menu_item
+SET min_role_rank = 1
+WHERE route = '/admin-console/overview';
+
+UPDATE rbac_menu_item
+SET roles = 'Developer,Project Admin,Organization Admin,Admin'
+WHERE route = '/admin-console/publishing';
+
+
+-- rbac-28: AI Client (legacy usm_role 'Viewer') was seeded read-only — grant it the
+-- same PUT/POST/DELETE permissions 'Developer' already has for pipelines, datasets,
+-- connections and streaming services, so pipeline/dataset edits & connection tests
+-- stop 403ing for this role. Copies per matching project scope; safe to re-run.
+INSERT INTO usm_role_permissions (permission, role)
+SELECT DISTINCT p.id, client_role.id
+FROM usm_role client_role
+         JOIN usm_role dev_role
+              ON (dev_role.project_id IS NULL AND client_role.project_id IS NULL)
+                  OR (dev_role.project_id = client_role.project_id)
+         JOIN usm_role_permissions rp ON rp.role = dev_role.id
+         JOIN usm_permissions p ON p.id = rp.permission
+         JOIN usm_permission_api pa ON pa.permission_id = p.id
+WHERE LOWER(client_role.name) IN ('viewer', 'ai client')
+  AND LOWER(dev_role.name) = 'developer'
+  AND UPPER(pa.type) IN ('PUT', 'POST', 'DELETE')
+  AND (
+    LOWER(pa.api) LIKE '%pipeline%'
+        OR LOWER(pa.api) LIKE '%dataset%'
+        OR LOWER(pa.api) LIKE '%datasource%'
+        OR LOWER(pa.api) LIKE '%connection%'
+        OR LOWER(pa.api) LIKE '%streamingservices%'
+    )
+  AND NOT EXISTS (
+    SELECT 1 FROM usm_role_permissions rp2
+    WHERE rp2.role = client_role.id AND rp2.permission = p.id
+);
