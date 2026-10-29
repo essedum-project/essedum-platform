@@ -6,7 +6,7 @@
       matInput
       [(ngModel)]="note"
       name="note"
-      rows="4"
+      rows="5"
       [placeholder]="'Enter ' + label.toLowerCase() + ' note...'">
     </textarea>
   </mat-form-field>
@@ -15,3 +15,4 @@
   <button mat-button (click)="cancel()">Cancel</button>
   <button mat-raised-button color="primary" (click)="submit()" [disabled]="!valid">Submit</button>
 </div>
+

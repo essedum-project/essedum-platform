@@ -102,8 +102,10 @@
   }
 }
 
-:host-context(body.header-light-theme) .page-header h2 { color: #0f172a !important; }
-:host-context(body.header-light-theme) .page-header .page-subtitle { color: #64748b; }
+body.header-light-theme .page-header h2,
+.admin-console-shell.light-theme .page-header h2 { color: #0f172a !important; }
+body.header-light-theme .page-header .page-subtitle,
+.admin-console-shell.light-theme .page-header .page-subtitle { color: #64748b; }
 
 mat-tab-group {
   display: block !important;
@@ -186,6 +188,33 @@ body.header-light-theme .admin-console-page .empty-state {
   color: #64748b;
 }
 
+/* ── Comment badge (rejection note in Comments column) ── */
+.comment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 10px;
+  padding: 2px 9px;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+
+  .fa { font-size: 10px; flex-shrink: 0; }
+}
+
+body.header-light-theme .comment-badge,
+.admin-console-shell.light-theme .comment-badge {
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+  border-color: rgba(220, 38, 38, 0.2);
+}
 
 /* ── Paginator theme ─────────────────────────────────────────────────────── */
 mat-paginator,
@@ -216,7 +245,9 @@ mat-paginator .mat-mdc-icon-button[disabled],
 .mat-mdc-paginator .mat-mdc-icon-button[disabled] { opacity: 0.35; }
 
 body.header-light-theme mat-paginator,
-body.header-light-theme .mat-mdc-paginator {
+body.header-light-theme .mat-mdc-paginator,
+.admin-console-shell.light-theme mat-paginator,
+.admin-console-shell.light-theme .mat-mdc-paginator {
   --mat-paginator-container-background-color: #f1f5f9;
   background: #f1f5f9 !important;
   background-color: #f1f5f9 !important;
@@ -226,16 +257,32 @@ body.header-light-theme .mat-mdc-paginator {
 body.header-light-theme mat-paginator .mat-mdc-paginator-outer-container,
 body.header-light-theme mat-paginator .mat-mdc-paginator-container,
 body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-outer-container,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-container { background: #f1f5f9 !important; }
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-container,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-paginator-outer-container,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-paginator-container,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-paginator-outer-container,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-paginator-container { background: #f1f5f9 !important; }
 body.header-light-theme mat-paginator .mat-mdc-paginator-range-label,
 body.header-light-theme mat-paginator .mat-mdc-paginator-page-size-label,
 body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-range-label,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #64748b !important; }
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-page-size-label,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-paginator-range-label,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-paginator-page-size-label,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-paginator-range-label,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #64748b !important; }
 body.header-light-theme mat-paginator .mat-mdc-select-value,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-select-value { color: #1e293b !important; }
+body.header-light-theme .mat-mdc-paginator .mat-mdc-select-value,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-select-value,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-select-value { color: #1e293b !important; }
 body.header-light-theme mat-paginator .mat-mdc-icon-button,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b !important; }
+body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-icon-button,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b !important; }
 body.header-light-theme mat-paginator .mat-mdc-icon-button svg,
 body.header-light-theme mat-paginator .mat-mdc-icon-button .mat-icon,
 body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button svg,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #64748b !important; fill: #64748b !important; }
+body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button .mat-icon,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-icon-button svg,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-icon-button .mat-icon,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-icon-button svg,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #64748b !important; fill: #64748b !important; }

@@ -12,6 +12,7 @@ export interface ApproveRejectDialogResult {
 @Component({
   selector: 'app-approve-reject-dialog',
   templateUrl: './approve-reject-dialog.component.html',
+  styleUrls: ['./approve-reject-dialog.component.scss'],
   standalone: false,
 })
 export class ApproveRejectDialogComponent {

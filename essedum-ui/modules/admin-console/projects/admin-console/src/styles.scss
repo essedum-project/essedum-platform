@@ -727,5 +727,71 @@ body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button {
   --mdc-icon-button-icon-color: #64748b !important;
 }
 
+/* ── Approve / Reject dialog ─────────────────────────────────────────────── */
+.approve-reject-dialog .mat-mdc-dialog-surface {
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  border-radius: 12px !important;
+  padding: 0 !important;
+}
+
+.approve-reject-dialog {
+  h2[mat-dialog-title],
+  .mat-mdc-dialog-title {
+    color: #e2e8f0 !important;
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+    padding: 20px 24px 4px !important;
+  }
+
+  .mat-mdc-dialog-content {
+    padding: 12px 24px !important;
+    overflow: visible !important;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 8px 24px 20px !important;
+    gap: 10px;
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+    margin-top: 4px;
+  }
+
+  /* form-field: transparent fill, subtle border */
+  .mat-mdc-form-field {
+    width: 100% !important;
+  }
+
+  .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+    background: #111827 !important;
+    border-radius: 8px !important;
+  }
+
+  .mat-mdc-form-field .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+    background-color: #111827 !important;
+  }
+
+  .mat-mdc-form-field .mdc-floating-label,
+  .mat-mdc-form-field .mat-mdc-floating-label {
+    color: #94a3b8 !important;
+  }
+
+  .mat-mdc-form-field textarea {
+    color: #e2e8f0 !important;
+    resize: none !important;
+    min-height: 100px !important;
+    caret-color: #7eb8ff !important;
+    line-height: 1.5 !important;
+  }
+
+  .mat-mdc-form-field .mdc-line-ripple::before {
+    border-bottom-color: rgba(148, 163, 184, 0.25) !important;
+  }
+
+  .mat-mdc-form-field .mdc-line-ripple::after {
+    border-bottom-color: #7eb8ff !important;
+  }
+}
+
 
 

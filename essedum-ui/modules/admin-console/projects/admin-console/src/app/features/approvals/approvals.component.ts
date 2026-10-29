@@ -79,7 +79,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit {
 
   decide(event: PromotionEventRow, action: 'approved' | 'rejected'): void {
     this.dialog
-      .open(ApproveRejectDialogComponent, { width: '480px', data: { action } })
+      .open(ApproveRejectDialogComponent, { width: '480px', panelClass: 'approve-reject-dialog', data: { action } })
       .afterClosed()
       .subscribe((result: ApproveRejectDialogResult | undefined) => {
         if (!result) {
