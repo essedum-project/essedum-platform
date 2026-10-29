@@ -680,7 +680,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
           this._pendingAutoSwitchOrgId = null;
         }
         this.isOrgLoading = false;
-      },
+        },
       error: () => { this.isOrgLoading = false; }
     });
 
@@ -743,6 +743,14 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
           console.log('[RBAC] projects callback: applied scope → projectList:', this.projectList.map((p: any) => `${p.name||p.projectdisplayname}[#${p.id}]`));
         } else {
           console.log('[RBAC] projects callback: assignments not yet cached — projectList stays empty until assignments callback runs _applyRbacScope()');
+        }
+        // Deferred org-click: assignments arrived before projects so _cascadeOrgChange was
+        // skipped (race condition — _allRbacProjects was empty at that point).
+        // Now that _allRbacProjects is populated, complete the cascade.
+        if (this._pendingOrgClick && this._rbacAssignmentsCache.length > 0 && !this._destroyed) {
+          const _pendingOrg = this._pendingOrgClick;
+          this._pendingOrgClick = null;
+          this._cascadeOrgChange(_pendingOrg);
         }
         this.isProjectLoading = false;
       },
@@ -885,11 +893,16 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               sessionStorage.setItem('_rbac_portfolio_list', JSON.stringify(this.portfoliodata));
               // User changed org while RBAC data was still loading — cascade from their selection.
               if (this._pendingOrgClick) {
-                const _pendingOrg = this._pendingOrgClick;
-                this._pendingOrgClick = null;
                 this._rbacUser = true;
                 sessionStorage.setItem('_rbac_session_initialized', '1');
-                this._cascadeOrgChange(_pendingOrg);
+                if (this._allRbacProjects.length > 0) {
+                  // Projects already loaded — cascade immediately.
+                  const _pendingOrg = this._pendingOrgClick;
+                  this._pendingOrgClick = null;
+                  this._cascadeOrgChange(_pendingOrg);
+                }
+                // else: _allRbacProjects not yet loaded (projects HTTP still in flight).
+                // _pendingOrgClick stays set; the projects callback will cascade once ready.
                 return;
               }
               // First-load detection: '_rbac_session_initialized' is cleared on logout.
