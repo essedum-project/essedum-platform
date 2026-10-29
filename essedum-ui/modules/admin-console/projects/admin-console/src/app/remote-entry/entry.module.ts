@@ -18,9 +18,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 // Routing
 import { EntryRoutingModule } from './entry-routing.module';
+
+// Core
+import { AcSnackbarComponent } from '../core/ac-snackbar/ac-snackbar.component';
 
 // Shell
 import { ShellComponent } from '../shell/shell.component';
@@ -47,6 +51,7 @@ import { MenuPickerDialogComponent } from '../features/my-details/menu-picker-di
 
 @NgModule({
   declarations: [
+    AcSnackbarComponent,
     ShellComponent,
     OverviewComponent,
     TenancyComponent,
@@ -85,6 +90,7 @@ import { MenuPickerDialogComponent } from '../features/my-details/menu-picker-di
     MatDialogModule,
     MatCheckboxModule,
     MatPaginatorModule,
+    MatSnackBarModule,
     EntryRoutingModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

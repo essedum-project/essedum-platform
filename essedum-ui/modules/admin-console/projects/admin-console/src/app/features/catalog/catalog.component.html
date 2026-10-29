@@ -40,13 +40,21 @@
         </div>
       </div>
 
-      <!-- Footer: serving version only (no scope repeat) -->
+      <!-- Footer: serving version pill + Edit action (TC-071) -->
       <div class="card-actions-bar">
         <span class="serving-pill" *ngIf="asset.servingVersionNo !== null">
           <span class="v-dot"></span>
           serving v{{ asset.servingVersionNo }}
         </span>
         <span class="no-version" *ngIf="asset.servingVersionNo === null">No active version</span>
+        <button
+          *ngIf="canEdit(asset)"
+          class="card-edit-btn"
+          (click)="editAsset(asset)"
+          [title]="'Open a new draft of ' + asset.name + ' — live version keeps serving'">
+          <mat-icon class="btn-icon">edit</mat-icon>
+          Edit
+        </button>
       </div>
 
     </div>

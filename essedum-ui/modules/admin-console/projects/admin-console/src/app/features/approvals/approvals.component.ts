@@ -5,6 +5,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
+import { NotificationService } from '../../core/notification.service';
 import type { PromotionEvent } from '../../core/api-models';
 import { ApproveRejectDialogComponent, ApproveRejectDialogResult } from './approve-reject-dialog/approve-reject-dialog.component';
 
@@ -37,6 +38,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit {
     private readonly api: ApiService,
     private readonly userContext: UserContextService,
     private readonly dialog: MatDialog,
+    private readonly notify: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -95,8 +97,12 @@ export class ApprovalsComponent implements OnInit, AfterViewInit {
             note: result.note,
           })
           .subscribe({
-            next: () => this.load(),
-            error: err => alert(err?.error?.message || `Failed to ${action} the submission.`),
+            next: () => {
+              const msg = action === 'approved' ? 'Asset approved successfully.' : 'Asset rejected.';
+              action === 'approved' ? this.notify.success(msg) : this.notify.warning(msg);
+              this.load();
+            },
+            error: err => this.notify.error(err?.error?.message || `Failed to ${action} the submission.`),
           });
       });
   }

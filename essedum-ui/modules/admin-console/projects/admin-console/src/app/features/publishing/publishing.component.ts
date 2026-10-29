@@ -5,6 +5,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
+import { NotificationService } from '../../core/notification.service';
 import type { AssetVersion } from '../../core/api-models';
 import { DraftDialogComponent, DraftDialogResult } from './draft-dialog/draft-dialog.component';
 
@@ -51,6 +52,7 @@ export class PublishingComponent implements OnInit, AfterViewInit {
     private readonly api: ApiService,
     private readonly userContext: UserContextService,
     private readonly dialog: MatDialog,
+    private readonly notify: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -126,8 +128,8 @@ export class PublishingComponent implements OnInit, AfterViewInit {
             actorName: `User #${userId}`,
           })
           .subscribe({
-            next: () => this.load(),
-            error: err => alert(err?.error?.message || 'Failed to create the draft.'),
+            next: () => { this.notify.success('Draft created successfully.'); this.load(); },
+            error: err => this.notify.error(err?.error?.message || 'Failed to create the draft.'),
           });
       });
   }
@@ -158,8 +160,8 @@ export class PublishingComponent implements OnInit, AfterViewInit {
             actorName: `User #${userId}`,
           })
           .subscribe({
-            next: () => this.load(),
-            error: err => alert(err?.error?.message || 'Failed to save the draft.'),
+            next: () => { this.notify.success('Draft saved successfully.'); this.load(); },
+            error: err => this.notify.error(err?.error?.message || 'Failed to save the draft.'),
           });
       });
   }
@@ -171,8 +173,8 @@ export class PublishingComponent implements OnInit, AfterViewInit {
     this.api
       .submitVersion(version.id, { actorId: userId, actorName: `User #${userId}`, note: '' })
       .subscribe({
-        next: () => this.load(),
-        error: err => alert(err?.error?.message || 'Failed to submit for approval.'),
+        next: () => { this.notify.success('Submitted for review successfully.'); this.load(); },
+        error: err => this.notify.error(err?.error?.message || 'Failed to submit for approval.'),
       });
   }
 

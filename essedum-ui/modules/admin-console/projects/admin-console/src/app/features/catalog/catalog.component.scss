@@ -234,6 +234,7 @@
 .card-actions-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 8px 14px 12px;
   border-top: 1px solid rgba(99, 102, 241, 0.1);
 }
@@ -259,6 +260,37 @@
   font-size: 11px;
   color: #4a5e72;
   font-style: italic;
+}
+
+// ── Edit button (TC-071) ──────────────────────────────────────────────────────
+.card-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(79, 142, 247, 0.12);
+  border: 1px solid rgba(79, 142, 247, 0.28);
+  color: #7eb8ff;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.12s, border-color 0.12s;
+
+  .btn-icon {
+    font-size: 13px !important;
+    width: 13px !important;
+    height: 13px !important;
+    line-height: 13px !important;
+  }
+
+  &:hover {
+    background: rgba(79, 142, 247, 0.22);
+    border-color: rgba(79, 142, 247, 0.5);
+  }
 }
 
 // ── Empty state ───────────────────────────────────────────────────────────────
@@ -345,4 +377,15 @@
 
   .serving-pill { color: #64748b; .v-dot { background: #16a34a; } }
   .no-version   { color: #94a3b8; }
+
+  .card-edit-btn {
+    background: rgba(37, 99, 235, 0.08);
+    border-color: rgba(37, 99, 235, 0.22);
+    color: #2563eb;
+
+    &:hover {
+      background: rgba(37, 99, 235, 0.14);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+  }
 }
