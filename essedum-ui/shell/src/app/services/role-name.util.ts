@@ -1,10 +1,14 @@
 /** Centralized RBAC role name mapping — single source of truth across shell and admin-console. */
 export class RoleNameUtil {
   private static readonly ROLE_NAME_MAP: { [key: string]: string } = {
+    'ai client': 'AI Client',
     'viewer': 'AI Client',
     'developer': 'AI Engineer',
+    'project admin': 'AI Project Admin',
     'project_admin': 'AI Project Admin',
-    'org_admin': 'AI Organization Admin',
+    'organization admin': 'AI Organisation Admin',
+    'org_admin': 'AI Organisation Admin',
+    'admin': 'AI Platform Admin',
     'platform_admin': 'AI Platform Admin',
   };
 
