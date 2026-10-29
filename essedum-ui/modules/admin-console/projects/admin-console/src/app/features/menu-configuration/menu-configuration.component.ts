@@ -4,6 +4,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
+import { NotificationService } from '../../core/notification.service';
 import type { MenuItem, RoleMenu } from '../../core/api-models';
 import { MenuItemDialogComponent } from './menu-item-dialog/menu-item-dialog.component';
 import { RoleMenuDialogComponent } from './role-menu-dialog/role-menu-dialog.component';
@@ -93,6 +94,7 @@ export class MenuConfigurationComponent implements OnInit, AfterViewInit {
     private readonly api: ApiService,
     private readonly dialog: MatDialog,
     private readonly userContext: UserContextService,
+    private readonly notify: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -129,7 +131,10 @@ export class MenuConfigurationComponent implements OnInit, AfterViewInit {
     const ref = this.dialog.open(MenuItemDialogComponent, { width: '640px' });
     ref.afterClosed().subscribe((result: Omit<MenuItem, 'id'> | undefined) => {
       if (result) {
-        this.api.createMenuItem(this.userContext.userId$.value, result).subscribe(() => this.loadAdmin());
+        this.api.createMenuItem(this.userContext.userId$.value, result).subscribe({
+          next: () => { this.notify.success('Menu item created successfully.'); this.loadAdmin(); },
+          error: err => this.notify.error(err?.error?.message || 'Failed to create menu item.'),
+        });
       }
     });
   }
@@ -138,13 +143,19 @@ export class MenuConfigurationComponent implements OnInit, AfterViewInit {
     const ref = this.dialog.open(MenuItemDialogComponent, { width: '640px', data: row });
     ref.afterClosed().subscribe((result: Omit<MenuItem, 'id'> | undefined) => {
       if (result) {
-        this.api.updateMenuItem(row.id, this.userContext.userId$.value, result).subscribe(() => this.loadAdmin());
+        this.api.updateMenuItem(row.id, this.userContext.userId$.value, result).subscribe({
+          next: () => { this.notify.success('Menu item updated successfully.'); this.loadAdmin(); },
+          error: err => this.notify.error(err?.error?.message || 'Failed to update menu item.'),
+        });
       }
     });
   }
 
   removeAdmin(row: MenuItemRow): void {
-    this.api.deleteMenuItem(row.id, this.userContext.userId$.value).subscribe(() => this.loadAdmin());
+    this.api.deleteMenuItem(row.id, this.userContext.userId$.value).subscribe({
+      next: () => { this.notify.success('Menu item deleted.'); this.loadAdmin(); },
+      error: err => this.notify.error(err?.error?.message || 'Failed to delete menu item.'),
+    });
   }
 
   // ----- role menus -----
@@ -186,7 +197,10 @@ export class MenuConfigurationComponent implements OnInit, AfterViewInit {
       if (result) {
         this.api
           .createRoleMenu(this.userContext.userId$.value, { role: this.selectedRole, project: this.selectedProject, ...result })
-          .subscribe(() => this.loadRoleMenus());
+          .subscribe({
+            next: () => { this.notify.success('Role menu item created successfully.'); this.loadRoleMenus(); },
+            error: err => this.notify.error(err?.error?.message || 'Failed to create role menu item.'),
+          });
       }
     });
   }
@@ -195,12 +209,18 @@ export class MenuConfigurationComponent implements OnInit, AfterViewInit {
     const ref = this.dialog.open(RoleMenuDialogComponent, { width: '480px', data: row });
     ref.afterClosed().subscribe((result: { label: string; icon: string | null; url: string | null } | undefined) => {
       if (result) {
-        this.api.updateRoleMenu(row.id, this.userContext.userId$.value, result).subscribe(() => this.loadRoleMenus());
+        this.api.updateRoleMenu(row.id, this.userContext.userId$.value, result).subscribe({
+          next: () => { this.notify.success('Role menu item updated successfully.'); this.loadRoleMenus(); },
+          error: err => this.notify.error(err?.error?.message || 'Failed to update role menu item.'),
+        });
       }
     });
   }
 
   removeRoleMenu(row: RoleMenu): void {
-    this.api.deleteRoleMenu(row.id, this.userContext.userId$.value).subscribe(() => this.loadRoleMenus());
+    this.api.deleteRoleMenu(row.id, this.userContext.userId$.value).subscribe({
+      next: () => { this.notify.success('Role menu item deleted.'); this.loadRoleMenus(); },
+      error: err => this.notify.error(err?.error?.message || 'Failed to delete role menu item.'),
+    });
   }
 }

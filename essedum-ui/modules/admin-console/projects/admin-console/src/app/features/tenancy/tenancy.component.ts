@@ -7,6 +7,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
+import { NotificationService } from '../../core/notification.service';
 import type { LegacyOrganisation, LegacyProject, DisplayOrg, RbacEnvironment } from '../../core/api-models';
 import { ProvisionDialogComponent, ProvisionKind } from './provision-dialog/provision-dialog.component';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
@@ -54,6 +55,7 @@ export class TenancyComponent implements OnInit, AfterViewInit {
     private readonly dialog: MatDialog,
     private readonly userContext: UserContextService,
     private readonly route: ActivatedRoute,
+    private readonly notify: NotificationService,
   ) {}
 
   // Rank-gated create/delete buttons (server re-checks). 4=platform,3=org,2=project admin.
@@ -130,23 +132,35 @@ export class TenancyComponent implements OnInit, AfterViewInit {
         return;
       }
       if (r.kind === 'organization') {
-        this.api.createOrganization(userId, { name: r.name, status: r.status }).subscribe(() => {
-          this.loadOrgs();
-          window.dispatchEvent(new CustomEvent('essedum:tenancy-changed'));
+        this.api.createOrganization(userId, { name: r.name, status: r.status }).subscribe({
+          next: () => {
+            this.notify.success('Organization created successfully.');
+            this.loadOrgs();
+            window.dispatchEvent(new CustomEvent('essedum:tenancy-changed'));
+          },
+          error: err => this.notify.error(err?.error?.message || 'Failed to create organization.'),
         });
       } else if (r.kind === 'project') {
         this.api
           .createProject(userId, { name: r.name, description: r.description, organisationId: r.organisationId })
-          .subscribe(() => {
-            this.loadProjects();
-            window.dispatchEvent(new CustomEvent('essedum:tenancy-changed'));
+          .subscribe({
+            next: () => {
+              this.notify.success('Project created successfully.');
+              this.loadProjects();
+              window.dispatchEvent(new CustomEvent('essedum:tenancy-changed'));
+            },
+            error: err => this.notify.error(err?.error?.message || 'Failed to create project.'),
           });
       } else if (r.kind === 'environment') {
         this.api
           .createEnvironment(userId, { name: r.name, projectId: r.projectId, configRef: r.configRef })
-          .subscribe(() => {
-            this.loadEnvironments();
-            window.dispatchEvent(new CustomEvent('essedum:tenancy-changed'));
+          .subscribe({
+            next: () => {
+              this.notify.success('Environment created successfully.');
+              this.loadEnvironments();
+              window.dispatchEvent(new CustomEvent('essedum:tenancy-changed'));
+            },
+            error: err => this.notify.error(err?.error?.message || 'Failed to create environment.'),
           });
       }
     });
@@ -162,8 +176,12 @@ export class TenancyComponent implements OnInit, AfterViewInit {
         return;
       }
       this.api.deleteOrganization(row.id, this.userContext.userId$.value).subscribe({
-        next: () => { this.loadOrgs(); window.dispatchEvent(new CustomEvent('essedum:tenancy-changed')); },
-        error: err => alert(err?.error?.message || 'Could not delete this organization.'),
+        next: () => {
+          this.notify.success('Organization deleted successfully.');
+          this.loadOrgs();
+          window.dispatchEvent(new CustomEvent('essedum:tenancy-changed'));
+        },
+        error: err => this.notify.error(err?.error?.message || 'Could not delete this organization.'),
       });
     });
   }
@@ -178,8 +196,12 @@ export class TenancyComponent implements OnInit, AfterViewInit {
         return;
       }
       this.api.deleteProject(row.id, this.userContext.userId$.value).subscribe({
-        next: () => { this.loadProjects(); window.dispatchEvent(new CustomEvent('essedum:tenancy-changed')); },
-        error: err => alert(err?.error?.message || 'Could not delete this project.'),
+        next: () => {
+          this.notify.success('Project deleted successfully.');
+          this.loadProjects();
+          window.dispatchEvent(new CustomEvent('essedum:tenancy-changed'));
+        },
+        error: err => this.notify.error(err?.error?.message || 'Could not delete this project.'),
       });
     });
   }

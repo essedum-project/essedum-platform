@@ -8,6 +8,7 @@ import { RoleNameUtil } from '../../core/role-name.util';
 import type { RbacRole, RoleAssignment, UserOption } from '../../core/api-models';
 import { GrantRoleDialogComponent } from './grant-role-dialog/grant-role-dialog.component';
 import { UserContextService } from '../../core/user-context.service';
+import { NotificationService } from '../../core/notification.service';
 import { ProvisionDialogComponent } from '../tenancy/provision-dialog/provision-dialog.component';
 
 interface RoleAssignmentRow extends RoleAssignment {
@@ -40,6 +41,7 @@ export class AccessComponent implements OnInit, AfterViewInit {
     private readonly api: ApiService,
     private readonly dialog: MatDialog,
     private readonly userContext: UserContextService,
+    private readonly notify: NotificationService,
   ) {}
 
   get canCreateRole(): boolean { return this.rank >= 4; }
@@ -61,7 +63,10 @@ export class AccessComponent implements OnInit, AfterViewInit {
       if (!r) {
         return;
       }
-      this.api.createRole(userId, { name: r.name, rank: r.rank }).subscribe(() => this.load());
+      this.api.createRole(userId, { name: r.name, rank: r.rank }).subscribe({
+        next: () => { this.notify.success('Role created successfully.'); this.load(); },
+        error: err => this.notify.error(err?.error?.message || 'Failed to create role.'),
+      });
     });
   }
 
@@ -115,17 +120,25 @@ export class AccessComponent implements OnInit, AfterViewInit {
           actorUserId,
         }),
       );
-      combineLatest(grants).subscribe(() => {
-        this.load();
-        window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
+      combineLatest(grants).subscribe({
+        next: () => {
+          this.notify.success('Role granted successfully.');
+          this.load();
+          window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
+        },
+        error: err => this.notify.error(err?.error?.message || 'Failed to grant role.'),
       });
     });
   }
 
   revoke(row: RoleAssignmentRow): void {
-    this.api.revokeRoleAssignment(row.id, this.userContext.userId$.value).subscribe(() => {
-      this.load();
-      window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
+    this.api.revokeRoleAssignment(row.id, this.userContext.userId$.value).subscribe({
+      next: () => {
+        this.notify.warning('Role assignment revoked.');
+        this.load();
+        window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
+      },
+      error: err => this.notify.error(err?.error?.message || 'Failed to revoke role assignment.'),
     });
   }
 }

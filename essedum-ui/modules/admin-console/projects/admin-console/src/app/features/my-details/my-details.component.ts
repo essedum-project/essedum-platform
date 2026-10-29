@@ -6,6 +6,7 @@ import { combineLatest, map } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { RoleNameUtil } from '../../core/role-name.util';
 import { UserContextService } from '../../core/user-context.service';
+import { NotificationService } from '../../core/notification.service';
 import type { RoleAssignment, RbacRole, LegacyOrganisation, LegacyProject } from '../../core/api-models';
 import { MenuPickerDialogComponent } from './menu-picker-dialog/menu-picker-dialog.component';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
@@ -72,6 +73,7 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
     private readonly api: ApiService,
     private readonly dialog: MatDialog,
     private readonly userContext: UserContextService,
+    private readonly notify: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -250,6 +252,7 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
       // Revoke all duplicate assignment ids for this combo sequentially
       const revokeAll = (ids: number[]) => {
         if (ids.length === 0) {
+          this.notify.warning('Role assignment revoked.');
           this.cards = this.cards.filter(c => c !== card);
           window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
           return;
@@ -257,7 +260,10 @@ export class MyDetailsComponent implements OnInit, OnDestroy {
         const [head, ...tail] = ids;
         this.api.revokeRoleAssignment(head, actorUserId).subscribe({
           next: () => revokeAll(tail),
-          error: () => { card.revoking = false; },
+          error: err => {
+            card.revoking = false;
+            this.notify.error(err?.error?.message || 'Failed to revoke role assignment.');
+          },
         });
       };
 

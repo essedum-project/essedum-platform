@@ -13,28 +13,25 @@ export class NotificationService {
 
   success(message: string): void {
     this.snackBar.openFromComponent(AcSnackbarComponent, {
-      ...BASE,
-      duration: 5000,
-      panelClass: ['ac-snackbar', 'ac-snackbar-success'],
-      data: { message, type: 'success' },
+      ...BASE, duration: 5000, panelClass: ['ac-snackbar'], data: { message, type: 'success' },
     });
   }
 
   error(message: string): void {
     this.snackBar.openFromComponent(AcSnackbarComponent, {
-      ...BASE,
-      duration: 6000,
-      panelClass: ['ac-snackbar', 'ac-snackbar-error'],
-      data: { message, type: 'error' },
+      ...BASE, duration: 6000, panelClass: ['ac-snackbar'], data: { message, type: 'error' },
     });
   }
 
   warning(message: string): void {
     this.snackBar.openFromComponent(AcSnackbarComponent, {
-      ...BASE,
-      duration: 5000,
-      panelClass: ['ac-snackbar', 'ac-snackbar-warning'],
-      data: { message, type: 'warning' },
+      ...BASE, duration: 5000, panelClass: ['ac-snackbar'], data: { message, type: 'warning' },
+    });
+  }
+
+  info(message: string): void {
+    this.snackBar.openFromComponent(AcSnackbarComponent, {
+      ...BASE, duration: 4000, panelClass: ['ac-snackbar'], data: { message, type: 'info' },
     });
   }
 }

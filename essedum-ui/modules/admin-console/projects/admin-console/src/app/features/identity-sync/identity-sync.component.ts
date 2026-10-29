@@ -5,6 +5,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
+import { NotificationService } from '../../core/notification.service';
 import type { IdentityTarget, LegacyProject } from '../../core/api-models';
 
 interface SystemCell {
@@ -48,6 +49,7 @@ export class IdentitySyncComponent implements OnInit, AfterViewInit {
   constructor(
     private readonly api: ApiService,
     private readonly userContext: UserContextService,
+    private readonly notify: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -84,6 +86,9 @@ export class IdentitySyncComponent implements OnInit, AfterViewInit {
     if (!cell.target) {
       return;
     }
-    this.api.retryIdentityTarget(cell.target.id, this.userContext.userId$.value).subscribe(() => this.load());
+    this.api.retryIdentityTarget(cell.target.id, this.userContext.userId$.value).subscribe({
+      next: () => { this.notify.info('Sync retry triggered.'); this.load(); },
+      error: err => this.notify.error(err?.error?.message || 'Failed to retry sync.'),
+    });
   }
 }
