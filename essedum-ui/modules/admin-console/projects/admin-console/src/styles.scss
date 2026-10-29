@@ -448,6 +448,32 @@ body.header-light-theme .admin-console-table,
 /* ---- dialog backdrop: darken the page behind so the surface reads clearly ---- */
 .cdk-overlay-dark-backdrop { background: rgba(2, 6, 23, 0.55); }
 
+/* ---- confirm/generic dialog: ensure message text and buttons are fully readable ---- */
+/* Override MDC's own dialog content color token — this controls the <p> inside mat-dialog-content */
+.mat-mdc-dialog-surface {
+  --mdc-dialog-supporting-text-color: #e2e8f0 !important;
+  --mdc-dialog-subhead-color: #e2e8f0 !important;
+}
+body.header-light-theme .mat-mdc-dialog-surface {
+  --mdc-dialog-supporting-text-color: #1e293b !important;
+  --mdc-dialog-subhead-color: #1e293b !important;
+}
+/* Belt-and-suspenders: also set color directly on the p element */
+.mat-mdc-dialog-content p { color: #e2e8f0 !important; }
+body.header-light-theme .mat-mdc-dialog-content p { color: #1e293b !important; }
+
+/* Cancel button (plain mat-button without color attribute) in dialog actions */
+.mat-mdc-dialog-actions .mat-mdc-button:not([color]),
+.mat-mdc-dialog-actions button[mat-button]:not([color]) {
+  color: #e2e8f0 !important;
+  --mdc-text-button-label-text-color: #e2e8f0 !important;
+}
+body.header-light-theme .mat-mdc-dialog-actions .mat-mdc-button:not([color]),
+body.header-light-theme .mat-mdc-dialog-actions button[mat-button]:not([color]) {
+  color: #1e293b !important;
+  --mdc-text-button-label-text-color: #1e293b !important;
+}
+
 /* ════════════════════════════════════════════════════════════════════════════
    Paginator — scoped under .admin-console-shell for definitive specificity.
    The token block above (on .admin-console-shell) already sets
