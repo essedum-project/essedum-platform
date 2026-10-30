@@ -97,8 +97,11 @@ export class ApiService {
   }
 
   // §4 marketplace — published assets visible in the caller's scope.
-  getCatalog(userId: number): Observable<Asset[]> {
-    return this.http.get<Asset[]>(`${this.base}/assets/catalog`, { params: { userId } });
+  getCatalog(userId: number, orgId?: number | null, projectId?: number | null): Observable<Asset[]> {
+    const params: Record<string, any> = { userId };
+    if (orgId != null) params['orgId'] = orgId;
+    if (projectId != null) params['projectId'] = projectId;
+    return this.http.get<Asset[]>(`${this.base}/assets/catalog`, { params });
   }
 
   // Create an asset + its first draft version. §5.

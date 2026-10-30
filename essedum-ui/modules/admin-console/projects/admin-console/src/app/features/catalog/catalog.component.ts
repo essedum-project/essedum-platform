@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { combineLatest, switchMap, map } from 'rxjs';
+import { combineLatest, switchMap, map, take } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import { NotificationService } from '../../core/notification.service';
@@ -32,10 +32,14 @@ export class CatalogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.userContext.userId$
+    combineLatest([this.userContext.userId$, this.userContext.orgId$, this.userContext.projectId$])
       .pipe(
-        switchMap(userId =>
-          combineLatest([this.api.getCatalog(userId), this.api.getVersions(userId)]),
+        take(1),
+        switchMap(([userId, orgId, projectId]) =>
+          combineLatest([
+            this.api.getCatalog(userId, orgId, projectId),
+            this.api.getVersions(userId, orgId, projectId),
+          ]),
         ),
         map(([assets, versions]: [Asset[], AssetVersion[]]) =>
           assets.map(a => ({

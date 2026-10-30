@@ -149,7 +149,11 @@ public class PublishingService {
 	 * visibility query the marketplace reads.
 	 */
 	public List<Asset> listCatalogForUser(Integer userId) {
-		return listAssetsForUser(userId).stream()
+		return listCatalogForUser(userId, null, null);
+	}
+
+	public List<Asset> listCatalogForUser(Integer userId, Integer orgId, Integer projectId) {
+		return listAssetsForUser(userId, orgId, projectId).stream()
 				.filter(a -> a.getCurrentVersionId() != null)
 				.filter(a -> !PromotionGate.SCOPE_DRAFT.equals(a.getScope()))
 				.collect(Collectors.toList());

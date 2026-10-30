@@ -55,8 +55,11 @@ public class PublishingResource {
 
 	/** §4 marketplace — published assets visible within the caller's scope. */
 	@GetMapping("/assets/catalog")
-	public ResponseEntity<List<Asset>> catalog(@RequestParam Integer userId) {
-		return ResponseEntity.ok(publishingService.listCatalogForUser(userId));
+	public ResponseEntity<List<Asset>> catalog(
+			@RequestParam Integer userId,
+			@RequestParam(required = false) Integer orgId,
+			@RequestParam(required = false) Integer projectId) {
+		return ResponseEntity.ok(publishingService.listCatalogForUser(userId, orgId, projectId));
 	}
 
 	@GetMapping("/assets/versions")
