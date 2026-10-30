@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { combineLatest, switchMap, map } from 'rxjs';
+import { combineLatest, switchMap, map, take } from 'rxjs';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
@@ -46,13 +46,14 @@ export class ApprovalsComponent implements OnInit, AfterViewInit {
   }
 
   private load(): void {
-    this.userContext.userId$
+    combineLatest([this.userContext.userId$, this.userContext.orgId$, this.userContext.projectId$])
       .pipe(
-        switchMap(userId =>
+        take(1),
+        switchMap(([userId, orgId, projectId]) =>
           combineLatest([
-            this.api.getApprovals(userId),
-            this.api.getVersions(userId),
-            this.api.getAssets(userId),
+            this.api.getApprovals(userId, orgId, projectId),
+            this.api.getVersions(userId, orgId, projectId),
+            this.api.getAssets(userId, orgId, projectId),
           ]),
         ),
         map(([events, versions, assets]) =>

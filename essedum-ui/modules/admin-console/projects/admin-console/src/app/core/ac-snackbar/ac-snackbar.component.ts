@@ -20,9 +20,9 @@ export interface AcSnackbarData {
     .custom-snackbar {
       display: flex !important; flex-direction: row !important; align-items: center !important;
       gap: 10px; padding: 12px 16px; border-radius: 12px;
-      background: rgba(13,22,48,0.97);
+      background: rgba(30,41,59,0.95);
       border: 1px solid rgba(79,142,247,0.25);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(129,140,248,0.12);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(129,140,248,0.12);
       backdrop-filter: blur(16px);
       min-width: 280px; max-width: min(90vw, 720px); width: max-content;
     }

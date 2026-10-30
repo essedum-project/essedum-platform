@@ -38,13 +38,19 @@ public class PublishingResource {
 	}
 
 	@GetMapping("/assets/versions/drafts")
-	public ResponseEntity<List<AssetVersion>> myDrafts(@RequestParam Integer userId) {
-		return ResponseEntity.ok(publishingService.listDraftsForUser(userId));
+	public ResponseEntity<List<AssetVersion>> myDrafts(
+			@RequestParam Integer userId,
+			@RequestParam(required = false) Integer orgId,
+			@RequestParam(required = false) Integer projectId) {
+		return ResponseEntity.ok(publishingService.listDraftsForUser(userId, orgId, projectId));
 	}
 
 	@GetMapping("/assets")
-	public ResponseEntity<List<Asset>> assets(@RequestParam Integer userId) {
-		return ResponseEntity.ok(publishingService.listAssetsForUser(userId));
+	public ResponseEntity<List<Asset>> assets(
+			@RequestParam Integer userId,
+			@RequestParam(required = false) Integer orgId,
+			@RequestParam(required = false) Integer projectId) {
+		return ResponseEntity.ok(publishingService.listAssetsForUser(userId, orgId, projectId));
 	}
 
 	/** §4 marketplace — published assets visible within the caller's scope. */
@@ -54,8 +60,11 @@ public class PublishingResource {
 	}
 
 	@GetMapping("/assets/versions")
-	public ResponseEntity<List<AssetVersion>> versions(@RequestParam Integer userId) {
-		return ResponseEntity.ok(publishingService.listVersionsForUser(userId));
+	public ResponseEntity<List<AssetVersion>> versions(
+			@RequestParam Integer userId,
+			@RequestParam(required = false) Integer orgId,
+			@RequestParam(required = false) Integer projectId) {
+		return ResponseEntity.ok(publishingService.listVersionsForUser(userId, orgId, projectId));
 	}
 
 	/** Create an asset + its first draft version. §5. Requires rank ≥ 1 (Developer). */
@@ -155,9 +164,11 @@ public class PublishingResource {
 	}
 
 	@GetMapping("/approvals")
-	public ResponseEntity<List<PromotionEvent>> approvals(@RequestParam Integer userId) {
-		int rank = accessContextService.highestRank(userId);
-		return ResponseEntity.ok(publishingService.pendingApprovalsForRank(rank));
+	public ResponseEntity<List<PromotionEvent>> approvals(
+			@RequestParam Integer userId,
+			@RequestParam(required = false) Integer orgId,
+			@RequestParam(required = false) Integer projectId) {
+		return ResponseEntity.ok(publishingService.pendingApprovalsForRank(userId, orgId, projectId));
 	}
 
 	@PostMapping("/approvals/{versionId}/decision")

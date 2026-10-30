@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation, ViewChild, AfterViewInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { combineLatest, switchMap, map } from 'rxjs';
+import { combineLatest, switchMap, map, take } from 'rxjs';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
@@ -64,10 +64,14 @@ export class PublishingComponent implements OnInit, AfterViewInit {
   }
 
   private load(): void {
-    this.userContext.userId$
+    combineLatest([this.userContext.userId$, this.userContext.orgId$, this.userContext.projectId$])
       .pipe(
-        switchMap(userId =>
-          combineLatest([this.api.getDraftVersions(userId), this.api.getAssets(userId)]),
+        take(1),
+        switchMap(([userId, orgId, projectId]) =>
+          combineLatest([
+            this.api.getDraftVersions(userId, orgId, projectId),
+            this.api.getAssets(userId, orgId, projectId),
+          ]),
         ),
         map(([versions, assets]) =>
           versions.map(v => {

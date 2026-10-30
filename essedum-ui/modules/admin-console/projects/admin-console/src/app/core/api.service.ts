@@ -75,16 +75,25 @@ export class ApiService {
   }
 
   // ---- publishing ----
-  getAssets(userId: number): Observable<Asset[]> {
-    return this.http.get<Asset[]>(`${this.base}/assets`, { params: { userId } });
+  getAssets(userId: number, orgId?: number | null, projectId?: number | null): Observable<Asset[]> {
+    const params: Record<string, any> = { userId };
+    if (orgId != null) params['orgId'] = orgId;
+    if (projectId != null) params['projectId'] = projectId;
+    return this.http.get<Asset[]>(`${this.base}/assets`, { params });
   }
 
-  getVersions(userId: number): Observable<AssetVersion[]> {
-    return this.http.get<AssetVersion[]>(`${this.base}/assets/versions`, { params: { userId } });
+  getVersions(userId: number, orgId?: number | null, projectId?: number | null): Observable<AssetVersion[]> {
+    const params: Record<string, any> = { userId };
+    if (orgId != null) params['orgId'] = orgId;
+    if (projectId != null) params['projectId'] = projectId;
+    return this.http.get<AssetVersion[]>(`${this.base}/assets/versions`, { params });
   }
 
-  getDraftVersions(userId: number): Observable<AssetVersion[]> {
-    return this.http.get<AssetVersion[]>(`${this.base}/assets/versions/drafts`, { params: { userId } });
+  getDraftVersions(userId: number, orgId?: number | null, projectId?: number | null): Observable<AssetVersion[]> {
+    const params: Record<string, any> = { userId };
+    if (orgId != null) params['orgId'] = orgId;
+    if (projectId != null) params['projectId'] = projectId;
+    return this.http.get<AssetVersion[]>(`${this.base}/assets/versions/drafts`, { params });
   }
 
   // §4 marketplace — published assets visible in the caller's scope.
@@ -133,8 +142,11 @@ export class ApiService {
     return this.http.get<PromotionEvent[]>(`${this.base}/assets/versions/${versionId}/events`);
   }
 
-  getApprovals(userId: number): Observable<PromotionEvent[]> {
-    return this.http.get<PromotionEvent[]>(`${this.base}/approvals`, { params: { userId } });
+  getApprovals(userId: number, orgId?: number | null, projectId?: number | null): Observable<PromotionEvent[]> {
+    const params: Record<string, any> = { userId };
+    if (orgId != null) params['orgId'] = orgId;
+    if (projectId != null) params['projectId'] = projectId;
+    return this.http.get<PromotionEvent[]>(`${this.base}/approvals`, { params });
   }
 
   decideApproval(

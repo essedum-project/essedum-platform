@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,8 @@ import org.springframework.web.server.ResponseStatusException;
 import com.lfn.iamp.usm.access.AccessContext;
 import com.lfn.iamp.usm.access.AccessContextService;
 import com.lfn.iamp.usm.audit.AuditService;
+import com.lfn.iamp.usm.domain.Project;
+import com.lfn.iamp.usm.repository.ProjectRepository;
 
 /**
  * Submit/approve/reject drive the §5 state machine. The serving version
@@ -38,22 +41,34 @@ public class PublishingService {
 	private final PromotionEventRepository promotionEventRepository;
 	private final AccessContextService accessContextService;
 	private final AuditService auditService;
+	private final ProjectRepository projectRepository;
 
 	public PublishingService(AssetRepository assetRepository, AssetVersionRepository assetVersionRepository,
 	                         PromotionEventRepository promotionEventRepository, AccessContextService accessContextService,
-	                         AuditService auditService) {
+	                         AuditService auditService, ProjectRepository projectRepository) {
 		this.assetRepository = assetRepository;
 		this.assetVersionRepository = assetVersionRepository;
 		this.promotionEventRepository = promotionEventRepository;
 		this.accessContextService = accessContextService;
 		this.auditService = auditService;
+		this.projectRepository = projectRepository;
 	}
 
 	public List<AssetVersion> listDraftsForUser(Integer userId) {
-		// Drafts are only visible to DIRECT project members — not to users who
-		// reach the project transitively via an org-scoped grant.
+		return listDraftsForUser(userId, null, null);
+	}
+
+	public List<AssetVersion> listDraftsForUser(Integer userId, Integer orgId, Integer projectId) {
 		AccessContext ctx = accessContextService.resolve(userId);
-		List<Integer> assetIds = assetRepository.findByProjectIdIn(ctx.getDirectProjectIds()).stream()
+		// When the caller supplies an explicit scope (projectId or orgId from the
+		// user's session), expand to reachableProjectIds so org-scoped members can
+		// also see drafts in their selected project. Without a filter, stay with
+		// directProjectIds to avoid org admins seeing every project's drafts at once.
+		List<Integer> base = (projectId != null || orgId != null)
+				? ctx.getReachableProjectIds()
+				: ctx.getDirectProjectIds();
+		List<Integer> directProjectIds = resolveProjectFilter(base, orgId, projectId);
+		List<Integer> assetIds = assetRepository.findByProjectIdIn(directProjectIds).stream()
 				.map(Asset::getId)
 				.collect(Collectors.toList());
 		// Return only the highest version_no per asset — editDraft now writes a new
@@ -84,9 +99,13 @@ public class PublishingService {
 	 *   no currentVersion (pure draft) → only direct project members
 	 */
 	public List<Asset> listAssetsForUser(Integer userId) {
+		return listAssetsForUser(userId, null, null);
+	}
+
+	public List<Asset> listAssetsForUser(Integer userId, Integer orgId, Integer projectId) {
 		AccessContext ctx = accessContextService.resolve(userId);
-		List<Integer> reachableIds = ctx.getReachableProjectIds();
-		List<Integer> directIds = ctx.getDirectProjectIds();
+		List<Integer> reachableIds = resolveProjectFilter(ctx.getReachableProjectIds(), orgId, projectId);
+		List<Integer> directIds = resolveProjectFilter(ctx.getDirectProjectIds(), orgId, projectId);
 
 		List<Asset> reachable = assetRepository.findByProjectIdIn(reachableIds).stream()
 				.filter(a -> {
@@ -94,7 +113,7 @@ public class PublishingService {
 						// Pure draft — only direct project members can see it
 						return directIds.contains(a.getProjectId());
 					}
-					// project scope: only direct project members 
+					// project scope: only direct project members
 					if (PromotionGate.SCOPE_PROJECT.equals(a.getScope())) {
 						return directIds.contains(a.getProjectId());
 					}
@@ -103,9 +122,13 @@ public class PublishingService {
 				})
 				.collect(Collectors.toCollection(ArrayList::new));
 
-		for (Asset publicAsset : assetRepository.findByScope(PromotionGate.SCOPE_PUBLIC)) {
-			if (reachable.stream().noneMatch(a -> a.getId().equals(publicAsset.getId()))) {
-				reachable.add(publicAsset);
+		// Only include public assets when no org/project scope restriction is applied,
+		// or when the public asset also belongs to the filtered project.
+		if (projectId == null && orgId == null) {
+			for (Asset publicAsset : assetRepository.findByScope(PromotionGate.SCOPE_PUBLIC)) {
+				if (reachable.stream().noneMatch(a -> a.getId().equals(publicAsset.getId()))) {
+					reachable.add(publicAsset);
+				}
 			}
 		}
 		return reachable;
@@ -134,7 +157,12 @@ public class PublishingService {
 
 	/** All versions reachable by the user's projects — lets the frontend join versionNo onto a promotion event. */
 	public List<AssetVersion> listVersionsForUser(Integer userId) {
-		List<Integer> assetIds = listAssetsForUser(userId).stream().map(Asset::getId).collect(Collectors.toList());
+		return listVersionsForUser(userId, null, null);
+	}
+
+	public List<AssetVersion> listVersionsForUser(Integer userId, Integer orgId, Integer projectId) {
+		List<Integer> assetIds = listAssetsForUser(userId, orgId, projectId).stream()
+				.map(Asset::getId).collect(Collectors.toList());
 		return assetVersionRepository.findByAssetIdIn(assetIds);
 	}
 
@@ -182,12 +210,15 @@ public class PublishingService {
 			throw new IllegalStateException("Only draft or rejected versions can be edited: v" + versionId);
 		}
 
-		// Only the creator may edit a draft.
 		Asset asset = assetRepository.findById(current.getAssetId())
 				.orElseThrow(() -> new IllegalArgumentException("No such asset: " + current.getAssetId()));
-		if (asset.getCreatedBy() != null && !asset.getCreatedBy().equals(actorId)) {
-			throw new IllegalStateException(
-					"Only the creator (user " + asset.getCreatedBy() + ") may edit this draft");
+
+		// Only the creator of THIS version may edit it. Use version-level creatorId
+		// first (set for versions opened via clone/createNewVersion); fall back to the
+		// asset's original createdBy for first-version drafts that pre-date creatorId.
+		Integer versionCreator = current.getCreatorId() != null ? current.getCreatorId() : asset.getCreatedBy();
+		if (versionCreator != null && !versionCreator.equals(actorId)) {
+			throw new IllegalStateException("Only the creator (user " + versionCreator + ") may edit this draft");
 		}
 
 		// Each save writes a new version row with an incremented version_no.
@@ -198,6 +229,7 @@ public class PublishingService {
 
 		// Use name as the digest salt so a rename also registers as a content change.
 		AssetVersion newVersion = newVersion(asset.getId(), nextNo, payloadRef, name);
+		newVersion.setCreatorId(actorId);
 		AssetVersion saved = assetVersionRepository.save(newVersion);
 
 		if (name != null && !name.isBlank()) {
@@ -210,22 +242,42 @@ public class PublishingService {
 	}
 
 	/**
-	 * Open a fresh draft version on an already-published asset. The live
-	 * version keeps serving (current_version_id untouched) until this new one
-	 * climbs the gates. §5 "editing published opens a new draft".
+	 * Clone a published asset as a completely NEW independent asset in draft.
+	 * The original asset and its published version remain untouched — editing
+	 * the clone never affects the published asset's name or content.
+	 * The clone starts at v1 with the same name, assetType, projectId, and
+	 * payloadRef as the original's currently-serving version.
 	 */
 	@Transactional
 	public AssetVersion createNewVersion(Integer assetId, String payloadRef, Integer actorId, String actorName) {
-		Asset asset = assetRepository.findById(assetId)
+		Asset original = assetRepository.findById(assetId)
 				.orElseThrow(() -> new IllegalArgumentException("No such asset: " + assetId));
-		int nextNo = assetVersionRepository.findByAssetIdIn(Arrays.asList(assetId)).stream()
-				.map(AssetVersion::getVersionNo)
-				.max(Comparator.naturalOrder())
-				.orElse(0) + 1;
-		AssetVersion version = newVersion(assetId, nextNo, payloadRef, actorId);
+
+		// Copy payloadRef from the currently-serving version when none is supplied.
+		String effectivePayloadRef = payloadRef;
+		if (effectivePayloadRef == null || effectivePayloadRef.isBlank()) {
+			if (original.getCurrentVersionId() != null) {
+				effectivePayloadRef = assetVersionRepository.findById(original.getCurrentVersionId())
+						.map(AssetVersion::getPayloadRef)
+						.orElse("");
+			}
+			if (effectivePayloadRef == null) effectivePayloadRef = "";
+		}
+
+		// Create a NEW asset independent of the original so editing the clone
+		// does not rename or otherwise affect the published asset.
+		Asset clone = new Asset();
+		clone.setProjectId(original.getProjectId());
+		clone.setAssetType(original.getAssetType());
+		clone.setName(original.getName());
+		clone.setScope(PromotionGate.SCOPE_PROJECT);
+		clone.setCreatedBy(actorId);
+		Asset savedClone = assetRepository.save(clone);
+
+		AssetVersion version = newVersion(savedClone.getId(), 1, effectivePayloadRef, actorId);
 		AssetVersion saved = assetVersionRepository.save(version);
-		auditService.record("asset_version", "created", actorId, actorName,
-				"new draft v" + nextNo + " opened on asset " + asset.getName());
+		auditService.record("asset", "cloned", actorId, actorName,
+				"asset '" + original.getName() + "' (id=" + assetId + ") cloned → new asset id=" + savedClone.getId() + " draft v1");
 		return saved;
 	}
 
@@ -326,14 +378,24 @@ public class PublishingService {
 	/**
 	 * The current state of a gate is the latest event for (asset_version_id,
 	 * gate) — filtered to gates the viewer's rank can decide at. §6.
+	 * When orgId or projectId is supplied, only events for assets in that
+	 * org/project are returned.
 	 */
-	public List<PromotionEvent> pendingApprovalsForRank(int viewerRank) {
+	public List<PromotionEvent> pendingApprovalsForRank(Integer userId, Integer orgId, Integer projectId) {
+		int viewerRank = accessContextService.highestRank(userId);
+		AccessContext ctx = accessContextService.resolve(userId);
+		List<Integer> allowedProjectIds = resolveProjectFilter(ctx.getReachableProjectIds(), orgId, projectId);
+
 		Map<String, PromotionEvent> latestByKey = new HashMap<>();
 		for (String gate : PromotionGate.all()) {
 			if (viewerRank < PromotionGate.requiredRank(gate)) {
 				continue;
 			}
 			for (PromotionEvent event : promotionEventRepository.findByGateAndAction(gate, "submitted")) {
+				// Filter by org/project when a scope restriction is active.
+				if (!allowedProjectIds.isEmpty() && !isEventInProjects(event, allowedProjectIds)) {
+					continue;
+				}
 				String key = event.getAssetVersionId() + ":" + event.getGate();
 				PromotionEvent existing = latestByKey.get(key);
 				if (existing == null || event.getOccurredAt().isAfter(existing.getOccurredAt())) {
@@ -354,6 +416,33 @@ public class PublishingService {
 		}
 		pending.sort(Comparator.comparing(PromotionEvent::getOccurredAt));
 		return pending;
+	}
+
+	/** Returns true when the promotion event's asset belongs to one of the given project IDs. */
+	private boolean isEventInProjects(PromotionEvent event, List<Integer> projectIds) {
+		return assetVersionRepository.findById(event.getAssetVersionId())
+				.flatMap(v -> assetRepository.findById(v.getAssetId()))
+				.map(a -> projectIds.contains(a.getProjectId()))
+				.orElse(false);
+	}
+
+	/**
+	 * Narrows a base project-id list to a specific project (when projectId is
+	 * set) or to projects belonging to a specific org (when orgId is set).
+	 * Returns the base list unchanged when both are null.
+	 */
+	private List<Integer> resolveProjectFilter(List<Integer> baseIds, Integer orgId, Integer projectId) {
+		if (projectId != null) {
+			return baseIds.contains(projectId) ? Collections.singletonList(projectId) : Collections.emptyList();
+		}
+		if (orgId != null) {
+			List<Integer> orgProjectIds = projectRepository.findAll().stream()
+					.filter(p -> orgId.equals(p.getOrganisationId()))
+					.map(Project::getId)
+					.collect(Collectors.toList());
+			return baseIds.stream().filter(orgProjectIds::contains).collect(Collectors.toList());
+		}
+		return baseIds;
 	}
 
 	/** All promotion events for a version — the append-only audit trail  */

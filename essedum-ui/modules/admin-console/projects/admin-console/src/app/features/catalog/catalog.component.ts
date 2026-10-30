@@ -54,18 +54,18 @@ export class CatalogComponent implements OnInit {
     return asset.scope !== 'draft';
   }
 
-  // POST /assets/{id}/versions — creates a fresh draft; live version keeps serving.
-  // On success navigate to My Drafts where the new draft appears immediately.
-  editAsset(asset: CatalogRow): void {
+  // POST /assets/{id}/versions — clones the published asset as a fresh draft;
+  // live version keeps serving until the clone re-climbs the gates (TC-071).
+  cloneAsset(asset: CatalogRow): void {
     const userId = this.userContext.userId$.value;
     this.api
       .createNewVersion(asset.id, { payloadRef: '', actorId: userId, actorName: `User #${userId}` })
       .subscribe({
         next: () => {
-          this.notify.success('New draft created — opening My Drafts.');
+          this.notify.success('Asset cloned as new draft — opening My Drafts.');
           this.router.navigate(['../publishing'], { relativeTo: this.route });
         },
-        error: err => this.notify.error(err?.error?.message || 'Failed to open a new draft.'),
+        error: err => this.notify.error(err?.error?.message || 'Failed to clone the published asset.'),
       });
   }
 

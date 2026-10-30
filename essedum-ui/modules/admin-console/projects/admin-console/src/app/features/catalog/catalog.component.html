@@ -50,10 +50,10 @@
         <button
           *ngIf="canEdit(asset)"
           class="card-edit-btn"
-          (click)="editAsset(asset)"
-          [title]="'Open a new draft of ' + asset.name + ' — live version keeps serving'">
-          <mat-icon class="btn-icon">edit</mat-icon>
-          Edit
+          (click)="cloneAsset(asset)"
+          [title]="'Clone ' + asset.name + ' as a new draft — live version keeps serving'">
+          <mat-icon class="btn-icon">content_copy</mat-icon>
+          Clone
         </button>
       </div>
 

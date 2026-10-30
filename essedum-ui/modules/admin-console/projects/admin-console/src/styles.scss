@@ -757,6 +757,11 @@ body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button {
    ac-snackbar — MDC container reset only.
    All visual styling lives in AcSnackbarComponent (ViewEncapsulation.None).
    ════════════════════════════════════════════════════════════════════════════ */
+.mat-mdc-snack-bar-container.ac-snackbar {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
 .ac-snackbar .mdc-snackbar__surface {
   background: transparent !important;
   box-shadow: none !important;
