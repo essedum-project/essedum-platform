@@ -86,5 +86,92 @@ public class ICIPStreamingServicesController {
 			logger.error("Error deleting streaming service with id: {}", id, e);
 			return ResponseEntity.status(500).build();
 		}
-}
+	}
+
+	// ==================== PIPELINE APPROVAL ENDPOINTS ====================
+	private static final java.util.Map<String, java.util.Map<String, Object>> pipelineApprovals = new java.util.concurrent.ConcurrentHashMap<>();
+
+	@org.springframework.web.bind.annotation.PostMapping("/approval/submit")
+	public ResponseEntity<java.util.Map<String, Object>> submitPipelineForApproval(@org.springframework.web.bind.annotation.RequestBody java.util.Map<String, String> request) {
+		try {
+			String pipelineName = request.get("pipelineName");
+			String pipelineAlias = request.get("pipelineAlias");
+
+			if (pipelineName == null || pipelineName.trim().isEmpty()) {
+				logger.warn("Pipeline name is required");
+				return ResponseEntity.badRequest().body(createErrorResponse("Pipeline name is required"));
+			}
+
+			logger.info("Pipeline submitted for approval: {}", pipelineName);
+
+			java.util.Map<String, Object> approvalData = new java.util.HashMap<>();
+			approvalData.put("pipelineName", pipelineName);
+			approvalData.put("pipelineAlias", pipelineAlias);
+			approvalData.put("status", "pending");
+			approvalData.put("submittedAt", System.currentTimeMillis());
+
+			pipelineApprovals.put(pipelineName, approvalData);
+
+			java.util.Map<String, Object> response = new java.util.HashMap<>();
+			response.put("success", true);
+			response.put("message", "Pipeline submitted for approval");
+			response.put("pipelineName", pipelineName);
+			response.put("status", "pending");
+
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			logger.error("Error submitting pipeline for approval", e);
+			return ResponseEntity.status(500).body(createErrorResponse("Error: " + e.getMessage()));
+		}
+	}
+
+	@org.springframework.web.bind.annotation.GetMapping("/approval/approved-list")
+	public ResponseEntity<java.util.Map<String, Object>> getApprovedPipelines() {
+		try {
+			java.util.List<java.util.Map<String, Object>> approvedList = new java.util.ArrayList<>();
+			java.util.Map<String, Object> response = new java.util.HashMap<>();
+			response.put("success", true);
+			response.put("data", approvedList);
+			response.put("count", 0);
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			logger.error("Error fetching approved pipelines", e);
+			return ResponseEntity.status(500).body(createErrorResponse("Error: " + e.getMessage()));
+		}
+	}
+
+	@org.springframework.web.bind.annotation.GetMapping("/approval/pending-list")
+	public ResponseEntity<java.util.Map<String, Object>> getPendingPipelines() {
+		try {
+			java.util.List<java.util.Map<String, Object>> pendingList = new java.util.ArrayList<>();
+
+			for (java.util.Map.Entry<String, java.util.Map<String, Object>> entry : pipelineApprovals.entrySet()) {
+				java.util.Map<String, Object> approval = entry.getValue();
+				if ("pending".equals(approval.get("status"))) {
+					java.util.Map<String, Object> item = new java.util.HashMap<>();
+					item.put("name", entry.getKey());
+					item.put("pipelineAlias", approval.get("pipelineAlias"));
+					item.put("status", approval.get("status"));
+					item.put("submittedAt", approval.get("submittedAt"));
+					pendingList.add(item);
+				}
+			}
+
+			java.util.Map<String, Object> response = new java.util.HashMap<>();
+			response.put("success", true);
+			response.put("data", pendingList);
+			response.put("count", pendingList.size());
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			logger.error("Error fetching pending pipelines", e);
+			return ResponseEntity.status(500).body(createErrorResponse("Error: " + e.getMessage()));
+		}
+	}
+
+	private java.util.Map<String, Object> createErrorResponse(String message) {
+		java.util.Map<String, Object> response = new java.util.HashMap<>();
+		response.put("success", false);
+		response.put("message", message);
+		return response;
+	}
 }

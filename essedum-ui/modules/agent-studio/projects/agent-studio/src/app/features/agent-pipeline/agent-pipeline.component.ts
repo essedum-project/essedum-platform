@@ -4813,7 +4813,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   private loadApprovalsFromBackend(): void {
     // Load approved pipelines
-    this.http.get<any>('/api/aip/rbac/pipeline-approved').subscribe({
+    this.http.get<any>('/api/streamingServices/approval/approved-list').subscribe({
       next: (response: any) => {
         const approved = response?.data || [];
         this.approvedNames = new Set(approved.map((item: any) => (item.name || item).toString()));
@@ -4823,7 +4823,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     });
 
     // Load draft/pending pipelines
-    this.http.get<any>('/api/aip/rbac/pipeline-create').subscribe({
+    this.http.get<any>('/api/streamingServices/approval/pending-list').subscribe({
       next: (response: any) => {
         const drafts = response?.data || [];
         this.myDraftNames = new Set(drafts.map((item: any) => (item.name || item).toString()));
@@ -4896,7 +4896,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     console.debug('[Approval] Requesting approval for:', pipelineName);
 
     // Call backend API to submit for approval
-    this.http.post(`/api/aip/rbac/pipeline-approval`, {
+    this.http.post(`/api/streamingServices/approval/submit`, {
       pipelineName: pipelineName,
       pipelineAlias: this.pipelineAlias
     }).subscribe({
