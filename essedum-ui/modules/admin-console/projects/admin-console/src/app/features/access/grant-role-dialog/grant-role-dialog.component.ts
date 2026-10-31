@@ -52,6 +52,7 @@ export class GrantRoleDialogComponent implements OnInit {
       // Only the 5 new RBAC roles (rank defined), sorted lowest → highest rank
       this.roles = roles
         .filter(r => r.rank != null)
+        .filter(r => r.rank !== 1) // Hide AI Engineer (rank 1) from dropdowns
         .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
     });
     this.api.getUsers().subscribe(users => (this.users = users));

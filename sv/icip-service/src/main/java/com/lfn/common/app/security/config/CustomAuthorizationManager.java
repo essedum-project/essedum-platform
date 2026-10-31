@@ -76,7 +76,8 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				AntPathRequestMatcher.antMatcher("/api/demo-usecase/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/adapter_workflow/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/interactiveWorkflow/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/RPAExternalTask/**").matcher(authorizationContext.getRequest()).isMatch())
+				AntPathRequestMatcher.antMatcher("/api/RPAExternalTask/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/aip/rbac/**").matcher(authorizationContext.getRequest()).isMatch())
 			return new AuthorizationDecision(true);
 		
 		String urlForValidation=authorizationContext.getRequest().getRequestURI();

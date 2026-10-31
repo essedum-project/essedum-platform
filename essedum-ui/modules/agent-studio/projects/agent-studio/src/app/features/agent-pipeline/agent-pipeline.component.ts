@@ -4788,6 +4788,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         const user = JSON.parse(userStr);
         this.currentUserLogin = user?.user_login || '';
         console.debug('[Approval] Resolved currentUserLogin:', this.currentUserLogin);
+      } else {
+        console.debug('[Approval] No user in sessionStorage');
       }
 
       const roleStr = sessionStorage.getItem('role');
@@ -4795,7 +4797,12 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         const role = JSON.parse(roleStr);
         this.userRank = role?.rank ?? -1;
         console.debug('[Approval] Resolved userRank:', this.userRank);
+      } else {
+        console.debug('[Approval] No role in sessionStorage');
       }
+
+      // Trigger change detection to update template with resolved user context
+      this.cdr.detectChanges();
     } catch (error) {
       console.error('[Approval] Error resolving user context:', error);
     }

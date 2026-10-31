@@ -2846,22 +2846,30 @@
       line-height: 16px;
     }
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: linear-gradient(135deg, #3470e5, #4a7fe5);
       box-shadow: 0 4px 12px rgba(68, 128, 245, 0.3);
       transform: translateY(-1px);
     }
 
-    &:active {
+    &:active:not(:disabled) {
       transform: translateY(0);
       box-shadow: 0 2px 8px rgba(68, 128, 245, 0.2);
     }
 
     &:disabled {
-      opacity: 0.5;
+      opacity: 0.65;
       cursor: not-allowed;
       box-shadow: none;
       transform: none;
+      background: linear-gradient(135deg, #fb923c, #f97316);
+      color: #ffffff;
+    }
+
+    &.pending-btn {
+      background: linear-gradient(135deg, #fb923c, #f97316);
+      opacity: 0.65;
+      cursor: not-allowed;
     }
   }
 }
@@ -2887,13 +2895,22 @@
       background: linear-gradient(135deg, #4480f5, #5b8ef5);
       color: #ffffff;
 
-      &:hover {
+      &:hover:not(:disabled) {
         background: linear-gradient(135deg, #3470e5, #4a7fe5);
         box-shadow: 0 4px 12px rgba(68, 128, 245, 0.2);
       }
 
-      &:active {
+      &:active:not(:disabled) {
         box-shadow: 0 2px 8px rgba(68, 128, 245, 0.15);
+      }
+
+      &:disabled {
+        background: linear-gradient(135deg, #fb923c, #f97316);
+        opacity: 0.65;
+      }
+
+      &.pending-btn {
+        background: linear-gradient(135deg, #fb923c, #f97316);
       }
     }
   }

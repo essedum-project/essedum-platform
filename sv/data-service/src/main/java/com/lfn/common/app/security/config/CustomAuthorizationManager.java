@@ -118,7 +118,8 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				"/api/email/**", "/api/event/trigger/**", "/api/sre-availability-cal/**", "/api/usm-notificationss",
 				"/api/registerUser", "/api/userss/resetPassword", "/api/userss/checkemail", "/api/demo-usecase",
 				"/api/demo-usecase/**", "/api/adapter_workflow/**", "/api/interactiveWorkflow/**",
-				"/api/RPAExternalTask/**", "/" + prefix + "/streamingServices/delete/**", "/" + prefix + "/file/pipeline/**", "/" + prefix + "/folder/upload/**");
+				"/api/RPAExternalTask/**", "/" + prefix + "/streamingServices/delete/**", "/" + prefix + "/file/pipeline/**", "/" + prefix + "/folder/upload/**",
+				"/api/aip/rbac/**");
 	}
 
 	private boolean isPublicEndpoint(HttpServletRequest request) {

@@ -792,8 +792,10 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               const key = roleName.toLowerCase();
               if (seen.has(key)) continue;
               if (!this.roleMenuSvc.isRbacRole(roleName)) continue; // only our 5 RBAC roles
+              const rank = this.rbacRoleRankMap.get(key) ?? 0;
+              if (rank === 1) continue; // Hide AI Engineer (rank 1) from dropdowns
               seen.add(key);
-              rbacList.push({ name: roleName, rank: this.rbacRoleRankMap.get(key) ?? 0, id: a.roleId });
+              rbacList.push({ name: roleName, rank: rank, id: a.roleId });
             }
 
             // Highest rank (most privileged) first
@@ -1013,8 +1015,10 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       const key = roleName.toLowerCase();
       if (seen.has(key)) continue;
       if (!this.roleMenuSvc.isRbacRole(roleName)) continue;
+      const rank = this.rbacRoleRankMap.get(key) ?? 0;
+      if (rank === 1) continue; // Hide AI Engineer (rank 1) from dropdowns
       seen.add(key);
-      scopedRoles.push({ name: roleName, rank: this.rbacRoleRankMap.get(key) ?? 0, id: a.roleId });
+      scopedRoles.push({ name: roleName, rank: rank, id: a.roleId });
     }
     scopedRoles.sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
     if (scopedRoles.length > 0) {

@@ -31,9 +31,14 @@
                 <span *ngIf="isApproved()" class="approval-badge approved d-flex align-items-center gap-2">
                   <mat-icon>check_circle</mat-icon> Approved
                 </span>
-                <span *ngIf="isPendingApproval()" class="approval-badge pending d-flex align-items-center gap-2">
-                  <mat-icon>hourglass_top</mat-icon> Pending Approval
-                </span>
+                <button *ngIf="isPendingApproval()" 
+                  class="approval-request-btn pending-btn"
+                  type="button"
+                  disabled
+                  matTooltip="Pipeline sent for approval"
+                  matTooltipPosition="left">
+                  <mat-icon>schedule</mat-icon> Sent for Approval
+                </button>
                 <button *ngIf="!isPendingApproval() && !isApproved() && isOwnPipeline()" 
                   class="approval-request-btn"
                   type="button"
