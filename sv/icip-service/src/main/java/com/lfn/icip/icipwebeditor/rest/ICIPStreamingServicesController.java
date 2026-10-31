@@ -77,11 +77,15 @@ public class ICIPStreamingServicesController {
 	 */
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Void> deleteStreamingServices(@PathVariable(name = "id") Integer id) throws SQLException, InvalidRemoteException, TransportException, IOException, GitAPIException {
-		streamingServicesService.delete(id);
-		logger.info("Deleting streaming service by Id : {}", id);
-		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString()))
+		try {
+			streamingServicesService.delete(id);
+			logger.info("Deleting streaming service by Id : {}", id);
+			return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString()))
 				.build();
+		} catch (Exception e) {
+			logger.error("Error deleting streaming service with id: {}", id, e);
+			return ResponseEntity.status(500).build();
+		}
 	}
-
 
 }

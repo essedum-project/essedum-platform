@@ -111,6 +111,17 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   isGitLoading = false;
   showGitDropdown = false;
 
+  // Approval flow (AI Client = rank 0)
+  private readonly RBAC_BASE = '/api/usm';
+  userRank = 0;
+  currentUserId = 0;
+  private currentUserLogin = '';
+  private currentProjectId: number | null = null;
+  /** asset.name values of approved (project/org-scoped) pipeline assets visible to this user */
+  approvedNames = new Set<string>();
+  /** asset.name values of pipelines this user has submitted for approval (draft/in_review) */
+  myDraftNames = new Set<string>();
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -155,6 +166,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
 
     this.loadAuthentications();
     this.updateLastRefreshTime();
+    this.resolveUserContext();
   }
 
   private handleRouteState(): void {
@@ -247,6 +259,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   private loadAuthentications(): void {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
       this.deleteAuth = cipAuthority.includes('pipeline-delete');
+      this.createAuth = cipAuthority.includes('pipeline-create');
     });
   }
 
@@ -770,6 +783,99 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     } else {
     }
   }
+
+  // ── Approval flow ────────────────────────────────────────────────────────────
+
+  /** Reads userId, role rank, login, and RBAC projectId from sessionStorage. */
+  private resolveUserContext(): void {
+    try {
+      const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+      this.currentUserId = Number(user.id) || 0;
+      // preferred_username in JWT (= created_by) is typically the email prefix.
+      // Fall back to email prefix when user_login is absent so the match works.
+      const email = (user.user_email || '').toLowerCase();
+      const emailPrefix = email.includes('@') ? email.split('@')[0] : '';
+      this.currentUserLogin = (user.user_login || user.username || user.name || emailPrefix || '').toLowerCase();
+      const role = JSON.parse(sessionStorage.getItem('role') || '{}');
+      this.userRank = Number(role.rank) ?? 0;
+      console.debug('User context resolved:', {
+        currentUserId: this.currentUserId,
+        currentUserLogin: this.currentUserLogin,
+        userRank: this.userRank,
+        user: { id: user.id, user_login: user.user_login, user_email: user.user_email }
+      });
+    } catch (e) {
+      console.error('Error resolving user context:', e);
+    }
+
+    if (this.userRank === 0 && this.currentUserId) {
+      // Load catalog/drafts immediately (don't wait for project lookup).
+      this.loadApprovalStatus();
+      // Also look up the RBAC project ID so requestApproval() has it ready.
+      this.http.get<any[]>('/api/projects', { params: { size: '1000' } })
+        .pipe(catchError(() => of([])))
+        .subscribe(projects => {
+          const orgName = sessionStorage.getItem('organization') ?? '';
+          const match = projects.find((p: any) => p.name === orgName);
+          this.currentProjectId = match?.id ?? null;
+        });
+    }
+  }
+
+  /** Fetches catalog (approved) and all assets (my drafts) to populate approval sets. */
+  private loadApprovalStatus(): void {
+    if (!this.currentUserId) return;
+
+    this.http.get<any[]>(`${this.RBAC_BASE}/assets/catalog`, { params: { userId: this.currentUserId } })
+      .pipe(catchError(() => of([])))
+      .subscribe(assets => {
+        this.approvedNames.clear();
+        assets.filter(a => a.assetType === 'pipeline').forEach(a => {
+          if (a.name) this.approvedNames.add(a.name);
+        });
+      });
+
+    this.http.get<any[]>(`${this.RBAC_BASE}/assets`, { params: { userId: this.currentUserId } })
+      .pipe(catchError(() => of([])))
+      .subscribe(assets => {
+        this.myDraftNames.clear();
+        assets.filter(a => a.assetType === 'pipeline' && a.createdBy === this.currentUserId && !a.currentVersionId)
+          .forEach(a => { if (a.name) this.myDraftNames.add(a.name); });
+      });
+  }
+
+  /** Pipeline cards visible to the current user.
+   *  Higher ranks (AI Engineer+): see all cards, unchanged.
+   *  AI Client (rank 0): delegates to isCardVisibleToUser() — see that method.
+   */
+  get visibleCards(): any[] {
+    if (this.userRank > 0) return this.paginatedCards;
+    return this.paginatedCards.filter(card => this.isCardVisibleToUser(card));
+  }
+
+  /** Visibility check for AI Client (rank=0). Shows:
+   *  1. Admin-created pipelines (visible to all).
+   *  2. Pipelines where created_by OR lastmodifiedby matches the logged-in user.
+   *  3. Approved or draft pipelines submitted by this user.
+   *  Handles both snake_case (created_by) and camelCase (createdBy) from the API. */
+  private isCardVisibleToUser(card: any): boolean {
+    const createdBy = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
+    const lastModifiedBy = (card.target?.lastmodifiedby || card.lastmodifiedby || '').toLowerCase();
+    if (createdBy === 'admin') return true;
+    if (this.currentUserLogin) {
+      if (createdBy === this.currentUserLogin) return true;
+      if (lastModifiedBy === this.currentUserLogin) return true;
+    }
+    return this.approvedNames.has(card.alias) || this.myDraftNames.has(card.alias);
+  }
+
+  /** True when the card was created by admin or by the logged-in user — no approval needed. */
+  isDirectlyVisible(card: any): boolean {
+    const createdBy = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
+    return createdBy === 'admin' || (!!this.currentUserLogin && createdBy === this.currentUserLogin);
+  }
+
+
 
   /**
    * Get API parameters based on current pipeline mode

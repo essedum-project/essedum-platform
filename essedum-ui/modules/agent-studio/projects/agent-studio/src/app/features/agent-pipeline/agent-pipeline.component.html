@@ -25,6 +25,24 @@
                   {{ pipelineAlias }}
                 </span>
               </div>
+              
+              <!-- Approval Status and Button - Top Right Corner -->
+              <div class="approval-actions d-flex align-items-center gap-3" *ngIf="userRank === 0">
+                <span *ngIf="isApproved()" class="approval-badge approved d-flex align-items-center gap-2">
+                  <mat-icon>check_circle</mat-icon> Approved
+                </span>
+                <span *ngIf="isPendingApproval()" class="approval-badge pending d-flex align-items-center gap-2">
+                  <mat-icon>hourglass_top</mat-icon> Pending Approval
+                </span>
+                <button *ngIf="!isPendingApproval() && !isApproved() && isOwnPipeline()" 
+                  class="approval-request-btn"
+                  type="button"
+                  (click)="requestApproval($event)"
+                  matTooltip="Submit for approval"
+                  matTooltipPosition="left">
+                  <mat-icon>upload</mat-icon> Send for Approval
+                </button>
+              </div>
             </div>
 
             <!-- Main Content Panel -->

@@ -36,8 +36,7 @@ export class MenuConfigurationComponent implements OnInit, AfterViewInit {
     { rank: 4, label: 'AI Platform Admin',    roleName: 'admin' },
     { rank: 3, label: 'AI Organization Admin', roleName: 'organization admin' },
     { rank: 2, label: 'AI Project Admin',      roleName: 'project admin' },
-    { rank: 1, label: 'AI Engineer',           roleName: 'developer' },
-    { rank: 0, label: 'AI Client',             roleName: 'ai client' },
+    { rank: 0, label: 'AI Engineer',             roleName: 'ai client' },
   ];
   adminTierFilter: number | null = null;
 

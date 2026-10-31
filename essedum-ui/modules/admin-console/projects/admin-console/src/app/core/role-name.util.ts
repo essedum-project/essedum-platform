@@ -2,7 +2,7 @@
 export class RoleNameUtil {
   private static readonly ROLE_NAME_MAP: { [key: string]: string } = {
     // Legacy DB key names (pre-rbac-17)
-    'viewer': 'AI Client',
+    'viewer': 'AI Engineer',
     'developer': 'AI Engineer',
     'project_admin': 'AI Project Admin',
     'org_admin': 'AI Organization Admin',
@@ -11,11 +11,11 @@ export class RoleNameUtil {
     'admin': 'AI Platform Admin',
     'organization admin': 'AI Organization Admin',
     'project admin': 'AI Project Admin',
-    'ai client': 'AI Client',
+    'ai client': 'AI Engineer',
   };
 
   private static readonly RANK_LABEL_MAP: { [key: number]: string } = {
-    0: 'AI Client',
+    0: 'AI Engineer',
     1: 'AI Engineer',
     2: 'AI Project Admin',
     3: 'AI Organization Admin',

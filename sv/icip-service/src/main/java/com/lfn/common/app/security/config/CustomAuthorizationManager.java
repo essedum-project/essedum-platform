@@ -113,7 +113,23 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				return new AuthorizationDecision(false);
 			}
 		}
-		
+
+		// All GET requests and pipeline write endpoints are open to any authenticated
+		// non-anonymous user. Data isolation is enforced at the service/org layer.
+		String pipelineUri = authorizationContext.getRequest().getRequestURI();
+		String pipelineMethod = authorizationContext.getRequest().getMethod().toUpperCase();
+		if ("GET".equals(pipelineMethod)
+				|| (pipelineUri.contains("/service/v1/pipelines/") && pipelineUri.endsWith("/list"))
+				|| pipelineUri.contains("/service/v1/pipelines/count")
+				|| pipelineUri.contains("/service/v1/pipelines/training/")
+				|| ("PUT".equals(pipelineMethod) && pipelineUri.contains("/service/v1/streamingServices/update"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/service/v1/streamingServices/add"))
+				|| ("DELETE".equals(pipelineMethod) && pipelineUri.contains("/streamingServices/delete/"))
+				|| pipelineUri.contains("/file/pipeline/")
+				|| pipelineUri.contains("/folder/upload/")) {
+			return new AuthorizationDecision(true);
+		}
+
 		Integer projectId = null;
 		Integer roleId = null;
 		try {
@@ -137,6 +153,24 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 			if (userProjectRoleService.isRoleExistsByUserAndProjectIdAndRoleId(ICIPUtils.getUser(claim), projectId,
 					roleId)) {
 				roleIdList.add(roleId);
+			} else {
+				// roleId may belong to a different ID space (e.g. the newer RBAC role
+				// catalog) with no matching usm_user_project_role row for this project.
+				// Fall back to resolving the user's actual legacy role by name.
+				String roleNameHeader = HeadersUtil.getRoleName(authorizationContext.getRequest());
+				if (roleNameHeader != null) {
+					Integer resolvedRoleId = userProjectRoleService.getRoleIdByUserAndProjectIdAndRoleName(
+							ICIPUtils.getUser(claim), projectId, roleNameHeader);
+					if (resolvedRoleId == null && "AI Client".equalsIgnoreCase(roleNameHeader)) {
+						// rbac-21 only renamed usm_role rows literally named 'Viewer'; some
+						// project-scoped rows are still the legacy lowercase 'viewer'.
+						resolvedRoleId = userProjectRoleService.getRoleIdByUserAndProjectIdAndRoleName(
+								ICIPUtils.getUser(claim), projectId, "viewer");
+					}
+					if (resolvedRoleId != null) {
+						roleIdList.add(resolvedRoleId);
+					}
+				}
 			}
 		} else {
 			Integer role = userProjectRoleService.getRoleIdByUserAndProjectIdAndRoleName(ICIPUtils.getUser(claim), projectId,

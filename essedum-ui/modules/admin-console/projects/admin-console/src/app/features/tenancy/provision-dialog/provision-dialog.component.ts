@@ -33,7 +33,7 @@ export class ProvisionDialogComponent implements OnInit {
   };
 
   private readonly roleDescriptions: { [key: number]: string } = {
-    0: 'AI Client',
+    0: 'AI Engineer',
     1: 'AI Engineer',
     2: 'AI Project Admin',
     3: 'AI Organization Admin',

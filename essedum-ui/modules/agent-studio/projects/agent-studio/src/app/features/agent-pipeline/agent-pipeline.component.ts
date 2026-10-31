@@ -317,6 +317,12 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   showAppViewer = false;
   appUrl = '';
 
+  // ─── Approval workflow state ─────────────────────────────────────────────
+  currentUserLogin: string = '';
+  userRank: number = -1;
+  approvedNames: Set<string> = new Set();
+  myDraftNames: Set<string> = new Set();
+
   // ─── AI Chat Panel state (mockup) ────────────────────────────────────────
   @ViewChild('aiChatMessagesEl') aiChatMessagesEl?: ElementRef<HTMLDivElement>;
   @ViewChild('aiChatTextarea') aiChatTextareaEl?: ElementRef<HTMLTextAreaElement>;
@@ -601,6 +607,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
   ngOnInit(): void {
     this.lastRefreshedTime = new Date();
+    
+    // Resolve user context for approval workflow
+    this.resolveUserContext();
+    this.loadApprovalsFromBackend();
     
     // Initialize organisation from localStorage or default
     this.organisation = this.getConsistentOrganization();
@@ -4761,6 +4771,140 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
   toggleSecretVisibility(index: number): void {
     this.secretsShowValue[index] = !this.secretsShowValue[index];
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // APPROVAL WORKFLOW METHODS
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Resolve the current user's context from sessionStorage
+   * Loads user login name and rank for approval workflow
+   */
+  private resolveUserContext(): void {
+    try {
+      const userStr = sessionStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        this.currentUserLogin = user?.user_login || '';
+        console.debug('[Approval] Resolved currentUserLogin:', this.currentUserLogin);
+      }
+
+      const roleStr = sessionStorage.getItem('role');
+      if (roleStr) {
+        const role = JSON.parse(roleStr);
+        this.userRank = role?.rank ?? -1;
+        console.debug('[Approval] Resolved userRank:', this.userRank);
+      }
+    } catch (error) {
+      console.error('[Approval] Error resolving user context:', error);
+    }
+  }
+
+  /**
+   * Load approval statuses from backend RBAC endpoints
+   */
+  private loadApprovalsFromBackend(): void {
+    // Load approved pipelines
+    this.http.get<any>('/api/aip/rbac/pipeline-approved').subscribe({
+      next: (response: any) => {
+        const approved = response?.data || [];
+        this.approvedNames = new Set(approved.map((item: any) => (item.name || item).toString()));
+        console.debug('[Approval] Approved pipelines loaded:', this.approvedNames);
+      },
+      error: (err) => console.warn('[Approval] Failed to load approved pipelines:', err)
+    });
+
+    // Load draft/pending pipelines
+    this.http.get<any>('/api/aip/rbac/pipeline-create').subscribe({
+      next: (response: any) => {
+        const drafts = response?.data || [];
+        this.myDraftNames = new Set(drafts.map((item: any) => (item.name || item).toString()));
+        console.debug('[Approval] Draft pipelines loaded:', this.myDraftNames);
+      },
+      error: (err) => console.warn('[Approval] Failed to load draft pipelines:', err)
+    });
+  }
+
+  /**
+   * Check if current user owns this pipeline (created_by matches currentUserLogin)
+   */
+  isOwnPipeline(): boolean {
+    if (!this.streamItem || !this.currentUserLogin) {
+      console.debug('[Approval] isOwnPipeline: streamItem or currentUserLogin missing');
+      return false;
+    }
+
+    const createdBy = (this.streamItem.created_by || '').toLowerCase();
+    const userLogin = this.currentUserLogin.toLowerCase();
+    const isOwned = createdBy === userLogin;
+
+    console.debug('[Approval] isOwnPipeline check:', {
+      createdBy: this.streamItem.created_by,
+      currentUserLogin: this.currentUserLogin,
+      isOwned
+    });
+
+    return isOwned;
+  }
+
+  /**
+   * Check if pipeline is approved
+   */
+  isApproved(): boolean {
+    const pipelineName = (this.currentCname || this.pipelineAlias || '').toString();
+    const approved = this.approvedNames.has(pipelineName);
+    console.debug('[Approval] isApproved:', { pipelineName, approved });
+    return approved;
+  }
+
+  /**
+   * Check if pipeline is pending approval
+   */
+  isPendingApproval(): boolean {
+    const pipelineName = (this.currentCname || this.pipelineAlias || '').toString();
+    const pending = this.myDraftNames.has(pipelineName);
+    console.debug('[Approval] isPendingApproval:', { pipelineName, pending });
+    return pending;
+  }
+
+  /**
+   * Submit pipeline for approval
+   */
+  requestApproval(event: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    if (!this.isOwnPipeline()) {
+      this.service.message('You can only submit your own pipelines for approval', 'warning');
+      return;
+    }
+
+    const pipelineName = (this.currentCname || this.pipelineAlias || '').toString();
+    if (!pipelineName) {
+      this.service.message('Pipeline name is missing', 'error');
+      return;
+    }
+
+    console.debug('[Approval] Requesting approval for:', pipelineName);
+
+    // Call backend API to submit for approval
+    this.http.post(`/api/aip/rbac/pipeline-approval`, {
+      pipelineName: pipelineName,
+      pipelineAlias: this.pipelineAlias
+    }).subscribe({
+      next: (response: any) => {
+        console.debug('[Approval] Approval request submitted:', response);
+        this.service.message('Pipeline submitted for approval', 'success');
+        // Update the pending set
+        this.myDraftNames.add(pipelineName);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('[Approval] Error submitting for approval:', err);
+        this.service.message('Failed to submit for approval', 'error');
+      }
+    });
   }
 
   /**
