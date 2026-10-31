@@ -122,6 +122,7 @@ class CustomAuthSecurityConfig {
 					.requestMatchers(PATH_MATCHERS.matcher("/api/aip/langflow/get_langflow_agent_file")).permitAll()
 					.requestMatchers(PATH_MATCHERS.matcher("/api/aip/file/create/**")).permitAll()
 					.requestMatchers(PATH_MATCHERS.matcher("/api/aip/service/v1/streamingServices/update")).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/api/aip/streamingServices/approval/**")).permitAll()
 					.requestMatchers(PATH_MATCHERS.matcher(API_PATTERN)).access(customAuthorizationManager)
 					.requestMatchers(PATH_MATCHERS.matcher("/camunda/**")).access(customAuthorizationManager)
 					.anyRequest().authenticated());
@@ -138,6 +139,7 @@ class CustomAuthSecurityConfig {
                         .requestMatchers(PATH_MATCHERS.matcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
                         .requestMatchers(PATH_MATCHERS.matcher("/api/aip/langflow/langflow_export_file_details")).permitAll()
                         .requestMatchers(PATH_MATCHERS.matcher("/api/aip/langflow/get_langflow_agent_file")).permitAll()
+						.requestMatchers(PATH_MATCHERS.matcher("/api/aip/streamingServices/approval/**")).permitAll()
 						.requestMatchers(PATH_MATCHERS.matcher(API_PATTERN)).access(customAuthorizationManager)
 						.requestMatchers(PATH_MATCHERS.matcher("/camunda/**")).access(customAuthorizationManager)
                         .anyRequest().authenticated();
@@ -170,8 +172,8 @@ class CustomAuthSecurityConfig {
 
 			@Override
 			public boolean matches(HttpServletRequest request) {
-				// Exclude the langflow_agent_export, file/create, and streamingServices/update endpoints from authentication filter
-				if (request.getRequestURI().contains(LANGFLOW_AGENT_EXPORT) || request.getRequestURI().contains("/api/aip/file/create") || request.getRequestURI().contains("/api/aip/service/v1/streamingServices/update")) {
+				// Exclude the langflow_agent_export, file/create, streamingServices/update, and approval endpoints from authentication filter
+				if (request.getRequestURI().contains(LANGFLOW_AGENT_EXPORT) || request.getRequestURI().contains("/api/aip/file/create") || request.getRequestURI().contains("/api/aip/service/v1/streamingServices/update") || request.getRequestURI().contains("/api/aip/streamingServices/approval")) {
 					return false;
 				}
 				return PATH_MATCHERS.matcher(API_PATTERN).matches(request);
