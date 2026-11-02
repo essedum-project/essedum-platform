@@ -2,6 +2,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  HostListener,
   OnChanges,
   OnInit,
   OnDestroy,
@@ -15,6 +16,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { TagsService } from '@essedum/shared-lib';
 import { Location } from '@angular/common';
+import { GitHubService } from '../../sharedModule/services/github.service';
 import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
 import { forkJoin, of, Subject } from 'rxjs';
 import { catchError, map, takeUntil, timeout } from 'rxjs/operators';
@@ -134,23 +136,9 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
     public dialog: MatDialog,
     public tagService: TagsService,
     private location: Location,
+    private githubService: GitHubService,
     private http: HttpClient
   ) {}
-
-  gitLogin(): void {
-    this.isGitLoading = true;
-    setTimeout(() => {
-      this.isGitLoading = false;
-      this.service.message('Git login not configured', 'warning');
-    }, 500);
-  }
-
-  gitLogout(): void {
-    this.isGitAuthenticated = false;
-    this.gitUsername = '';
-    this.showGitDropdown = false;
-    sessionStorage.removeItem('git_username');
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.organization) this.refresh();
@@ -159,13 +147,19 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
   ngOnInit(): void {
     this.filteredCards = [];
     this.organization = sessionStorage.getItem('organization');
-    
+
     // Get the actual project name from sessionStorage for API calls
     try {
       const projectObj = JSON.parse(sessionStorage.getItem('project') || '{}');
       this.projectName = projectObj?.name || this.organization;
     } catch {
       this.projectName = this.organization;
+    }
+
+    const cachedGitUser = sessionStorage.getItem('git_username');
+    if (cachedGitUser) {
+      this.gitUsername = cachedGitUser;
+      this.isGitAuthenticated = true;
     }
 
     if (this.organization) {
@@ -177,7 +171,62 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
 
     this.loadAuthentications();
     this.updateLastRefreshTime();
-    this.resolveUserContext();
+    this.resolveUserContext();    
+  }
+
+  /**
+   * Remove all GitHub-related data cached in this browser session
+   * (username, session id, and any previously selected repo/branch).
+   */
+  private clearGitSessionData(): void {
+    this.githubService.clearClientGitSession();
+  }
+
+  toggleGitDropdown(event: Event): void {
+    event.stopPropagation();
+    this.showGitDropdown = !this.showGitDropdown;
+  }
+
+  @HostListener('document:click')
+  closeGitDropdown(): void {
+    this.showGitDropdown = false;
+  }
+
+  gitLogin(): void {
+    this.isGitLoading = true;
+    this.githubService.initiateOAuthFlow().subscribe({
+      next: (status) => {
+        this.isGitLoading = false;
+        this.isGitAuthenticated = true;
+        this.githubService.cacheClientAuth(status);
+        this.gitUsername = status.githubUsername || status.username || '';
+        this.service.message('Git login success', 'success');
+        this.changeDetectionRef.detectChanges();
+      },
+      error: () => {
+        this.isGitLoading = false;
+        this.changeDetectionRef.detectChanges();
+      }
+    });
+  }
+
+  gitLogout(): void {
+    this.showGitDropdown = false;
+    this.isGitLoading = true;
+    this.githubService.logout().subscribe({
+      next: () => {
+        this.isGitAuthenticated = false;
+        this.gitUsername = '';
+        this.isGitLoading = false;
+        this.clearGitSessionData();
+        this.service.message('Logout successful', 'success');
+        this.changeDetectionRef.detectChanges();
+      },
+      error: () => {
+        this.isGitLoading = false;
+        this.changeDetectionRef.detectChanges();
+      }
+    });
   }
 
   private handleRouteState(): void {
@@ -393,6 +442,21 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
           }
         });
       }
+
+      const adItems: any[] = agentDesigner?.items || [];
+      adItems.forEach((item: any) => {
+        const card = {
+          ...item,
+          alias: item.name || item.alias || item.id,
+          name: item.id || item.name,
+          isAgentDesigner: true,
+          cid: item.id
+        };
+        data.push(card);
+        if (item.id) {
+          this.agentDesignerCids.add(item.id);
+        }
+      });
 
       this.cards = data;
       this.filteredCards = data;
@@ -736,23 +800,17 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
 
   redirection(card: any): void {
     if (card.isAgentDesigner) {
-      const extras: NavigationExtras = {
-        queryParams: {
-          page: this.pageNumber,
-          search: this.filter,
-          org: this.organization,
-          roleId: JSON.parse(sessionStorage.getItem('role') || '{}').id,
-        },
+      try {
+        sessionStorage.setItem('agentDesignerNavigationCard', JSON.stringify({ card }));
+      } catch { /* ignore */ }
+      this.router.navigate(['./view/' + card.name], {
         queryParamsHandling: 'merge',
         state: {
-          cardTitle: 'Agent Pipelines',
-          pipelineAlias: card.alias,
-          card: card,
-          pipelineMode: this.pipelineMode,
+          card,
+          pipelineMode: this.pipelineMode
         },
-        relativeTo: this.route,
-      };
-      this.router.navigate(['./view/' + card.name], extras);
+        relativeTo: this.route
+      });
       return;
     }
     // Use the actual organization stored with this pipeline (from list API).
@@ -816,31 +874,26 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
   }
 
   deletePipeline(cid: string): void {
-    if (this.agentDesignerCids.has(cid)) {
-      const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result === 'delete') {
-          this.http.delete(`${this.AGENT_DESIGNER_API}/pipelines/${cid}`).subscribe({
-            next: () => {
-              this.service.message('Pipeline deleted successfully!', 'success');
-              this.onRefresh();
-            },
-            error: () => {
-              this.service.message('Some error occurred', 'error');
-            }
-          });
-        }
-      });
-      return;
-    }
     try {
       const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
       dialogRef.afterClosed().subscribe((result) => {
         if (result === 'delete') {
-          this.service.deletePipeline(cid).subscribe((res) => {
-            this.service.message('Pipeline deleted successfully!', 'success');
-            this.onRefresh();
-          });
+          if (this.agentDesignerCids.has(cid)) {
+            this.http.delete(`${this.AGENT_DESIGNER_API}/pipelines/${cid}`).subscribe({
+              next: () => {
+                this.service.message('Agent Designer Pipeline deleted successfully!', 'success');
+                this.onRefresh();
+              },
+              error: () => {
+                this.service.message('Error deleting Agent Designer Pipeline', 'error');
+              }
+            });
+          } else {
+            this.service.deletePipeline(cid).subscribe((res) => {
+              this.service.message('Pipeline deleted successfully!', 'success');
+              this.onRefresh();
+            });
+          }
         }
       });
     } catch (Exception) {
