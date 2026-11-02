@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { interval, Subject, forkJoin, of } from 'rxjs';
 import { exhaustMap, takeUntil, catchError, map } from 'rxjs/operators';
 import { Services } from '@essedum/shared-lib';
@@ -59,6 +59,12 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   selectedType = 'all';
   selectedStatus = 'all';
   isBackHovered = false;
+
+  // ── User context for approval workflow ──────────────────────────────────
+  private currentUserLogin = '';
+  private userRank = -1;
+  private selectedProjectId: number | null = null;
+  private selectedOrgId: number | null = null;
 
   // ── Page labels (dynamic, single source of truth) ───────────────────────
   readonly PAGETITLE          = 'Pipelines in Execution';
@@ -192,6 +198,9 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Extract user context for approval workflow filtering
+    this.extractUserContext();
+
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
@@ -220,6 +229,70 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  /**
+   * Extract user context from sessionStorage for approval workflow filtering.
+   * Reads user login, rank, project, and organization from sessionStorage.
+   */
+  private extractUserContext(): void {
+    try {
+      // Extract user login
+      const userStr = sessionStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        this.currentUserLogin = user?.user_login || '';
+        console.debug('[Approval] Pipeline-in-execution resolved currentUserLogin:', this.currentUserLogin);
+      }
+
+      // Extract user rank/roleId
+      const roleStr = sessionStorage.getItem('role');
+      if (roleStr) {
+        const role = JSON.parse(roleStr);
+        this.userRank = role?.rank ?? -1;
+        console.debug('[Approval] Pipeline-in-execution resolved userRank:', this.userRank);
+      }
+
+      // Extract project ID
+      let projectId = sessionStorage.getItem('project');
+      if (projectId) {
+        try {
+          const projectObj = JSON.parse(projectId);
+          this.selectedProjectId = projectObj?.id || projectObj?.projectId || Number(projectId) || null;
+        } catch {
+          this.selectedProjectId = Number(projectId) || null;
+        }
+      }
+
+      if (!this.selectedProjectId) {
+        const projIdStr = sessionStorage.getItem('projectId') || sessionStorage.getItem('CURRENTPRJID');
+        if (projIdStr) {
+          this.selectedProjectId = Number(projIdStr) || null;
+        }
+      }
+      console.debug('[Approval] Pipeline-in-execution resolved selectedProjectId:', this.selectedProjectId);
+
+      // Extract organization ID
+      const orgStr = sessionStorage.getItem('organization');
+      if (orgStr) {
+        try {
+          const orgObj = JSON.parse(orgStr);
+          this.selectedOrgId = orgObj?.id || orgObj?.organizationId || Number(orgStr) || null;
+        } catch {
+          this.selectedOrgId = Number(orgStr) || null;
+        }
+      }
+
+      if (!this.selectedOrgId) {
+        const orgIdStr = sessionStorage.getItem('organizationId') || sessionStorage.getItem('orgId');
+        if (orgIdStr) {
+          this.selectedOrgId = Number(orgIdStr) || null;
+        }
+      }
+      console.debug('[Approval] Pipeline-in-execution resolved selectedOrgId:', this.selectedOrgId);
+    } catch (error) {
+      console.error('[Approval] Pipeline-in-execution error extracting user context:', error);
+    }
+  }
+
   /** Fetches ALL records for the current type (pod-watcher + agent-designer) then applies client-side filters. */
   loadAllPipelines(): void {
     this.loading = true;
@@ -237,11 +310,30 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   /**
    * Fetches pipelines registered via Agent Designer and maps them to ExecutionPipeline shape.
    * These show as "Agent" type with status derived from the pipeline record.
+   * Sends user context headers for approval workflow filtering.
    */
   private fetchAgentDesignerPipelines(): import('rxjs').Observable<ExecutionPipeline[]> {
+    // Build headers with user context for approval visibility filtering
+    let headers = new HttpHeaders();
+    if (this.currentUserLogin) {
+      headers = headers.set('user-login', this.currentUserLogin);
+    }
+    if (this.selectedProjectId !== null) {
+      headers = headers.set('project', String(this.selectedProjectId));
+    }
+    if (this.selectedOrgId !== null) {
+      headers = headers.set('organisation', String(this.selectedOrgId));
+    }
+    if (this.userRank >= 0) {
+      headers = headers.set('roleId', String(this.userRank));
+    }
+
+    const options = headers.keys().length > 0 ? { headers } : undefined;
+
     return this.http
       .get<{ items: AgentDesignerPipeline[]; total: number }>(
-        `${this.AGENT_DESIGNER_API}/pipelines?limit=200`
+        `${this.AGENT_DESIGNER_API}/pipelines?limit=200`,
+        options
       )
       .pipe(
         map(res => (res.items || []).map(p => this.mapAgentDesignerPipeline(p))),

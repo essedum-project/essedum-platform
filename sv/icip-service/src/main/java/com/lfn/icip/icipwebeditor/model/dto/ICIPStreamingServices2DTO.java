@@ -93,4 +93,18 @@ public interface ICIPStreamingServices2DTO {
 	 */
 	String getRunnerServiceStatus();
 
+	/**
+	 * The user who created this pipeline.
+	 *
+	 * @return the created by
+	 */
+	String getCreatedBy();
+
+	/**
+	 * The user who last modified this pipeline.
+	 *
+	 * @return the lastmodifiedby
+	 */
+	String getLastmodifiedby();
+
 }

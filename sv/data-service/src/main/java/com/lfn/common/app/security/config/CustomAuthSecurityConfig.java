@@ -162,10 +162,11 @@ class CustomAuthSecurityConfig {
 			csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 			csrf.csrfTokenRequestHandler(requestHandler);
 			csrf.ignoringRequestMatchers(antMatchers(ignoreCsrfUrls));
-			// Ignore CSRF for actuator and WebSocket endpoints
+			// Ignore CSRF for actuator, WebSocket, and approval endpoints
 			csrf.ignoringRequestMatchers(
 					PATH_MATCHERS.matcher(ACTUATOR_PATTERN),
-					PATH_MATCHERS.matcher("/ws/**")
+					PATH_MATCHERS.matcher("/ws/**"),
+					PATH_MATCHERS.matcher("/api/aip/streamingServices/approval/**")
 			);
 		});
 		FilterChainProxy filterChainProxy = new FilterChainProxy(new SecurityFilterChain() {

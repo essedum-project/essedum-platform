@@ -33,6 +33,7 @@ export interface Asset {
   scope: 'draft' | 'project' | 'organization' | 'public';
   currentVersionId: number | null;
   createdBy: number | null;
+  creatorName: string | null;
 }
 
 export interface AssetVersion {

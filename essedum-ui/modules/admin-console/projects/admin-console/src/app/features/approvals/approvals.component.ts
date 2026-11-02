@@ -1,5 +1,6 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { combineLatest, switchMap, map, take } from 'rxjs';
+import { Component, OnInit, ViewChild, ViewChildren, QueryList, AfterViewInit, OnDestroy } from '@angular/core';
+import { combineLatest, switchMap, map, take, of, Subject } from 'rxjs';
+import { takeUntil, distinctUntilChanged } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,15 +24,47 @@ interface PromotionEventRow extends PromotionEvent {
   styleUrls: ['./approvals.component.scss'],
   standalone: false,
 })
-export class ApprovalsComponent implements OnInit, AfterViewInit {
+export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
   pending = new MatTableDataSource<PromotionEventRow>([]);
+  readyForOrgEscalation: PromotionEventRow[] = [];
+
+  // Streaming services approvals (Pipeline/Agent/MCP) - with pagination support
+  streamingApprovals: any[] = [];
+  streamingOrgApprovals: any[] = [];
+  streamingApprovalsDataSource = new MatTableDataSource<any>([]);
+  streamingOrgApprovalsDataSource = new MatTableDataSource<any>([]);
+  
+  projectId: number | null = null;
+  orgId: number | null = null;
+  userRank: number = -1;
 
   readonly columns = ['assetName', 'versionNo', 'gate', 'actorName', 'occurredAt', 'actions'];
+  readonly streamingColumns = ['name', 'type', 'createdBy', 'createdDate', 'status', 'actions'];
+  readonly streamingOrgColumns = ['name', 'type', 'createdBy', 'status', 'actions'];
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatPaginator) legacyPaginator!: MatPaginator;
+  @ViewChildren(MatPaginator) allPaginators!: QueryList<MatPaginator>;
+  
+  private readonly destroy$ = new Subject<void>();
 
   ngAfterViewInit(): void {
-    this.pending.paginator = this.paginator;
+    // Bind legacy paginator
+    this.legacyPaginator.pageSizeOptions = [5, 10, 25];
+    this.pending.paginator = this.legacyPaginator;
+    
+    // Bind paginators for streaming tables
+    const paginators = this.allPaginators.toArray();
+    if (paginators.length >= 1) {
+      this.streamingApprovalsDataSource.paginator = paginators[0];
+    }
+    if (paginators.length >= 2) {
+      this.streamingOrgApprovalsDataSource.paginator = paginators[1];
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   constructor(
@@ -42,33 +75,158 @@ export class ApprovalsComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
+    // Load immediately
     this.load();
+    
+    // Reload when projectId or orgId changes
+    combineLatest([this.userContext.projectId$, this.userContext.orgId$])
+      .pipe(
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(([projectId, orgId]) => {
+        console.log('[APPROVALS] Context changed:', { projectId, orgId });
+        this.load();
+      });
   }
 
   private load(): void {
+    console.log('[APPROVALS] load() called');
+    
+    // Log current context from sessionStorage
+    try {
+      const proj = JSON.parse(sessionStorage.getItem('project') || '{}');
+      const org = JSON.parse(sessionStorage.getItem('organisation') || '{}');
+      console.log('[APPROVALS] sessionStorage data:', { proj, org });
+    } catch (e) {
+      console.error('[APPROVALS] Error reading sessionStorage:', e);
+    }
+    
     combineLatest([this.userContext.userId$, this.userContext.orgId$, this.userContext.projectId$])
       .pipe(
         take(1),
-        switchMap(([userId, orgId, projectId]) =>
-          combineLatest([
-            this.api.getApprovals(userId, orgId, projectId),
-            this.api.getVersions(userId, orgId, projectId),
-            this.api.getAssets(userId, orgId, projectId),
-          ]),
-        ),
-        map(([events, versions, assets]) =>
-          events.map(e => {
-            const version = versions.find(v => v.id === e.assetVersionId);
-            const asset = version ? assets.find(a => a.id === version.assetId) : undefined;
-            return {
-              ...e,
-              versionNo: version?.versionNo ?? 0,
-              assetName: asset?.name ?? `Version #${e.assetVersionId}`,
-            };
-          }),
-        ),
+        switchMap(([userId, orgId, projectId]) => {
+          console.log('[APPROVALS] Step 1 - Context from UserContextService:', { userId, orgId, projectId });
+          
+          // Fallback: If projectId is not from UserContextService, try sessionStorage
+          let finalProjectId = projectId;
+          if (!finalProjectId) {
+            try {
+              const projObj = JSON.parse(sessionStorage.getItem('project') || '{}');
+              finalProjectId = projObj?.id ? Number(projObj.id) : null;
+              console.log('[APPROVALS] Step 2a - Got projectId from sessionStorage:', finalProjectId);
+            } catch (e) {
+              console.error('[APPROVALS] Error reading project from sessionStorage:', e);
+            }
+          } else {
+            console.log('[APPROVALS] Step 2a - Using projectId from UserContextService:', finalProjectId);
+          }
+
+          // Fallback: If orgId is not from UserContextService, try sessionStorage
+          let finalOrgId = orgId;
+          if (!finalOrgId) {
+            try {
+              const orgObj = JSON.parse(sessionStorage.getItem('organisation') || '{}');
+              finalOrgId = orgObj?.id ? Number(orgObj.id) : null;
+              console.log('[APPROVALS] Step 2b - Got orgId from sessionStorage:', finalOrgId);
+            } catch (e) {
+              console.error('[APPROVALS] Error reading organisation from sessionStorage:', e);
+            }
+          } else {
+            console.log('[APPROVALS] Step 2b - Using orgId from UserContextService:', finalOrgId);
+          }
+
+          // Store for use in methods
+          this.projectId = finalProjectId;
+          this.orgId = finalOrgId;
+
+          console.log('[APPROVALS] Step 3 - Final IDs to use:', { finalProjectId, finalOrgId, userId });
+          
+          // Load NEW streaming service approvals ONLY
+          // Rank 2: can see PENDING_PROJECT_APPROVAL (needs projectId)
+          // Rank 3: can see PENDING_ORG_APPROVAL (needs orgId)
+          if (!finalProjectId && !finalOrgId) {
+            console.warn('[APPROVALS] WARNING: No projectId or orgId found! Will return empty arrays');
+            return combineLatest([of([]), of([])]);
+          }
+          
+          const streamingApi$ = finalProjectId ? this.api.getProjectAdminApprovals(finalProjectId) : of([]);
+          const streamingOrgApi$ = finalOrgId ? this.api.getOrgAdminApprovals(finalOrgId) : of([]);
+
+          return combineLatest([streamingApi$, streamingOrgApi$]);
+        }),
+        map(([streamingApprovals, streamingOrgApprovals]) => {
+          console.log('[APPROVALS] Step 4 - Received raw data:', { streamingApprovals, streamingOrgApprovals });
+          
+          try {
+            // Extract data arrays from response objects (API returns {count, data, success})
+            // Handle both array and object responses safely
+            let approvalsList: any[] = [];
+            if (Array.isArray(streamingApprovals)) {
+              console.log('[APPROVALS] streamingApprovals is array, using directly');
+              approvalsList = streamingApprovals;
+            } else if (streamingApprovals && typeof streamingApprovals === 'object') {
+              if (Array.isArray(streamingApprovals.data)) {
+                console.log('[APPROVALS] streamingApprovals.data is array, extracting');
+                approvalsList = streamingApprovals.data;
+              } else {
+                console.warn('[APPROVALS] streamingApprovals.data is not an array:', streamingApprovals.data);
+              }
+            }
+            
+            let orgApprovalsList: any[] = [];
+            if (Array.isArray(streamingOrgApprovals)) {
+              console.log('[APPROVALS] streamingOrgApprovals is array, using directly');
+              orgApprovalsList = streamingOrgApprovals;
+            } else if (streamingOrgApprovals && typeof streamingOrgApprovals === 'object') {
+              if (Array.isArray(streamingOrgApprovals.data)) {
+                console.log('[APPROVALS] streamingOrgApprovals.data is array, extracting');
+                orgApprovalsList = streamingOrgApprovals.data;
+              } else {
+                console.warn('[APPROVALS] streamingOrgApprovals.data is not an array:', streamingOrgApprovals.data);
+              }
+            }
+            
+            console.log('[APPROVALS] Step 5 - Extracted arrays:', { 
+              approvalsList_length: approvalsList.length, 
+              orgApprovalsList_length: orgApprovalsList.length,
+              approvalsList,
+              orgApprovalsList
+            });
+            
+            // Store streaming services for display with data sources
+            this.streamingApprovals = approvalsList;
+            this.streamingApprovalsDataSource.data = approvalsList;
+            
+            this.streamingOrgApprovals = orgApprovalsList;
+            this.streamingOrgApprovalsDataSource.data = orgApprovalsList;
+          } catch (error) {
+            console.error('[APPROVALS] Error extracting data:', error);
+            this.streamingApprovals = [];
+            this.streamingApprovalsDataSource.data = [];
+            
+            this.streamingOrgApprovals = [];
+            this.streamingOrgApprovalsDataSource.data = [];
+          }
+          
+          // Return empty array for legacy pending table
+          return [];
+        }),
       )
-      .subscribe(rows => (this.pending.data = rows));
+      .subscribe({
+        next: (rows) => {
+          console.log('[APPROVALS] Step 6 - Subscribe success, setting pending.data');
+          this.pending.data = rows;
+        },
+        error: (err) => {
+          console.error('[APPROVALS] Step 6 - Subscribe error:', err);
+          this.streamingApprovals = [];
+          this.streamingApprovalsDataSource.data = [];
+          
+          this.streamingOrgApprovals = [];
+          this.streamingOrgApprovalsDataSource.data = [];
+        }
+      });
   }
 
   gateLabel(gate: string): string {
@@ -106,5 +264,53 @@ export class ApprovalsComponent implements OnInit, AfterViewInit {
             error: err => this.notify.error(err?.error?.message || `Failed to ${action} the submission.`),
           });
       });
+  }
+
+  // Streaming service (Pipeline/Agent/MCP) approval methods
+  approveStreamingService(resourceId: number, isOrgLevel: boolean = false): void {
+    // Get projectId from component property or fallback to sessionStorage
+    let finalProjectId = this.projectId;
+    if (!finalProjectId) {
+      try {
+        const projObj = JSON.parse(sessionStorage.getItem('project') || '{}');
+        finalProjectId = projObj?.id ? Number(projObj.id) : null;
+        console.log('[APPROVALS] approveStreamingService - Using projectId from sessionStorage:', finalProjectId);
+      } catch (e) {
+        console.error('[APPROVALS] Error reading projectId from sessionStorage:', e);
+      }
+    }
+    
+    const apiCall$ = isOrgLevel
+      ? this.api.approveOrgApproval(resourceId)
+      : this.api.approveProjectApproval(resourceId, finalProjectId || 0);
+
+    apiCall$.subscribe({
+      next: () => {
+        this.notify.success('Resource approved successfully');
+        this.load();
+      },
+      error: err => this.notify.error(err?.error?.message || 'Failed to approve'),
+    });
+  }
+
+  rejectStreamingService(resourceId: number, isOrgLevel: boolean = false): void {
+    const apiCall$ = isOrgLevel
+      ? this.api.rejectOrgApproval(resourceId)
+      : this.api.rejectProjectApproval(resourceId);
+
+    apiCall$.subscribe({
+      next: () => {
+        this.notify.success('Resource rejected successfully');
+        this.load();
+      },
+      error: err => this.notify.error(err?.error?.message || 'Failed to reject'),
+    });
+  }
+
+  /**
+   * Check if item is a streaming service (has approval_status field)
+   */
+  isStreamingService(item: any): boolean {
+    return item && item.hasOwnProperty('approval_status') && item.hasOwnProperty('cid');
   }
 }

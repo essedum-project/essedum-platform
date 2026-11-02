@@ -105,5 +105,17 @@ public class ICIPStreamingServices2DTOImpl implements ICIPStreamingServices2DTO 
         }
         return null;
     }
+
+    @Override
+    public String getCreatedBy() {
+        Object val = data.get("created_by");
+        return val != null ? val.toString() : null;
+    }
+
+    @Override
+    public String getLastmodifiedby() {
+        Object val = data.get("lastmodifiedby");
+        return val != null ? val.toString() : null;
+    }
 }
 

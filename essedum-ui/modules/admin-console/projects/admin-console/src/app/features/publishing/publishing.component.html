@@ -3,74 +3,84 @@
     <div class="page-header-left">
       <div>
         <h2>My Drafts</h2>
-        <span class="page-subtitle">Review and submit your draft assets for approval</span>
+        <span class="page-subtitle">Resources approved at project level - Submit to organization for approval</span>
       </div>
-    </div>
-    <div class="page-header-actions page-actions-group">
-      <button *ngIf="canCreate" mat-raised-button color="primary" (click)="newDraft()">New Draft</button>
     </div>
   </div>
 
-  <table mat-table [dataSource]="versions" class="admin-console-table">
-    <ng-container matColumnDef="assetName">
-      <th mat-header-cell *matHeaderCellDef>Asset</th>
-      <td mat-cell *matCellDef="let row">{{ row.assetName }}</td>
-    </ng-container>
-    <ng-container matColumnDef="versionNo">
-      <th mat-header-cell *matHeaderCellDef>Version</th>
-      <td mat-cell *matCellDef="let row">v{{ row.versionNo }}</td>
-    </ng-container>
-    <ng-container matColumnDef="status">
-      <th mat-header-cell *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let row">
-        <span [ngClass]="'status-badge status-badge-' + row.status">{{ statusLabel(row.status) }}</span>
-      </td>
-    </ng-container>
-    <ng-container matColumnDef="comments">
-      <th mat-header-cell *matHeaderCellDef>Comments</th>
-      <td mat-cell *matCellDef="let row">
-        <span
-          *ngIf="rejectionNote(row.id)"
-          class="comment-badge"
-          [matTooltip]="rejectionNote(row.id)">
-          <i class="fa fa-comment"></i>{{ rejectionNote(row.id) }}
-        </span>
-      </td>
-    </ng-container>
-    <ng-container matColumnDef="nextGate">
-      <th mat-header-cell *matHeaderCellDef>Next stage</th>
-      <td mat-cell *matCellDef="let row">
-        <span class="next-gate" [matTooltip]="'Submitting sends this version to the ' + gateLabel(row.id) + ' gate'">
-          {{ gateLabel(row.id) }}
-        </span>
-      </td>
-    </ng-container>
-    <ng-container matColumnDef="updatedAt">
-      <th mat-header-cell *matHeaderCellDef>Updated</th>
-      <td mat-cell *matCellDef="let row">{{ row.updatedAt | date: 'medium' }}</td>
-    </ng-container>
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let row">
-        <button *ngIf="canEdit(row)"
-          style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.28);color:#4f8ef7;font-size:12px;font-weight:500;font-family:inherit;padding:5px 12px;border-radius:6px;cursor:pointer;outline:none;display:inline-flex;align-items:center;gap:5px;margin-right:6px;transition:background 0.12s;"
-          (click)="edit(row)">
-          <i class="fa fa-pencil" style="font-size:11px;"></i> Edit
-        </button>
-        <button *ngIf="canSubmit(row)"
-          style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.28);color:#4f8ef7;font-size:12px;font-weight:500;font-family:inherit;padding:5px 12px;border-radius:6px;cursor:pointer;outline:none;display:inline-flex;align-items:center;gap:5px;transition:background 0.12s;"
-          (click)="submit(row)">
-          <i class="fa fa-paper-plane" style="font-size:11px;"></i> Submit
-        </button>
-      </td>
-    </ng-container>
-    <tr mat-header-row *matHeaderRowDef="columns"></tr>
-    <tr mat-row *matRowDef="let row; columns: columns"></tr>
-  </table>
-  <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+  <!-- STREAMING SERVICES (Pipeline/Agent/MCP) - Ready for Organization Approval -->
+  <div class="streaming-drafts-section">
+    <div class="section-title">
+      <mat-icon>storage</mat-icon>
+      <span>Resources Ready for Organization Approval</span>
+    </div>
 
-  <p *ngIf="versions.data.length === 0" class="empty-state">
-    <ng-container *ngIf="canCreate">No drafts yet. Click <strong>New Draft</strong> to create an asset.</ng-container>
-    <ng-container *ngIf="!canCreate">No drafts are visible for your current role.</ng-container>
-  </p>
+    <table mat-table [dataSource]="streamingServicesDraftsDataSource" class="admin-console-table streaming-table">
+      
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Resource Name</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="resource-name">{{ row.alias || row.name }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Type Column -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="resource-type-badge" [ngClass]="'type-' + (row.resource_type | lowercase)">
+            {{ row.resource_type || 'Agent' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Created By Column -->
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="created-by-text">{{ row.created_by }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Date Column -->
+      <ng-container matColumnDef="createdDate">
+        <th mat-header-cell *matHeaderCellDef>Created Date</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="date-text">{{ row.created_date | date: 'medium' }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="status-badge status-approved">
+            <mat-icon>check_circle</mat-icon> Project Approved
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-button class="btn-submit-org" (click)="submitToOrg(row)">
+            <mat-icon>send</mat-icon> Submit to Organization
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="streamingColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="streamingServicesDrafts.length > 0">
+      <mat-paginator #streamingPaginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+    </div>
+
+    <p *ngIf="streamingServicesDrafts.length === 0" class="empty-state">
+      <mat-icon>info</mat-icon>
+      <span>No resources ready for organization approval at this time.</span>
+    </p>
+  </div>
 </div>

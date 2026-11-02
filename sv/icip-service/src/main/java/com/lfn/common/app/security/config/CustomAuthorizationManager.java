@@ -76,8 +76,7 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				AntPathRequestMatcher.antMatcher("/api/demo-usecase/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/adapter_workflow/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/interactiveWorkflow/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/RPAExternalTask/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/aip/rbac/**").matcher(authorizationContext.getRequest()).isMatch())
+				AntPathRequestMatcher.antMatcher("/api/RPAExternalTask/**").matcher(authorizationContext.getRequest()).isMatch())
 			return new AuthorizationDecision(true);
 		
 		String urlForValidation=authorizationContext.getRequest().getRequestURI();
@@ -124,10 +123,7 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				|| pipelineUri.contains("/service/v1/pipelines/count")
 				|| pipelineUri.contains("/service/v1/pipelines/training/")
 				|| ("PUT".equals(pipelineMethod) && pipelineUri.contains("/service/v1/streamingServices/update"))
-				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/service/v1/streamingServices/add"))
-				|| ("DELETE".equals(pipelineMethod) && pipelineUri.contains("/streamingServices/delete/"))
-				|| pipelineUri.contains("/file/pipeline/")
-				|| pipelineUri.contains("/folder/upload/")) {
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/service/v1/streamingServices/add"))) {
 			return new AuthorizationDecision(true);
 		}
 
@@ -154,24 +150,6 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 			if (userProjectRoleService.isRoleExistsByUserAndProjectIdAndRoleId(ICIPUtils.getUser(claim), projectId,
 					roleId)) {
 				roleIdList.add(roleId);
-			} else {
-				// roleId may belong to a different ID space (e.g. the newer RBAC role
-				// catalog) with no matching usm_user_project_role row for this project.
-				// Fall back to resolving the user's actual legacy role by name.
-				String roleNameHeader = HeadersUtil.getRoleName(authorizationContext.getRequest());
-				if (roleNameHeader != null) {
-					Integer resolvedRoleId = userProjectRoleService.getRoleIdByUserAndProjectIdAndRoleName(
-							ICIPUtils.getUser(claim), projectId, roleNameHeader);
-					if (resolvedRoleId == null && "AI Client".equalsIgnoreCase(roleNameHeader)) {
-						// rbac-21 only renamed usm_role rows literally named 'Viewer'; some
-						// project-scoped rows are still the legacy lowercase 'viewer'.
-						resolvedRoleId = userProjectRoleService.getRoleIdByUserAndProjectIdAndRoleName(
-								ICIPUtils.getUser(claim), projectId, "viewer");
-					}
-					if (resolvedRoleId != null) {
-						roleIdList.add(resolvedRoleId);
-					}
-				}
 			}
 		} else {
 			Integer role = userProjectRoleService.getRoleIdByUserAndProjectIdAndRoleName(ICIPUtils.getUser(claim), projectId,

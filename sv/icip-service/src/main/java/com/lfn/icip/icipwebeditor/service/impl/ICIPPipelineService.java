@@ -979,8 +979,60 @@ public class ICIPPipelineService implements IICIPSearchable{
 		}
 	}
 
+	/**
+	 * Strips trailing slashes so a configured base URL can be concatenated with a
+	 * path that already starts with "/".
+	 */
+	private static String trimTrailingSlash(String url) {
+		String trimmed = url.trim();
+		while (trimmed.endsWith("/")) {
+			trimmed = trimmed.substring(0, trimmed.length() - 1);
+		}
+		return trimmed;
+	}
+
+	private static boolean isBlank(String value) {
+		return value == null || value.trim().isEmpty();
+	}
+
+	/**
+	 * Builds the image reference, tolerating a registry prefix configured with or
+	 * without a trailing slash.
+	 */
+	private String buildTargetImageTag(String alias) {
+		String prefix = isBlank(containerRegistryPrefix) ? "" : containerRegistryPrefix.trim();
+		if (!prefix.isEmpty() && !prefix.endsWith("/")) {
+			prefix = prefix + "/";
+		}
+		return prefix + alias + ":v1";
+	}
+
 	private ResponseEntity<?> deployPipelineAsContainer(String jobType, String cname, String alias, String org) {
 		try {
+			// A blank base URL silently produces a relative URI, which fails deep inside the
+			// HTTP client ("Target host is not specified"). Fail fast with the property name
+			// so the misconfiguration is actionable.
+			if (isBlank(containerPyJobUrl)) {
+				logger.error("Container deploy aborted for pipeline {}: icip.container.pyjob.url is not configured", cname);
+				return new ResponseEntity<>(
+						"Container deploy failed: py-job executor URL is not configured. "
+								+ "Set CONTAINER_PYJOB_URL (icip.container.pyjob.url) on the icip-service.",
+						HttpStatus.SERVICE_UNAVAILABLE);
+			}
+			if (isBlank(containerDeployerUrl)) {
+				logger.error("Container deploy aborted for pipeline {}: icip.container.deployer.url is not configured", cname);
+				return new ResponseEntity<>(
+						"Container deploy failed: container deployer URL is not configured. "
+								+ "Set CONTAINER_DEPLOYER_URL (icip.container.deployer.url) on the icip-service.",
+						HttpStatus.SERVICE_UNAVAILABLE);
+			}
+			if (isBlank(containerMinioEndpoint) || isBlank(containerMinioAccessKey) || isBlank(containerMinioSecretKey)) {
+				logger.error("Container deploy aborted for pipeline {}: MinIO connection details are not configured", cname);
+				return new ResponseEntity<>(
+						"Container deploy failed: MinIO connection details are not configured. "
+								+ "Set MINIO_URL, MINIO_ACCESS_KEY and MINIO_SECRET_KEY on the icip-service.",
+						HttpStatus.SERVICE_UNAVAILABLE);
+			}
 			// Use findByOrgAndName (list) to handle pipelines with multiple script entries
 			// (e.g. both a .py and an .ipynb row share the same cname). Filter to .py only
 			// since the container runtime executes Python. Each deploy request opens a fresh
@@ -1017,8 +1069,8 @@ public class ICIPPipelineService implements IICIPSearchable{
 			body.add("zip_file", new ByteArrayResource(zipBytes) {
 				@Override public String getFilename() { return zipName; }
 			});
-			body.add("deployer_url", containerDeployerUrl);
-			body.add("target_image_tag", containerRegistryPrefix + alias + ":v1");
+			body.add("deployer_url", trimTrailingSlash(containerDeployerUrl));
+			body.add("target_image_tag", buildTargetImageTag(alias));
 			body.add("deployment_name", alias);
 			body.add("namespace", namespace);
 			body.add("minio_endpoint", containerMinioEndpoint);
@@ -1030,7 +1082,7 @@ public class ICIPPipelineService implements IICIPSearchable{
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
 			ResponseEntity<String> response = restTemplate.postForEntity(
-				containerPyJobUrl + "/container-deploy-with-zip", entity, String.class);
+				trimTrailingSlash(containerPyJobUrl) + "/container-deploy-with-zip", entity, String.class);
 			return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error("Container deploy failed for pipeline: " + cname, e);
@@ -1040,8 +1092,14 @@ public class ICIPPipelineService implements IICIPSearchable{
 
 	public ResponseEntity<?> getContainerDeployStatus(String deployId) {
 		try {
+			if (isBlank(containerPyJobUrl)) {
+				logger.error("Cannot fetch container deploy status for {}: icip.container.pyjob.url is not configured", deployId);
+				return new ResponseEntity<>(
+						"py-job executor URL is not configured. Set CONTAINER_PYJOB_URL (icip.container.pyjob.url) on the icip-service.",
+						HttpStatus.SERVICE_UNAVAILABLE);
+			}
 			ResponseEntity<String> response = restTemplate.getForEntity(
-				containerPyJobUrl + "/container-deploy/" + deployId + "/status", String.class);
+				trimTrailingSlash(containerPyJobUrl) + "/container-deploy/" + deployId + "/status", String.class);
 			return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error("Failed to get container deploy status for deployId: " + deployId, e);

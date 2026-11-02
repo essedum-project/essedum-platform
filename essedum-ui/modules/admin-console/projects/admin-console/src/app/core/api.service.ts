@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import type {
   AccessContext, RbacRole, RoleAssignment, Asset, AssetVersion, PromotionEvent, MenuItem,
@@ -146,6 +146,7 @@ export class ApiService {
   }
 
   getApprovals(userId: number, orgId?: number | null, projectId?: number | null): Observable<PromotionEvent[]> {
+    console.warn('[API] OLD getApprovals() called - this should not be called from approvals page! userId:', userId, 'orgId:', orgId, 'projectId:', projectId);
     const params: Record<string, any> = { userId };
     if (orgId != null) params['orgId'] = orgId;
     if (projectId != null) params['projectId'] = projectId;
@@ -157,6 +158,13 @@ export class ApiService {
     payload: { gate: string; action: 'approved' | 'rejected'; actorId: number; actorName: string; note: string },
   ): Observable<PromotionEvent> {
     return this.http.post<PromotionEvent>(`${this.base}/approvals/${versionId}/decision`, payload);
+  }
+
+  escalateToOrg(
+    versionId: number,
+    payload: { actorId: number; actorName: string; note: string },
+  ): Observable<PromotionEvent> {
+    return this.http.post<PromotionEvent>(`${this.base}/assets/versions/${versionId}/escalate-org`, payload);
   }
 
   // ---- menu ----
@@ -257,5 +265,218 @@ export class ApiService {
 
   retryIdentityTarget(id: number, actorUserId: number): Observable<void> {
     return this.http.post<void>(`${this.base}/identity/targets/${id}/retry`, {}, { params: { actorUserId } });
+  }
+
+  // ---- streaming services approval workflow (pipelines, agents, mcps) ----
+  
+  /**
+   * Rank 2 Project Admin - Get pending approvals for their project
+   * Status: PENDING_PROJECT_APPROVAL
+   */
+  getProjectAdminApprovals(projectId: number): Observable<any> {
+    console.log('[API] getProjectAdminApprovals called with projectId:', projectId);
+    
+    // Extract rank from sessionStorage
+    let rank = '2'; // default
+    try {
+      const roleStr = sessionStorage.getItem('role');
+      if (roleStr) {
+        const roleObj = JSON.parse(roleStr);
+        rank = roleObj?.rank?.toString() || '2';
+      }
+    } catch (e) {
+      console.error('[API] Error reading rank from sessionStorage:', e);
+    }
+    
+    const url = `/api/aip/streamingServices/approval/project-admin/list`;
+    console.log('[API] Calling URL:', url, 'with params:', { projectId, rank });
+    return this.http.get<any>(url, { 
+      params: { projectId, rank } 
+    });
+  }
+
+  /**
+   * Rank 3 Org Admin - Get pending approvals for their organization
+   * Status: PENDING_ORG_APPROVAL
+   */
+  getOrgAdminApprovals(organizationId: number): Observable<any> {
+    console.log('[API] getOrgAdminApprovals called with organizationId:', organizationId);
+    
+    // Extract rank from sessionStorage
+    let rank = '3'; // default
+    try {
+      const roleStr = sessionStorage.getItem('role');
+      if (roleStr) {
+        const roleObj = JSON.parse(roleStr);
+        rank = roleObj?.rank?.toString() || '3';
+      }
+    } catch (e) {
+      console.error('[API] Error reading rank from sessionStorage:', e);
+    }
+    
+    const url = `/api/aip/streamingServices/approval/org-admin/list`;
+    console.log('[API] Calling URL:', url, 'with params:', { organizationId, rank });
+    return this.http.get<any>(url, { 
+      params: { organizationId, rank } 
+    });
+  }
+
+  /**
+   * Rank 2 Project Admin - Get PROJECT_APPROVED resources (draft resources)
+   * Resources ready to be submitted to org for publishing
+   */
+  getDraftResources(projectId: number): Observable<any> {
+    // Extract rank from sessionStorage
+    let rank = '2'; // default
+    try {
+      const roleStr = sessionStorage.getItem('role');
+      if (roleStr) {
+        const roleObj = JSON.parse(roleStr);
+        rank = roleObj?.rank?.toString() || '2';
+      }
+    } catch (e) {
+      console.error('[API] Error reading rank from sessionStorage:', e);
+    }
+    
+    console.log('[API] getDraftResources called with projectId:', projectId, 'rank:', rank);
+    return this.http.get<any>(`/api/aip/streamingServices/approval/draft-resources`, { 
+      params: { projectId, rank } 
+    }).pipe(
+      tap(response => {
+        console.log('[API] getDraftResources response:', response);
+      })
+    );
+  }
+
+  /**
+   * Rank 2 Project Admin - Approve resource at project level
+   * Status: PENDING_PROJECT_APPROVAL -> PROJECT_APPROVED
+   */
+  approveProjectApproval(resourceId: number, projectId: number): Observable<any> {
+    // Extract rank from sessionStorage
+    let rank = '2'; // default
+    try {
+      const roleStr = sessionStorage.getItem('role');
+      if (roleStr) {
+        const roleObj = JSON.parse(roleStr);
+        rank = roleObj?.rank?.toString() || '2';
+      }
+    } catch (e) {
+      console.error('[API] Error reading rank from sessionStorage:', e);
+    }
+    
+    console.log('[API] approveProjectApproval - resourceId:', resourceId, 'projectId:', projectId, 'rank:', rank);
+    return this.http.post<any>(
+      `/api/aip/streamingServices/approval/project/approve/${resourceId}`,
+      { projectId, rank },
+      { params: { projectId, rank } }
+    );
+  }
+
+  /**
+   * Rank 2 Project Admin - Reject resource at project level
+   * Status: PENDING_PROJECT_APPROVAL -> PROJECT_REJECTED
+   */
+  rejectProjectApproval(resourceId: number): Observable<any> {
+    // Extract rank from sessionStorage
+    let rank = '2'; // default
+    try {
+      const roleStr = sessionStorage.getItem('role');
+      if (roleStr) {
+        const roleObj = JSON.parse(roleStr);
+        rank = roleObj?.rank?.toString() || '2';
+      }
+    } catch (e) {
+      console.error('[API] Error reading rank from sessionStorage:', e);
+    }
+    
+    console.log('[API] rejectProjectApproval - resourceId:', resourceId, 'rank:', rank);
+    return this.http.post<any>(
+      `/api/aip/streamingServices/approval/project/reject/${resourceId}`,
+      { rank },
+      { params: { rank } }
+    );
+  }
+
+  /**
+   * Rank 2 Project Admin - Submit approved resource to Org Admin
+   * Status: PROJECT_APPROVED -> PENDING_ORG_APPROVAL
+   */
+  submitForOrgApproval(resourceId: number, organizationId: number): Observable<any> {
+    // Extract rank from sessionStorage
+    let rank = '2'; // default
+    try {
+      const roleStr = sessionStorage.getItem('role');
+      if (roleStr) {
+        const roleObj = JSON.parse(roleStr);
+        rank = roleObj?.rank?.toString() || '2';
+      }
+    } catch (e) {
+      console.error('[API] Error reading rank from sessionStorage:', e);
+    }
+
+    return this.http.post<any>(
+      `/api/aip/streamingServices/approval/org/submit`,
+      { resourceId, organizationId },
+      { params: { rank } }
+    );
+  }
+
+  /**
+   * Rank 3 Org Admin - Approve resource at org level (publish)
+   * Status: PENDING_ORG_APPROVAL -> PUBLISHED
+   */
+  approveOrgApproval(resourceId: number): Observable<any> {
+    // Extract rank from sessionStorage
+    let rank = '3'; // default for org admin
+    try {
+      const roleStr = sessionStorage.getItem('role');
+      if (roleStr) {
+        const roleObj = JSON.parse(roleStr);
+        rank = roleObj?.rank?.toString() || '3';
+      }
+    } catch (e) {
+      console.error('[API] Error reading rank from sessionStorage:', e);
+    }
+
+    return this.http.post<any>(
+      `/api/aip/streamingServices/approval/org/approve/${resourceId}`,
+      {},
+      { params: { rank } }
+    );
+  }
+
+  /**
+   * Rank 3 Org Admin - Reject resource at org level
+   * Status: PENDING_ORG_APPROVAL -> ORG_REJECTED
+   */
+  rejectOrgApproval(resourceId: number): Observable<any> {
+    // Extract rank from sessionStorage
+    let rank = '3'; // default for org admin
+    try {
+      const roleStr = sessionStorage.getItem('role');
+      if (roleStr) {
+        const roleObj = JSON.parse(roleStr);
+        rank = roleObj?.rank?.toString() || '3';
+      }
+    } catch (e) {
+      console.error('[API] Error reading rank from sessionStorage:', e);
+    }
+
+    return this.http.post<any>(
+      `/api/aip/streamingServices/approval/org/reject/${resourceId}`,
+      {},
+      { params: { rank } }
+    );
+  }
+
+  /**
+   * Get organizations linked to a project
+   * Used by Rank 2 to select which org to submit resource to
+   */
+  getProjectOrganizations(projectId: number): Observable<any[]> {
+    return this.http.get<any[]>(`/api/aip/projects/${projectId}/organizations`).pipe(
+      catchError(() => of([]))
+    );
   }
 }

@@ -1,6 +1,7 @@
-import { Component, OnInit, ViewEncapsulation, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { combineLatest, switchMap, map, take } from 'rxjs';
+import { combineLatest, switchMap, map, of, Subject } from 'rxjs';
+import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
@@ -31,7 +32,7 @@ const GATE_LABEL: Record<string, string> = {
   encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
-export class PublishingComponent implements OnInit, AfterViewInit {
+export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
   versions = new MatTableDataSource<AssetVersionRow>([]);
   // versionId -> next gate ('project_admin' | 'org_admin' | 'platform_admin' | null)
   nextGateByVersion: Record<number, string | null> = {};
@@ -40,13 +41,33 @@ export class PublishingComponent implements OnInit, AfterViewInit {
   /** The caller's highest role rank — drives "New Draft" visibility. */
   userRank = 0;
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  // Streaming services (Pipeline/Agent/MCP) with PROJECT_APPROVED status ready to submit to org
+  streamingServicesDrafts: any[] = [];
+  streamingServicesDraftsDataSource = new MatTableDataSource<any>([]);
+  projectId: number | null = null;
+  orgId: number | null = null;
+
+  @ViewChild(MatPaginator) legacyPaginator!: MatPaginator;
+  @ViewChild('streamingPaginator') streamingPaginator!: MatPaginator;
+
+  private readonly destroy$ = new Subject<void>();
 
   ngAfterViewInit(): void {
-    this.versions.paginator = this.paginator;
+    this.versions.paginator = this.legacyPaginator;
+    
+    // Bind streaming paginators
+    if (this.streamingPaginator) {
+      this.streamingServicesDraftsDataSource.paginator = this.streamingPaginator;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   readonly columns = ['assetName', 'versionNo', 'status', 'comments', 'nextGate', 'updatedAt', 'actions'];
+  readonly streamingColumns = ['name', 'type', 'createdBy', 'status', 'actions'];
 
   constructor(
     private readonly api: ApiService,
@@ -66,23 +87,58 @@ export class PublishingComponent implements OnInit, AfterViewInit {
   private load(): void {
     combineLatest([this.userContext.userId$, this.userContext.orgId$, this.userContext.projectId$])
       .pipe(
-        take(1),
-        switchMap(([userId, orgId, projectId]) =>
-          combineLatest([
+        distinctUntilChanged((prev, curr) => 
+          prev[0] === curr[0] && prev[1] === curr[1] && prev[2] === curr[2]
+        ),
+        switchMap(([userId, orgId, projectId]) => {
+          console.log('[PUBLISHING] load() - context changed: userId:', userId, 'orgId:', orgId, 'projectId:', projectId);
+          // Store these for use in submit methods
+          this.projectId = projectId;
+          this.orgId = orgId;
+          
+          // Load streaming services with PROJECT_APPROVED status (Rank 2 can submit to org)
+          const streamingApi$ = projectId ? this.api.getDraftResources(projectId) : of([]);
+          
+          return combineLatest([
             this.api.getDraftVersions(userId, orgId, projectId),
             this.api.getAssets(userId, orgId, projectId),
-          ]),
-        ),
-        map(([versions, assets]) =>
-          versions.map(v => {
+            streamingApi$
+          ]);
+        }),
+        map(([versions, assets, streamingServices]) => {
+          console.log('[PUBLISHING] Data loaded - versions:', versions?.length, 'assets:', assets?.length, 'streaming response:', streamingServices);
+          
+          // Extract data array from API response wrapper
+          let streamingArray: any[] = [];
+          if (streamingServices) {
+            if (Array.isArray(streamingServices)) {
+              streamingArray = streamingServices;
+            } else if (streamingServices.data && Array.isArray(streamingServices.data)) {
+              streamingArray = streamingServices.data;
+            }
+          }
+          console.log('[PUBLISHING] Extracted streaming array length:', streamingArray.length);
+          
+          // Process asset versions
+          const processedVersions = versions.map(v => {
             const asset = assets.find(a => a.id === v.assetId);
             return {
               ...v,
               assetName: asset?.name ?? `Asset #${v.assetId}`,
               assetScope: asset?.scope ?? 'draft',
             };
-          }),
-        ),
+          });
+          
+          // Filter and store streaming services that are PROJECT_APPROVED
+          this.streamingServicesDrafts = streamingArray.filter(
+            s => s.approval_status === 'PROJECT_APPROVED'
+          );
+          console.log('[PUBLISHING] Filtered streaming drafts:', this.streamingServicesDrafts.length, 'resources:', this.streamingServicesDrafts);
+          this.streamingServicesDraftsDataSource.data = this.streamingServicesDrafts;
+          
+          return processedVersions;
+        }),
+        takeUntil(this.destroy$)
       )
       .subscribe(rows => {
         this.versions.data = rows;
@@ -209,5 +265,38 @@ export class PublishingComponent implements OnInit, AfterViewInit {
   /** "New Draft" is only visible to users with rank ≥ 1 (Developer+). */
   get canCreate(): boolean {
     return this.userRank >= MIN_RANK_CREATE;
+  }
+
+  // Streaming service (Pipeline/Agent/MCP) methods
+  submitToOrg(resource: any): void {
+    if (!this.orgId) {
+      this.notify.error('Organization not set. Please refresh the page.');
+      return;
+    }
+
+    this.api.submitForOrgApproval(resource.cid, this.orgId).subscribe({
+      next: () => {
+        this.notify.success(`${resource.name} submitted to organization for approval`);
+        
+        // Remove submitted resource from the drafts list immediately
+        const index = this.streamingServicesDrafts.findIndex(s => s.cid === resource.cid);
+        if (index !== -1) {
+          this.streamingServicesDrafts.splice(index, 1);
+          this.streamingServicesDraftsDataSource.data = [...this.streamingServicesDrafts];
+          console.log('[PUBLISHING] Removed submitted resource, remaining drafts:', this.streamingServicesDrafts.length);
+        }
+        
+        // Also refresh legacy version data if needed
+        this.load();
+      },
+      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+    });
+  }
+
+  /**
+   * Check if item is a streaming service (has approval_status field)
+   */
+  isStreamingService(item: any): boolean {
+    return item && item.hasOwnProperty('approval_status');
   }
 }

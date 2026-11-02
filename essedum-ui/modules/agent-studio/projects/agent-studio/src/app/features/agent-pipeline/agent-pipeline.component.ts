@@ -320,6 +320,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   // ─── Approval workflow state ─────────────────────────────────────────────
   currentUserLogin: string = '';
   userRank: number = -1;
+  selectedProjectId: number | null = null;
   approvedNames: Set<string> = new Set();
   myDraftNames: Set<string> = new Set();
 
@@ -610,7 +611,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     
     // Resolve user context for approval workflow
     this.resolveUserContext();
-    this.loadApprovalsFromBackend();
+    // Note: loadApprovalsFromBackend() removed - approval status is now tracked in streamItem.approval_status
     
     // Initialize organisation from localStorage or default
     this.organisation = this.getConsistentOrganization();
@@ -4801,6 +4802,28 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         console.debug('[Approval] No role in sessionStorage');
       }
 
+      // Extract project ID from various possible sessionStorage keys
+      let projectId = sessionStorage.getItem('project');
+      if (projectId) {
+        try {
+          const projectObj = JSON.parse(projectId);
+          this.selectedProjectId = projectObj?.id || projectObj?.projectId || Number(projectId) || null;
+        } catch {
+          // If it's just a number string
+          this.selectedProjectId = Number(projectId) || null;
+        }
+      }
+      
+      if (!this.selectedProjectId) {
+        // Try alternative keys
+        const projIdStr = sessionStorage.getItem('projectId') || sessionStorage.getItem('CURRENTPRJID');
+        if (projIdStr) {
+          this.selectedProjectId = Number(projIdStr) || null;
+        }
+      }
+
+      console.debug('[Approval] Resolved selectedProjectId:', this.selectedProjectId);
+
       // Trigger change detection to update template with resolved user context
       this.cdr.detectChanges();
     } catch (error) {
@@ -4809,28 +4832,12 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * Load approval statuses from backend RBAC endpoints
+   * Approval status is now tracked in streamItem.approval_status field
+   * No need to load separate lists from backend
+   * Keeping this for reference but no longer calling it
    */
   private loadApprovalsFromBackend(): void {
-    // Load approved pipelines
-    this.http.get<any>('/api/streamingServices/approval/approved-list').subscribe({
-      next: (response: any) => {
-        const approved = response?.data || [];
-        this.approvedNames = new Set(approved.map((item: any) => (item.name || item).toString()));
-        console.debug('[Approval] Approved pipelines loaded:', this.approvedNames);
-      },
-      error: (err) => console.warn('[Approval] Failed to load approved pipelines:', err)
-    });
-
-    // Load draft/pending pipelines
-    this.http.get<any>('/api/streamingServices/approval/pending-list').subscribe({
-      next: (response: any) => {
-        const drafts = response?.data || [];
-        this.myDraftNames = new Set(drafts.map((item: any) => (item.name || item).toString()));
-        console.debug('[Approval] Draft pipelines loaded:', this.myDraftNames);
-      },
-      error: (err) => console.warn('[Approval] Failed to load draft pipelines:', err)
-    });
+    // Deprecated - use streamItem.approval_status instead
   }
 
   /**
@@ -4856,27 +4863,72 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * Check if pipeline is approved
+   * Check if pipeline is approved at project level
+   * Status = PROJECT_APPROVED means all users in same project can see it
    */
   isApproved(): boolean {
-    const pipelineName = (this.currentCname || this.pipelineAlias || '').toString();
-    const approved = this.approvedNames.has(pipelineName);
-    console.debug('[Approval] isApproved:', { pipelineName, approved });
-    return approved;
+    if (!this.streamItem) {
+      return false;
+    }
+
+    const approvalStatus = (this.streamItem as any).approval_status || 'DRAFT';
+    // Project Approved status means visible to all project users
+    const isProjectApproved = approvalStatus === 'PROJECT_APPROVED' || approvalStatus === 'PENDING_ORG_APPROVAL' || approvalStatus === 'PUBLISHED';
+    
+    console.debug('[Approval] isApproved:', { 
+      approvalStatus, 
+      isProjectApproved,
+      resourceName: this.streamItem.name 
+    });
+    
+    return isProjectApproved;
   }
 
   /**
-   * Check if pipeline is pending approval
+   * Check if pipeline is pending project approval
+   * Status = PENDING_PROJECT_APPROVAL means waiting for Project Admin
    */
   isPendingApproval(): boolean {
-    const pipelineName = (this.currentCname || this.pipelineAlias || '').toString();
-    const pending = this.myDraftNames.has(pipelineName);
-    console.debug('[Approval] isPendingApproval:', { pipelineName, pending });
+    const pending = this.streamItem?.approval_status === 'PENDING_PROJECT_APPROVAL';
+    console.debug('[Approval] isPendingApproval:', { approval_status: this.streamItem?.approval_status, pending });
     return pending;
   }
 
   /**
-   * Submit pipeline for approval
+   * Check if pipeline is visible to current user based on approval status and ownership
+   */
+  isResourceVisible(): boolean {
+    if (!this.streamItem || !this.currentUserLogin) {
+      return false;
+    }
+
+    const approvalStatus = (this.streamItem as any).approval_status || 'DRAFT';
+    const isCreator = this.isOwnPipeline();
+    
+    // DRAFT: only visible to creator
+    if (approvalStatus === 'DRAFT') {
+      return isCreator;
+    }
+
+    // PROJECT_APPROVED, PENDING_ORG_APPROVAL, PUBLISHED: visible to all in same project
+    if (approvalStatus === 'PROJECT_APPROVED' || approvalStatus === 'PENDING_ORG_APPROVAL' || approvalStatus === 'PUBLISHED') {
+      // Check if user is in same project
+      const userProjectId = this.getProjectIdFromContext();
+      const resourceProjectId = (this.streamItem as any).project_id;
+      return userProjectId && resourceProjectId && userProjectId === resourceProjectId;
+    }
+
+    // PENDING_PROJECT_APPROVAL: visible to creator and project admins (handled by backend queries)
+    // PROJECT_REJECTED, ORG_REJECTED: visible to creator only
+    if (approvalStatus === 'PROJECT_REJECTED' || approvalStatus === 'ORG_REJECTED') {
+      return isCreator;
+    }
+
+    return false;
+  }
+
+  /**
+   * Submit pipeline for approval to Project Admin
    */
   requestApproval(event: Event): void {
     event?.preventDefault();
@@ -4887,31 +4939,157 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       return;
     }
 
-    const pipelineName = (this.currentCname || this.pipelineAlias || '').toString();
-    if (!pipelineName) {
-      this.service.message('Pipeline name is missing', 'error');
+    if (!this.streamItem || !this.streamItem.cid) {
+      this.service.message('Pipeline ID is missing', 'error');
       return;
     }
 
-    console.debug('[Approval] Requesting approval for:', pipelineName);
+    // Get current project from session or environment
+    const projectId = this.getProjectIdFromContext();
+    if (!projectId) {
+      this.service.message('Project ID is missing. Please ensure you are logged in to a project.', 'error');
+      return;
+    }
 
-    // Call backend API to submit for approval
-    this.http.post(`/api/streamingServices/approval/submit`, {
-      pipelineName: pipelineName,
-      pipelineAlias: this.pipelineAlias
+    console.debug('[Approval] Requesting approval for resource:', {
+      resourceId: this.streamItem.cid,
+      projectId: projectId,
+      resourceName: this.streamItem.name
+    });
+
+    // Call backend API to submit for approval to Project Admin
+    this.http.post(`/api/aip/streamingServices/approval/submit`, {
+      resourceId: this.streamItem.cid,
+      projectId: projectId
     }).subscribe({
       next: (response: any) => {
         console.debug('[Approval] Approval request submitted:', response);
-        this.service.message('Pipeline submitted for approval', 'success');
-        // Update the pending set
-        this.myDraftNames.add(pipelineName);
-        this.cdr.detectChanges();
+        this.service.message('Pipeline submitted for project approval', 'success');
+        
+        // IMPORTANT: Reload pipeline data from backend to get updated approval_status
+        if (this.streamItem?.name && this.streamItem?.organization) {
+          this.http.get<any>(`/api/aip/streamingServices/${this.streamItem.name}/${this.streamItem.organization}`).subscribe({
+            next: (updatedPipeline: any) => {
+              console.debug('[Approval] Pipeline reloaded with new status:', updatedPipeline?.approval_status);
+              // Update streamItem with new approval status
+              this.streamItem.approval_status = updatedPipeline?.approval_status || 'PENDING_PROJECT_APPROVAL';
+              this.myDraftNames.add((this.currentCname || this.pipelineAlias || '').toString());
+              this.cdr.detectChanges();
+            },
+            error: (reloadErr) => {
+              console.warn('[Approval] Could not reload pipeline data:', reloadErr);
+              // Fallback: assume status changed even if we can't verify
+              this.streamItem.approval_status = 'PENDING_PROJECT_APPROVAL';
+              this.myDraftNames.add((this.currentCname || this.pipelineAlias || '').toString());
+              this.cdr.detectChanges();
+            }
+          });
+        } else {
+          // Fallback if we don't have name/org
+          this.streamItem.approval_status = 'PENDING_PROJECT_APPROVAL';
+          this.myDraftNames.add((this.currentCname || this.pipelineAlias || '').toString());
+          this.cdr.detectChanges();
+        }
       },
       error: (err) => {
         console.error('[Approval] Error submitting for approval:', err);
-        this.service.message('Failed to submit for approval', 'error');
+        const errMsg = err?.error?.message || 'Failed to submit for approval';
+        this.service.message(errMsg, 'error');
       }
     });
+  }
+
+  /**
+   * Get approval status for display
+   * Returns the current approval status or null if DRAFT
+   */
+  getApprovalStatus(): string | null {
+    if (!this.streamItem) return null;
+    const status = (this.streamItem as any).approval_status || 'DRAFT';
+    return status === 'DRAFT' ? null : status;
+  }
+
+  /**
+   * Get human-readable approval status label
+   */
+  getApprovalStatusLabel(): string {
+    const status = this.getApprovalStatus();
+    if (!status) return '';
+    
+    const labels: {[key: string]: string} = {
+      'PENDING_PROJECT_APPROVAL': 'Pending Project Approval',
+      'PROJECT_APPROVED': 'Project Approved',
+      'PROJECT_REJECTED': 'Project Rejected',
+      'PENDING_ORG_APPROVAL': 'Pending Organization Approval',
+      'PUBLISHED': 'Published',
+      'ORG_REJECTED': 'Organization Rejected'
+    };
+    
+    return labels[status] || status;
+  }
+
+  /**
+   * Get approval status message for user context
+   */
+  getApprovalStatusMessage(): string {
+    const status = this.getApprovalStatus();
+    if (!status) return '';
+    
+    const messages: {[key: string]: string} = {
+      'PENDING_PROJECT_APPROVAL': 'Waiting for Project Admin approval',
+      'PROJECT_APPROVED': 'Approved at project level - Ready to submit to organization',
+      'PROJECT_REJECTED': 'Rejected by Project Admin',
+      'PENDING_ORG_APPROVAL': 'Waiting for Organization Admin approval',
+      'PUBLISHED': 'Published and available to all users in the organization',
+      'ORG_REJECTED': 'Rejected by Organization Admin'
+    };
+    
+    return messages[status] || '';
+  }
+
+  /**
+   * Get CSS class for approval status badge
+   */
+  getApprovalStatusClass(): string {
+    const status = this.getApprovalStatus();
+    if (!status) return '';
+    
+    const classes: {[key: string]: string} = {
+      'PENDING_PROJECT_APPROVAL': 'pending-project',
+      'PROJECT_APPROVED': 'approved',
+      'PROJECT_REJECTED': 'rejected',
+      'PENDING_ORG_APPROVAL': 'pending-org',
+      'PUBLISHED': 'published',
+      'ORG_REJECTED': 'rejected'
+    };
+    
+    return classes[status] || '';
+  }
+
+  /**
+   * Get approval icon for status
+   */
+  getApprovalStatusIcon(): string {
+    const status = this.getApprovalStatus();
+    if (!status) return '';
+    
+    const icons: {[key: string]: string} = {
+      'PENDING_PROJECT_APPROVAL': 'schedule',
+      'PROJECT_APPROVED': 'check_circle',
+      'PROJECT_REJECTED': 'cancel',
+      'PENDING_ORG_APPROVAL': 'schedule',
+      'PUBLISHED': 'published',
+      'ORG_REJECTED': 'cancel'
+    };
+    
+    return icons[status] || 'info';
+  }
+
+  /**
+   * Get project ID from resolved context
+   */
+  private getProjectIdFromContext(): number | null {
+    return this.selectedProjectId;
   }
 
   /**

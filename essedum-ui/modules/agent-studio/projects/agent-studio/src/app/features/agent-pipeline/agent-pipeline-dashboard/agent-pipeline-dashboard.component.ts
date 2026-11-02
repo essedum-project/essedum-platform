@@ -11,7 +11,7 @@ import {
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { Services } from '@essedum/shared-lib';
 import { MatDialog } from '@angular/material/dialog';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { TagsService } from '@essedum/shared-lib';
 import { Location } from '@angular/common';
 import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
@@ -270,8 +270,25 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   private getCards(): void {
     const params = this.buildHttpParams();
 
+    // Build headers with user context for approval workflow filtering
+    let headers = new HttpHeaders();
+    if (this.currentUserLogin) {
+      headers = headers.set('user-login', this.currentUserLogin);
+    }
+    if (this.currentProjectId !== null) {
+      headers = headers.set('project', String(this.currentProjectId));
+    }
+    if (this.organization) {
+      headers = headers.set('organisation', this.organization);
+    }
+    if (this.userRank >= 0) {
+      headers = headers.set('roleId', String(this.userRank));
+    }
+
+    const httpOptions = headers.keys().length > 0 ? { headers } : undefined;
+
     const agentDesigner$ = this.pipelineMode === 'agent'
-      ? this.http.get<any>(`${this.AGENT_DESIGNER_API}/pipelines?limit=200`).pipe(catchError(() => of({ items: [] })))
+      ? this.http.get<any>(`${this.AGENT_DESIGNER_API}/pipelines?limit=200`, httpOptions).pipe(catchError(() => of({ items: [] })))
       : of({ items: [] });
 
     forkJoin({

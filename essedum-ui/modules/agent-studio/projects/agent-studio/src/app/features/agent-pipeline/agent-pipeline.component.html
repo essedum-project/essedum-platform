@@ -27,26 +27,26 @@
               </div>
               
               <!-- Approval Status and Button - Top Right Corner -->
-              <div class="approval-actions d-flex align-items-center gap-3" *ngIf="userRank === 0">
-                <span *ngIf="isApproved()" class="approval-badge approved d-flex align-items-center gap-2">
-                  <mat-icon>check_circle</mat-icon> Approved
-                </span>
-                <button *ngIf="isPendingApproval()" 
-                  class="approval-request-btn pending-btn"
-                  type="button"
-                  disabled
-                  matTooltip="Pipeline sent for approval"
-                  matTooltipPosition="left">
-                  <mat-icon>schedule</mat-icon> Sent for Approval
-                </button>
-                <button *ngIf="!isPendingApproval() && !isApproved() && isOwnPipeline()" 
-                  class="approval-request-btn"
-                  type="button"
-                  (click)="requestApproval($event)"
-                  matTooltip="Submit for approval"
-                  matTooltipPosition="left">
-                  <mat-icon>upload</mat-icon> Send for Approval
-                </button>
+              <div class="approval-actions-container">
+                <!-- Approval Status Display - Compact Inline -->
+                <div *ngIf="getApprovalStatus() && userRank === 0" 
+                  class="approval-status-inline" 
+                  [ngClass]="getApprovalStatusClass()">
+                  <mat-icon class="status-icon">{{ getApprovalStatusIcon() }}</mat-icon>
+                  <span class="status-label">{{ getApprovalStatusLabel() }}</span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="approval-button-container" *ngIf="userRank === 0">
+                  <button *ngIf="!getApprovalStatus() && isOwnPipeline()" 
+                    class="send-approval-btn"
+                    type="button"
+                    (click)="requestApproval($event)"
+                    matTooltip="Submit pipeline for project approval"
+                    matTooltipPosition="left">
+                    <mat-icon>upload</mat-icon> Send for Approval
+                  </button>
+                </div>
               </div>
             </div>
 

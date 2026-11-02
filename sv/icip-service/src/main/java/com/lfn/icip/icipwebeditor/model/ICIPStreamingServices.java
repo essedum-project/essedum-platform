@@ -172,6 +172,21 @@ public class ICIPStreamingServices extends BaseDomain implements Serializable {
 	@JsonProperty("runner_service_status")
 	private String runnerServiceStatus;
 
+	/** Approval workflow status: DRAFT, PENDING_PROJECT_APPROVAL, PROJECT_APPROVED, etc */
+	@Column(name = "approval_status", columnDefinition = "VARCHAR(50) DEFAULT 'DRAFT'")
+	@JsonProperty("approval_status")
+	private String approvalStatus = "DRAFT";
+
+	/** Project ID for project-level approvals */
+	@Column(name = "project_id")
+	@JsonProperty("project_id")
+	private Integer projectId;
+
+	/** Organization ID for org-level approvals */
+	@Column(name = "approved_organization_id")
+	@JsonProperty("approved_organization_id")
+	private Integer approvedOrganizationId;
+
 	/**
 	 * Sync runner service status from json_content before INSERT and UPDATE.
 	 * runner_service_status: true  → "true"

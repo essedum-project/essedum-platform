@@ -118,8 +118,7 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				"/api/email/**", "/api/event/trigger/**", "/api/sre-availability-cal/**", "/api/usm-notificationss",
 				"/api/registerUser", "/api/userss/resetPassword", "/api/userss/checkemail", "/api/demo-usecase",
 				"/api/demo-usecase/**", "/api/adapter_workflow/**", "/api/interactiveWorkflow/**",
-				"/api/RPAExternalTask/**", "/" + prefix + "/streamingServices/delete/**", "/" + prefix + "/file/pipeline/**", "/" + prefix + "/folder/upload/**",
-				"/api/aip/rbac/**");
+				"/api/RPAExternalTask/**");
 	}
 
 	private boolean isPublicEndpoint(HttpServletRequest request) {
@@ -174,19 +173,6 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 		} else if (roleId != null) {
 			if (Boolean.TRUE.equals(userProjectRoleService.isRoleExistsByUserAndProjectIdAndRoleId(user, projectId, roleId))) {
 				roleIdList.add(roleId);
-			} else if (roleName != null) {
-				// roleId may belong to a different ID space (e.g. the newer RBAC role
-				// catalog) with no matching usm_user_project_role row for this project.
-				// Fall back to resolving the user's actual legacy role by name.
-				Integer resolvedRoleId = userProjectRoleService.getRoleIdByUserAndProjectIdAndRoleName(user, projectId, roleName);
-				if (resolvedRoleId == null && "AI Client".equalsIgnoreCase(roleName)) {
-					// rbac-21 only renamed usm_role rows literally named 'Viewer'; some
-					// project-scoped rows are still the legacy lowercase 'viewer'.
-					resolvedRoleId = userProjectRoleService.getRoleIdByUserAndProjectIdAndRoleName(user, projectId, "viewer");
-				}
-				if (resolvedRoleId != null) {
-					roleIdList.add(resolvedRoleId);
-				}
 			}
 		} else {
 			roleIdList.add(userProjectRoleService.getRoleIdByUserAndProjectIdAndRoleName(user, projectId, roleName));
