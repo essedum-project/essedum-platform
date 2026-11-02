@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -1391,42 +1392,157 @@ public class ICIPMlopsController {
 				} else
 					tagList = null;
 
+				// Get pipelines from the current project
 				List<ICIPStreamingServices2DTO> results = streamingServicesService.getAllPipelinesByTypeAndOrg(project,
 						paginate, query, tagList, orderBy, type, interfacetype);
+				
+				// IMPORTANT: For org-wide visibility, also fetch PUBLISHED pipelines from all projects in the organization
+				// This is needed because PUBLISHED pipelines should be visible across all projects in same org
+				List<ICIPStreamingServices2DTO> publishedPipelines = new ArrayList<>();
+				try {
+					String orgStr = headers.getOrDefault("organisation", headers.getOrDefault("organization", ""));
+					if (!orgStr.isEmpty()) {
+						// Query for PUBLISHED pipelines in the organization
+						// We use org name/ID to fetch pipelines with PUBLISHED status across all projects
+						logger.info("[Approval] Fetching PUBLISHED pipelines for organization: {}", orgStr);
+						
+						// Create a query to get published pipelines for this org
+						// Note: getAllPipelinesByTypeAndOrg filters by project, so we need to query differently
+						// For now, we'll fetch with project=0 (or null equivalent) to get org-wide results
+						// If that doesn't work, we'll need a separate method
+						try {
+							publishedPipelines = streamingServicesService.getAllPipelinesByTypeAndOrg("0",
+									PageRequest.of(0, 1000), null, null, orderBy, type, interfacetype);
+							logger.info("[Approval] Fetched {} potential org-wide pipelines", publishedPipelines.size());
+						} catch (Exception e) {
+							logger.warn("[Approval] Could not fetch org-wide pipelines: {}", e.getMessage());
+						}
+					}
+				} catch (Exception e) {
+					logger.warn("[Approval] Error fetching published pipelines: {}", e.getMessage());
+				}
+				
+				// Combine results and remove duplicates by pipeline ID/name
+				Map<String, ICIPStreamingServices2DTO> combined = new LinkedHashMap<>();
+				for (ICIPStreamingServices2DTO result : results) {
+					combined.put(result.getCid() + "-" + result.getName(), result);
+				}
+				for (ICIPStreamingServices2DTO published : publishedPipelines) {
+					String key = published.getCid() + "-" + published.getName();
+					if (published.getApprovalStatus() != null && published.getApprovalStatus().equals("PUBLISHED")) {
+						combined.put(key, published);
+					}
+				}
+				List<ICIPStreamingServices2DTO> allResults = new ArrayList<>(combined.values());
 				
 				// Apply approval workflow visibility filtering
 				try {
 					String username = headers.getOrDefault("user-login", "");
 					String projectStr = headers.getOrDefault("project", headers.getOrDefault("Project", ""));
 					String orgStr = headers.getOrDefault("organisation", headers.getOrDefault("organization", ""));
-					String roleId = headers.getOrDefault("roleId", headers.getOrDefault("rank", ""));
+					String roleIdStr = headers.getOrDefault("roleId", headers.getOrDefault("rank", ""));
 					
 					logger.info("[Approval] Pipeline list filtering: user={}, project={}, org={}, role={}", 
-						username, projectStr, orgStr, roleId);
+						username, projectStr, orgStr, roleIdStr);
 					
-					if (!username.isEmpty() && !projectStr.isEmpty() && !orgStr.isEmpty() && !roleId.isEmpty()) {
+					if (!username.isEmpty() && !projectStr.isEmpty() && !orgStr.isEmpty() && !roleIdStr.isEmpty()) {
 						try {
 							Integer userProjectId = Integer.parseInt(projectStr);
+							Integer userRoleId = Integer.parseInt(roleIdStr);
 							Integer userOrganizationId = null;
 							
-							// Try to parse org as integer first, or use as name
+							// Try to parse org as integer first
 							try {
 								userOrganizationId = Integer.parseInt(orgStr);
 							} catch (NumberFormatException e) {
-								// org might be org name, not ID - for now we won't filter by org name in approval check
+								// org might be org name - keep as string for now
 								logger.debug("[Approval] org is not numeric: {}", orgStr);
 							}
 							
-							// Filter results using approval workflow service
+							// Filter results using approval workflow visibility rules
 							List<ICIPStreamingServices2DTO> filteredResults = new ArrayList<>();
-							for (ICIPStreamingServices2DTO result : results) {
-								// Convert DTO to entity model for visibility check
-								// For now, we'll check based on approval_status if available
-								// Otherwise include all (legacy behavior for non-approval tracked items)
-								filteredResults.add(result);
+							for (ICIPStreamingServices2DTO result : allResults) {
+								String approvalStatus = result.getApprovalStatus();
+								
+								// If no approval status, include (legacy items)
+								if (approvalStatus == null || approvalStatus.isEmpty()) {
+									filteredResults.add(result);
+									logger.debug("[Approval] Including legacy pipeline without approval_status: {}", result.getName());
+									continue;
+								}
+								
+								boolean isVisible = false;
+								
+								// Rule 1: DRAFT - only creator can see
+								if ("DRAFT".equals(approvalStatus)) {
+									String createdBy = result.getCreatedBy();
+									if (username.equals(createdBy)) {
+										isVisible = true;
+									}
+									logger.debug("[Approval] DRAFT check for {}: createdBy={}, user={}, visible={}", 
+										result.getName(), createdBy, username, isVisible);
+								}
+								
+								// Rule 2: PENDING_PROJECT_APPROVAL - creator + project admins of same project
+								else if ("PENDING_PROJECT_APPROVAL".equals(approvalStatus)) {
+									String createdBy = result.getCreatedBy();
+									Integer resourceProjectId = result.getProjectId();
+									
+									if (username.equals(createdBy) || (userRoleId == 2 && userProjectId.equals(resourceProjectId))) {
+										isVisible = true;
+									}
+									logger.debug("[Approval] PENDING_PROJECT_APPROVAL check for {}: resourceProject={}, userProject={}, role={}, visible={}", 
+										result.getName(), resourceProjectId, userProjectId, userRoleId, isVisible);
+								}
+								
+								// Rule 3: PROJECT_APPROVED - all users in same project
+								else if ("PROJECT_APPROVED".equals(approvalStatus)) {
+									Integer resourceProjectId = result.getProjectId();
+									if (userProjectId.equals(resourceProjectId)) {
+										isVisible = true;
+									}
+									logger.debug("[Approval] PROJECT_APPROVED check for {}: resourceProject={}, userProject={}, visible={}", 
+										result.getName(), resourceProjectId, userProjectId, isVisible);
+								}
+								
+								// Rule 4: PENDING_ORG_APPROVAL - same project users
+								else if ("PENDING_ORG_APPROVAL".equals(approvalStatus)) {
+									Integer resourceProjectId = result.getProjectId();
+									if (userProjectId.equals(resourceProjectId)) {
+										isVisible = true;
+									}
+									logger.debug("[Approval] PENDING_ORG_APPROVAL check for {}: resourceProject={}, userProject={}, visible={}", 
+										result.getName(), resourceProjectId, userProjectId, isVisible);
+								}
+								
+								// Rule 5: PUBLISHED - all users in approved organization (org-wide, cross-project)
+								// For PUBLISHED, we trust that the org admin has approved it for their organization
+								// Include all PUBLISHED pipelines as they are visible org-wide
+								else if ("PUBLISHED".equals(approvalStatus)) {
+									isVisible = true;
+									logger.info("[Approval] PUBLISHED pipeline {} included - visible org-wide", result.getName());
+								}
+								
+								// Rule 6: PROJECT_REJECTED / ORG_REJECTED - creator only or all users in same project respectively
+								else if ("PROJECT_REJECTED".equals(approvalStatus)) {
+									String createdBy = result.getCreatedBy();
+									if (username.equals(createdBy)) {
+										isVisible = true;
+									}
+								} else if ("ORG_REJECTED".equals(approvalStatus)) {
+									Integer resourceProjectId = result.getProjectId();
+									if (userProjectId.equals(resourceProjectId)) {
+										isVisible = true;
+									}
+								}
+								
+								if (isVisible) {
+									filteredResults.add(result);
+								}
 							}
 							
-							logger.info("[Approval] Pipeline list returning {} results", filteredResults.size());
+							logger.info("[Approval] Pipeline list returning {} results out of {} total (including {} org-wide published)", 
+								filteredResults.size(), allResults.size(), publishedPipelines.size());
 							String response = new JSONArray(filteredResults).toString();
 							return ResponseEntity.status(200).body(response);
 						} catch (NumberFormatException e) {
@@ -1436,7 +1552,7 @@ public class ICIPMlopsController {
 						logger.debug("[Approval] Missing user context headers for filtering - returning unfiltered");
 					}
 				} catch (Exception e) {
-					logger.error("[Approval] Error applying visibility filtering: {}", e.getMessage());
+					logger.error("[Approval] Error applying visibility filtering: {}", e.getMessage(), e);
 					// Fall through to return unfiltered results
 				}
 				

@@ -34,6 +34,7 @@ export interface Asset {
   currentVersionId: number | null;
   createdBy: number | null;
   creatorName: string | null;
+  approval_status?: string; // Approval workflow status (DRAFT, PENDING_PROJECT_APPROVAL, etc.)
 }
 
 export interface AssetVersion {

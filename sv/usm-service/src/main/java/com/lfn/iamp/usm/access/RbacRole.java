@@ -38,6 +38,7 @@ public class RbacRole implements Serializable {
 	private String name;
 
 	@NotNull
-	@Column(name = "rank")
+	// `rank` is a reserved word in MySQL 8 — unquoted, Hibernate's INSERT fails with a 1064 syntax error.
+	@Column(name = "`rank`")
 	private Integer rank;
 }

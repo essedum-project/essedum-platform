@@ -52,4 +52,9 @@ public class Asset implements Serializable {
 	/** Populated at creation; used to enforce edit-ownership. */
 	@Column(name = "created_by")
 	private Integer createdBy;
+
+	/** Display name of the creator — shown in My Drafts so engineers see who submitted. */
+	@Size(max = 255)
+	@Column(name = "creator_name")
+	private String creatorName;
 }

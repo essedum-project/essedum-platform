@@ -942,9 +942,9 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       if (lastModifiedBy === this.currentUserLogin) return true;
     }
     
-    // Rule 3: NEW - PROJECT_APPROVED by project admin (approved for team use)
-    if (approvalStatus === 'PROJECT_APPROVED') {
-      console.debug('[Visibility] Card visible: PROJECT_APPROVED status', card.alias);
+    // Rule 3: PROJECT_APPROVED or PUBLISHED - approved by project/org admin
+    if (approvalStatus === 'PROJECT_APPROVED' || approvalStatus === 'PUBLISHED') {
+      console.debug('[Visibility] Card visible:', approvalStatus, 'status', card.alias);
       return true;
     }
     

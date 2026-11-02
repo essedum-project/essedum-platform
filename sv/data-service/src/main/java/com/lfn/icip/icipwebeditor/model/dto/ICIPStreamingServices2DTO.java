@@ -106,4 +106,18 @@ public interface ICIPStreamingServices2DTO {
 	 */
 	String getApprovalStatus();
 
+	/**
+	 * The project ID this pipeline belongs to.
+	 *
+	 * @return the project id
+	 */
+	Integer getProjectId();
+
+	/**
+	 * The organization ID this pipeline was approved for (when status is PUBLISHED).
+	 *
+	 * @return the approved organization id
+	 */
+	Integer getApprovedOrganizationId();
+
 }
