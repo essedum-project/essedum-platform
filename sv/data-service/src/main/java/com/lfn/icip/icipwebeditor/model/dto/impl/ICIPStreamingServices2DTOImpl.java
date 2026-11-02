@@ -117,5 +117,11 @@ public class ICIPStreamingServices2DTOImpl implements ICIPStreamingServices2DTO 
         Object val = data.get("lastmodifiedby");
         return val != null ? val.toString() : null;
     }
+
+    @Override
+    public String getApprovalStatus() {
+        Object val = data.get("approval_status");
+        return val != null ? val.toString() : null;
+    }
 }
 

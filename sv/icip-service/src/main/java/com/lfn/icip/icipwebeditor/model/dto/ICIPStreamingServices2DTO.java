@@ -107,4 +107,11 @@ public interface ICIPStreamingServices2DTO {
 	 */
 	String getLastmodifiedby();
 
+	/**
+	 * The approval status of the pipeline (DRAFT, PENDING_PROJECT_APPROVAL, PROJECT_APPROVED, etc.)
+	 *
+	 * @return the approval status
+	 */
+	String getApprovalStatus();
+
 }

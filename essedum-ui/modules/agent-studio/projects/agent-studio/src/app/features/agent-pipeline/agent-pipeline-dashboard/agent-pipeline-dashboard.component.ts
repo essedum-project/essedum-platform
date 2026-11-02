@@ -873,16 +873,30 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   /** Visibility check for AI Client (rank=0). Shows:
    *  1. Admin-created pipelines (visible to all).
    *  2. Pipelines where created_by OR lastmodifiedby matches the logged-in user.
-   *  3. Approved or draft pipelines submitted by this user.
+   *  3. Pipelines with PROJECT_APPROVED status (approved by project admin for team use).
+   *  4. Approved or draft pipelines submitted by this user.
    *  Handles both snake_case (created_by) and camelCase (createdBy) from the API. */
   private isCardVisibleToUser(card: any): boolean {
     const createdBy = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
     const lastModifiedBy = (card.target?.lastmodifiedby || card.lastmodifiedby || '').toLowerCase();
+    const approvalStatus = card.approval_status || card.approvalStatus || '';
+    
+    // Rule 1: Admin-created pipelines visible to everyone
     if (createdBy === 'admin') return true;
+    
+    // Rule 2: Created by logged-in user
     if (this.currentUserLogin) {
       if (createdBy === this.currentUserLogin) return true;
       if (lastModifiedBy === this.currentUserLogin) return true;
     }
+    
+    // Rule 3: NEW - PROJECT_APPROVED by project admin (approved for team use)
+    if (approvalStatus === 'PROJECT_APPROVED') {
+      console.debug('[Visibility] Card visible: PROJECT_APPROVED status', card.alias);
+      return true;
+    }
+    
+    // Rule 4: In approval sets (approvedNames or myDraftNames)
     return this.approvedNames.has(card.alias) || this.myDraftNames.has(card.alias);
   }
 
