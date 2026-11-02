@@ -28,8 +28,8 @@
               
               <!-- Approval Status and Button - Top Right Corner -->
               <div class="approval-actions-container">
-                <!-- Approval Status Display - Compact Inline -->
-                <div *ngIf="getApprovalStatus() && userRank === 0" 
+                <!-- Approval Status Display - Compact Inline (show for all users regardless of rank) -->
+                <div *ngIf="getApprovalStatus()" 
                   class="approval-status-inline" 
                   [ngClass]="getApprovalStatusClass()">
                   <mat-icon class="status-icon">{{ getApprovalStatusIcon() }}</mat-icon>
