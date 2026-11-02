@@ -150,7 +150,7 @@ public class ApprovalWorkflowService {
 	 * Status: PENDING_ORG_APPROVAL -> PUBLISHED
 	 * Now visible to ALL users of approved organization
 	 */
-	public ICIPStreamingServices approveOrgApproval(Integer resourceId, String currentUserRank) {
+	public ICIPStreamingServices approveOrgApproval(Integer resourceId, String currentUserRank, String orgName) {
 		logger.info("[Approval] Org Admin publishing resource {}", resourceId);
 
 		if (!"3".equals(currentUserRank)) {
@@ -166,10 +166,15 @@ public class ApprovalWorkflowService {
 			throw new IllegalStateException("Only PENDING_ORG_APPROVAL resources can be org-approved");
 		}
 
-		logger.info("[Approval] Before publish - resource: id={}, name={}, status={}, approvedOrgId={}", 
-			resourceId, resource.getName(), resource.getApprovalStatus(), resource.getApprovedOrganizationId());
-		
+		logger.info("[Approval] Before publish - resource: id={}, name={}, status={}, approvedOrgId={}, org={}",
+			resourceId, resource.getName(), resource.getApprovalStatus(), resource.getApprovedOrganizationId(), resource.getOrganization());
+
 		resource.setApprovalStatus("PUBLISHED");
+		// Set organization to org (portfolio) name so the pipeline is visible to all users across all projects in this org
+		if (orgName != null && !orgName.isEmpty()) {
+			resource.setOrganization(orgName);
+			logger.info("[Approval] Updating organization to org name '{}' for org-wide visibility", orgName);
+		}
 		ICIPStreamingServices saved = streamingServicesRepository.save(resource);
 		
 		logger.info("[Approval] After publish - resource: id={}, name={}, status={}, approvedOrgId={}", 

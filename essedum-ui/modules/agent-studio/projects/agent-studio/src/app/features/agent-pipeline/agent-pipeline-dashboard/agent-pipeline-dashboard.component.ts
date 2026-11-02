@@ -4,6 +4,7 @@ import {
   EventEmitter,
   OnChanges,
   OnInit,
+  OnDestroy,
   Output,
   SimpleChanges,
   ViewChild,
@@ -15,8 +16,8 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { TagsService } from '@essedum/shared-lib';
 import { Location } from '@angular/common';
 import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { forkJoin, of, Subject } from 'rxjs';
+import { catchError, map, takeUntil, timeout } from 'rxjs/operators';
 import { PipelineCreateComponent } from '../../pipeline/pipeline-create/pipeline-create.component';
 import { DataPipelineWizardLocalComponent } from '../wizard/data-pipeline-wizard/data-pipeline-wizard.component';
 import { TrainingPipelineWizardLocalComponent } from '../wizard/training-pipeline-wizard/training-pipeline-wizard.component';
@@ -27,9 +28,11 @@ import { TrainingPipelineWizardLocalComponent } from '../wizard/training-pipelin
     styleUrls: ['./agent-pipeline-dashboard.component.scss'],
     standalone: false
 })
-export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
+export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDestroy {
   private readonly AGENT_DESIGNER_API = '/mfe/agent-designer/api/v1';
+  private readonly AGENT_DESIGNER_TIMEOUT = 5000; // 5 seconds timeout for agent-designer API
   private agentDesignerCids = new Set<string>();
+  private destroy$ = new Subject<void>();
 
   // Constants
   get CARD_TITLE() {
@@ -103,6 +106,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   finalDataList: any = [];
   filter: string = '';
   organization: string;
+  projectName: string;  // Actual project name from sessionStorage for API calls
   pipelineConstantsKey: string = 'icip.pipeline.includeCore';
 
   // GitHub auth state
@@ -155,7 +159,14 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this.filteredCards = [];
     this.organization = sessionStorage.getItem('organization');
-
+    
+    // Get the actual project name from sessionStorage for API calls
+    try {
+      const projectObj = JSON.parse(sessionStorage.getItem('project') || '{}');
+      this.projectName = projectObj?.name || this.organization;
+    } catch {
+      this.projectName = this.organization;
+    }
 
     if (this.organization) {
       this.handleRouteState();
@@ -268,65 +279,118 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   }
 
   private getCards(): void {
-    const params = this.buildHttpParams();
+    try {
+      const params = this.buildHttpParams();
+      const httpOptions = this.buildHttpOptions();
 
-    // Build headers with user context for approval workflow filtering
-    let headers = new HttpHeaders();
-    if (this.currentUserLogin) {
-      headers = headers.set('user-login', this.currentUserLogin);
-    }
-    if (this.currentProjectId !== null) {
-      headers = headers.set('project', String(this.currentProjectId));
-    }
-    if (this.organization) {
-      headers = headers.set('organisation', this.organization);
-    }
-    if (this.userRank >= 0) {
-      headers = headers.set('roleId', String(this.userRank));
-    }
+      // Agent Designer API should NOT get approval workflow headers (separate MFE with its own auth)
+      const agentDesigner$ = this.pipelineMode === 'agent'
+        ? this.http.get<any>(`${this.AGENT_DESIGNER_API}/pipelines?limit=200`).pipe(
+            timeout(this.AGENT_DESIGNER_TIMEOUT),
+            map((response: any) => {
+              // Ensure response has items array
+              if (response && Array.isArray(response.items)) {
+                return response;
+              }
+              if (Array.isArray(response)) {
+                return { items: response };
+              }
+              return { items: [] };
+            }),
+            catchError((error) => {
+              console.warn('[AgentPipelineDashboard] Agent Designer API unavailable:', error?.message || error);
+              return of({ items: [] });
+            })
+          )
+        : of({ items: [] });
 
-    const httpOptions = headers.keys().length > 0 ? { headers } : undefined;
+      forkJoin({
+        java: this.service.getPipelinesCards(params, httpOptions).pipe(
+          catchError((error) => {
+            console.error('[AgentPipelineDashboard] Error fetching Java pipelines:', error?.message || error);
+            return of([]);
+          })
+        ),
+        agentDesigner: agentDesigner$
+      }).pipe(
+        takeUntil(this.destroy$),
+        timeout(10000) // Overall timeout for forkJoin
+      ).subscribe(
+        ({ java, agentDesigner }) => {
+          this.processCards(java, agentDesigner);
+        },
+        (error) => {
+          console.error('[AgentPipelineDashboard] Error loading cards:', error?.message || error);
+          this.cards = [];
+          this.filteredCards = [];
+          this.loading = false;
+        }
+      );
+    } catch (error) {
+      console.error('[AgentPipelineDashboard] Exception in getCards:', error);
+      this.cards = [];
+      this.filteredCards = [];
+      this.loading = false;
+    }
+  }
 
-    const agentDesigner$ = this.pipelineMode === 'agent'
-      ? this.http.get<any>(`${this.AGENT_DESIGNER_API}/pipelines?limit=200`, httpOptions).pipe(catchError(() => of({ items: [] })))
-      : of({ items: [] });
-
-    forkJoin({
-      java: this.service.getPipelinesCards(params).pipe(catchError(() => of([]))),
-      agentDesigner: agentDesigner$
-    }).subscribe(({ java, agentDesigner }) => {
+  private processCards(java: any[], agentDesigner: any): void {
+    try {
       const data: any[] = [];
       this.agentDesignerCids.clear();
+      this.users = []; // Reset users array
 
-      // Prepend agent-designer pipelines (newest first) only on page 1
-      if (this.pageNumber === 1 && agentDesigner?.items?.length) {
-        const sorted = [...agentDesigner.items].sort((a: any, b: any) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+      // Safely process agent-designer pipelines (only on page 1)
+      if (this.pageNumber === 1 && agentDesigner?.items && Array.isArray(agentDesigner.items) && agentDesigner.items.length > 0) {
+        const sorted = [...agentDesigner.items]
+          .filter((pipeline: any) => pipeline?.id && pipeline?.name && pipeline?.created_at) // Defensive filter
+          .sort((a: any, b: any) => {
+            try {
+              const timeA = new Date(b.created_at).getTime();
+              const timeB = new Date(a.created_at).getTime();
+              return timeA - timeB;
+            } catch {
+              return 0; // If date parsing fails, maintain original order
+            }
+          });
+
         sorted.forEach((pipeline: any) => {
-          const card = {
-            alias: pipeline.name,
-            name: pipeline.cname,
-            cid: pipeline.id,
-            type: 'AIAgent',
-            interfacetype: 'pipeline-agent',
-            description: pipeline.description || '',
-            status: pipeline.status,
-            isAgentDesigner: true,
-            flowId: pipeline.flow_id,
-            createdDate: pipeline.created_at,
-            target: { created_by: 'Agent Designer' },
-          };
-          data.push(card);
-          this.agentDesignerCids.add(pipeline.id);
-          this.users.push(pipeline.name);
+          try {
+            const card = {
+              alias: pipeline.name || 'Unknown',
+              name: pipeline.cname || pipeline.name || 'Unknown',
+              cid: pipeline.id,
+              type: 'AIAgent',
+              interfacetype: 'pipeline-agent',
+              description: pipeline.description || '',
+              status: pipeline.status || 'active',
+              isAgentDesigner: true,
+              flowId: pipeline.flow_id || null,
+              createdDate: pipeline.created_at,
+              target: { created_by: 'Agent Designer' },
+            };
+            data.push(card);
+            this.agentDesignerCids.add(pipeline.id);
+            if (pipeline.name) {
+              this.users.push(pipeline.name);
+            }
+          } catch (err) {
+            console.warn('[AgentPipelineDashboard] Error processing agent-designer pipeline:', err);
+          }
         });
       }
 
-      if (java?.length) {
+      // Safely process Java pipelines
+      if (java && Array.isArray(java) && java.length > 0) {
         java.forEach((element: any) => {
-          data.push(element);
-          this.users.push(element.alias);
+          try {
+            data.push(element);
+            if (element?.alias) {
+              this.users.push(element.alias);
+            }
+          } catch (err) {
+            console.warn('[AgentPipelineDashboard] Error processing Java pipeline:', err);
+          }
         });
       }
 
@@ -339,16 +403,24 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
         this.filter,
         this.selectedPipelineAgentType.toString()
       );
-    });
+    } catch (error) {
+      console.error('[AgentPipelineDashboard] Error in processCards:', error);
+      this.cards = [];
+      this.filteredCards = [];
+      this.loading = false;
+    }
   }
 
   private buildHttpParams(): HttpParams {
     const apiParams = this.getApiParametersForMode();
     
+    // Use the correct project name (not organization name) for API calls
+    // Organization and project are kept separate: organization is for org-level APIs,
+    // projectName is for project-level APIs to match the approval workflow expectations
     let params = new HttpParams()
       .set('page', this.pageNumber.toString())
       .set('size', this.pageSize.toString())
-      .set('project', this.organization)
+      .set('project', this.projectName || this.organization)  // Use projectName if available, fallback to organization
       .set('isCached', 'true')
       .set('adapter_instance', 'internal')    
       .set('interfacetype', apiParams.interfacetype);
@@ -378,23 +450,75 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     this.getCountPipelines();
   }
 
+  /** Build HTTP options with user context headers for approval workflow filtering (Java backend only) */
+  private buildHttpOptions(): any {
+    try {
+      let headers = new HttpHeaders();
+      let hasHeaders = false;
+
+      if (this.currentUserLogin) {
+        headers = headers.set('user-login', this.currentUserLogin);
+        hasHeaders = true;
+      }
+      if (this.currentProjectId !== null && this.currentProjectId !== undefined) {
+        headers = headers.set('project', String(this.currentProjectId));
+        hasHeaders = true;
+      }
+      if (this.organization) {
+        headers = headers.set('organisation', this.organization);
+        hasHeaders = true;
+      }
+      if (this.userRank >= 0) {
+        headers = headers.set('roleId', String(this.userRank));
+        hasHeaders = true;
+      }
+
+      return hasHeaders ? { headers } : {}; // Return empty object instead of undefined for consistency
+    } catch (error) {
+      console.warn('[AgentPipelineDashboard] Error building HTTP options:', error);
+      return {};
+    }
+  }
+
+  /** Cleanup subscriptions on component destroy */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private getCountPipelines(): void {
-    let params = this.buildHttpParams();
-
-    params = params.set('cloud_provider', 'internal');
-
-    this.service.getCountPipelines(params).subscribe((res) => {
-      this.noOfItems = res;
-      this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
-      this.pageArr = [...Array(this.noOfPages).keys()];
-      this.initializePagination();
-    });
+    try {
+      let params = this.buildHttpParams();
+      params = params.set('cloud_provider', 'internal');
+      
+      const httpOptions = this.buildHttpOptions();
+      this.service.getCountPipelines(params, httpOptions).pipe(
+        timeout(10000),
+        takeUntil(this.destroy$),
+        catchError((error) => {
+          console.error('[AgentPipelineDashboard] Error getting pipeline count:', error?.message || error);
+          return of(0);
+        })
+      ).subscribe((res) => {
+        const count = res || 0;
+        this.noOfItems = count;
+        this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
+        this.pageArr = [...Array(Math.max(1, this.noOfPages)).keys()];
+        this.initializePagination();
+      });
+    } catch (error) {
+      console.error('[AgentPipelineDashboard] Exception in getCountPipelines:', error);
+      this.noOfItems = 0;
+      this.noOfPages = 1;
+      this.pageArr = [0];
+    }
   }
 
   private desc(card: any): void {
     this.cardToggled = !this.cardToggled;
     this.selectedCard = card;
-    this.service.getStreamingServicesByName(card.name).subscribe((res) => {
+    const descOrg = (card as any).organization || this.organization;
+    this.service.getStreamingServicesByName(card.name, descOrg).subscribe((res) => {
       this.streamItem = res;
     });
   }
@@ -631,7 +755,10 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       this.router.navigate(['./view/' + card.name], extras);
       return;
     }
-    this.service.getStreamingServicesByName(card.name).subscribe((res) => {
+    // Use the actual organization stored with this pipeline (from list API).
+    // New pipelines use project name; old ones use org name — card.organization tells us which.
+    const cardOrg = (card as any).organization || this.organization;
+    this.service.getStreamingServicesByName(card.name, cardOrg).subscribe((res) => {
       this.streamItem = res;
       const navigationExtras: NavigationExtras = {
         queryParams: {

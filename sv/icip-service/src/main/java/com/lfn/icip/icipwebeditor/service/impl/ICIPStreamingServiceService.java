@@ -866,7 +866,8 @@ public class ICIPStreamingServiceService implements IICIPStreamingServiceService
 //			type = typeliststring.substring(0, typeliststring.length() - 1)+")";
 //		}
 		List<String> projectList = new ArrayList();
-		if (project.contains("Core,")) {
+		if (project.contains(",")) {
+			// Split comma-separated org/project names (handles "Core,X" and "PROJ,ORG" patterns)
 			projectList = Arrays.asList(project.split(","));
 		} else {
 			projectList.add(project);
@@ -935,7 +936,8 @@ public class ICIPStreamingServiceService implements IICIPStreamingServiceService
 			type = "notRequired";
 		}
 		List<String> projectList = new ArrayList();
-		if (project.contains("Core,")) {
+		if (project.contains(",")) {
+			// Split comma-separated org/project names (handles "Core,X" and "PROJ,ORG" patterns)
 			projectList = Arrays.asList(project.split(","));
 		} else {
 			projectList.add(project);

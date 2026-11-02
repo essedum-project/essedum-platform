@@ -371,6 +371,7 @@ public class ICIPStreamingServicesController {
 	public ResponseEntity<?> approveOrgApproval(
 			@PathVariable Integer resourceId,
 			@RequestParam(value = "rank", required = false) String rank,
+			@RequestParam(value = "orgName", required = false) String orgName,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
@@ -379,7 +380,7 @@ public class ICIPStreamingServicesController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
 			}
 
-			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approveOrgApproval(resourceId, userRank);
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approveOrgApproval(resourceId, userRank, orgName);
 			logger.info("[Approval] Resource {} approved and published at org level", resourceId);
 			return ResponseEntity.ok(java.util.Map.of(
 				"success", true,

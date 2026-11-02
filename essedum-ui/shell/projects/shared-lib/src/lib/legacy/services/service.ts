@@ -143,14 +143,22 @@ export class Services {
       );
   }
 
-  getCountPipelines(param: HttpParams): Observable<any> {
+  getCountPipelines(param: HttpParams, options?: any): Observable<any> {
+    const requestOptions: any = {
+      observe: 'response',
+      responseType: 'json',
+      params: param,
+    };
+    
+    // Merge in optional headers if provided
+    if (options?.headers) {
+      requestOptions.headers = options.headers;
+    }
+    
     return this.https
-      .get(this.dataUrl + '/service/v1/pipelines/count', {
-        observe: 'response',
-        params: param,
-      })
+      .get(this.dataUrl + '/service/v1/pipelines/count', requestOptions)
       .pipe(
-        map((response) => {
+        map((response: any) => {
           return response.body;
         })
       )
@@ -1297,20 +1305,28 @@ export class Services {
       );
   }
 
-  getPipelinesCards(param: HttpParams): Observable<any> {
+  getPipelinesCards(param: HttpParams, options?: any): Observable<any> {
     // let session: any = sessionStorage.getItem('organization');
     // let param = new HttpParams()
     //   .set('cloud_provider', 'internal')
     //   .set('filter', 'abc')
     //   .set('orderBy', 'abc')
     //   .set('project', session);
+    const requestOptions: any = {
+      observe: 'response',
+      responseType: 'json',
+      params: param,
+    };
+    
+    // Merge in optional headers if provided
+    if (options?.headers) {
+      requestOptions.headers = options.headers;
+    }
+    
     return this.https
-      .get(this.dataUrl + '/service/v1/pipelines/training/list', {
-        observe: 'response',
-        params: param,
-      })
+      .get(this.dataUrl + '/service/v1/pipelines/training/list', requestOptions)
       .pipe(
-        map((response) => {
+        map((response: any) => {
           return response.body;
         })
       )
@@ -1815,10 +1831,19 @@ export class Services {
   }
 
   private convert(streaming_services: StreamingServices): StreamingServices {
-    const copy: StreamingServices = Object.assign({}, streaming_services, {
-      organization: sessionStorage.getItem('organization'),
-    });
-    return copy;
+    // Use project name (matches the list query's ?project= param) rather than org name.
+    // Org name (ORG1-SCOPE) vs project name (PROJ1-SCOPE) mismatch causes newly created
+    // pipelines to be invisible in the list API which filters by organization=projectName.
+    let organization = sessionStorage.getItem('organization');
+    let projectId: number | null = null;
+    try {
+      const projectObj = JSON.parse(sessionStorage.getItem('project') || '{}');
+      if (projectObj?.name) organization = projectObj.name;
+      if (projectObj?.id) projectId = parseInt(projectObj.id, 10);
+    } catch { }
+    const overrides: any = { organization };
+    if (projectId !== null && !isNaN(projectId)) overrides.project_id = projectId;
+    return Object.assign({}, streaming_services, overrides);
   }
 
   //create native-file

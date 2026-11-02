@@ -635,6 +635,20 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     const cardFromState = historyState?.card ?? storedNav?.card ?? null;
     const resolvedState = { ...storedNav, ...historyState };
 
+    // Pre-populate streamItem from navigation state so the approval badge shows
+    // immediately on every navigation (not just when file list falls back to getStreamService).
+    // Also captures card.organization so getStreamService() uses the exact org (PROJ1-SCOPE or
+    // ORG1-SCOPE) without needing a trial-and-error fallback.
+    if (resolvedState?.streamItem) {
+      this.streamItem = resolvedState.streamItem;
+    } else if (cardFromState) {
+      // Card from list API carries approval_status and organization — seed streamItem with them.
+      if (!this.streamItem) this.streamItem = {} as StreamingServices;
+      const c = cardFromState as any;
+      if (c.approval_status !== undefined) (this.streamItem as any).approval_status = c.approval_status;
+      if (c.organization) (this.streamItem as any).organization = c.organization;
+    }
+
     // Set pipeline mode from navigation state if available
     if (resolvedState?.pipelineMode) {
       this.pipelineMode = resolvedState.pipelineMode;
@@ -722,15 +736,35 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   getStreamService() {
-    this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
+    // Priority: use organization already seeded on streamItem from nav state (card.organization).
+    // This is the exact value stored in the DB — no guessing or fallback call needed.
+    // Falls back to session project name, then session org name.
+    let org: string | undefined = (this.streamItem as any)?.organization || undefined;
+    if (!org) {
+      try {
+        const projectObj = JSON.parse(sessionStorage.getItem('project') || '{}');
+        org = projectObj?.name || sessionStorage.getItem('organization') || undefined;
+      } catch {
+        org = sessionStorage.getItem('organization') || undefined;
+      }
+    }
+
+    const applyResult = (res: StreamingServices) => {
       this.streamItem = res;
       this.pipelineAlias = res.alias;
-
-      // Load files for code explorer
-      // Files will be loaded after data is parsed in try block below
-
       if (this.router.url.includes('preview')) {
         this.pipelineAlias = this.streamItem.alias;
+      }
+    };
+
+    this.service.getStreamingServicesByName(this.cardName, org).subscribe({
+      next: applyResult,
+      error: () => {
+        // Fallback: try default session org if the seeded org didn't match
+        this.service.getStreamingServicesByName(this.cardName).subscribe({
+          next: applyResult,
+          error: () => { /* streamItem already pre-populated from nav state — badge still shows */ }
+        });
       }
     });
   }
@@ -4506,10 +4540,12 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         if (listResponse && listResponse.length > 0) {
           // List API succeeded - enable codespace tab and populate with response data
           this.enableCodespaceTabOnly(listResponse);
-          
+
           this.isLoadingFiles = false;
 
-               
+          // Also load pipeline metadata so approval_status badge is always available.
+          this.getStreamService();
+
           // Trigger change detection
           this.cdr.detectChanges();
         } else {

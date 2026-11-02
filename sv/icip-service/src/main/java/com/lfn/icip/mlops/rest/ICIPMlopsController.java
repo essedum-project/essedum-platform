@@ -1392,8 +1392,16 @@ public class ICIPMlopsController {
 				} else
 					tagList = null;
 
-				// Get pipelines from the current project
-				List<ICIPStreamingServices2DTO> results = streamingServicesService.getAllPipelinesByTypeAndOrg(project,
+				// Get pipelines by project name AND org name (handles pipelines stored under either value).
+				// Pipelines created before the project-name fix have organization=orgName;
+				// newer ones have organization=projectName. Both must be included.
+				String orgHeader = headers.getOrDefault("organisation", headers.getOrDefault("organization", ""));
+				String projectParam = project;
+				if (!orgHeader.isEmpty() && !orgHeader.equalsIgnoreCase(project)) {
+					projectParam = project + "," + orgHeader;
+					logger.info("[Approval] Querying pipelines for project='{}' and org='{}'", project, orgHeader);
+				}
+				List<ICIPStreamingServices2DTO> results = streamingServicesService.getAllPipelinesByTypeAndOrg(projectParam,
 						paginate, query, tagList, orderBy, type, interfacetype);
 				
 				// IMPORTANT: For org-wide visibility, also fetch PUBLISHED pipelines from all projects in the organization
@@ -1600,7 +1608,13 @@ public class ICIPMlopsController {
 		} else
 			tagList = null;
 
-		Long results = streamingServicesService.getPipelinesCountByTypeAndOrg(project, query, tagList, orderBy, type,
+		// Include both project name and org name (same as listTraining) so counts match.
+		String countOrgHeader = headers.getOrDefault("organisation", headers.getOrDefault("organization", ""));
+		String countProjectParam = project;
+		if (!countOrgHeader.isEmpty() && !countOrgHeader.equalsIgnoreCase(project)) {
+			countProjectParam = project + "," + countOrgHeader;
+		}
+		Long results = streamingServicesService.getPipelinesCountByTypeAndOrg(countProjectParam, query, tagList, orderBy, type,
 				interfacetype);
 //			String response = new JSONArray(results).toString();
 		return ResponseEntity.status(200).body(results);

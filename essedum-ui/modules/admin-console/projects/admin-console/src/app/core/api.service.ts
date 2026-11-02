@@ -439,10 +439,12 @@ export class ApiService {
       console.error('[API] Error reading rank from sessionStorage:', e);
     }
 
+    const orgName = sessionStorage.getItem('organization') || '';
+
     return this.http.post<any>(
       `/api/aip/streamingServices/approval/org/approve/${resourceId}`,
       {},
-      { params: { rank } }
+      { params: { rank, ...(orgName ? { orgName } : {}) } }
     );
   }
 

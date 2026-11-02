@@ -40,15 +40,27 @@ export class CatalogComponent implements OnInit {
     ])
       .pipe(
         take(1),
-        switchMap(([userId, orgId, projectId, roleId]) =>
-          combineLatest([
-            this.api.getCatalog(userId, orgId, projectId),
+        switchMap(([userId, orgId, projectId, roleId]) => {
+          // For rank 2 (Project Admin): pass ONLY projectId
+          // For rank 3 (Org Admin): pass ONLY orgId
+          // For other ranks: pass neither
+          let requestProjectId: number | null = null;
+          let requestOrgId: number | null = null;
+          
+          if (roleId === 2) {
+            requestProjectId = projectId;
+          } else if (roleId === 3) {
+            requestOrgId = orgId;
+          }
+          
+          return combineLatest([
+            this.api.getCatalog(userId, requestOrgId, requestProjectId),
             this.api.getVersions(userId, orgId, projectId),
           ]).pipe(
             // Filter based on rank/role
             map(([assets, versions]) => this.filterByRank(assets, versions, roleId))
-          ),
-        ),
+          );
+        }),
         map(([assets, versions]: [Asset[], AssetVersion[]]) =>
           assets.map(a => ({
             ...a,
@@ -61,25 +73,19 @@ export class CatalogComponent implements OnInit {
   }
 
   /**
-   * Filter catalog assets based on user rank
-   * Rank 2 (Project Admin): Show ONLY PROJECT_APPROVED assets (assets approved by project admin)
-   * Rank 3 (Org Admin): Show ONLY PUBLISHED assets (assets approved by org admin)
-   * Other ranks: Show all assets (no filtering)
+   * Simplified filter — backend already filters by rank via separate methods.
+   * This just returns the filtered list from backend as-is.
+   * Backend routing ensures:
+   * - Rank 2 (Project Admin): Gets listCatalogForProjectAdmin() → PROJECT_APPROVED only
+   * - Rank 3 (Org Admin): Gets listCatalogForOrgAdmin() → ORG_APPROVED only
+   * - Other ranks: Gets listCatalogForUser() → all reachable published assets
    */
-  private filterByRank(assets: Asset[], versions: AssetVersion[], roleId: number | null): [Asset[], AssetVersion[]] {
-    if (roleId === 2) {
-      // Project Admin: Only show assets that have been approved by project admin
-      const filtered = assets.filter(a => (a as any).approval_status === 'PROJECT_APPROVED');
-      console.log('[Catalog] Rank 2 (Project Admin) filtering - showing', filtered.length, 'of', assets.length, 'assets with PROJECT_APPROVED status');
-      return [filtered, versions];
-    } else if (roleId === 3) {
-      // Org Admin: Only show assets that have been approved by org admin (published)
-      const filtered = assets.filter(a => (a as any).approval_status === 'PUBLISHED');
-      console.log('[Catalog] Rank 3 (Org Admin) filtering - showing', filtered.length, 'of', assets.length, 'assets with PUBLISHED status');
-      return [filtered, versions];
-    }
-    
-    // Other ranks: No filtering, show all
+  private filterByRank(
+    assets: Asset[], 
+    versions: AssetVersion[], 
+    roleId: number | null
+  ): [Asset[], AssetVersion[]] {
+    console.log('[Catalog] Backend already filtered for role', roleId, '- received', assets.length, 'assets');
     return [assets, versions];
   }
 
