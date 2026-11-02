@@ -40,7 +40,7 @@ public class AccessResource {
 	private final RoleRepository roleRepository;
 
 	public AccessResource(AccessContextService accessContextService, UsersRepository usersRepository,
-			RoleRepository roleRepository) {
+	                      RoleRepository roleRepository) {
 		this.accessContextService = accessContextService;
 		this.usersRepository = usersRepository;
 		this.roleRepository = roleRepository;
@@ -144,7 +144,7 @@ public class AccessResource {
 			}
 		}
 		RoleAssignment saved = accessContextService.grant(request.getUserId(), request.getRoleId(),
-				request.getOrganizationId(), request.getProjectId());
+				request.getOrganizationId(), request.getProjectId(), isLegacyRole);
 		return ResponseEntity.ok(saved);
 	}
 

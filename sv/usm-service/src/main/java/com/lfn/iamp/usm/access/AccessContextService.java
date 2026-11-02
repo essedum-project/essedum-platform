@@ -59,12 +59,12 @@ public class AccessContextService {
 	private final UsmPortfolioRepository usmPortfolioRepository;
 
 	public AccessContextService(RoleAssignmentRepository roleAssignmentRepository,
-			RbacRoleRepository rbacRoleRepository, ProjectRepository projectRepository,
-			OrganisationRepository organisationRepository, AuditService auditService,
-			IdentityProjectionService identityProjectionService, UserProjectRoleRepository userProjectRoleRepository,
-			RoleRepository legacyRoleRepository, UsersRepository usersRepository,
-			UsmRolePermissionsRepository usmRolePermissionsRepository, UsmPermissionApiService usmPermissionApiService,
-			UsmPortfolioRepository usmPortfolioRepository) {
+	                            RbacRoleRepository rbacRoleRepository, ProjectRepository projectRepository,
+	                            OrganisationRepository organisationRepository, AuditService auditService,
+	                            IdentityProjectionService identityProjectionService, UserProjectRoleRepository userProjectRoleRepository,
+	                            RoleRepository legacyRoleRepository, UsersRepository usersRepository,
+	                            UsmRolePermissionsRepository usmRolePermissionsRepository, UsmPermissionApiService usmPermissionApiService,
+	                            UsmPortfolioRepository usmPortfolioRepository) {
 		this.roleAssignmentRepository = roleAssignmentRepository;
 		this.rbacRoleRepository = rbacRoleRepository;
 		this.projectRepository = projectRepository;
@@ -148,6 +148,10 @@ public class AccessContextService {
 	}
 
 	public RoleAssignment grant(Integer userId, Integer roleId, Integer organizationId, Integer projectId) {
+		return grant(userId, roleId, organizationId, projectId, false);
+	}
+
+	public RoleAssignment grant(Integer userId, Integer roleId, Integer organizationId, Integer projectId, boolean isLegacy) {
 		if (organizationId != null && projectId != null) {
 			throw new IllegalArgumentException("A role assignment scopes to at most one of organization/project");
 		}
@@ -157,6 +161,8 @@ public class AccessContextService {
 			if (existing.getRoleId().equals(roleId)
 					&& java.util.Objects.equals(existing.getOrganizationId(), organizationId)
 					&& java.util.Objects.equals(existing.getProjectId(), projectId)) {
+				// Already assigned — still ensure the legacy bridge exists (idempotent).
+				bridgeAssignment(userId, roleId, organizationId, projectId, isLegacy);
 				return existing;
 			}
 		}
@@ -170,7 +176,7 @@ public class AccessContextService {
 		auditService.record("role_assignment", "granted", userId, "User #" + userId,
 				"role " + roleId + " granted, org=" + organizationId + " project=" + projectId);
 		identityProjectionService.enqueueForProject(projectId);
-		bridgeAssignment(userId, roleId, organizationId, projectId);
+		bridgeAssignment(userId, roleId, organizationId, projectId, isLegacy);
 		return saved;
 	}
 
@@ -181,14 +187,18 @@ public class AccessContextService {
 	 * mirrored once per project.
 	 */
 	private void bridgeAssignment(Integer userId, Integer roleId, Integer organizationId, Integer projectId) {
+		bridgeAssignment(userId, roleId, organizationId, projectId, false);
+	}
+
+	private void bridgeAssignment(Integer userId, Integer roleId, Integer organizationId, Integer projectId, boolean isLegacy) {
 		List<Integer> bridgeProjectIds = projectId != null ? Collections.singletonList(projectId)
 				: organizationId != null ? projectRepository.findAll().stream()
-						.filter(p -> organizationId.equals(p.getOrganisationId()))
-						.map(Project::getId)
-						.collect(Collectors.toList()) : Collections.<Integer>emptyList();
+										   .filter(p -> organizationId.equals(p.getOrganisationId()))
+										   .map(Project::getId)
+										   .collect(Collectors.toList()) : Collections.<Integer>emptyList();
 		for (Integer pid : bridgeProjectIds) {
 			try {
-				bridgeToLegacyUserProjectRole(userId, roleId, pid);
+				bridgeToLegacyUserProjectRole(userId, roleId, pid, isLegacy);
 			} catch (RuntimeException e) {
 				log.warn("Legacy usm_user_project_role bridge skipped for user {} project {}: {}", userId, pid,
 						e.getMessage());
@@ -220,8 +230,15 @@ public class AccessContextService {
 	 * since the legacy table has no equivalent of either).
 	 */
 	private void bridgeToLegacyUserProjectRole(Integer userId, Integer roleId, Integer projectId) {
-		int rank = rankOfRole(roleId);
-		String roleName = legacyRoleName(roleId);
+		bridgeToLegacyUserProjectRole(userId, roleId, projectId, false);
+	}
+
+	private void bridgeToLegacyUserProjectRole(Integer userId, Integer roleId, Integer projectId, boolean isLegacy) {
+		// For legacy roles the roleId is a usm_role PK, not an rbac_role PK.
+		// rankOfRole() looks in rbac_role and would return the colliding RBAC role's
+		// rank (e.g. rank=4 for id=1 "platform_admin") — use 0 for all legacy roles.
+		int rank = isLegacy ? 0 : rankOfRole(roleId);
+		String roleName = legacyRoleName(roleId, isLegacy);
 
 		boolean[] isNewRole = { false };
 		Role legacyRole = legacyRoleRepository.findByNameAndProjectId(roleName, projectId).stream().findFirst()
@@ -242,7 +259,8 @@ public class AccessContextService {
 		}
 
 		UserProjectRole existing = userProjectRoleRepository.findByUserId(userId).stream()
-				.filter(upr -> upr.getProject_id() != null && projectId.equals(upr.getProject_id().getId()))
+				.filter(upr -> upr.getProject_id() != null && projectId.equals(upr.getProject_id().getId())
+						&& upr.getRole_id() != null && legacyRole.getId().equals(upr.getRole_id().getId()))
 				.findFirst().orElse(null);
 
 		Project project = projectRepository.findById(projectId).orElse(null);
@@ -259,10 +277,8 @@ public class AccessContextService {
 		}
 
 		if (existing != null) {
-			existing.setRole_id(legacyRole);
-			existing.setPortfolio_id(portfolio);
-			existing.setTime_stamp(ZonedDateTime.now());
-			userProjectRoleRepository.save(existing);
+			// Already mapped. Never update it: the table's primary key includes portfolio_id,
+			// so rewriting it can collide with a sibling row.
 			return;
 		}
 
@@ -283,22 +299,36 @@ public class AccessContextService {
 	 * "<role name> Side" (e.g. "Project Admin Side"), so a bridged rbac_role
 	 * must carry the legacy display name, not its internal key (project_admin).
 	 * A role id that isn't in rbac_role is a legacy usm_role id — keep its name.
+	 *
+	 * IMPORTANT: rbac_role and usm_role both start their auto-increment at 1, so
+	 * their IDs collide (e.g. usm_role.id=1 "IT Portfolio Manager" == rbac_role.id=1
+	 * "platform_admin"). When bridging a known-legacy roleId (isLegacy=true) we
+	 * skip the rbac_role lookup entirely to return the correct display name.
 	 */
 	private String legacyRoleName(Integer roleId) {
+		return legacyRoleName(roleId, false);
+	}
+
+	private String legacyRoleName(Integer roleId, boolean isLegacy) {
+		if (isLegacy) {
+			// Legacy role — look up display name directly from usm_role, bypassing the
+			// rbac_role table whose IDs overlap with usm_role's auto-increment sequence.
+			return legacyRoleRepository.findById(roleId).map(Role::getName).orElse("Viewer");
+		}
 		return rbacRoleRepository.findById(roleId).map(r -> {
 			switch (r.getName().toLowerCase()) {
-			case "platform_admin":
-				return "Admin";
-			case "org_admin":
-				return "Organization Admin";
-			case "project_admin":
-				return "Project Admin";
-			case "developer":
-				return "Developer";
-			case "viewer":
-				return "Viewer";
-			default:
-				return r.getName();
+				case "platform_admin":
+					return "Admin";
+				case "org_admin":
+					return "Organization Admin";
+				case "project_admin":
+					return "Project Admin";
+				case "developer":
+					return "Developer";
+				case "viewer":
+					return "Viewer";
+				default:
+					return r.getName();
 			}
 		}).orElseGet(() -> legacyRoleRepository.findById(roleId).map(Role::getName).orElse("Viewer"));
 	}

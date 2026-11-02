@@ -1,13 +1,13 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -85,8 +85,8 @@ import io.swagger.v3.oas.annotations.Parameter;
  * REST controller for managing UserProjectRole.
  */
 /**
-* @author essedum
-*/
+ * @author essedum
+ */
 @RestController
 @RequestMapping("/api")
 @Tag(name= "User Management", description = "User Management")
@@ -100,13 +100,13 @@ public class UserProjectRoleResource {
 
 	/** The user project role service. */
 	private final UserProjectRoleService user_project_roleService;
-	
+
 	@Autowired(required = false)
 	private CamundaUSM camundaUSM;
-	
+
 	@Autowired
 	ConstantsServiceImplAbstract constantsServiceImplAbstract;
-	
+
 //	/** The defailtdemostatus. */
 //	@EssedumProperty("usm.deleteautoassignedroles")
 //	private static String autoassignedrolekey;
@@ -131,12 +131,12 @@ public class UserProjectRoleResource {
 	 * @throws UnsupportedEncodingException the unsupported encoding exception
 	 * @throws JsonMappingException the json mapping exception
 	 * @throws JsonProcessingException the json processing exception
-	 * @throws NoSuchAlgorithmException 
-	 * @throws InvalidKeySpecException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * @throws NoSuchPaddingException 
-	 * @throws InvalidKeyException 
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws BadPaddingException
+	 * @throws IllegalBlockSizeException
+	 * @throws NoSuchPaddingException
+	 * @throws InvalidKeyException
 	 */
 	@GetMapping("/user-project-roles/page")
 	@Timed
@@ -196,7 +196,7 @@ public class UserProjectRoleResource {
 						HttpStatus.INTERNAL_SERVER_ERROR);
 			} else
 				log.info("createUserProjectRole: Saved User Project Role Sucessfully ID: {} Project Name: {} Role Name: {} User Name: {}" ,result.getId(),
-					result.getProject_id().getName(),result.getRole_id().getName(),result.getUser_id().getUser_f_name());
+						result.getProject_id().getName(),result.getRole_id().getName(),result.getUser_id().getUser_f_name());
 			return ResponseEntity.created(new URI(new StringBuffer("/api/user-project-roles/").append(result.getId()).toString()))
 					.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString())).body(result);
 
@@ -217,13 +217,13 @@ public class UserProjectRoleResource {
 	 *         user_project_role is not valid, or with status 500 (Internal Server
 	 *         Error) if the user_project_role couldn't be updated
 	 * @throws URISyntaxException if the Location URI syntax is incorrect
-	 * @throws JsonProcessingException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws InvalidKeySpecException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * @throws NoSuchPaddingException 
-	 * @throws InvalidKeyException 
+	 * @throws JsonProcessingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws BadPaddingException
+	 * @throws IllegalBlockSizeException
+	 * @throws NoSuchPaddingException
+	 * @throws InvalidKeyException
 	 */
 	@PutMapping("/user-project-roles")
 	@Timed
@@ -238,12 +238,12 @@ public class UserProjectRoleResource {
 			}
 			ModelMapper modelMapper = new ModelMapper();
 			UserProjectRole user_project_role = modelMapper.map(user_project_role_dto, UserProjectRole.class);
-			
-			
+
+
 			if(camundaUSM!=null) {
 				camundaUSM.updateUserProjectRole(user_project_role_dto);
 			}
-			
+
 			UserProjectRole result = user_project_roleService.save(user_project_role);
 			log.info("updateUserProjectRole: Updated UserProjectRole Sucessfully ID: {} Project Name: {} Role Name: {} User Name: {}" ,result.getId(),result.getProject_id().getName(),result.getRole_id().getName(),result.getUser_id().getUser_f_name());
 			return ResponseEntity.ok()
@@ -299,7 +299,7 @@ public class UserProjectRoleResource {
 				return new ResponseEntity<String>(new StringBuffer("UserProjectRole entity with id ").append(id).append(" does not exists!").toString(), new HttpHeaders(),
 						HttpStatus.INTERNAL_SERVER_ERROR);
 			} else
-			log.info("getUserProjectRole : Fetched User Project Role Sucessfully by ID: {}",user_project_role.getId());
+				log.info("getUserProjectRole : Fetched User Project Role Sucessfully by ID: {}",user_project_role.getId());
 			return new ResponseEntity<>(user_project_role, new HttpHeaders(), HttpStatus.OK);
 
 		} catch (SQLException | EntityNotFoundException e) {
@@ -321,11 +321,11 @@ public class UserProjectRoleResource {
 	public ResponseEntity<?> deleteUserProjectRole(@PathVariable("id") Integer id) {
 		try {
 			log.info("deleteUserProjectRole : Request to delete User Project Role by ID: {}",id);
-			
+
 			if(camundaUSM!=null) {
 				camundaUSM.deleteUserProjectRole(id);
 			}
-						
+
 			user_project_roleService.delete(user_project_roleService.getUserProjectRole(id));
 			log.info("deleteUserProjectRole :  Deleted User Project Role  Successfully by ID: : {}",id);
 			return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString()))
@@ -376,13 +376,13 @@ public class UserProjectRoleResource {
 	 *         user_project_role, or with status 400 (Bad Request) if the
 	 *         user_project_role has already an ID
 	 * @throws URISyntaxException if the Location URI syntax is incorrect
-	 * @throws JsonProcessingException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws InvalidKeySpecException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * @throws NoSuchPaddingException 
-	 * @throws InvalidKeyException 
+	 * @throws JsonProcessingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws BadPaddingException
+	 * @throws IllegalBlockSizeException
+	 * @throws NoSuchPaddingException
+	 * @throws InvalidKeyException
 	 */
 	@PostMapping("/user-project-roles-list")
 	@Timed
@@ -400,7 +400,31 @@ public class UserProjectRoleResource {
 			// save list of UserProjectRoles
 			String autoassignRole = constantsServiceImplAbstract.findExtensionKey(1,autoassignedrolekey);
 			if(Boolean.valueOf(autoassignRole)) {
-				user_project_roleService.deleteByUserRoleId(user_project_role_dto.get(0).getUser_id());
+				// Additive merge: preserve existing roles not in this request so that
+				// a partial update (e.g. Admin + developer + Project Admin) never silently
+				// drops roles such as "IT Portfolio Manager" that were assigned earlier.
+				try {
+					String userLogin = user_project_role_dto.get(0).getUser_id().getUser_login();
+					if (userLogin != null && !userLogin.isBlank()) {
+						Map<Integer, List<com.lfn.iamp.usm.domain.Role>> existingByProject =
+								user_project_roleService.findByUserIdUserLogin(userLogin);
+						java.util.Set<String> existingKeys = new java.util.HashSet<>();
+						existingByProject.forEach((pid, roles) -> roles.forEach(
+								r -> existingKeys.add(pid + ":" + r.getId())));
+						user_project_role_dto = user_project_role_dto.stream()
+								.filter(dto -> {
+									if (dto.getProject_id() == null || dto.getRole_id() == null) return true;
+									return !existingKeys.contains(
+											dto.getProject_id().getId() + ":" + dto.getRole_id().getId());
+								})
+								.collect(Collectors.toList());
+						if (user_project_role_dto.isEmpty()) {
+							return new ResponseEntity<>(new ArrayList<>(), new HttpHeaders(), HttpStatus.CREATED);
+						}
+					}
+				} catch (Exception e) {
+					log.warn("Could not load existing roles for merge; proceeding with full save: {}", e.getMessage());
+				}
 			}
 			user_project_role = user_project_role_dto.stream()
 					.map(source -> modelMapper.map(source, UserProjectRole.class)).collect(Collectors.toList());
@@ -425,40 +449,40 @@ public class UserProjectRoleResource {
 	 *         users, or with status 400 (Bad Request) if the users has already an
 	 *         ID
 	 * @throws URISyntaxException if the Location URI syntax is incorrect
-	 * @throws JsonProcessingException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws InvalidKeySpecException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * @throws NoSuchPaddingException 
-	 * @throws InvalidKeyException 
+	 * @throws JsonProcessingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws BadPaddingException
+	 * @throws IllegalBlockSizeException
+	 * @throws NoSuchPaddingException
+	 * @throws InvalidKeyException
 	 */
 	@PostMapping("/registerUser")
 	@Timed
 	public ResponseEntity<?> registerUser(@RequestBody UsersDTO users_dto) throws URISyntaxException, JsonProcessingException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, NoSuchAlgorithmException {
 		try {
-            log.info("createUsers: Request to register User Name: {}",users_dto.getUser_f_name());
-            log.debug("REST request to save Users : {}", users_dto);            
-            ModelMapper modelMapper = new ModelMapper();
-            Users users = modelMapper.map(users_dto, Users.class);
-            boolean validatedpassword = users_dto.getPassword().matches("(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_\\[\\]\\-{}|';:,+=|`~<\\\\/>?])[A-Za-z\\d!@#$%^&*_\\[\\]\\-{}|';:,+=|`~<\\\\/>?]{8,20}");
-            if(!validatedpassword){
-                return new ResponseEntity<String>("Password should contain atleast 1 number, 1 uppercase and lowercase character and 1 special character", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            boolean validatedUserName = users_dto.getUser_f_name().matches("^[A-Za-z]+(?:\\s[A-Za-z]+)*$");
-            if(!validatedUserName){
-                return new ResponseEntity<String>("Alpha numeric and atmost one special characters -_. allowed", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            UserProjectRoleSummary result = user_project_roleService.registerUserwithDefaultRoles(users);
-            if (result == null)
-                return new ResponseEntity<String>("User could not be created", new HttpHeaders(),
-                        HttpStatus.INTERNAL_SERVER_ERROR); 
-            return new ResponseEntity<>(result, new HttpHeaders(), HttpStatus.CREATED);        
-        } catch (SQLException | ConstraintViolationException | DataIntegrityViolationException e) {
+			log.info("createUsers: Request to register User Name: {}",users_dto.getUser_f_name());
+			log.debug("REST request to save Users : {}", users_dto);
+			ModelMapper modelMapper = new ModelMapper();
+			Users users = modelMapper.map(users_dto, Users.class);
+			boolean validatedpassword = users_dto.getPassword().matches("(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_\\[\\]\\-{}|';:,+=|`~<\\\\/>?])[A-Za-z\\d!@#$%^&*_\\[\\]\\-{}|';:,+=|`~<\\\\/>?]{8,20}");
+			if(!validatedpassword){
+				return new ResponseEntity<String>("Password should contain atleast 1 number, 1 uppercase and lowercase character and 1 special character", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+			boolean validatedUserName = users_dto.getUser_f_name().matches("^[A-Za-z]+(?:\\s[A-Za-z]+)*$");
+			if(!validatedUserName){
+				return new ResponseEntity<String>("Alpha numeric and atmost one special characters -_. allowed", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+			UserProjectRoleSummary result = user_project_roleService.registerUserwithDefaultRoles(users);
+			if (result == null)
+				return new ResponseEntity<String>("User could not be created", new HttpHeaders(),
+						HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(result, new HttpHeaders(), HttpStatus.CREATED);
+		} catch (SQLException | ConstraintViolationException | DataIntegrityViolationException e) {
 			// TODO: handle exception
 			log.error(new StringBuffer("SQLException ").append(e.getClass().getName()).append(": ").append(e).toString());
 			if(e.getMessage().contains("email_unique")) {
-			return new ResponseEntity<String>("User email already exists", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<String>("User email already exists", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 			else if (e.getMessage().contains("user_login_unique")) {
 				return new ResponseEntity<String>("User Login already exists", new HttpHeaders(),
@@ -468,12 +492,12 @@ public class UserProjectRoleResource {
 				return new ResponseEntity<>(users_dto, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * Find Project-Role Mapping for a given UserProjectRoleSummary
-	 * 
+	 *
 	 * @param UserProjectRoleSummary the userProjectRoleSummary
 	 * @return List<UserProjectRole> list of UserProjectRole
 	 */
@@ -483,17 +507,17 @@ public class UserProjectRoleResource {
 			UserProjectRole userProjectRoleExample = new UserProjectRole();
 			userProjectRoleExample.setUser_id(userProjectRoleSummary.getUserId());
 			PageRequestByExample<UserProjectRole> pageReqByExample = new PageRequestByExample<>();
-			pageReqByExample.setExample(userProjectRoleExample);				
+			pageReqByExample.setExample(userProjectRoleExample);
 			userProjectRoleList = user_project_roleService.getPaginatedUserProjectRoles(pageReqByExample,Pageable.unpaged())
-														  .getContent();
+					.getContent();
 		} catch (EntityNotFoundException e) {
 			log.error("Error occurred in getUserProjectRoleListByUserId {} ",e.getMessage());
 		}
-		
-	
+
+
 		return userProjectRoleList;
 	}
-	
+
 	/**
 	 * Fetch all user project roles.
 	 *
@@ -503,27 +527,27 @@ public class UserProjectRoleResource {
 	 * @throws UnsupportedEncodingException the unsupported encoding exception
 	 * @throws JsonMappingException the json mapping exception
 	 * @throws JsonProcessingException the json processing exception
-	 * @throws NoSuchAlgorithmException 
-	 * @throws InvalidKeySpecException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * @throws NoSuchPaddingException 
-	 * @throws InvalidKeyException 
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws BadPaddingException
+	 * @throws IllegalBlockSizeException
+	 * @throws NoSuchPaddingException
+	 * @throws InvalidKeyException
 	 */
 	@GetMapping("/user-project-roless/page")
 	@Timed
 	public ResponseEntity<?> fetchAllUserProjectRoles(@RequestHeader("example") String value,@Parameter Pageable pageable) throws UnsupportedEncodingException, JsonMappingException, JsonProcessingException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, NoSuchAlgorithmException   {
-			log.info("getAllUserProjectRoles : Request to get List of UserProjectRoles");
-			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			String body = new String(Base64.getDecoder().decode(value), "UTF-8");
-			PageRequestByExample<UserProjectRole> prbe = objectMapper.readValue(body, new TypeReference<PageRequestByExample<UserProjectRole>>() {
-			});
-	
-			log.info("getAllUserProjectRoles : Fetched List of UserProjectRoles successfully");
-			return new ResponseEntity<>(user_project_roleService.getPaginatedUserProjectRoles(prbe,pageable), new HttpHeaders(), HttpStatus.OK);
-		}
-	
+		log.info("getAllUserProjectRoles : Request to get List of UserProjectRoles");
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		String body = new String(Base64.getDecoder().decode(value), "UTF-8");
+		PageRequestByExample<UserProjectRole> prbe = objectMapper.readValue(body, new TypeReference<PageRequestByExample<UserProjectRole>>() {
+		});
+
+		log.info("getAllUserProjectRoles : Fetched List of UserProjectRoles successfully");
+		return new ResponseEntity<>(user_project_roleService.getPaginatedUserProjectRoles(prbe,pageable), new HttpHeaders(), HttpStatus.OK);
+	}
+
 	/**
 	 * Search projects.
 	 *
@@ -531,26 +555,26 @@ public class UserProjectRoleResource {
 	 * @param prbe the prbe
 	 * @return the response entity
 	 * @throws URISyntaxException the URI syntax exception
-	 * @throws JsonProcessingException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws InvalidKeySpecException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * @throws NoSuchPaddingException 
-	 * @throws InvalidKeyException 
+	 * @throws JsonProcessingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws BadPaddingException
+	 * @throws IllegalBlockSizeException
+	 * @throws NoSuchPaddingException
+	 * @throws InvalidKeyException
 	 */
 	@PostMapping("/search/user-project-roles/page")
 	@Timed
 	public ResponseEntity<?> searchProjects(@Parameter Pageable pageable,@RequestBody PageRequestByExample<UserProjectRole> prbe) throws  URISyntaxException, JsonProcessingException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, NoSuchAlgorithmException  {
 
-			log.info("searchProjects : Request to get list of User Project Roles");
-			
-			log.info("searchProjects : Fetched  list of User Project Roles successfully");
-	
-			return new ResponseEntity<>(user_project_roleService.search(pageable,prbe), new HttpHeaders(), HttpStatus.OK);
-		
-		}
-	
+		log.info("searchProjects : Request to get list of User Project Roles");
+
+		log.info("searchProjects : Fetched  list of User Project Roles successfully");
+
+		return new ResponseEntity<>(user_project_roleService.search(pageable,prbe), new HttpHeaders(), HttpStatus.OK);
+
+	}
+
 	/**
 	 * Gets the project list by user name.
 	 *
@@ -562,12 +586,12 @@ public class UserProjectRoleResource {
 	@Timed
 	public ResponseEntity<?> getProjectListByUserName(@PathVariable String user_login) throws  URISyntaxException  {
 
-			log.info("getProjectListByUserId : Request to get list of Project");
-			
-			log.info("getProjectListByUserId : Fetched  list of Project successfully");
-			return new ResponseEntity<>(user_project_roleService.getProjectListByUserName(user_login), new HttpHeaders(), HttpStatus.OK);		
-		}
-	
+		log.info("getProjectListByUserId : Request to get list of Project");
+
+		log.info("getProjectListByUserId : Fetched  list of Project successfully");
+		return new ResponseEntity<>(user_project_roleService.getProjectListByUserName(user_login), new HttpHeaders(), HttpStatus.OK);
+	}
+
 	@GetMapping("/user-project-roles-by-roleid/{roleId}/{projectId}")
 	@Timed
 	public ResponseEntity<?> getUsersByRoleID(@PathVariable Integer roleId, @PathVariable Integer projectId) throws URISyntaxException {
@@ -595,5 +619,5 @@ public class UserProjectRoleResource {
 			return new ResponseEntity<String>(e.getMessage(), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 }

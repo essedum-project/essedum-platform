@@ -12,10 +12,10 @@ SET SQL_SAFE_UPDATES = 0;
 
 -- rbac-1: roles
 CREATE TABLE IF NOT EXISTS rbac_role (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(64) NOT NULL UNIQUE,
-  `rank` INT NOT NULL
-);
+                                         id INT AUTO_INCREMENT PRIMARY KEY,
+                                         name VARCHAR(64) NOT NULL UNIQUE,
+    `rank` INT NOT NULL
+    );
 
 -- rbac-1-seed
 INSERT INTO rbac_role (name, `rank`)
@@ -40,58 +40,61 @@ WHERE (SELECT COUNT(*) FROM rbac_role) = 4;
 
 -- rbac-2
 CREATE TABLE IF NOT EXISTS rbac_role_assignment (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
-  role_id INT NOT NULL,
-  organization_id INT NULL,
-  project_id INT NULL,
-  granted_at DATETIME(6) NOT NULL,
-  revoked_at DATETIME(6) NULL
-);
+                                                    id INT AUTO_INCREMENT PRIMARY KEY,
+                                                    user_id INT NOT NULL,
+                                                    role_id INT NOT NULL,
+                                                    organization_id INT NULL,
+                                                    project_id INT NULL,
+                                                    granted_at DATETIME(6) NOT NULL,
+    revoked_at DATETIME(6) NULL
+    );
 
 -- rbac-3
 CREATE TABLE IF NOT EXISTS rbac_asset (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  project_id INT NOT NULL,
-  asset_type VARCHAR(64) NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  scope VARCHAR(32) NOT NULL,
-  current_version_id INT NULL
-);
+                                          id INT AUTO_INCREMENT PRIMARY KEY,
+                                          project_id INT NOT NULL,
+                                          asset_type VARCHAR(64) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    scope VARCHAR(32) NOT NULL,
+    current_version_id INT NULL
+    );
 
 -- rbac-4
 CREATE TABLE IF NOT EXISTS rbac_asset_version (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  asset_id INT NOT NULL,
-  environment_id INT NULL,
-  version_no INT NOT NULL,
-  status VARCHAR(32) NOT NULL,
-  content_digest VARCHAR(255) NULL,
-  payload_ref VARCHAR(500) NULL,
-  updated_at DATETIME(6) NOT NULL
-);
+                                                  id INT AUTO_INCREMENT PRIMARY KEY,
+                                                  asset_id INT NOT NULL,
+                                                  environment_id INT NULL,
+                                                  version_no INT NOT NULL,
+                                                  status VARCHAR(32) NOT NULL,
+    content_digest VARCHAR(255) NULL,
+    payload_ref VARCHAR(500) NULL,
+    updated_at DATETIME(6) NOT NULL,
+    creator_id INT NULL
+    );
+-- add creator_id to existing table if it was created without it
+ALTER TABLE rbac_asset_version ADD COLUMN IF NOT EXISTS creator_id INT NULL;
 
 -- rbac-5
 CREATE TABLE IF NOT EXISTS rbac_promotion_event (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  asset_version_id INT NOT NULL,
-  gate VARCHAR(32) NOT NULL,
-  action VARCHAR(32) NOT NULL,
-  actor_id INT NOT NULL,
-  actor_name VARCHAR(255) NULL,
-  note VARCHAR(1000) NULL,
-  occurred_at DATETIME(6) NOT NULL
-);
+                                                    id INT AUTO_INCREMENT PRIMARY KEY,
+                                                    asset_version_id INT NOT NULL,
+                                                    gate VARCHAR(32) NOT NULL,
+    action VARCHAR(32) NOT NULL,
+    actor_id INT NOT NULL,
+    actor_name VARCHAR(255) NULL,
+    note VARCHAR(1000) NULL,
+    occurred_at DATETIME(6) NOT NULL
+    );
 
 -- rbac-6
 CREATE TABLE IF NOT EXISTS rbac_menu_item (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  parent_id INT NULL,
-  label VARCHAR(255) NOT NULL,
-  route VARCHAR(255) NOT NULL,
-  min_role_rank INT NOT NULL,
-  display_order INT NOT NULL
-);
+                                              id INT AUTO_INCREMENT PRIMARY KEY,
+                                              parent_id INT NULL,
+                                              label VARCHAR(255) NOT NULL,
+    route VARCHAR(255) NOT NULL,
+    min_role_rank INT NOT NULL,
+    display_order INT NOT NULL
+    );
 
 -- rbac-6-seed (explicit ids, matches the Liquibase seed exactly)
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order)
@@ -124,15 +127,15 @@ SELECT 7, 1, 'Menu Configuration', '/admin-console/menu-configuration', 4, 6
 
 -- rbac-7
 CREATE TABLE IF NOT EXISTS rbac_audit_event (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  correlation_id VARCHAR(64) NOT NULL,
-  entity VARCHAR(64) NOT NULL,
-  action VARCHAR(64) NOT NULL,
-  actor_id INT NULL,
-  actor_name VARCHAR(255) NULL,
-  occurred_at DATETIME(6) NOT NULL,
-  details VARCHAR(1000) NULL
-);
+                                                id INT AUTO_INCREMENT PRIMARY KEY,
+                                                correlation_id VARCHAR(64) NOT NULL,
+    entity VARCHAR(64) NOT NULL,
+    action VARCHAR(64) NOT NULL,
+    actor_id INT NULL,
+    actor_name VARCHAR(255) NULL,
+    occurred_at DATETIME(6) NOT NULL,
+    details VARCHAR(1000) NULL
+    );
 
 -- rbac-8: closes the Project<->Organisation FK gap (only if column missing)
 SET @col_exists := (
@@ -146,21 +149,21 @@ DEALLOCATE PREPARE stmt;
 
 -- rbac-9
 CREATE TABLE IF NOT EXISTS rbac_environment (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  project_id INT NOT NULL,
-  name VARCHAR(64) NOT NULL,
-  config_ref VARCHAR(500) NULL
-);
+                                                id INT AUTO_INCREMENT PRIMARY KEY,
+                                                project_id INT NOT NULL,
+                                                name VARCHAR(64) NOT NULL,
+    config_ref VARCHAR(500) NULL
+    );
 
 -- rbac-10
 CREATE TABLE IF NOT EXISTS rbac_identity_projection_target (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  project_id INT NOT NULL,
-  target_type VARCHAR(32) NOT NULL,
-  external_ref VARCHAR(255) NULL,
-  sync_status VARCHAR(32) NOT NULL,
-  last_attempt_at DATETIME(6) NULL
-);
+                                                               id INT AUTO_INCREMENT PRIMARY KEY,
+                                                               project_id INT NOT NULL,
+                                                               target_type VARCHAR(32) NOT NULL,
+    external_ref VARCHAR(255) NULL,
+    sync_status VARCHAR(32) NOT NULL,
+    last_attempt_at DATETIME(6) NULL
+    );
 
 -- rbac-11: icon, roles (CSV role-override), project (scope) columns
 SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rbac_menu_item' AND COLUMN_NAME='icon');
@@ -173,7 +176,7 @@ SET @d := IF(@c=0,'ALTER TABLE rbac_menu_item ADD COLUMN project VARCHAR(255) NU
 -- rbac-12: Overview landing entry
 INSERT INTO rbac_menu_item (id, parent_id, label, route, min_role_rank, display_order, icon)
 SELECT 8, 1, 'Overview', '/admin-console/overview', 2, 0, 'tachometer'
-WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/overview');
+    WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/overview');
 
 -- rbac-13: seed icons for admin-console menu items
 UPDATE rbac_menu_item SET icon='shield'         WHERE route='/admin-console'                    AND (icon IS NULL OR icon='');

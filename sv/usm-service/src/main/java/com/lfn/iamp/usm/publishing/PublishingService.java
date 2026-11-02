@@ -149,11 +149,7 @@ public class PublishingService {
 	 * visibility query the marketplace reads.
 	 */
 	public List<Asset> listCatalogForUser(Integer userId) {
-		return listCatalogForUser(userId, null, null);
-	}
-
-	public List<Asset> listCatalogForUser(Integer userId, Integer orgId, Integer projectId) {
-		return listAssetsForUser(userId, orgId, projectId).stream()
+		return listAssetsForUser(userId).stream()
 				.filter(a -> a.getCurrentVersionId() != null)
 				.filter(a -> !PromotionGate.SCOPE_DRAFT.equals(a.getScope()))
 				.collect(Collectors.toList());
@@ -314,7 +310,7 @@ public class PublishingService {
 		if (!"draft".equals(version.getStatus()) && !"rejected".equals(version.getStatus())) {
 			throw new IllegalStateException(
 					"Only draft or rejected versions can be submitted (version " + versionId
-					+ " has status=" + version.getStatus() + ")");
+							+ " has status=" + version.getStatus() + ")");
 		}
 		String gate = nextGateForVersion(versionId);
 		if (gate == null) {
