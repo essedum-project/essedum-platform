@@ -38,13 +38,22 @@
 
                 <!-- Action Buttons -->
                 <div class="approval-button-container" *ngIf="userRank === 0">
-                  <button *ngIf="!getApprovalStatus() && isOwnPipeline()" 
+                  <button *ngIf="!getApprovalStatus() && isOwnPipeline()"
                     class="send-approval-btn"
                     type="button"
                     (click)="requestApproval($event)"
                     matTooltip="Submit pipeline for project approval"
                     matTooltipPosition="left">
                     <mat-icon>upload</mat-icon> Send for Approval
+                  </button>
+                  <!-- Resubmit after Project Admin rejection -->
+                  <button *ngIf="getApprovalStatus() === 'PROJECT_REJECTED' && isOwnPipeline()"
+                    class="send-approval-btn resubmit-btn"
+                    type="button"
+                    (click)="requestApproval($event)"
+                    matTooltip="Resubmit to Project Admin for approval"
+                    matTooltipPosition="left">
+                    <mat-icon>refresh</mat-icon> Resubmit
                   </button>
                 </div>
               </div>

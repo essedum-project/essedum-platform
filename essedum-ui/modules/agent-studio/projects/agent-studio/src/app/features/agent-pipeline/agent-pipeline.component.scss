@@ -3203,6 +3203,15 @@
       width: 18px;
       height: 18px;
     }
+
+    // Resubmit variant — amber to signal a retry after rejection
+    &.resubmit-btn {
+      background-color: #d97706;
+
+      &:hover:not(:disabled) {
+        background-color: #b45309;
+      }
+    }
   }
 }
 

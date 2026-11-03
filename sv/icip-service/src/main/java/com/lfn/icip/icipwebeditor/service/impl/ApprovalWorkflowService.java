@@ -43,9 +43,10 @@ public class ApprovalWorkflowService {
 			throw new IllegalAccessError("Only creator can submit for approval");
 		}
 
-		// Only DRAFT resources can be submitted
-		if (!"DRAFT".equals(resource.getApprovalStatus())) {
-			throw new IllegalStateException("Only DRAFT resources can be submitted for approval");
+		// Allow resubmission from DRAFT or PROJECT_REJECTED
+		String currentStatus = resource.getApprovalStatus();
+		if (!"DRAFT".equals(currentStatus) && !"PROJECT_REJECTED".equals(currentStatus)) {
+			throw new IllegalStateException("Only DRAFT or PROJECT_REJECTED resources can be submitted for approval");
 		}
 
 		resource.setApprovalStatus("PENDING_PROJECT_APPROVAL");
