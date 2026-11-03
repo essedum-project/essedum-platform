@@ -104,6 +104,14 @@ export class ApiService {
     return this.http.get<Asset[]>(`${this.base}/assets/catalog`, { params });
   }
 
+  // Catalog sourced from pipelines approved by project admin (rank 2) or org admin (rank 3).
+  getPipelineCatalog(projectId?: number | null, orgId?: number | null): Observable<any[]> {
+    const params: Record<string, any> = {};
+    if (projectId != null) params['projectId'] = projectId;
+    if (orgId != null) params['orgId'] = orgId;
+    return this.http.get<any[]>(`/api/aip/streamingServices/approval/catalog`, { params });
+  }
+
   // Create an asset + its first draft version. §5.
   createAsset(payload: {
     projectId: number; assetType: string; name: string; payloadRef: string;

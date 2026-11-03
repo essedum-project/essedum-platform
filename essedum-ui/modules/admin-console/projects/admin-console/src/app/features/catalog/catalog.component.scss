@@ -196,100 +196,45 @@
   }
 }
 
-// ── Canvas area ───────────────────────────────────────────────────────────────
-.card-canvas {
-  flex: 1;
-  min-height: 90px;
-  margin: 12px 14px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(99, 102, 241, 0.12);
+// ── Meta rows ─────────────────────────────────────────────────────────────────
+.card-meta {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.canvas-icon-bg {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  opacity: 0.35;
-
-  mat-icon {
-    font-size: 26px !important;
-    width: 26px !important;
-    height: 26px !important;
-  }
-
-  &.canvas-project      { background: rgba(99, 102, 241, 0.25);  mat-icon { color: #818cf8; } }
-  &.canvas-organization { background: rgba(168, 85, 247, 0.25);  mat-icon { color: #c084fc; } }
-  &.canvas-public       { background: rgba(34, 197, 94, 0.25);   mat-icon { color: #4ade80; } }
-}
-
-// ── Footer bar ────────────────────────────────────────────────────────────────
-.card-actions-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 14px 12px;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 14px 14px;
   border-top: 1px solid rgba(99, 102, 241, 0.1);
+  margin-top: 10px;
 }
 
-.serving-pill {
-  display: inline-flex;
+.meta-row {
+  display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
-  font-weight: 500;
-  color: #7a9cbf;
+  font-size: 11.5px;
+  line-height: 1.4;
 
-  .v-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #34d399;
-    flex-shrink: 0;
-  }
-}
-
-.no-version {
-  font-size: 11px;
-  color: #4a5e72;
-  font-style: italic;
-}
-
-// ── Edit button (TC-071) ──────────────────────────────────────────────────────
-.card-edit-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(79, 142, 247, 0.12);
-  border: 1px solid rgba(79, 142, 247, 0.28);
-  color: #7eb8ff;
-  font-size: 11px;
-  font-weight: 600;
-  font-family: inherit;
-  letter-spacing: 0.02em;
-  padding: 4px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  outline: none;
-  transition: background 0.12s, border-color 0.12s;
-
-  .btn-icon {
+  .meta-icon {
     font-size: 13px !important;
     width: 13px !important;
     height: 13px !important;
     line-height: 13px !important;
+    color: #6e8ea8;
+    flex-shrink: 0;
   }
 
-  &:hover {
-    background: rgba(79, 142, 247, 0.22);
-    border-color: rgba(79, 142, 247, 0.5);
+  .meta-label {
+    color: #6e8ea8;
+    font-weight: 500;
+    min-width: 48px;
+    flex-shrink: 0;
+  }
+
+  .meta-value {
+    color: #c8d6e5;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -361,31 +306,11 @@
     }
   }
 
-  .card-canvas {
-    background: rgba(241, 245, 249, 0.85);
-    border-color: rgba(71, 66, 220, 0.09);
-  }
+  .card-meta { border-top-color: rgba(71, 66, 220, 0.08); }
 
-  .canvas-icon-bg {
-    opacity: 0.45;
-    &.canvas-project      { background: rgba(99, 102, 241, 0.15);  mat-icon { color: #4f46e5; } }
-    &.canvas-organization { background: rgba(168, 85, 247, 0.15);  mat-icon { color: #7c3aed; } }
-    &.canvas-public       { background: rgba(22, 163, 74, 0.15);   mat-icon { color: #16a34a; } }
-  }
-
-  .card-actions-bar { border-top-color: rgba(71, 66, 220, 0.08); }
-
-  .serving-pill { color: #64748b; .v-dot { background: #16a34a; } }
-  .no-version   { color: #94a3b8; }
-
-  .card-edit-btn {
-    background: rgba(37, 99, 235, 0.08);
-    border-color: rgba(37, 99, 235, 0.22);
-    color: #2563eb;
-
-    &:hover {
-      background: rgba(37, 99, 235, 0.14);
-      border-color: rgba(37, 99, 235, 0.4);
-    }
+  .meta-row {
+    .meta-icon  { color: #94a3b8; }
+    .meta-label { color: #94a3b8; }
+    .meta-value { color: #1e293b; }
   }
 }

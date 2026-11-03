@@ -90,15 +90,31 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
         distinctUntilChanged((prev, curr) => 
           prev[0] === curr[0] && prev[1] === curr[1] && prev[2] === curr[2]
         ),
-        switchMap(([userId, orgId, projectId]) => {
-          console.log('[PUBLISHING] load() - context changed: userId:', userId, 'orgId:', orgId, 'projectId:', projectId);
-          // Store these for use in submit methods
+        switchMap(([userId, ctxOrgId, ctxProjectId]) => {
+          // userContext.orgId$ reads project.organisationId which is often null;
+          // fall back to portfoliodata.id (the org the user selected in the thumbnail).
+          let orgId = ctxOrgId;
+          if (!orgId) {
+            try {
+              const pd = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}');
+              orgId = pd?.id ? Number(pd.id) : null;
+            } catch {}
+          }
+          let projectId = ctxProjectId;
+          if (!projectId) {
+            try {
+              const proj = JSON.parse(sessionStorage.getItem('project') || '{}');
+              projectId = proj?.id ? Number(proj.id) : null;
+            } catch {}
+          }
+          console.log('[PUBLISHING] load() - context: userId:', userId, 'orgId:', orgId, 'projectId:', projectId);
+          // Store for use in submitToOrg / other methods
           this.projectId = projectId;
           this.orgId = orgId;
-          
+
           // Load streaming services with PROJECT_APPROVED status (Rank 2 can submit to org)
           const streamingApi$ = projectId ? this.api.getDraftResources(projectId) : of([]);
-          
+
           return combineLatest([
             this.api.getDraftVersions(userId, orgId, projectId),
             this.api.getAssets(userId, orgId, projectId),

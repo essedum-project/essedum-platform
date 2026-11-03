@@ -497,6 +497,34 @@ public class ICIPStreamingServicesController {
 	}
 
 	/**
+	 * GET /approval/catalog?projectId=X  → PROJECT_APPROVED pipelines for rank-2 catalog
+	 * GET /approval/catalog?orgId=X      → PUBLISHED pipelines for rank-3 catalog
+	 */
+	@GetMapping("/approval/catalog")
+	public ResponseEntity<?> getCatalog(
+			@RequestParam(required = false) Integer projectId,
+			@RequestParam(required = false) Integer orgId) {
+		try {
+			if (projectId != null) {
+				java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> items =
+					approvalWorkflowService.getDraftResources(projectId, "2");
+				logger.info("[Catalog] projectId={} → {} PROJECT_APPROVED items", projectId, items.size());
+				return ResponseEntity.ok(items);
+			}
+			if (orgId != null) {
+				java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> items =
+					approvalWorkflowService.getPublishedResourcesForOrg(orgId);
+				logger.info("[Catalog] orgId={} → {} PUBLISHED items", orgId, items.size());
+				return ResponseEntity.ok(items);
+			}
+			return ResponseEntity.ok(java.util.Collections.emptyList());
+		} catch (Exception e) {
+			logger.error("[Catalog] Error fetching catalog", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));
+		}
+	}
+
+	/**
 	 * GET /approval/draft-resources?projectId=X&rank=2
 	 * Get PROJECT_APPROVED resources available for org submission
 	 */

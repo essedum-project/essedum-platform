@@ -1480,7 +1480,15 @@ public class ICIPMlopsController {
 								}
 								
 								boolean isVisible = false;
-								
+
+								// Admin-created pipelines are visible to all users in the same org/scope
+								String createdByCheck = result.getCreatedBy();
+								if ("admin".equals(createdByCheck)) {
+									filteredResults.add(result);
+									logger.debug("[Approval] Admin-created pipeline {} included for all users", result.getName());
+									continue;
+								}
+
 								// Rule 1: DRAFT - only creator can see
 								if ("DRAFT".equals(approvalStatus)) {
 									String createdBy = result.getCreatedBy();

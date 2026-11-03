@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,8 @@ import com.lfn.iamp.usm.repository.ProjectRepository;
  */
 @Service
 public class PublishingService {
+
+	private static final Logger log = LoggerFactory.getLogger(PublishingService.class);
 
 	private final AssetRepository assetRepository;
 	private final AssetVersionRepository assetVersionRepository;
@@ -120,6 +124,7 @@ public class PublishingService {
 					// org/public scope: org-expanded visibility is fine
 					return true;
 				})
+				.peek(a -> a.deriveApprovalStatus())
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		// Only include public assets when no org/project scope restriction is applied,
@@ -127,6 +132,7 @@ public class PublishingService {
 		if (projectId == null && orgId == null) {
 			for (Asset publicAsset : assetRepository.findByScope(PromotionGate.SCOPE_PUBLIC)) {
 				if (reachable.stream().noneMatch(a -> a.getId().equals(publicAsset.getId()))) {
+					publicAsset.deriveApprovalStatus();
 					reachable.add(publicAsset);
 				}
 			}
@@ -152,7 +158,73 @@ public class PublishingService {
 		return listAssetsForUser(userId).stream()
 				.filter(a -> a.getCurrentVersionId() != null)
 				.filter(a -> !PromotionGate.SCOPE_DRAFT.equals(a.getScope()))
+				.peek(a -> a.deriveApprovalStatus())
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Catalog for Project Admin (Rank 2): Return ONLY project-scoped assets
+	 * in the specified project, regardless of visibility rules.
+	 */
+	public List<Asset> listCatalogForProjectAdmin(Integer userId, Integer projectId) {
+		AccessContext ctx = accessContextService.resolve(userId);
+		log.info("[Catalog] ProjectAdmin userId={} projectId={} directIds={} reachableIds={}",
+				userId, projectId, ctx.getDirectProjectIds(), ctx.getReachableProjectIds());
+		// Try direct project assignment first, then org-expanded (handles org-scoped role assignments)
+		List<Integer> ids = resolveProjectFilter(ctx.getDirectProjectIds(), null, projectId);
+		if (ids.isEmpty()) ids = resolveProjectFilter(ctx.getReachableProjectIds(), null, projectId);
+		// If still empty (e.g. org-scoped assignment + organisationId not set on projects), trust the provided projectId
+		if (ids.isEmpty()) ids = Collections.singletonList(projectId);
+		log.info("[Catalog] ProjectAdmin resolved project ids={}", ids);
+
+		List<Asset> result = assetRepository.findByProjectIdIn(ids).stream()
+				.filter(a -> a.getCurrentVersionId() != null)
+				.filter(a -> "project".equals(a.getScope()))
+				.peek(a -> a.deriveApprovalStatus())
+				.collect(Collectors.toList());
+		log.info("[Catalog] ProjectAdmin returning {} assets", result.size());
+		return result;
+	}
+
+	/**
+	 * Catalog for Org Admin (Rank 3): Return ONLY org-scoped assets
+	 * in the specified organization, regardless of visibility rules.
+	 */
+	public List<Asset> listCatalogForOrgAdmin(Integer userId, Integer orgId) {
+		AccessContext ctx = accessContextService.resolve(userId);
+		log.info("[Catalog] OrgAdmin userId={} orgId={} reachableIds={}", userId, orgId, ctx.getReachableProjectIds());
+		List<Integer> ids = resolveProjectFilter(ctx.getReachableProjectIds(), orgId, null);
+		log.info("[Catalog] OrgAdmin after resolveProjectFilter ids={}", ids);
+		if (ids.isEmpty()) {
+			// Fallback: orgId may be usm_organisation.id (RBAC path) or UsmPortfolio.id
+			// (portfolio path); try both so the catalog works regardless of which ID the
+			// frontend stores in portfoliodata.id.
+			ids = projectRepository.findAll().stream()
+					.filter(p -> orgId.equals(p.getOrganisationId()) ||
+					             (p.getPortfolioId() != null && orgId.equals(p.getPortfolioId().getId())))
+					.map(Project::getId)
+					.collect(Collectors.toList());
+			log.info("[Catalog] OrgAdmin after direct-org fallback ids={}", ids);
+		}
+		// Last resort: trust the access-context expansion — if the user can reach projects
+		// via an org-scoped role assignment, those are the right projects even if
+		// organisationId / portfolioId columns are not populated on the project rows.
+		if (ids.isEmpty() && !ctx.getReachableProjectIds().isEmpty()) {
+			ids = ctx.getReachableProjectIds();
+			log.info("[Catalog] OrgAdmin using reachable fallback ids={}", ids);
+		}
+		if (ids.isEmpty()) {
+			log.warn("[Catalog] OrgAdmin userId={} orgId={} — no projects resolved, returning empty", userId, orgId);
+			return Collections.emptyList();
+		}
+
+		List<Asset> result = assetRepository.findByProjectIdIn(ids).stream()
+				.filter(a -> a.getCurrentVersionId() != null)
+				.filter(a -> "organization".equals(a.getScope()))
+				.peek(a -> a.deriveApprovalStatus())
+				.collect(Collectors.toList());
+		log.info("[Catalog] OrgAdmin returning {} assets (scope=organization) from projectIds={}", result.size(), ids);
+		return result;
 	}
 
 	/** All versions reachable by the user's projects — lets the frontend join versionNo onto a promotion event. */

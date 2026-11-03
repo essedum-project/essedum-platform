@@ -330,6 +330,16 @@ public class ApprovalWorkflowService {
 	}
 
 	/**
+	 * Catalog for Org Admin (rank 3): PUBLISHED resources visible to this org.
+	 */
+	public List<ICIPStreamingServices> getPublishedResourcesForOrg(Integer organizationId) {
+		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
+		return allResources.stream()
+			.filter(r -> "PUBLISHED".equals(r.getApprovalStatus()) && organizationId.equals(r.getApprovedOrganizationId()))
+			.collect(Collectors.toList());
+	}
+
+	/**
 	 * Get PROJECT_APPROVED resources for a project
 	 */
 	public List<ICIPStreamingServices> getDraftResources(Integer projectId, String currentUserRank) {

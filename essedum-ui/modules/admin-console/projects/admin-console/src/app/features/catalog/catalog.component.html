@@ -1,14 +1,13 @@
 <div class="admin-console-page">
 
-  <!-- Page Header — same structure as Audit Log / Menu Configuration -->
   <div class="page-header">
     <div class="page-header-left">
       <div>
         <div class="title-row">
           <h2>Asset Catalog</h2>
-          <span class="count-chip" *ngIf="assets.length > 0">{{ assets.length }} asset{{ assets.length !== 1 ? 's' : '' }}</span>
+          <span class="count-chip" *ngIf="assets.length > 0">{{ assets.length }} pipeline{{ assets.length !== 1 ? 's' : '' }}</span>
         </div>
-        <span class="page-subtitle">Browse published assets available in your scope</span>
+        <span class="page-subtitle">Browse approved pipelines available in your scope</span>
       </div>
     </div>
   </div>
@@ -16,45 +15,45 @@
   <div class="catalog-grid" *ngIf="assets.length > 0">
     <div *ngFor="let asset of assets" class="catalog-card">
 
-      <!-- Header row: name + scope badge -->
+      <!-- Header: alias + scope badge -->
       <div class="card-main-header">
         <div class="card-title-group">
-          <div class="card-main-title" [title]="asset.name">{{ asset.name }}</div>
-          <div class="card-main-sub">
-            <mat-icon class="sub-icon">category</mat-icon>
-            {{ asset.assetType }}
+          <div class="card-main-title" [title]="asset.alias || asset.name">{{ asset.alias || asset.name }}</div>
+          <div class="card-main-sub" *ngIf="asset.type">
+            <mat-icon class="sub-icon">hub</mat-icon>
+            {{ asset.type }}
           </div>
         </div>
         <div class="card-badge-group">
-          <span class="card-type-badge" [ngClass]="'badge-' + asset.scope">
-            <mat-icon class="badge-icon">{{ scopeIcon(asset.scope) }}</mat-icon>
-            {{ scopeLabel(asset.scope) }}
+          <span class="card-type-badge" [ngClass]="badgeClass(asset)">
+            <mat-icon class="badge-icon">{{ scopeIcon(asset) }}</mat-icon>
+            {{ scopeLabel(asset) }}
           </span>
         </div>
       </div>
 
-      <!-- Visual canvas area — icon right-aligned -->
-      <div class="card-canvas">
-        <div class="canvas-icon-bg" [ngClass]="'canvas-' + asset.scope">
-          <mat-icon>inventory_2</mat-icon>
+      <!-- Meta rows -->
+      <div class="card-meta">
+        <div class="meta-row" *ngIf="asset.interfacetype">
+          <mat-icon class="meta-icon">settings_ethernet</mat-icon>
+          <span class="meta-label">Interface</span>
+          <span class="meta-value">{{ asset.interfacetype }}</span>
         </div>
-      </div>
-
-      <!-- Footer: serving version pill + Edit action (TC-071) -->
-      <div class="card-actions-bar">
-        <span class="serving-pill" *ngIf="asset.servingVersionNo !== null">
-          <span class="v-dot"></span>
-          serving v{{ asset.servingVersionNo }}
-        </span>
-        <span class="no-version" *ngIf="asset.servingVersionNo === null">No active version</span>
-        <button
-          *ngIf="canEdit(asset)"
-          class="card-edit-btn"
-          (click)="cloneAsset(asset)"
-          [title]="'Clone ' + asset.name + ' as a new draft — live version keeps serving'">
-          <mat-icon class="btn-icon">content_copy</mat-icon>
-          Clone
-        </button>
+        <div class="meta-row" *ngIf="asset.organization">
+          <mat-icon class="meta-icon">corporate_fare</mat-icon>
+          <span class="meta-label">Org</span>
+          <span class="meta-value">{{ asset.organization }}</span>
+        </div>
+        <div class="meta-row" *ngIf="asset.created_by">
+          <mat-icon class="meta-icon">person</mat-icon>
+          <span class="meta-label">By</span>
+          <span class="meta-value">{{ asset.created_by }}</span>
+        </div>
+        <div class="meta-row" *ngIf="asset.created_date">
+          <mat-icon class="meta-icon">calendar_today</mat-icon>
+          <span class="meta-label">Date</span>
+          <span class="meta-value">{{ displayDate(asset.created_date) }}</span>
+        </div>
       </div>
 
     </div>
@@ -62,7 +61,7 @@
 
   <div *ngIf="assets.length === 0" class="empty-state">
     <mat-icon>inventory_2</mat-icon>
-    <span class="empty-title">No published assets</span>
-    <span class="empty-sub">Nothing published in your scope yet.</span>
+    <span class="empty-title">No approved pipelines</span>
+    <span class="empty-sub">Nothing approved in your scope yet.</span>
   </div>
 </div>
