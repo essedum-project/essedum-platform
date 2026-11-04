@@ -188,7 +188,7 @@
               </div>
 
               <!-- Project / Customer -->
-              <div *ngIf="projectList.length >= 1 || isProjectLoading" (click)="$event.stopPropagation()" class="profile-menu-field-row">
+              <div *ngIf="portfoliodata?.length >= 1 || isOrgLoading" (click)="$event.stopPropagation()" class="profile-menu-field-row">
                 <span class="profile-menu-field-label">
                   {{ role1 ? 'Customer' : 'Project' }}
                   <span *ngIf="isProjectLoading" class="dropdown-spinner" aria-label="Loading projects"></span>
@@ -205,7 +205,7 @@
               </div>
 
               <!-- Role -->
-              <div *ngIf="roleList?.length >= 1 || selectedrole?.name || isRoleLoading || (projectList?.length >= 1 && !isProjectLoading)" (click)="$event.stopPropagation()" class="profile-menu-field-row">
+              <div *ngIf="projectList?.length >= 1 || isProjectLoading || selectedrole?.name || isRoleLoading" (click)="$event.stopPropagation()" class="profile-menu-field-row">
                 <span class="profile-menu-field-label">
                   Role
                   <span *ngIf="isRoleLoading" class="dropdown-spinner" aria-label="Loading roles"></span>

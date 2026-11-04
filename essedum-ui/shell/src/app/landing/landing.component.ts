@@ -684,70 +684,40 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       error: () => { this.isOrgLoading = false; }
     });
 
-    // Projects: fetch all RBAC projects and cache in _allRbacProjects for scope filtering.
-    // IMPORTANT: For RBAC roles, do NOT push to projectList here — _applyRbacScope() sets
-    // it (filtered by the selected org's organisationId) once assignments arrive. Pushing
-    // all projects would show every project in the dropdown on first login when the projects
-    // HTTP call completes before the assignments call (parallel race condition).
-    // For legacy (non-RBAC) roles: still merge into projectList to supplement processdata.
+    // Projects: fetch all projects and filter into projectList by selected org.
+    // No dependency on RBAC assignments — projects are org-scoped, not role-scoped.
     this.isProjectLoading = true;
     this.http.get<any[]>('/api/projects', { params: { size: '1000' } }).subscribe({
       next: (projects: any[]) => {
-        // Always update _allRbacProjects first — needed by _applyRbacScope regardless of role type
+        // Build _allRbacProjects — preserve portfolioId so downstream code (callDashConstantApi) doesn't crash
         this._allRbacProjects = (projects || []).map((p: any) => ({
           id: p.id, name: p.name, projectdisplayname: p.projectdisplayname || p.name,
-          organisationId: p.organisationId ?? null,
+          organisationId: p.organisationId ?? p.organizationId ?? null,
+          portfolioId: p.portfolioId ?? null,
+          theme: p.theme ?? null,
         }));
-        console.log('[RBAC] projects loaded from /api/projects —', this._allRbacProjects.length, 'total:', this._allRbacProjects.map((p: any) => `${p.name}[#${p.id}](org:${p.organisationId})`));
+        try { sessionStorage.setItem('_rbac_all_projects', JSON.stringify(this._allRbacProjects)); } catch {}
+        console.log('[RBAC] projects loaded —', this._allRbacProjects.length, 'total:', this._allRbacProjects.map((p: any) => `${p.name}[#${p.id}](org:${p.organisationId})`));
 
-        const _roleIsRbac = this.roleMenuSvc.isRbacRole(
-          (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })()
-        );
-        if (!_roleIsRbac) {
-          // Legacy users only: merge RBAC projects into projectList to supplement processdata
-          const existingIds = new Set<number>(this.projectList.map((p: any) => p.id));
-          let changed = false;
-          (projects || []).forEach((proj: any) => {
-            if (!existingIds.has(proj.id)) {
-              this.projectList.push({
-                id: proj.id, name: proj.name,
-                projectdisplayname: proj.projectdisplayname || proj.name
-              });
-              existingIds.add(proj.id);
-              changed = true;
-            }
-          });
-          if (changed) {
-            this.projectList = this.projectList.sort((a: any, b: any) =>
-              (a.projectdisplayname || '').toLowerCase() > (b.projectdisplayname || '').toLowerCase() ? 1 : -1
-            );
-          }
-        }
-        // Complete deferred auto-switch project if assignments arrived before projects did
-        if (this._pendingAutoSwitchProjectId != null) {
-          const pendingProj = this._allRbacProjects.find((p: any) =>
-            Number(p.id) === this._pendingAutoSwitchProjectId
+        // Always populate projectList from the currently selected org.
+        // Projects are org-scoped — no dependency on RBAC assignments or role type.
+        const _projOrgId = (() => {
+          const id = this.selectedportfolio?.id ?? null;
+          if (id != null) return Number(id);
+          try { const ss = JSON.parse(sessionStorage.getItem('portfoliodata') || 'null'); return ss?.id != null ? Number(ss.id) : null; } catch { return null; }
+        })();
+        if (_projOrgId != null) {
+          const _byOrg = this._allRbacProjects.filter((p: any) =>
+            (p.organisationId != null && Number(p.organisationId) === _projOrgId) ||
+            (p.portfolioId?.id != null && Number(p.portfolioId.id) === _projOrgId)
           );
-          if (pendingProj) {
-            this.selectedproject = pendingProj;
-            sessionStorage.setItem('project', JSON.stringify(pendingProj));
-          }
-          this._pendingAutoSwitchProjectId = null;
-        }
-        // Re-apply org/project scope filter now that projects are fully loaded.
-        // Also re-save _rbac_project_list so the fast-path cache is correct when
-        // assignments finished before projects (parallel fetch race).
-        if (this._rbacAssignmentsCache.length) {
-          this._applyRbacScope();
+          this.projectList = _byOrg.length > 0 ? _byOrg : [];
           sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
-          console.log('[RBAC] projects callback: applied scope → projectList:', this.projectList.map((p: any) => `${p.name||p.projectdisplayname}[#${p.id}]`));
-        } else {
-          console.log('[RBAC] projects callback: assignments not yet cached — projectList stays empty until assignments callback runs _applyRbacScope()');
+          console.log(`[RBAC] projects callback: org #${_projOrgId} → projectList:`, this.projectList.map((p: any) => `${p.name}[#${p.id}]`));
         }
-        // Deferred org-click: assignments arrived before projects so _cascadeOrgChange was
-        // skipped (race condition — _allRbacProjects was empty at that point).
-        // Now that _allRbacProjects is populated, complete the cascade.
-        if (this._pendingOrgClick && this._rbacAssignmentsCache.length > 0 && !this._destroyed) {
+        // Deferred org-click: _cascadeOrgChange was skipped because _allRbacProjects was empty.
+        // Now that it's populated, run the cascade.
+        if (this._pendingOrgClick && !this._destroyed) {
           const _pendingOrg = this._pendingOrgClick;
           this._pendingOrgClick = null;
           this._cascadeOrgChange(_pendingOrg);
@@ -770,6 +740,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
           if (r.id != null) roleNameById.set(r.id, r.name);
         });
 
+        try { sessionStorage.setItem('_rbac_role_rank_map', JSON.stringify([...this.rbacRoleRankMap.entries()])); } catch {}
         if (!userId) { this._sortLegacyRoleList(); this.isRoleLoading = false; return; }
 
         // Step 2: fetch this user's RBAC assignments and build a clean role list
@@ -783,6 +754,12 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
             // Cache for org/project/role cascade filtering
             this._rbacAssignmentsCache = active;
             this._rbacRoleNameByIdCache = roleNameById;
+            // Persist caches so fast-path component recreations can restore them without HTTP round-trips
+            try {
+              sessionStorage.setItem('_rbac_assignments_cache', JSON.stringify(active));
+              sessionStorage.setItem('_rbac_role_name_map', JSON.stringify([...roleNameById.entries()]));
+            } catch {}
+
             const seen = new Set<string>();
             const rbacList: any[] = [];
 
@@ -791,7 +768,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               if (!roleName) continue;
               const key = roleName.toLowerCase();
               if (seen.has(key)) continue;
-              if (!this.roleMenuSvc.isRbacRole(roleName)) continue; // only our 5 RBAC roles
+              if (!this.roleMenuSvc.isRbacRole(roleName)) continue;
               const rank = this.rbacRoleRankMap.get(key) ?? 0;
               if (rank === 1) continue; // Hide AI Engineer (rank 1) from dropdowns
               seen.add(key);
@@ -944,7 +921,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.newsidebar();
               }
             } else {
-              this._sortLegacyRoleList(); // no RBAC assignments — keep legacy list
+              this._sortLegacyRoleList(); // no RBAC role assignments — keep legacy list
               this._rbacCheckPending = false;
               this.isRoleLoading = false;
               this._rbacDataLoading = false;
@@ -978,9 +955,12 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     const _orgName = this.selectedportfolio?.portfolioName || this.selectedportfolio?.name || '?';
     console.log(`[RBAC] _applyRbacScope: org="${_orgName}"[#${selOrgId}] isRbacOrg=${isRbacOrg} allProjects=${this._allRbacProjects.length}`);
 
-    // Filter projects by organisationId — show only projects that belong to the selected org.
+    // Filter projects by organisationId OR portfolioId.id — show only projects belonging to the selected org.
     if (isRbacOrg && selOrgId != null && this._allRbacProjects.length > 0) {
-      const byOrg = this._allRbacProjects.filter(p => p.organisationId != null && Number(p.organisationId) === selOrgId);
+      const byOrg = this._allRbacProjects.filter((p: any) =>
+        (p.organisationId != null && Number(p.organisationId) === selOrgId) ||
+        (p.portfolioId?.id != null && Number(p.portfolioId.id) === selOrgId)
+      );
       console.log(`[RBAC] _applyRbacScope: projects for org #${selOrgId}:`, byOrg.map((p: any) => `${p.name}[#${p.id}]`));
       if (byOrg.length > 0) this.projectList = byOrg;
     } else if (!isRbacOrg && selOrgId != null) {
@@ -1032,8 +1012,6 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
    * Only called for RBAC users (when _rbacAssignmentsCache is populated).
    */
   private _cascadeOrgChange(org: any): void {
-    if (!this._rbacAssignmentsCache.length) return;
-
     const orgId = org?.id != null ? Number(org.id) : null;
     this.isProjectLoading = true;
     this.projectList = [];
@@ -1058,19 +1036,27 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     };
 
-    if (orgId == null || this._allRbacProjects.length === 0) {
+    if (orgId == null) {
       applyOrgProjects([...this._allRbacProjects]);
       return;
     }
+    if (this._allRbacProjects.length === 0) {
+      // Projects not yet loaded — keep spinners, defer cascade when they arrive
+      this._pendingOrgClick = org;
+      return;
+    }
 
-    // Fast path: use organisationId field when it is populated in project data.
-    const byOrg = this._allRbacProjects.filter((p: any) => p.organisationId != null && Number(p.organisationId) === orgId);
+    // Match by organisationId OR portfolioId.id (some projects store org as portfolioId).
+    const byOrg = this._allRbacProjects.filter((p: any) =>
+      (p.organisationId != null && Number(p.organisationId) === orgId) ||
+      (p.portfolioId?.id != null && Number(p.portfolioId.id) === orgId)
+    );
     if (byOrg.length > 0) {
       applyOrgProjects(byOrg);
       return;
     }
 
-    // Fallback: organisationId field unreliable for this org — ask the backend directly
+    // Fallback: neither field matched — ask the backend directly
     // which project IDs belong to it, then cross-reference _allRbacProjects.
     this.http.get<number[]>(`/api/getPortfolioProjects/${orgId}`).subscribe({
       next: (ids: number[]) => {
@@ -1085,50 +1071,57 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
-   * Simple RBAC cascade for project change:
-   *   project selected → filter roles for org+project → auto-select highest rank → load menu.
-   * Only called for RBAC users (when _rbacAssignmentsCache is populated).
+   * RBAC cascade for project change: fetches roles the logged-in user holds on
+   * the selected project via /api/usm/access/role-assignments/by-user-project,
+   * filters to ranked RBAC roles only (revokedAt=null, roleRank!=null), and
+   * auto-selects the highest-ranked one to load its menu.
    */
   private _cascadeProjectChange(project: any, orgId: number | null = null): void {
-    if (!this._rbacAssignmentsCache.length) return;
-
     const projId = project?.id != null ? Number(project.id) : null;
-    const _orgId = orgId ?? (this.selectedportfolio?.id != null ? Number(this.selectedportfolio.id) : null);
 
     this.isRoleLoading = true;
     this.roleList = [];
 
-    const scopedAssignments = this._rbacAssignmentsCache.filter(a => {
-      const orgMatch = a.organizationId == null ||
-        (_orgId != null && Number(a.organizationId) === _orgId);
-      const projMatch = a.projectId == null ||
-        (projId != null && Number(a.projectId) === projId);
-      return orgMatch && projMatch;
+    const userId = (() => {
+      try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id ?? null; }
+      catch { return null; }
+    })();
+
+    if (!userId || !projId) {
+      this.isRoleLoading = false;
+      return;
+    }
+
+    this.http.get<any[]>(
+      `/api/usm/access/role-assignments/by-user-project?userId=${userId}&projectId=${projId}`
+    ).subscribe({
+      next: (assignments: any[]) => {
+        const seen = new Set<string>();
+        const scopedRoles: any[] = [];
+        for (const a of (assignments || [])) {
+          if (a.revokedAt) continue;
+          if (a.roleRank == null) continue; // skip legacy roles with no rank
+          const roleName: string = a.roleName;
+          if (!roleName) continue;
+          const key = roleName.toLowerCase();
+          if (seen.has(key)) continue;
+          if (!this.roleMenuSvc.isRbacRole(roleName)) continue;
+          seen.add(key);
+          scopedRoles.push({ name: roleName, rank: a.roleRank, id: a.roleId });
+        }
+        scopedRoles.sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
+
+        this.isRoleLoading = false;
+
+        if (scopedRoles.length > 0) {
+          this.roleList = scopedRoles;
+          sessionStorage.setItem('_rbac_role_list', JSON.stringify(scopedRoles));
+          this._lastManualRoleSwitch = 0;
+          this.valuechangerole(scopedRoles[0]);
+        }
+      },
+      error: () => { this.isRoleLoading = false; }
     });
-
-    const seen = new Set<string>();
-    const scopedRoles: any[] = [];
-    for (const a of scopedAssignments) {
-      const roleName = this._rbacRoleNameByIdCache.get(a.roleId);
-      if (!roleName) continue;
-      const key = roleName.toLowerCase();
-      if (seen.has(key)) continue;
-      if (!this.roleMenuSvc.isRbacRole(roleName)) continue;
-      seen.add(key);
-      scopedRoles.push({ name: roleName, rank: this.rbacRoleRankMap.get(key) ?? 0, id: a.roleId });
-    }
-    scopedRoles.sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
-
-    this.isRoleLoading = false;
-
-    if (scopedRoles.length > 0) {
-      this.roleList = scopedRoles;
-      // Persist so fast-path restore on next component recreation shows correct role list.
-      sessionStorage.setItem('_rbac_role_list', JSON.stringify(scopedRoles));
-      // Auto-select highest-ranked role and load its menu
-      this._lastManualRoleSwitch = 0; // allow auto-selection
-      this.valuechangerole(scopedRoles[0]);
-    }
   }
 
   ngOnInit() {
@@ -1805,39 +1798,63 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         "portfoliodata",
         JSON.stringify(this.selectedportfolio)
       );
-      // Clear project selection when org changes so the cascade starts fresh
+      // Clear project/role selection when org changes
       this.selectedproject = {};
-      // RBAC fast path: MUST be before fetchRolesforUser() — otherwise the legacy call
-      // clears/reloads projectList+roleList in parallel with _cascadeOrgChange, causing
-      // empty dropdowns and wrong role state for RBAC users.
-      if (this._rbacUser && this._rbacAssignmentsCache.length) {
-        this._cascadeOrgChange(data);
-        return;
-      }
-      // Guard for early clicks: user opened the org dropdown before supplementRbacData()
-      // finished loading assignments. The in-memory cache is still empty but the sessionStorage
-      // role confirms this is an RBAC user. Calling fetchRolesforUser() here would invoke
-      // getDashConsts() (which needs a project context) and crash, wiping the sidebar.
-      // Show loading states instead — the ongoing supplementRbacData() will cascade once done.
-      const _earlyClickRole = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null'); } catch { return null; } })();
-      if (_earlyClickRole?.name && this.roleMenuSvc.isRbacRole(_earlyClickRole.name)) {
-        this._pendingOrgClick = data; // cascade when supplementRbacData() completes
+      this.roleList = [];
+
+      const _selOrgNum = data?.id != null ? Number(data.id) : null;
+
+      if (this._allRbacProjects.length > 0 && _selOrgNum != null) {
+        // Filter projects for the selected org — no dependency on roles or assignments
+        const _byOrg = this._allRbacProjects.filter((p: any) =>
+          (p.organisationId != null && Number(p.organisationId) === _selOrgNum) ||
+          (p.portfolioId?.id != null && Number(p.portfolioId.id) === _selOrgNum)
+        );
+        this.projectList = _byOrg;
+        sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+
+        if (_byOrg.length > 0) {
+          // This org has RBAC projects — do NOT call fetchRolesforUser() (it uses processdata
+          // which doesn't contain RBAC-only projects and would reset projectList to empty).
+          // Auto-select the first project the user has an assignment for, or the first overall.
+          const preferredProject = _byOrg.find((proj: any) =>
+            this._rbacAssignmentsCache.some(a => a.projectId != null && Number(a.projectId) === Number(proj.id))
+          ) || _byOrg[0];
+          this.selectedproject = preferredProject;
+          sessionStorage.setItem('project', JSON.stringify(preferredProject));
+
+          if (this._rbacAssignmentsCache.length) {
+            // Assignments already loaded — cascade roles immediately
+            this._cascadeProjectChange(preferredProject, _selOrgNum);
+          } else {
+            // Assignments not cached yet — supplementRbacData will cascade when done
+            this.isRoleLoading = true;
+            if (!this._rbacDataLoading) this.supplementRbacData();
+          }
+          return;
+        }
+      } else if (this._allRbacProjects.length === 0) {
+        // Projects not loaded yet — defer cascade until they arrive
+        this._pendingOrgClick = data;
         this.projectList = [];
-        this.roleList = [];
         this.isProjectLoading = true;
-        this.isRoleLoading = true;
-        // supplementRbacData() may not run again after session init (fast path) —
-        // call it explicitly so _pendingOrgClick is processed and spinners clear.
         if (!this._rbacDataLoading) this.supplementRbacData();
         return;
       }
+
+      // For RBAC role in sessionStorage (early click before assignments loaded)
+      const _earlyClickRole = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null'); } catch { return null; } })();
+      if (_earlyClickRole?.name && this.roleMenuSvc.isRbacRole(_earlyClickRole.name)) {
+        this.isRoleLoading = true;
+        if (!this._rbacDataLoading) this.supplementRbacData();
+        return;
+      }
+      // Legacy path: org has no RBAC projects, use processdata
       this.fetchRolesforUser();
     } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     sessionStorage.removeItem("sidebarConfig");
-    // Legacy path: apply scope filter immediately (before async supplementRbacData completes)
-    if (this._rbacAssignmentsCache.length) this._applyRbacScope();
   }
 
   fetchCredentials(): boolean {
@@ -1901,6 +1918,10 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     sessionStorage.removeItem('_rbac_project_list');
     sessionStorage.removeItem('_rbac_role_list');
     sessionStorage.removeItem('_rbac_page_initializing');
+    sessionStorage.removeItem('_rbac_assignments_cache');
+    sessionStorage.removeItem('_rbac_role_name_map');
+    sessionStorage.removeItem('_rbac_role_rank_map');
+    sessionStorage.removeItem('_rbac_all_projects');
     this.router.navigate(["../logout"]);
   }
   setHighlightedLabel(item: any) {
@@ -2117,16 +2138,24 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
             sessionStorage.setItem('_rbac_sidebar_role', _switchRoleName);
             sessionStorage.setItem('_rbac_sidebar_menu', JSON.stringify(items));
 
-            // Navigate to the first item the menu exposes, or fall back to the
-            // role's default landing page when no items were returned.
+            // Navigate to the first menu item, or fall back to a safe default.
+            // A user has real RBAC assignments when either:
+            //   (a) _rbacAssignmentsCache holds a ranked-role entry (fetched on login), OR
+            //   (b) roleList was populated from the project-specific API (by-user-project).
+            // Without either, the user won't pass admin-console's RankGuard → send to dashboard.
+            const _hasRealRbacAssignments =
+              this._rbacAssignmentsCache.some(a => {
+                const rName = this._rbacRoleNameByIdCache.get(a.roleId);
+                return rName && this.roleMenuSvc.isRbacRole(rName);
+              }) || this.roleList.some(r => this.roleMenuSvc.isRbacRole(r.name));
             let dest: string;
-            if (items.length > 0 && items[0].url) {
+            if (items.length > 0 && items[0].url && _hasRealRbacAssignments) {
               const rawUrl = items[0].url.startsWith('./') ? items[0].url.slice(1) : items[0].url;
               dest = '/landing' + rawUrl;
+            } else if (this.roleMenuSvc.isRbacAdminRole(_switchRoleName) && _hasRealRbacAssignments) {
+              dest = '/landing/admin-console/overview';
             } else {
-              dest = this.roleMenuSvc.isRbacAdminRole(_switchRoleName)
-                ? '/landing/admin-console/overview'
-                : '/landing/dashboard';
+              dest = '/landing/dashboard';
             }
             this.router.navigate([dest]);
             // Dismiss init overlay after navigate + delay so intermediate navigations and
@@ -2252,15 +2281,15 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       );
     else sessionStorage.setItem("theme", theme);
 
-    // RBAC fast path: cascade project → role without legacy DashConst round-trips
-    if (this._rbacUser && this._rbacAssignmentsCache.length) {
-      this._cascadeProjectChange(event);
+    // If assignments are cached, use RBAC cascade for roles (works for all users with assignments)
+    if (this._rbacAssignmentsCache.length) {
+      const currentOrgId = this.selectedportfolio?.id != null ? Number(this.selectedportfolio.id) : null;
+      this._cascadeProjectChange(event, currentOrgId);
       return;
     }
-    // Legacy path
+    // Legacy path: no assignments cached yet
     this.checkRole();
     this.apisService.getDashConsts().subscribe(() => this.fetchRolesforUser());
-    if (this._rbacAssignmentsCache.length) this._applyRbacScope();
   }
 
   compareObjects(o1: any, o2: any): boolean {
@@ -2597,6 +2626,16 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
           if (_ssProjList) { const _p = JSON.parse(_ssProjList); if (Array.isArray(_p) && _p.length) this.projectList = _p; }
           const _ssRoleList = sessionStorage.getItem('_rbac_role_list');
           if (_ssRoleList) { const _r = JSON.parse(_ssRoleList); if (Array.isArray(_r) && _r.length) { this.roleList = _r; this.isRoleLoading = false; } }
+          // Restore in-memory RBAC caches so manual org/project changes cascade correctly
+          const _ssAss = sessionStorage.getItem('_rbac_assignments_cache');
+          if (_ssAss) { this._rbacAssignmentsCache = JSON.parse(_ssAss); }
+          const _ssRnMap = sessionStorage.getItem('_rbac_role_name_map');
+          if (_ssRnMap) { this._rbacRoleNameByIdCache = new Map(JSON.parse(_ssRnMap)); }
+          const _ssRkMap = sessionStorage.getItem('_rbac_role_rank_map');
+          if (_ssRkMap) { this.rbacRoleRankMap = new Map(JSON.parse(_ssRkMap)); }
+          const _ssAllProj = sessionStorage.getItem('_rbac_all_projects');
+          if (_ssAllProj) { this._allRbacProjects = JSON.parse(_ssAllProj); }
+          if (this._rbacAssignmentsCache.length > 0) { this._rbacUser = true; }
         } catch {}
         this.newsidebar();
       } else {
@@ -4433,6 +4472,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       }
     });
     if (!test) {
+      if (!roles || (roles as any[]).length === 0) return;
       sessionStorage.setItem("role", JSON.stringify(roles[0]));
     }
   }

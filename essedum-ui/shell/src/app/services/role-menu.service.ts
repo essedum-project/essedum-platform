@@ -67,14 +67,16 @@ export class RoleMenuService {
     );
   }
 
-  /** True when the role name should use the new menu system. */
+  /** True when the role name uses the RBAC menu system (the 5 ranked roles in rbac_role table). */
   isRbacRole(roleName: string): boolean {
-    return RBAC_ROLE_NAMES.has((roleName || '').toLowerCase().trim());
+    const lower = (roleName || '').toLowerCase().trim();
+    return RBAC_ROLE_NAMES.has(lower);
   }
 
-  /** True when the role's menu is admin-console-only. */
+  /** True when the role's menu is admin-console-only (rank >= 1). */
   isRbacAdminRole(roleName: string): boolean {
-    return ADMIN_ROLE_NAMES.has((roleName || '').toLowerCase().trim());
+    const lower = (roleName || '').toLowerCase().trim();
+    return ADMIN_ROLE_NAMES.has(lower);
   }
 
   private _filterAndMap(items: any[], roleRank: number, roleName: string = ''): RoleMenuItem[] {
