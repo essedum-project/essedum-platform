@@ -21,8 +21,9 @@ export class CatalogComponent implements OnInit {
     try { projectId = Number(JSON.parse(sessionStorage.getItem('project') || '{}')?.id) || null; } catch {}
     try { orgId = Number(JSON.parse(sessionStorage.getItem('portfoliodata') || '{}')?.id) || null; } catch {}
 
-    // Rank 2 (Project Admin) → PROJECT_APPROVED for their project
-    // Rank 3 (Org Admin)     → PUBLISHED for their org
+    // Rank 2 (Project Admin)   → PROJECT_APPROVED for their project
+    // Rank 3 (Org Admin)       → PUBLISHED for their org
+    // Rank 4 (Platform Admin)  → globally visible (null, null → backend returns all globally published)
     const requestProjectId = rank === 2 ? projectId : null;
     const requestOrgId     = rank === 3 ? orgId     : null;
 
@@ -33,22 +34,25 @@ export class CatalogComponent implements OnInit {
 
   badgeClass(item: any): string {
     const s: string = item?.approval_status ?? '';
-    if (s === 'PROJECT_APPROVED') return 'badge-project';
-    if (s === 'PUBLISHED')        return 'badge-organization';
+    if (s === 'PROJECT_APPROVED')   return 'badge-project';
+    if (s === 'PUBLISHED')          return 'badge-organization';
+    if (s === 'GLOBALLY_PUBLISHED') return 'badge-global';
     return 'badge-public';
   }
 
   scopeLabel(item: any): string {
     const s: string = item?.approval_status ?? '';
-    if (s === 'PROJECT_APPROVED') return 'Project';
-    if (s === 'PUBLISHED')        return 'Organization';
+    if (s === 'PROJECT_APPROVED')   return 'Project';
+    if (s === 'PUBLISHED')          return 'Organization';
+    if (s === 'GLOBALLY_PUBLISHED') return 'Global';
     return s;
   }
 
   scopeIcon(item: any): string {
     const s: string = item?.approval_status ?? '';
-    if (s === 'PROJECT_APPROVED') return 'folder';
-    if (s === 'PUBLISHED')        return 'business';
+    if (s === 'PROJECT_APPROVED')   return 'folder';
+    if (s === 'PUBLISHED')          return 'business';
+    if (s === 'GLOBALLY_PUBLISHED') return 'public';
     return 'label';
   }
 

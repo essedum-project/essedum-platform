@@ -480,6 +480,38 @@ export class ApiService {
     );
   }
 
+  // ─── Rank 4 Platform Admin approval methods ───────────────────────────────
+
+  getPlatformAdminApprovals(): Observable<any> {
+    let rank = '4';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
+    return this.http.get<any>(`/api/aip/streamingServices/approval/platform-admin/list`, { params: { rank } });
+  }
+
+  getOrgAdminDraftResources(organizationId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.get<any>(`/api/aip/streamingServices/approval/org-admin/draft-resources`, { params: { organizationId, rank } });
+  }
+
+  submitForPlatformApproval(resourceId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.post<any>(`/api/aip/streamingServices/approval/platform/submit`, { resourceId }, { params: { rank } });
+  }
+
+  approvePlatformApproval(resourceId: number): Observable<any> {
+    let rank = '4';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
+    return this.http.post<any>(`/api/aip/streamingServices/approval/platform/approve/${resourceId}`, {}, { params: { rank } });
+  }
+
+  rejectPlatformApproval(resourceId: number): Observable<any> {
+    let rank = '4';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
+    return this.http.post<any>(`/api/aip/streamingServices/approval/platform/reject/${resourceId}`, {}, { params: { rank } });
+  }
+
   /**
    * Get organizations linked to a project
    * Used by Rank 2 to select which org to submit resource to

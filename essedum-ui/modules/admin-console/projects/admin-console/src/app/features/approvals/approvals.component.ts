@@ -31,9 +31,11 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
   // Streaming services approvals (Pipeline/Agent/MCP) - with pagination support
   streamingApprovals: any[] = [];
   streamingOrgApprovals: any[] = [];
+  streamingPlatformApprovals: any[] = [];
   streamingApprovalsDataSource = new MatTableDataSource<any>([]);
   streamingOrgApprovalsDataSource = new MatTableDataSource<any>([]);
-  
+  streamingPlatformApprovalsDataSource = new MatTableDataSource<any>([]);
+
   projectId: number | null = null;
   orgId: number | null = null;
   userRank: number = -1;
@@ -41,6 +43,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly columns = ['assetName', 'versionNo', 'gate', 'actorName', 'occurredAt', 'actions'];
   readonly streamingColumns = ['name', 'type', 'createdBy', 'createdDate', 'status', 'actions'];
   readonly streamingOrgColumns = ['name', 'type', 'createdBy', 'status', 'actions'];
+  readonly streamingPlatformColumns = ['name', 'type', 'createdBy', 'status', 'actions'];
 
   @ViewChild(MatPaginator) legacyPaginator!: MatPaginator;
   @ViewChildren(MatPaginator) allPaginators!: QueryList<MatPaginator>;
@@ -51,7 +54,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
     // Bind legacy paginator
     this.legacyPaginator.pageSizeOptions = [5, 10, 25];
     this.pending.paginator = this.legacyPaginator;
-    
+
     // Bind paginators for streaming tables
     const paginators = this.allPaginators.toArray();
     if (paginators.length >= 1) {
@@ -59,6 +62,9 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     if (paginators.length >= 2) {
       this.streamingOrgApprovalsDataSource.paginator = paginators[1];
+    }
+    if (paginators.length >= 3) {
+      this.streamingPlatformApprovalsDataSource.paginator = paginators[2];
     }
   }
 
@@ -142,21 +148,28 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
 
           console.log('[APPROVALS] Step 3 - Final IDs to use:', { finalProjectId, finalOrgId, userId });
           
+          // Read rank for platform-admin section
+          let streamingUserRank = -1;
+          try { streamingUserRank = Number(JSON.parse(sessionStorage.getItem('role') || '{}')?.rank ?? -1); } catch {}
+          this.userRank = streamingUserRank;
+
           // Load NEW streaming service approvals ONLY
-          // Rank 2: can see PENDING_PROJECT_APPROVAL (needs projectId)
-          // Rank 3: can see PENDING_ORG_APPROVAL (needs orgId)
-          if (!finalProjectId && !finalOrgId) {
+          // Rank 2: PENDING_PROJECT_APPROVAL (needs projectId)
+          // Rank 3: PENDING_ORG_APPROVAL (needs orgId)
+          // Rank 4: PENDING_PLATFORM_APPROVAL (no project/org needed)
+          if (!finalProjectId && !finalOrgId && streamingUserRank !== 4) {
             console.warn('[APPROVALS] WARNING: No projectId or orgId found! Will return empty arrays');
-            return combineLatest([of([]), of([])]);
+            return combineLatest([of([]), of([]), of([])]);
           }
-          
+
           const streamingApi$ = finalProjectId ? this.api.getProjectAdminApprovals(finalProjectId) : of([]);
           const streamingOrgApi$ = finalOrgId ? this.api.getOrgAdminApprovals(finalOrgId) : of([]);
+          const platformApi$ = streamingUserRank === 4 ? this.api.getPlatformAdminApprovals() : of([]);
 
-          return combineLatest([streamingApi$, streamingOrgApi$]);
+          return combineLatest([streamingApi$, streamingOrgApi$, platformApi$]);
         }),
-        map(([streamingApprovals, streamingOrgApprovals]) => {
-          console.log('[APPROVALS] Step 4 - Received raw data:', { streamingApprovals, streamingOrgApprovals });
+        map(([streamingApprovals, streamingOrgApprovals, platformApprovals]) => {
+          console.log('[APPROVALS] Step 4 - Received raw data:', { streamingApprovals, streamingOrgApprovals, platformApprovals });
           
           try {
             // Extract data arrays from response objects (API returns {count, data, success})
@@ -194,19 +207,35 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
               orgApprovalsList
             });
             
+            // Extract platform approvals (rank 4)
+            let platformApprovalsList: any[] = [];
+            if (Array.isArray(platformApprovals)) {
+              platformApprovalsList = platformApprovals;
+            } else if (platformApprovals && typeof platformApprovals === 'object') {
+              if (Array.isArray((platformApprovals as any).data)) {
+                platformApprovalsList = (platformApprovals as any).data;
+              }
+            }
+
             // Store streaming services for display with data sources
             this.streamingApprovals = approvalsList;
             this.streamingApprovalsDataSource.data = approvalsList;
-            
+
             this.streamingOrgApprovals = orgApprovalsList;
             this.streamingOrgApprovalsDataSource.data = orgApprovalsList;
+
+            this.streamingPlatformApprovals = platformApprovalsList;
+            this.streamingPlatformApprovalsDataSource.data = platformApprovalsList;
           } catch (error) {
             console.error('[APPROVALS] Error extracting data:', error);
             this.streamingApprovals = [];
             this.streamingApprovalsDataSource.data = [];
-            
+
             this.streamingOrgApprovals = [];
             this.streamingOrgApprovalsDataSource.data = [];
+
+            this.streamingPlatformApprovals = [];
+            this.streamingPlatformApprovalsDataSource.data = [];
           }
           
           // Return empty array for legacy pending table
@@ -222,9 +251,12 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
           console.error('[APPROVALS] Step 6 - Subscribe error:', err);
           this.streamingApprovals = [];
           this.streamingApprovalsDataSource.data = [];
-          
+
           this.streamingOrgApprovals = [];
           this.streamingOrgApprovalsDataSource.data = [];
+
+          this.streamingPlatformApprovals = [];
+          this.streamingPlatformApprovalsDataSource.data = [];
         }
       });
   }
@@ -267,22 +299,27 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // Streaming service (Pipeline/Agent/MCP) approval methods
-  approveStreamingService(resourceId: number, isOrgLevel: boolean = false): void {
-    // Get projectId from component property or fallback to sessionStorage
-    let finalProjectId = this.projectId;
-    if (!finalProjectId) {
-      try {
-        const projObj = JSON.parse(sessionStorage.getItem('project') || '{}');
-        finalProjectId = projObj?.id ? Number(projObj.id) : null;
-        console.log('[APPROVALS] approveStreamingService - Using projectId from sessionStorage:', finalProjectId);
-      } catch (e) {
-        console.error('[APPROVALS] Error reading projectId from sessionStorage:', e);
+  approveStreamingService(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+    let apiCall$;
+
+    if (isPlatformLevel) {
+      apiCall$ = this.api.approvePlatformApproval(resourceId);
+    } else if (isOrgLevel) {
+      apiCall$ = this.api.approveOrgApproval(resourceId);
+    } else {
+      // Get projectId from component property or fallback to sessionStorage
+      let finalProjectId = this.projectId;
+      if (!finalProjectId) {
+        try {
+          const projObj = JSON.parse(sessionStorage.getItem('project') || '{}');
+          finalProjectId = projObj?.id ? Number(projObj.id) : null;
+          console.log('[APPROVALS] approveStreamingService - Using projectId from sessionStorage:', finalProjectId);
+        } catch (e) {
+          console.error('[APPROVALS] Error reading projectId from sessionStorage:', e);
+        }
       }
+      apiCall$ = this.api.approveProjectApproval(resourceId, finalProjectId || 0);
     }
-    
-    const apiCall$ = isOrgLevel
-      ? this.api.approveOrgApproval(resourceId)
-      : this.api.approveProjectApproval(resourceId, finalProjectId || 0);
 
     apiCall$.subscribe({
       next: () => {
@@ -293,10 +330,12 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  rejectStreamingService(resourceId: number, isOrgLevel: boolean = false): void {
-    const apiCall$ = isOrgLevel
-      ? this.api.rejectOrgApproval(resourceId)
-      : this.api.rejectProjectApproval(resourceId);
+  rejectStreamingService(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+    const apiCall$ = isPlatformLevel
+      ? this.api.rejectPlatformApproval(resourceId)
+      : isOrgLevel
+        ? this.api.rejectOrgApproval(resourceId)
+        : this.api.rejectProjectApproval(resourceId);
 
     apiCall$.subscribe({
       next: () => {

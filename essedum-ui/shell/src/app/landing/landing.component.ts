@@ -1101,6 +1101,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
         for (const a of (assignments || [])) {
           if (a.revokedAt) continue;
           if (a.roleRank == null) continue; // skip legacy roles with no rank
+          if (a.roleRank === 1) continue;   // hide Developer/AI Engineer from thumbnail
           const roleName: string = a.roleName;
           if (!roleName) continue;
           const key = roleName.toLowerCase();

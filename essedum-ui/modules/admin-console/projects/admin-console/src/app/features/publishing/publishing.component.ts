@@ -41,23 +41,29 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
   /** The caller's highest role rank — drives "New Draft" visibility. */
   userRank = 0;
 
-  // Streaming services (Pipeline/Agent/MCP) with PROJECT_APPROVED status ready to submit to org
+  // Rank 2: PROJECT_APPROVED resources ready to submit to org
   streamingServicesDrafts: any[] = [];
   streamingServicesDraftsDataSource = new MatTableDataSource<any>([]);
+  // Rank 3: ORG_APPROVED resources ready to submit to platform admin
+  streamingOrgDrafts: any[] = [];
+  streamingOrgDraftsDataSource = new MatTableDataSource<any>([]);
   projectId: number | null = null;
   orgId: number | null = null;
 
   @ViewChild(MatPaginator) legacyPaginator!: MatPaginator;
   @ViewChild('streamingPaginator') streamingPaginator!: MatPaginator;
+  @ViewChild('orgStreamingPaginator') orgStreamingPaginator!: MatPaginator;
 
   private readonly destroy$ = new Subject<void>();
 
   ngAfterViewInit(): void {
     this.versions.paginator = this.legacyPaginator;
-    
-    // Bind streaming paginators
+
     if (this.streamingPaginator) {
       this.streamingServicesDraftsDataSource.paginator = this.streamingPaginator;
+    }
+    if (this.orgStreamingPaginator) {
+      this.streamingOrgDraftsDataSource.paginator = this.orgStreamingPaginator;
     }
   }
 
@@ -68,6 +74,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   readonly columns = ['assetName', 'versionNo', 'status', 'comments', 'nextGate', 'updatedAt', 'actions'];
   readonly streamingColumns = ['name', 'type', 'createdBy', 'status', 'actions'];
+  readonly orgStreamingColumns = ['name', 'type', 'createdBy', 'status', 'actions'];
 
   constructor(
     private readonly api: ApiService,
@@ -112,29 +119,42 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
           this.projectId = projectId;
           this.orgId = orgId;
 
-          // Load streaming services with PROJECT_APPROVED status (Rank 2 can submit to org)
-          const streamingApi$ = projectId ? this.api.getDraftResources(projectId) : of([]);
+          // Read rank from sessionStorage for immediate use in streaming section
+          let streamingRank = 0;
+          try { streamingRank = Number(JSON.parse(sessionStorage.getItem('role') || '{}')?.rank ?? 0); } catch {}
+          if (streamingRank > 0) { this.userRank = streamingRank; }
+
+          // Rank 2: PROJECT_APPROVED resources ready to submit to org
+          const streamingRank2$ = projectId ? this.api.getDraftResources(projectId) : of([]);
+          // Rank 3: ORG_APPROVED resources ready to submit to platform admin
+          const streamingRank3$ = (streamingRank === 3 && orgId) ? this.api.getOrgAdminDraftResources(orgId) : of([]);
 
           return combineLatest([
             this.api.getDraftVersions(userId, orgId, projectId),
             this.api.getAssets(userId, orgId, projectId),
-            streamingApi$
+            streamingRank2$,
+            streamingRank3$
           ]);
         }),
-        map(([versions, assets, streamingServices]) => {
-          console.log('[PUBLISHING] Data loaded - versions:', versions?.length, 'assets:', assets?.length, 'streaming response:', streamingServices);
-          
-          // Extract data array from API response wrapper
-          let streamingArray: any[] = [];
-          if (streamingServices) {
-            if (Array.isArray(streamingServices)) {
-              streamingArray = streamingServices;
-            } else if (streamingServices.data && Array.isArray(streamingServices.data)) {
-              streamingArray = streamingServices.data;
-            }
+        map(([versions, assets, streamingRank2, streamingRank3]) => {
+          console.log('[PUBLISHING] Data loaded - versions:', versions?.length, 'assets:', assets?.length, 'rank2:', streamingRank2, 'rank3:', streamingRank3);
+
+          // Extract rank 2 data (PROJECT_APPROVED)
+          let rank2Array: any[] = [];
+          if (Array.isArray(streamingRank2)) {
+            rank2Array = streamingRank2;
+          } else if (streamingRank2?.data && Array.isArray(streamingRank2.data)) {
+            rank2Array = streamingRank2.data;
           }
-          console.log('[PUBLISHING] Extracted streaming array length:', streamingArray.length);
-          
+
+          // Extract rank 3 data (ORG_APPROVED)
+          let rank3Array: any[] = [];
+          if (Array.isArray(streamingRank3)) {
+            rank3Array = streamingRank3;
+          } else if (streamingRank3?.data && Array.isArray(streamingRank3.data)) {
+            rank3Array = streamingRank3.data;
+          }
+
           // Process asset versions
           const processedVersions = versions.map(v => {
             const asset = assets.find(a => a.id === v.assetId);
@@ -144,14 +164,19 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
               assetScope: asset?.scope ?? 'draft',
             };
           });
-          
-          // Filter and store streaming services that are PROJECT_APPROVED
-          this.streamingServicesDrafts = streamingArray.filter(
+
+          // Rank 2: PROJECT_APPROVED resources ready for org submission
+          this.streamingServicesDrafts = rank2Array.filter(
             s => s.approval_status === 'PROJECT_APPROVED'
           );
-          console.log('[PUBLISHING] Filtered streaming drafts:', this.streamingServicesDrafts.length, 'resources:', this.streamingServicesDrafts);
+          console.log('[PUBLISHING] Rank2 drafts:', this.streamingServicesDrafts.length);
           this.streamingServicesDraftsDataSource.data = this.streamingServicesDrafts;
-          
+
+          // Rank 3: ORG_APPROVED resources ready for platform submission
+          this.streamingOrgDrafts = rank3Array;
+          console.log('[PUBLISHING] Rank3 org drafts:', this.streamingOrgDrafts.length);
+          this.streamingOrgDraftsDataSource.data = this.streamingOrgDrafts;
+
           return processedVersions;
         }),
         takeUntil(this.destroy$)
@@ -306,6 +331,22 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.load();
       },
       error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+    });
+  }
+
+  // Rank 3 Org Admin: submit ORG_APPROVED resource to Platform Admin for global publishing
+  submitToPlatform(resource: any): void {
+    this.api.submitForPlatformApproval(resource.cid).subscribe({
+      next: () => {
+        this.notify.success(`${resource.alias || resource.name} submitted to Platform Admin for approval`);
+        const index = this.streamingOrgDrafts.findIndex(s => s.cid === resource.cid);
+        if (index !== -1) {
+          this.streamingOrgDrafts.splice(index, 1);
+          this.streamingOrgDraftsDataSource.data = [...this.streamingOrgDrafts];
+        }
+        this.load();
+      },
+      error: err => this.notify.error(err?.error?.message || 'Failed to submit for platform approval'),
     });
   }
 
