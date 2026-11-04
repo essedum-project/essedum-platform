@@ -11,4 +11,7 @@ public interface RoleAssignmentRepository extends JpaRepository<RoleAssignment, 
 	List<RoleAssignment> findByUserIdAndRevokedAtIsNull(Integer userId);
 
 	List<RoleAssignment> findByRevokedAtIsNull();
+
+	/** Active assignments for a given user scoped to a specific project (direct grants only). */
+	List<RoleAssignment> findByUserIdAndProjectIdAndRevokedAtIsNull(Integer userId, Integer projectId);
 }

@@ -113,6 +113,20 @@ public class AccessResource {
 		return ResponseEntity.ok(scoped);
 	}
 
+	/**
+	 * What roles does a given user have on a given project? Returns active
+	 * (non-revoked) assignments only, including org-scoped grants that cover
+	 * this project through its organisation.
+	 */
+	@GetMapping("/access/role-assignments/by-user-project")
+	public ResponseEntity<List<RoleAssignmentView>> listForUserAndProject(
+			@RequestParam Integer userId, @RequestParam Integer projectId) {
+		List<RoleAssignmentView> views = accessContextService.listForUserAndProject(userId, projectId).stream()
+				.map(accessContextService::toView)
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(views);
+	}
+
 	@PostMapping("/access/role-assignments")
 	public ResponseEntity<RoleAssignment> grant(@RequestBody GrantRoleRequest request) {
 		// If the roleId carries the legacy offset, strip it back to the real usm_role id

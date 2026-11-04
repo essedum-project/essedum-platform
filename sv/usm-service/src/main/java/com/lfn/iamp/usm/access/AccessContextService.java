@@ -414,6 +414,77 @@ public class AccessContextService {
 		return roleAssignmentRepository.findByRevokedAtIsNull();
 	}
 
+	/**
+	 * Active role assignments for a given user, scoped to a specific project —
+	 * answers "what roles does user X have on project Y". Includes both direct
+	 * project-level grants and, if the user's org-scoped grant covers this
+	 * project, that org-scoped assignment as well (since it's what actually
+	 * grants access to the project per resolve()'s org-expansion logic).
+	 */
+	public List<RoleAssignment> listForUserAndProject(Integer userId, Integer projectId) {
+		List<RoleAssignment> direct = roleAssignmentRepository
+				.findByUserIdAndProjectIdAndRevokedAtIsNull(userId, projectId);
+
+		Project project = projectRepository.findById(projectId).orElse(null);
+		Integer organisationId = project != null ? project.getOrganisationId() : null;
+		if (organisationId == null) {
+			return direct;
+		}
+
+		List<RoleAssignment> result = new ArrayList<>(direct);
+		roleAssignmentRepository.findByUserIdAndRevokedAtIsNull(userId).stream()
+				.filter(a -> organisationId.equals(a.getOrganizationId()))
+				.forEach(result::add);
+		return result;
+	}
+
+	/**
+	 * Resolves a role name/rank for display. Checks rbac_role first (new RBAC
+	 * roles, IDs as-is); if not found there, falls back to usm_role by the raw
+	 * id — covers assignments bridged from the legacy system whose roleId was
+	 * stored without the LEGACY_ROLE_ID_OFFSET (the offset is only applied on
+	 * the /roles listing endpoint, not on the stored rbac_role_assignment row).
+	 */
+	public RoleAssignmentView toView(RoleAssignment a) {
+		String orgName = a.getOrganizationId() != null
+				? organisationRepository.findById(a.getOrganizationId()).map(Organisation::getName).orElse(null)
+				: null;
+		Project project = a.getProjectId() != null
+				? projectRepository.findById(a.getProjectId()).orElse(null)
+				: null;
+		String projectName = project != null ? project.getName() : null;
+		Integer projectOrgId = project != null ? project.getOrganisationId() : null;
+		String projectOrgName = projectOrgId != null
+				? organisationRepository.findById(projectOrgId).map(Organisation::getName).orElse(null)
+				: null;
+		return rbacRoleRepository.findById(a.getRoleId())
+				.map(r -> RoleAssignmentView.of(a, displayNameOf(r.getName()), r.getRank(), orgName, projectName,
+						projectOrgId, projectOrgName))
+				.orElseGet(() -> RoleAssignmentView.of(a,
+						legacyRoleRepository.findById(a.getRoleId()).map(Role::getName).orElse("Unknown"), null,
+						orgName, projectName, projectOrgId, projectOrgName));
+	}
+
+	private String displayNameOf(String rbacRoleName) {
+		if (rbacRoleName == null) {
+			return null;
+		}
+		switch (rbacRoleName.toLowerCase()) {
+			case "platform_admin":
+				return "Platform Admin";
+			case "org_admin":
+				return "Organization Admin";
+			case "project_admin":
+				return "Project Admin";
+			case "developer":
+				return "Developer";
+			case "viewer":
+				return "Viewer";
+			default:
+				return rbacRoleName;
+		}
+	}
+
 	public java.util.Optional<RoleAssignment> getAssignment(Integer id) {
 		return roleAssignmentRepository.findById(id);
 	}
