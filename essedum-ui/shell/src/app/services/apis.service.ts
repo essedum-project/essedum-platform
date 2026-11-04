@@ -177,31 +177,14 @@ export class ApisService {
       sessionStorage.setItem("user", JSON.stringify(userInfo.userId));
       localStorage.setItem("user", JSON.stringify(userInfo.userId));
 
-      // Get organization from portfolio (NOT from project)
-      let organization;
-      try {
-        const portfolio = JSON.parse(sessionStorage.getItem("portfoliodata") || "");
-        organization = portfolio?.portfolioName || portfolio?.name;
-      } catch (e: any) {
-        console.error("JSON.parse error getting organization from portfolio - ", e.message);
+      if (currentProject) {
+        sessionStorage.setItem("organization", currentProject.name);
+        localStorage.setItem("organization", currentProject.name);
       }
-      
-      // Fallback to currentProject if available
-      if (!organization && currentProject) {
-        organization = currentProject.portfolioName || currentProject.name;
+      else {
+        sessionStorage.setItem("organization", userInfo.porfolios[0].projectWithRoles[index].projectId.name);
+        localStorage.setItem("organization", userInfo.porfolios[0].projectWithRoles[index].projectId.name);
       }
-      
-      // Last resort fallback
-      if (!organization) {
-        try {
-          organization = userInfo.porfolios[0].projectWithRoles[index].projectId.name;
-        } catch (e: any) {
-          console.error("Could not extract organization - ", e.message);
-        }
-      }
-      
-      sessionStorage.setItem("organization", organization);
-      localStorage.setItem("organization", organization);
 
       if (flag == 0) {
         if (currentRole) {
