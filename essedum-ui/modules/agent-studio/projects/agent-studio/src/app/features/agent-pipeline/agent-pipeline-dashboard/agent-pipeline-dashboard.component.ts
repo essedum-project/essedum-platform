@@ -1099,16 +1099,15 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
     // Items with no approval_status (legacy) always show
     if (!status) return true;
 
+    // Only DRAFT and PENDING_PROJECT_APPROVAL are creator-only.
+    // PENDING_ORG_APPROVAL / PENDING_PLATFORM_APPROVAL are visible to all users
+    // in scope — the backend already enforces this via approval-workflow filtering.
     const draftOrPending = status === 'DRAFT' ||
-      status === 'PENDING_PROJECT_APPROVAL' ||
-      status === 'PENDING_ORG_APPROVAL' ||
-      status === 'PENDING_PLATFORM_APPROVAL';
+      status === 'PENDING_PROJECT_APPROVAL';
 
-    if (!draftOrPending) return true; // approved / published items visible to all
+    if (!draftOrPending) return true; // approved / pending-org / published items visible to all
 
-    // DRAFT and PENDING: only the creator sees them.
-    // If we can't determine the current user's login, default to showing the card
-    // so a misconfigured session doesn't silently hide the user's own work.
+    // DRAFT / PENDING_PROJECT_APPROVAL: only the creator sees them.
     if (!this.currentUserLogin) return true;
 
     const createdBy = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
@@ -1139,8 +1138,12 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
       if (lastModifiedBy === this.currentUserLogin) return true;
     }
     
-    // Rule 3: PROJECT_APPROVED or PUBLISHED - approved by project/org admin
-    if (approvalStatus === 'PROJECT_APPROVED' || approvalStatus === 'PUBLISHED') {
+    // Rule 3: Any approved/pending-higher-level status — backend already scoped correctly
+    const visibleStatuses = [
+      'PROJECT_APPROVED', 'ORG_APPROVED', 'PUBLISHED',
+      'PENDING_ORG_APPROVAL', 'PENDING_PLATFORM_APPROVAL'
+    ];
+    if (visibleStatuses.includes(approvalStatus)) {
       console.debug('[Visibility] Card visible:', approvalStatus, 'status', card.alias);
       return true;
     }

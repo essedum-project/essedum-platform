@@ -674,32 +674,18 @@ public class ICIPStreamingServicesController {
 	}
 
 	/**
-	 * GET /approval/catalog?projectId=X  → PROJECT_APPROVED pipelines for rank-2 catalog
-	 * GET /approval/catalog?orgId=X      → PUBLISHED (org-scoped) pipelines for rank-3 catalog
-	 * GET /approval/catalog              → globally PUBLISHED pipelines for rank-4 catalog
+	 * GET /approval/catalog?projectId=X&orgId=Y
+	 * Returns all approved pipelines visible to a user: PROJECT_APPROVED in their project
+	 * + ORG_APPROVED in their org + globally PUBLISHED. Any user rank may call this.
 	 */
 	@GetMapping("/approval/catalog")
 	public ResponseEntity<?> getCatalog(
 			@RequestParam(required = false) Integer projectId,
 			@RequestParam(required = false) Integer orgId) {
 		try {
-			if (projectId != null) {
-				java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> items =
-					approvalWorkflowService.getDraftResources(projectId, "2");
-				logger.info("[Catalog] projectId={} → {} PROJECT_APPROVED items", projectId, items.size());
-				return ResponseEntity.ok(items);
-			}
-			if (orgId != null) {
-				java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> items =
-					approvalWorkflowService.getPublishedResourcesForOrg(orgId);
-				logger.info("[Catalog] orgId={} → {} PUBLISHED items", orgId, items.size());
-				return ResponseEntity.ok(items);
-			}
-			// rank 4 → all globally PUBLISHED (approvedOrganizationId == null, platform-approved)
-			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> globalItems =
-				approvalWorkflowService.getGloballyPublishedResources();
-			logger.info("[Catalog] no scope params → {} globally PUBLISHED items", globalItems.size());
-			return ResponseEntity.ok(globalItems);
+			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> items =
+				approvalWorkflowService.getCatalogResources(projectId, orgId);
+			return ResponseEntity.ok(items);
 		} catch (Exception e) {
 			logger.error("[Catalog] Error fetching catalog", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));

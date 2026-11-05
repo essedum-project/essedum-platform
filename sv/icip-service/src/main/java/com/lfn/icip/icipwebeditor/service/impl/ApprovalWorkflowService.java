@@ -1,7 +1,10 @@
 package com.lfn.icip.icipwebeditor.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -474,6 +477,39 @@ public class ApprovalWorkflowService {
 		return allResources.stream()
 			.filter(r -> "PUBLISHED".equals(r.getApprovalStatus()) && r.getApprovedOrganizationId() == null)
 			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Catalog: return all approved pipelines visible to a user given their project and org.
+	 * Combines: PROJECT_APPROVED (project-scoped) + ORG_APPROVED (org-scoped) + PUBLISHED (globally).
+	 * No rank restriction — any user in the project/org may call this.
+	 */
+	public List<ICIPStreamingServices> getCatalogResources(Integer projectId, Integer orgId) {
+		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
+		Map<Integer, ICIPStreamingServices> deduped = new LinkedHashMap<>();
+
+		for (ICIPStreamingServices r : allResources) {
+			String status = r.getApprovalStatus();
+			if (status == null) continue;
+			boolean include = false;
+
+			if ("PROJECT_APPROVED".equals(status) && projectId != null && projectId.equals(r.getProjectId())) {
+				include = true;
+			} else if (Arrays.asList("ORG_APPROVED", "PENDING_PLATFORM_APPROVAL").contains(status)
+					&& orgId != null && orgId.equals(r.getApprovedOrganizationId())) {
+				include = true;
+			} else if ("PUBLISHED".equals(status) && r.getApprovedOrganizationId() == null) {
+				include = true;
+			}
+
+			if (include && r.getCid() != null) {
+				deduped.put(r.getCid(), r);
+			}
+		}
+
+		List<ICIPStreamingServices> result = new ArrayList<>(deduped.values());
+		logger.info("[Catalog] projectId={}, orgId={} → {} items", projectId, orgId, result.size());
+		return result;
 	}
 
 	/**

@@ -1410,13 +1410,9 @@ public class ICIPMlopsController {
 				try {
 					String orgIdStr = headers.getOrDefault("organisation", headers.getOrDefault("organization", ""));
 					if (!orgIdStr.isEmpty()) {
-						try {
-							Integer orgIdForQuery = Integer.parseInt(orgIdStr);
-							orgApprovedPipelines = streamingServicesService.getOrgApprovedPipelines(orgIdForQuery);
-							logger.info("[Approval] Fetched {} org-approved pipelines for orgId={}", orgApprovedPipelines.size(), orgIdForQuery);
-						} catch (NumberFormatException e) {
-							logger.debug("[Approval] org header not numeric, skipping org-approved fetch: {}", orgIdStr);
-						}
+						// Use org name string directly — approveOrgApproval stores orgName in organization field
+						orgApprovedPipelines = streamingServicesService.getOrgApprovedPipelines(orgIdStr);
+						logger.info("[Approval] Fetched {} org-approved pipelines for org={}", orgApprovedPipelines.size(), orgIdStr);
 					}
 				} catch (Exception e) {
 					logger.warn("[Approval] Error fetching org-approved pipelines: {}", e.getMessage());
@@ -1537,32 +1533,37 @@ public class ICIPMlopsController {
 								}
 
 								// Rule 4b: ORG_APPROVED - all users in the approved organization (cross-project within org)
+								// approveOrgApproval sets organization=orgName; header also sends orgName → match by string
 								else if ("ORG_APPROVED".equals(approvalStatus)) {
-									Integer approvedOrgId = result.getApprovedOrganizationId();
-									if (approvedOrgId != null && userOrganizationId != null && approvedOrgId.equals(userOrganizationId)) {
+									String resourceOrg = result.getOrganization();
+									if (resourceOrg != null && !orgStr.isEmpty() && resourceOrg.equals(orgStr)) {
 										isVisible = true;
-									} else if (approvedOrgId == null) {
-										// fallback: same project
-										Integer resourceProjectId = result.getProjectId();
-										if (userProjectId.equals(resourceProjectId)) isVisible = true;
+									} else if (!isVisible && userOrganizationId != null) {
+										Integer approvedOrgId = result.getApprovedOrganizationId();
+										if (approvedOrgId != null && approvedOrgId.equals(userOrganizationId)) {
+											isVisible = true;
+										}
 									}
-									logger.debug("[Approval] ORG_APPROVED check for {}: approvedOrgId={}, userOrgId={}, visible={}",
-										result.getName(), approvedOrgId, userOrganizationId, isVisible);
+									logger.debug("[Approval] ORG_APPROVED check for {}: resourceOrg={}, userOrg={}, visible={}",
+										result.getName(), resourceOrg, orgStr, isVisible);
 								}
 
 								// Rule 4c: PENDING_PLATFORM_APPROVAL - same org users + platform admins
 								else if ("PENDING_PLATFORM_APPROVAL".equals(approvalStatus)) {
-									Integer approvedOrgId = result.getApprovedOrganizationId();
-									if (approvedOrgId != null && userOrganizationId != null && approvedOrgId.equals(userOrganizationId)) {
+									String resourceOrg = result.getOrganization();
+									if (resourceOrg != null && !orgStr.isEmpty() && resourceOrg.equals(orgStr)) {
 										isVisible = true;
-									} else if (userRoleId >= 4) {
-										isVisible = true;
-									} else if (approvedOrgId == null) {
-										Integer resourceProjectId = result.getProjectId();
-										if (userProjectId.equals(resourceProjectId)) isVisible = true;
+									} else if (!isVisible && userOrganizationId != null) {
+										Integer approvedOrgId = result.getApprovedOrganizationId();
+										if (approvedOrgId != null && approvedOrgId.equals(userOrganizationId)) {
+											isVisible = true;
+										}
 									}
-									logger.debug("[Approval] PENDING_PLATFORM_APPROVAL check for {}: approvedOrgId={}, userOrgId={}, visible={}",
-										result.getName(), approvedOrgId, userOrganizationId, isVisible);
+									if (!isVisible && userRoleId >= 4) {
+										isVisible = true;
+									}
+									logger.debug("[Approval] PENDING_PLATFORM_APPROVAL check for {}: resourceOrg={}, userOrg={}, role={}, visible={}",
+										result.getName(), resourceOrg, orgStr, userRoleId, isVisible);
 								}
 
 								// Rule 5: PUBLISHED - all users (globally published by platform admin)

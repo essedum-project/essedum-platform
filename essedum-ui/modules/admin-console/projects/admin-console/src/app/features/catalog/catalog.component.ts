@@ -16,28 +16,22 @@ export class CatalogComponent implements OnInit {
   constructor(private readonly api: ApiService) {}
 
   ngOnInit(): void {
-    let rank = 0;
     let projectId: number | null = null;
     let orgId: number | null = null;
-    try { rank = Number(JSON.parse(sessionStorage.getItem('role') || '{}')?.rank ?? 0); } catch {}
     try { projectId = Number(JSON.parse(sessionStorage.getItem('project') || '{}')?.id) || null; } catch {}
     try { orgId = Number(JSON.parse(sessionStorage.getItem('portfoliodata') || '{}')?.id) || null; } catch {}
 
-    // Rank 2 (Project Admin)   → PROJECT_APPROVED for their project
-    // Rank 3 (Org Admin)       → PUBLISHED for their org
-    // Rank 4 (Platform Admin)  → globally visible (null, null → backend returns all globally published)
-    const requestProjectId = rank === 2 ? projectId : null;
-    const requestOrgId     = rank === 3 ? orgId     : null;
-
-    this.api.getPipelineCatalog(requestProjectId, requestOrgId)
+    // Pass both projectId and orgId for every user — backend returns the full approved scope:
+    // PROJECT_APPROVED (project) + ORG_APPROVED (org) + PUBLISHED (globally)
+    this.api.getPipelineCatalog(projectId, orgId)
       .pipe(take(1))
       .subscribe(rows => (this.assets = Array.isArray(rows) ? rows : []));
 
-    this.api.getDatasetCatalog(requestProjectId, requestOrgId)
+    this.api.getDatasetCatalog(projectId, orgId)
       .pipe(take(1))
       .subscribe(rows => (this.datasetAssets = Array.isArray(rows) ? rows : (rows?.data && Array.isArray(rows.data) ? rows.data : [])));
 
-    this.api.getDatasourceCatalog(requestProjectId, requestOrgId)
+    this.api.getDatasourceCatalog(projectId, orgId)
       .pipe(take(1))
       .subscribe(rows => (this.datasourceAssets = Array.isArray(rows) ? rows : (rows?.data && Array.isArray(rows.data) ? rows.data : [])));
   }
