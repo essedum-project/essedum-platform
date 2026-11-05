@@ -123,7 +123,11 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				|| pipelineUri.contains("/service/v1/pipelines/count")
 				|| pipelineUri.contains("/service/v1/pipelines/training/")
 				|| ("PUT".equals(pipelineMethod) && pipelineUri.contains("/service/v1/streamingServices/update"))
-				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/service/v1/streamingServices/add"))) {
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/service/v1/streamingServices/add"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasources/test"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasources/add"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasets/test"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasets/add"))) {
 			return new AuthorizationDecision(true);
 		}
 

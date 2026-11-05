@@ -83,9 +83,14 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 			return new AuthorizationDecision(false);
 		}
 
-		// All GET requests are open to any authenticated non-anonymous user.
-		// Data isolation is enforced at the service/org layer.
-		if ("GET".equals(request.getMethod().toUpperCase())) {
+		// All GET requests and dataset/datasource write endpoints are open to any
+		// authenticated non-anonymous user. Data isolation is enforced at the service/org layer.
+		String dataMethod = request.getMethod().toUpperCase();
+		if ("GET".equals(dataMethod)
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/datasources/test"))
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/datasources/add"))
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/datasets/test"))
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/datasets/add"))) {
 			return new AuthorizationDecision(true);
 		}
 
