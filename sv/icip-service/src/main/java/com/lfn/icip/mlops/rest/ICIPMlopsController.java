@@ -1411,7 +1411,9 @@ public class ICIPMlopsController {
 				List<ICIPStreamingServices2DTO> orgApprovedPipelines = new ArrayList<>();
 				Integer userPortfolioId = null;
 				try {
-					String portfolioIdStr = headers.getOrDefault("portfolioId", "");
+					// Browsers send headers lowercase; "portfolioid" is the actual key received.
+				// Fall back to camelCase "portfolioId" for any server-to-server callers.
+				String portfolioIdStr = headers.getOrDefault("portfolioid", headers.getOrDefault("portfolioId", ""));
 					if (!portfolioIdStr.isEmpty()) {
 						userPortfolioId = Integer.parseInt(portfolioIdStr);
 						orgApprovedPipelines = streamingServicesService.getOrgApprovedPipelinesByOrgId(userPortfolioId);
