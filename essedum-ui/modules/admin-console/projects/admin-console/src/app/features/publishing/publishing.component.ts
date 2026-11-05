@@ -138,13 +138,20 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
 
           // Rank 2: PROJECT_APPROVED resources ready to submit to org
           const streamingRank2$ = projectId ? this.api.getDraftResources(projectId) : of([]);
-          // Rank 3: ORG_APPROVED resources ready to submit to platform admin
-          const streamingRank3$ = (streamingRank === 3 && orgId) ? this.api.getOrgAdminDraftResources(orgId) : of([]);
+          // Rank 3: ORG_APPROVED resources — must query by portfoliodata.id (the same value stored
+          // in approvedOrganizationId during org approval), not project.organisationId which is a
+          // different numeric ID and causes a mismatch.
+          let approvalOrgId = orgId;
+          try {
+            const pd = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}');
+            if (pd?.id) { approvalOrgId = Number(pd.id); }
+          } catch {}
+          const streamingRank3$ = (streamingRank === 3 && approvalOrgId) ? this.api.getOrgAdminDraftResources(approvalOrgId) : of([]);
 
           const datasetRank2$ = (streamingRank === 2 && projectId) ? this.api.getDatasetDraftResources(projectId).pipe(catchError(() => of([]))) : of([]);
-          const datasetRank3$ = (streamingRank === 3 && orgId) ? this.api.getDatasetOrgDraftResources(orgId).pipe(catchError(() => of([]))) : of([]);
+          const datasetRank3$ = (streamingRank === 3 && approvalOrgId) ? this.api.getDatasetOrgDraftResources(approvalOrgId).pipe(catchError(() => of([]))) : of([]);
           const datasourceRank2$ = (streamingRank === 2 && projectId) ? this.api.getDatasourceDraftResources(projectId).pipe(catchError(() => of([]))) : of([]);
-          const datasourceRank3$ = (streamingRank === 3 && orgId) ? this.api.getDatasourceOrgDraftResources(orgId).pipe(catchError(() => of([]))) : of([]);
+          const datasourceRank3$ = (streamingRank === 3 && approvalOrgId) ? this.api.getDatasourceOrgDraftResources(approvalOrgId).pipe(catchError(() => of([]))) : of([]);
 
           return combineLatest([
             this.api.getDraftVersions(userId, orgId, projectId),
