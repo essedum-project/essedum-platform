@@ -1463,7 +1463,9 @@ public class ICIPMlopsController {
 					logger.info("[Approval] Pipeline list filtering: user={}, project={}, org={}, role={}", 
 						username, projectStr, orgStr, roleIdStr);
 					
-					if (!username.isEmpty() && !projectStr.isEmpty() && !orgStr.isEmpty() && !roleIdStr.isEmpty()) {
+					// orgStr is optional: numeric org check uses portfolioId header (effectiveOrgId), not orgStr.
+					// username is optional: when absent, creator-based rules skip gracefully.
+					if (!projectStr.isEmpty() && !roleIdStr.isEmpty()) {
 						try {
 							Integer userProjectId = Integer.parseInt(projectStr);
 							Integer userRoleId = Integer.parseInt(roleIdStr);
@@ -1502,25 +1504,26 @@ public class ICIPMlopsController {
 									continue;
 								}
 
-								// Rule 1: DRAFT - only creator can see
+								// Rule 1: DRAFT - only creator can see (if username unknown, include it —
+								// same-project DRAFTs were always returned unfiltered before this feature)
 								if ("DRAFT".equals(approvalStatus)) {
 									String createdBy = result.getCreatedBy();
-									if (username.equals(createdBy)) {
+									if (username.isEmpty() || username.equals(createdBy)) {
 										isVisible = true;
 									}
-									logger.debug("[Approval] DRAFT check for {}: createdBy={}, user={}, visible={}", 
+									logger.debug("[Approval] DRAFT check for {}: createdBy={}, user={}, visible={}",
 										result.getName(), createdBy, username, isVisible);
 								}
-								
+
 								// Rule 2: PENDING_PROJECT_APPROVAL - creator + project admins of same project
 								else if ("PENDING_PROJECT_APPROVAL".equals(approvalStatus)) {
 									String createdBy = result.getCreatedBy();
 									Integer resourceProjectId = result.getProjectId();
-									
-									if (username.equals(createdBy) || (userRoleId == 2 && userProjectId.equals(resourceProjectId))) {
+
+									if (username.isEmpty() || username.equals(createdBy) || (userRoleId >= 2 && userProjectId.equals(resourceProjectId))) {
 										isVisible = true;
 									}
-									logger.debug("[Approval] PENDING_PROJECT_APPROVAL check for {}: resourceProject={}, userProject={}, role={}, visible={}", 
+									logger.debug("[Approval] PENDING_PROJECT_APPROVAL check for {}: resourceProject={}, userProject={}, role={}, visible={}",
 										result.getName(), resourceProjectId, userProjectId, userRoleId, isVisible);
 								}
 								
@@ -1591,7 +1594,7 @@ public class ICIPMlopsController {
 								// Rule 6: PROJECT_REJECTED / ORG_REJECTED - creator only or all users in same project respectively
 								else if ("PROJECT_REJECTED".equals(approvalStatus)) {
 									String createdBy = result.getCreatedBy();
-									if (username.equals(createdBy)) {
+									if (username.isEmpty() || username.equals(createdBy)) {
 										isVisible = true;
 									}
 								} else if ("ORG_REJECTED".equals(approvalStatus)) {
@@ -1614,14 +1617,16 @@ public class ICIPMlopsController {
 							logger.warn("[Approval] Invalid numeric values in headers: {}", e.getMessage());
 						}
 					} else {
-						logger.debug("[Approval] Missing user context headers for filtering - returning unfiltered");
+						logger.info("[Approval] Missing project/role headers for filtering - returning combined results");
 					}
 				} catch (Exception e) {
 					logger.error("[Approval] Error applying visibility filtering: {}", e.getMessage(), e);
-					// Fall through to return unfiltered results
+					// Fall through to return combined results
 				}
-				
-				String response = new JSONArray(results).toString();
+
+				// Return allResults (not just results): includes org-approved pipelines correctly scoped
+				// by portfolioId header, so cross-org pipelines are visible even when filter cannot run.
+				String response = new JSONArray(allResults).toString();
 				return ResponseEntity.status(200).body(response);
 			} else {
 				String results = pluginService.getDataSetService(getDatasource(adapterInstance, project))
