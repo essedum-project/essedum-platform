@@ -87,6 +87,8 @@ public interface ICIPStreamingServicesRepository extends JpaRepository<ICIPStrea
 
 	List<ICIPStreamingServices2DTO> findByApprovedOrganizationIdAndApprovalStatusIn(Integer approvedOrganizationId, List<String> approvalStatus);
 
+	List<ICIPStreamingServices2DTO> findByOrganizationAndApprovalStatusIn(String organization, List<String> approvalStatus);
+
 	List<ICIPStreamingServices2DTO> findByApprovalStatusAndApprovedOrganizationIdIsNull(String approvalStatus);
 
 	/**

@@ -156,8 +156,8 @@ public class ApprovalWorkflowService {
 	 * submission by the Org Admin to the Platform Admin before it becomes
 	 * globally PUBLISHED.
 	 */
-	public ICIPStreamingServices approveOrgApproval(Integer resourceId, String currentUserRank, String orgName) {
-		logger.info("[Approval] Org Admin approving resource {} at org level", resourceId);
+	public ICIPStreamingServices approveOrgApproval(Integer resourceId, String currentUserRank, String orgName, Integer portfolioOrgId) {
+		logger.info("[Approval] Org Admin approving resource {} at org level, portfolioOrgId={}", resourceId, portfolioOrgId);
 
 		if (!"3".equals(currentUserRank)) {
 			throw new IllegalAccessError("Only Org Admin (rank 3) can approve org-level publishing");
@@ -176,10 +176,12 @@ public class ApprovalWorkflowService {
 			resourceId, resource.getName(), resource.getApprovalStatus(), resource.getApprovedOrganizationId(), resource.getOrganization());
 
 		resource.setApprovalStatus("ORG_APPROVED");
-		// Set organization to org (portfolio) name so the pipeline is visible to all users across all projects in this org
-		if (orgName != null && !orgName.isEmpty()) {
-			resource.setOrganization(orgName);
-			logger.info("[Approval] Updating organization to org name '{}' for org-wide visibility", orgName);
+		// Normalize approvedOrganizationId to portfoliodata.id (the same value the catalog and pipeline-list
+		// queries use). This corrects any mismatch from the submit step (which may have used project.organisationId,
+		// a different number). Keep organization as project name so the initial project query still finds it.
+		if (portfolioOrgId != null) {
+			resource.setApprovedOrganizationId(portfolioOrgId);
+			logger.info("[Approval] Normalized approvedOrganizationId to portfolioOrgId={}", portfolioOrgId);
 		}
 		ICIPStreamingServices saved = streamingServicesRepository.save(resource);
 		
@@ -496,8 +498,15 @@ public class ApprovalWorkflowService {
 			if ("PROJECT_APPROVED".equals(status) && projectId != null && projectId.equals(r.getProjectId())) {
 				include = true;
 			} else if (Arrays.asList("ORG_APPROVED", "PENDING_PLATFORM_APPROVAL").contains(status)
-					&& orgId != null && orgId.equals(r.getApprovedOrganizationId())) {
-				include = true;
+					|| ("PUBLISHED".equals(status) && r.getApprovedOrganizationId() != null)) {
+				// New-flow ORG_APPROVED/PENDING_PLATFORM_APPROVAL OR old-flow org-scoped PUBLISHED (non-null approvedOrganizationId).
+				// Primary: numeric portfolio org ID match (reliable, set by approveOrgApproval from portfoliodata.id).
+				// Fallback: same project — users always see their own project's org-approved pipelines.
+				if (orgId != null && orgId.equals(r.getApprovedOrganizationId())) {
+					include = true;
+				} else if (projectId != null && projectId.equals(r.getProjectId())) {
+					include = true;
+				}
 			} else if ("PUBLISHED".equals(status) && r.getApprovedOrganizationId() == null) {
 				include = true;
 			}

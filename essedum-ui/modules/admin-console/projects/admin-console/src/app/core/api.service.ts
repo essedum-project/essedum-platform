@@ -447,12 +447,24 @@ export class ApiService {
       console.error('[API] Error reading rank from sessionStorage:', e);
     }
 
-    const orgName = sessionStorage.getItem('organization') || '';
+    // portfoliodata.name holds the actual org/portfolio name; portfoliodata.id is the numeric portfolio ID.
+    // Both are sourced from portfoliodata (not sessionStorage 'organization' which is the project name).
+    let orgName = '';
+    let orgId: string | null = null;
+    try {
+      const pd = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}');
+      orgName = pd?.name || '';
+      orgId = pd?.id != null ? String(pd.id) : null;
+    } catch {}
+
+    const params: Record<string, string> = { rank };
+    if (orgName) params['orgName'] = orgName;
+    if (orgId) params['orgId'] = orgId;
 
     return this.http.post<any>(
       `/api/aip/streamingServices/approval/org/approve/${resourceId}`,
       {},
-      { params: { rank, ...(orgName ? { orgName } : {}) } }
+      { params }
     );
   }
 

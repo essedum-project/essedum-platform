@@ -293,7 +293,9 @@ public interface IICIPStreamingServiceService {
 	public List<ICIPStreamingServices2DTO> getAllPipelinesByTypeAndOrg(String project, Pageable paginate,String query,
 			List<Integer>  tags,	String orderBy, String type, String interfacetype);
 
-	List<ICIPStreamingServices2DTO> getOrgApprovedPipelines(Integer orgId);
+	List<ICIPStreamingServices2DTO> getOrgApprovedPipelines(String orgName);
+
+	List<ICIPStreamingServices2DTO> getOrgApprovedPipelinesByOrgId(Integer orgId);
 
 	List<ICIPStreamingServices2DTO> getGloballyPublishedPipelines();
 

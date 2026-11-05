@@ -1176,6 +1176,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
       ORG_APPROVED: 'Org Approved',
       PENDING_PLATFORM_APPROVAL: 'Pending Platform Approval',
       GLOBALLY_PUBLISHED: 'Globally Published',
+      PUBLISHED: 'Globally Published',
     };
     return map[s] || s;
   }
@@ -1190,6 +1191,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
       ORG_APPROVED: 'badge-org-approved',
       PENDING_PLATFORM_APPROVAL: 'badge-pending',
       GLOBALLY_PUBLISHED: 'badge-global',
+      PUBLISHED: 'badge-global',
     };
     return map[s] || '';
   }
@@ -1200,7 +1202,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
     if (s.startsWith('PENDING_')) return 'hourglass_empty';
     if (s === 'PROJECT_APPROVED') return 'folder_open';
     if (s === 'ORG_APPROVED') return 'business';
-    if (s === 'GLOBALLY_PUBLISHED') return 'public';
+    if (s === 'GLOBALLY_PUBLISHED' || s === 'PUBLISHED') return 'public';
     return 'label';
   }
 

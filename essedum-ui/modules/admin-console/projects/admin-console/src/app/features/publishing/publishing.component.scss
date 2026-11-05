@@ -403,12 +403,45 @@ body.header-light-theme .draft-creator-badge,
       background: rgba(34, 197, 94, 0.15);
       color: #4ade80;
     }
+
+    &.status-org-approved {
+      background: rgba(124, 58, 237, 0.15);
+      color: #c084fc;
+    }
   }
 
   .approval-actions {
     display: flex;
     gap: 8px;
     align-items: center;
+
+    .btn-submit-platform {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      border-radius: 6px !important;
+      background: #a855f7 !important;
+      color: #ffffff !important;
+      border: none !important;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+      }
+    }
 
     .btn-submit-org {
       display: inline-flex;
@@ -618,6 +651,12 @@ body.header-light-theme .streaming-drafts-section .section-title,
       color: #d8b4fe;
       border: 1px solid rgba(168, 85, 247, 0.25);
     }
+
+    &.status-org-approved {
+      background: rgba(124, 58, 237, 0.12);
+      color: #c084fc;
+      border: 1px solid rgba(124, 58, 237, 0.25);
+    }
   }
 
   .approval-actions {
@@ -627,6 +666,7 @@ body.header-light-theme .streaming-drafts-section .section-title,
   }
 
   .btn-submit-org,
+  .btn-submit-platform,
   .btn-approve,
   .btn-reject {
     display: inline-flex;
@@ -658,6 +698,22 @@ body.header-light-theme .streaming-drafts-section .section-title,
     &:hover {
       background: #3b82f6;
       box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  .btn-submit-platform {
+    color: #ffffff;
+    background: #a855f7;
+    border: none;
+
+    &:hover {
+      background: #9333ea;
+      box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
       transform: translateY(-1px);
     }
 
@@ -751,6 +807,12 @@ body.header-light-theme .streaming-table,
       color: #7c3aed;
       border-color: rgba(139, 92, 246, 0.15);
     }
+
+    &.status-org-approved {
+      background: rgba(109, 40, 217, 0.08);
+      color: #6d28d9;
+      border-color: rgba(109, 40, 217, 0.15);
+    }
   }
 
   .btn-submit-org {
@@ -761,6 +823,22 @@ body.header-light-theme .streaming-table,
     &:hover {
       background: #3b82f6;
       box-shadow: 0 2px 8px rgba(96, 165, 250, 0.2);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  .btn-submit-platform {
+    color: #ffffff;
+    background: #9333ea;
+    border: none;
+
+    &:hover {
+      background: #7c3aed;
+      box-shadow: 0 2px 8px rgba(147, 51, 234, 0.2);
       transform: translateY(-1px);
     }
 

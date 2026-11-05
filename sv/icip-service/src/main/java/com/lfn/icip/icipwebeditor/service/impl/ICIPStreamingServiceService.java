@@ -845,10 +845,19 @@ public class ICIPStreamingServiceService implements IICIPStreamingServiceService
 	}
 
 	@Override
-	public List<ICIPStreamingServices2DTO> getOrgApprovedPipelines(Integer orgId) {
+	public List<ICIPStreamingServices2DTO> getOrgApprovedPipelines(String orgName) {
+		if (orgName == null || orgName.isEmpty()) return new ArrayList<>();
+		return streamingServicesRepository.findByOrganizationAndApprovalStatusIn(
+			orgName, java.util.Arrays.asList("ORG_APPROVED", "PENDING_PLATFORM_APPROVAL"));
+	}
+
+	@Override
+	public List<ICIPStreamingServices2DTO> getOrgApprovedPipelinesByOrgId(Integer orgId) {
 		if (orgId == null) return new ArrayList<>();
+		// Include "PUBLISHED" for backward compat: old org-approval flow set status=PUBLISHED with non-null approvedOrganizationId.
+		// The approvedOrganizationId filter ensures only org-scoped PUBLISHED (not globally published, which have null approvedOrganizationId) are returned.
 		return streamingServicesRepository.findByApprovedOrganizationIdAndApprovalStatusIn(
-			orgId, java.util.Arrays.asList("ORG_APPROVED", "PENDING_PLATFORM_APPROVAL"));
+			orgId, java.util.Arrays.asList("ORG_APPROVED", "PENDING_PLATFORM_APPROVAL", "PUBLISHED"));
 	}
 
 	@Override

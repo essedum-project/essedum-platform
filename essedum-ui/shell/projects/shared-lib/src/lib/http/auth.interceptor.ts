@@ -91,10 +91,22 @@ export class AuthInterceptor implements HttpInterceptor {
           } else if (o?.name?.toString()) {
             request = request.clone({ headers: request.headers.set('organisation', o.name.toString()) });
           }
-        } catch { 
+        } catch {
           // If not JSON, treat as string directly
           request = request.clone({ headers: request.headers.set('organisation', org) });
         }
+      }
+
+      // Send portfolioId header (numeric portfolio/org ID) for org-scoped approval visibility.
+      // portfoliodata stores the org/portfolio object with numeric id — always reliable.
+      const portfolioDataRaw = sessionStorage.getItem('portfoliodata');
+      if (portfolioDataRaw) {
+        try {
+          const pd = JSON.parse(portfolioDataRaw);
+          if (pd?.id?.toString()) {
+            request = request.clone({ headers: request.headers.set('portfolioId', pd.id.toString()) });
+          }
+        } catch { /* ignore */ }
       }
     }
 
