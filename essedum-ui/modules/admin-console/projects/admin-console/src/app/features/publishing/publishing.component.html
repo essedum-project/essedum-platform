@@ -9,7 +9,7 @@
   </div>
 
   <!-- STREAMING SERVICES (Pipeline/Agent/MCP) - Ready for Organization Approval (Rank 2) -->
-  <div class="streaming-drafts-section" *ngIf="userRank === 2 || streamingServicesDrafts.length > 0">
+  <div class="streaming-drafts-section" *ngIf="streamingServicesDrafts.length > 0">
     <div class="section-title">
       <mat-icon>storage</mat-icon>
       <span>Resources Ready for Organization Approval</span>
@@ -85,7 +85,7 @@
   </div>
 
   <!-- STREAMING SERVICES (Pipeline/Agent/MCP) - Org Approved, Ready for Platform Admin (Rank 3) -->
-  <div class="streaming-org-drafts-section" *ngIf="userRank === 3 || streamingOrgDrafts.length > 0">
+  <div class="streaming-org-drafts-section" *ngIf="streamingOrgDrafts.length > 0">
     <div class="section-title">
       <mat-icon>public</mat-icon>
       <span>Resources Ready for Platform Admin Approval</span>
@@ -153,7 +153,7 @@
   </div>
 
   <!-- DATASETS - Ready for Organization Approval (Rank 2) -->
-  <div class="streaming-drafts-section" *ngIf="userRank === 2 || datasetDrafts.length > 0">
+  <div class="streaming-drafts-section" *ngIf="datasetDrafts.length > 0">
     <div class="section-title">
       <mat-icon>storage</mat-icon>
       <span>Datasets Ready for Organization Approval</span>
@@ -188,7 +188,7 @@
   </div>
 
   <!-- DATASETS - Org Approved, Ready for Platform Admin (Rank 3) -->
-  <div class="streaming-org-drafts-section" *ngIf="userRank === 3 || datasetOrgDrafts.length > 0">
+  <div class="streaming-org-drafts-section" *ngIf="datasetOrgDrafts.length > 0">
     <div class="section-title">
       <mat-icon>storage</mat-icon>
       <span>Datasets Ready for Platform Admin Approval</span>
@@ -223,7 +223,7 @@
   </div>
 
   <!-- CONNECTIONS - Ready for Organization Approval (Rank 2) -->
-  <div class="streaming-drafts-section" *ngIf="userRank === 2 || datasourceDrafts.length > 0">
+  <div class="streaming-drafts-section" *ngIf="datasourceDrafts.length > 0">
     <div class="section-title">
       <mat-icon>cable</mat-icon>
       <span>Connections Ready for Organization Approval</span>
@@ -258,7 +258,7 @@
   </div>
 
   <!-- CONNECTIONS - Org Approved, Ready for Platform Admin (Rank 3) -->
-  <div class="streaming-org-drafts-section" *ngIf="userRank === 3 || datasourceOrgDrafts.length > 0">
+  <div class="streaming-org-drafts-section" *ngIf="datasourceOrgDrafts.length > 0">
     <div class="section-title">
       <mat-icon>cable</mat-icon>
       <span>Connections Ready for Platform Admin Approval</span>

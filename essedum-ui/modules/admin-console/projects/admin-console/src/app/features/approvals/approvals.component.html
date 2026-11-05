@@ -11,7 +11,7 @@
   </div>
 
   <!-- Table -->
-  <table mat-table [dataSource]="pending" class="admin-console-table">
+  <table mat-table [dataSource]="pending" class="admin-console-table" *ngIf="pending.data.length > 0">
 
     <ng-container matColumnDef="assetName">
       <th mat-header-cell *matHeaderCellDef>Asset</th>
