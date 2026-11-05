@@ -177,9 +177,9 @@ export class AipCardComponent {
         this.card?.lastmodifiedby || 'Name Not Available',
       [SERVICE_TYPES.MODEL]: this.card?.createdBy || 'Name Not Available',
       [SERVICE_TYPES.PIPELINE]:
-        this.card?.target?.created_by || 'Name Not Available',
+        this.card?.target?.created_by || this.card?.createdBy || this.card?.createdby || 'Name Not Available',
       [SERVICE_TYPES.PIPELINEAGENT]:
-        this.card?.target?.created_by || 'Name Not Available',
+        this.card?.target?.created_by || this.card?.createdBy || this.card?.createdby || 'Name Not Available',
       [SERVICE_TYPES.AGENT]: this.card?.name || 'Agent',
       [SERVICE_TYPES.AGENT_DIRECTORY]: this.card?.lastmodifiedby || 'Name Not Available',
     };
