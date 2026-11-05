@@ -37,8 +37,8 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="approval-button-container" *ngIf="userRank === 0">
-                  <button *ngIf="!getApprovalStatus() && isOwnPipeline()"
+                <div class="approval-button-container" *ngIf="isOwnPipeline()">
+                  <button *ngIf="getApprovalStatus() === 'DRAFT' && isOwnPipeline()"
                     class="send-approval-btn"
                     type="button"
                     (click)="requestApproval($event)"

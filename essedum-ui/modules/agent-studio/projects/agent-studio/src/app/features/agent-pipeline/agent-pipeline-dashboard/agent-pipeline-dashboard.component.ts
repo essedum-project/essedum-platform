@@ -988,34 +988,66 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
     try {
       const user = JSON.parse(sessionStorage.getItem('user') || '{}');
       this.currentUserId = Number(user.id) || 0;
-      // preferred_username in JWT (= created_by) is typically the email prefix.
-      // Fall back to email prefix when user_login is absent so the match works.
-      const email = (user.user_email || '').toLowerCase();
-      const emailPrefix = email.includes('@') ? email.split('@')[0] : '';
-      this.currentUserLogin = (user.user_login || user.username || user.name || emailPrefix || '').toLowerCase();
+
+      // Backend stores created_by as the email prefix (before @).
+      // Normalise currentUserLogin to that same prefix so comparisons match
+      // regardless of whether user_login is "anushka.mishra" or "anushka.mishra@infosys.com".
+      const rawLogin = (user.user_login || user.username || user.name || '').toLowerCase();
+      const email = (user.user_email || rawLogin).toLowerCase();
+      const emailPrefix = email.includes('@') ? email.split('@')[0] : email;
+      const resolvedLogin = rawLogin.includes('@') ? rawLogin.split('@')[0] : (rawLogin || emailPrefix);
+      this.currentUserLogin = resolvedLogin;
+
+      // Rank: role.rank is the definitive source; fall back to _rbac_role_rank_map
+      // then to role.id if the shell didn't embed rank in the stored role object.
       const role = JSON.parse(sessionStorage.getItem('role') || '{}');
-      this.userRank = Number(role.rank) ?? 0;
-      console.debug('User context resolved:', {
-        currentUserId: this.currentUserId,
+      let rank: number | null = null;
+      if (role.rank != null && !isNaN(Number(role.rank))) {
+        rank = Number(role.rank);
+      } else {
+        // Try the rank map the shell builds from the RBAC API
+        try {
+          const mapStr = sessionStorage.getItem('_rbac_role_rank_map');
+          if (mapStr && role.name) {
+            const entries: [string, number][] = JSON.parse(mapStr);
+            const mapRank = new Map(entries).get(role.name.toLowerCase());
+            if (mapRank != null) rank = Number(mapRank);
+          }
+        } catch {}
+      }
+      this.userRank = rank ?? 0;
+
+      console.debug('[Pipeline] User context:', {
         currentUserLogin: this.currentUserLogin,
         userRank: this.userRank,
-        user: { id: user.id, user_login: user.user_login, user_email: user.user_email }
+        currentUserId: this.currentUserId,
       });
     } catch (e) {
       console.error('Error resolving user context:', e);
     }
 
+    // For all ranks: read numeric project ID from sessionStorage so the backend
+    // visibility filter runs correctly (requires the "project" header as a numeric ID).
+    try {
+      const projObj = JSON.parse(sessionStorage.getItem('project') || '{}');
+      if (projObj?.id) {
+        this.currentProjectId = Number(projObj.id);
+      }
+    } catch {}
+
     if (this.userRank === 0 && this.currentUserId) {
       // Load catalog/drafts immediately (don't wait for project lookup).
       this.loadApprovalStatus();
-      // Also look up the RBAC project ID so requestApproval() has it ready.
-      this.http.get<any[]>('/api/projects', { params: { size: '1000' } })
-        .pipe(catchError(() => of([])))
-        .subscribe(projects => {
-          const orgName = sessionStorage.getItem('organization') ?? '';
-          const match = projects.find((p: any) => p.name === orgName);
-          this.currentProjectId = match?.id ?? null;
-        });
+      // Fallback project lookup for rank-0 when sessionStorage lacks the numeric id.
+      if (!this.currentProjectId) {
+        this.http.get<any[]>('/api/projects', { params: { size: '1000' } })
+          .pipe(catchError(() => of([])))
+          .subscribe(projects => {
+            const orgName = sessionStorage.getItem('organization') ?? '';
+            const match = projects.find((p: any) => p.name === orgName);
+            this.currentProjectId = match?.id ?? null;
+          });
+      }
     }
   }
 
@@ -1042,12 +1074,49 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
   }
 
   /** Pipeline cards visible to the current user.
-   *  Higher ranks (AI Engineer+): see all cards, unchanged.
+   *  Higher ranks (AI Engineer+): approved items + own DRAFT/PENDING items.
    *  AI Client (rank 0): delegates to isCardVisibleToUser() — see that method.
    */
   get visibleCards(): any[] {
-    if (this.userRank > 0) return this.paginatedCards;
+    if (this.userRank > 0) {
+      return this.paginatedCards.filter(card => this.isCardVisibleToHigherRankUser(card));
+    }
     return this.paginatedCards.filter(card => this.isCardVisibleToUser(card));
+  }
+
+  /** Visibility check for rank 1+ (AI Engineer, Project Admin, Org Admin, Platform Admin).
+   *  - Non-draft items (approved, published) are visible to all higher-rank users.
+   *  - DRAFT / PENDING items are only visible to their creator.
+   *  - Agent Designer items and items with no approval_status are always visible.
+   */
+  private isCardVisibleToHigherRankUser(card: any): boolean {
+    // Agent Designer cards always show
+    if (card.isAgentDesigner) return true;
+
+    const status = (card.approval_status || card.approvalStatus ||
+                    card.target?.approval_status || '').toUpperCase();
+
+    // Items with no approval_status (legacy) always show
+    if (!status) return true;
+
+    const draftOrPending = status === 'DRAFT' ||
+      status === 'PENDING_PROJECT_APPROVAL' ||
+      status === 'PENDING_ORG_APPROVAL' ||
+      status === 'PENDING_PLATFORM_APPROVAL';
+
+    if (!draftOrPending) return true; // approved / published items visible to all
+
+    // DRAFT and PENDING: only the creator sees them.
+    // If we can't determine the current user's login, default to showing the card
+    // so a misconfigured session doesn't silently hide the user's own work.
+    if (!this.currentUserLogin) return true;
+
+    const createdBy = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
+    if (!createdBy) return true; // unknown creator → show by default
+
+    // createdBy in the backend is always the email prefix (before @).
+    // currentUserLogin is already normalised to the prefix in resolveUserContext().
+    return createdBy === this.currentUserLogin;
   }
 
   /** Visibility check for AI Client (rank=0). Shows:
@@ -1087,6 +1156,80 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
   }
 
 
+
+  // ── Approval badge / submit helpers ─────────────────────────────────────────
+
+  getApprovalStatus(card: any): string {
+    return (card.approval_status || card.approvalStatus || card.target?.approval_status || '').toUpperCase();
+  }
+
+  getApprovalLabel(card: any): string {
+    const s = this.getApprovalStatus(card);
+    const map: Record<string, string> = {
+      DRAFT: 'Draft',
+      PENDING_PROJECT_APPROVAL: 'Pending Project Approval',
+      PROJECT_APPROVED: 'Project Approved',
+      PENDING_ORG_APPROVAL: 'Pending Org Approval',
+      ORG_APPROVED: 'Org Approved',
+      PENDING_PLATFORM_APPROVAL: 'Pending Platform Approval',
+      GLOBALLY_PUBLISHED: 'Globally Published',
+    };
+    return map[s] || s;
+  }
+
+  getApprovalBadgeClass(card: any): string {
+    const s = this.getApprovalStatus(card);
+    const map: Record<string, string> = {
+      DRAFT: 'badge-draft',
+      PENDING_PROJECT_APPROVAL: 'badge-pending',
+      PROJECT_APPROVED: 'badge-project-approved',
+      PENDING_ORG_APPROVAL: 'badge-pending',
+      ORG_APPROVED: 'badge-org-approved',
+      PENDING_PLATFORM_APPROVAL: 'badge-pending',
+      GLOBALLY_PUBLISHED: 'badge-global',
+    };
+    return map[s] || '';
+  }
+
+  getApprovalIcon(card: any): string {
+    const s = this.getApprovalStatus(card);
+    if (s === 'DRAFT') return 'edit_note';
+    if (s.startsWith('PENDING_')) return 'hourglass_empty';
+    if (s === 'PROJECT_APPROVED') return 'folder_open';
+    if (s === 'ORG_APPROVED') return 'business';
+    if (s === 'GLOBALLY_PUBLISHED') return 'public';
+    return 'label';
+  }
+
+  isDraftOwnedByUser(card: any): boolean {
+    const status = this.getApprovalStatus(card);
+    if (status !== 'DRAFT') return false;
+    const createdBy = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
+    return !!this.currentUserLogin && createdBy === this.currentUserLogin;
+  }
+
+  submitForProjectApproval(card: any): void {
+    const resourceId = card.cid;
+    if (!resourceId) { return; }
+
+    const headers: any = {};
+    if (this.currentUserLogin) { headers['user-login'] = this.currentUserLogin; }
+    if (this.currentProjectId) { headers['project'] = String(this.currentProjectId); }
+
+    this.http.post<any>(
+      '/api/aip/streamingServices/approval/submit',
+      { resourceId },
+      { headers }
+    ).pipe(catchError(err => {
+      this.service.message(err?.error?.message || 'Failed to submit for approval', 'error');
+      return of(null);
+    })).subscribe(res => {
+      if (res !== null) {
+        this.service.message(`"${card.alias || card.name}" submitted for project approval`, 'success');
+        this.getCards();
+      }
+    });
+  }
 
   /**
    * Get API parameters based on current pipeline mode

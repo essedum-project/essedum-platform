@@ -5022,7 +5022,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       const userStr = sessionStorage.getItem('user');
       if (userStr) {
         const user = JSON.parse(userStr);
-        this.currentUserLogin = user?.user_login || '';
+        const rawLogin = (user?.user_login || user?.username || user?.name || '').toLowerCase();
+        const email = (user?.user_email || rawLogin).toLowerCase();
+        const emailPrefix = email.includes('@') ? email.split('@')[0] : email;
+        const resolvedLogin = rawLogin.includes('@') ? rawLogin.split('@')[0] : (rawLogin || emailPrefix);
+        this.currentUserLogin = resolvedLogin;
         console.debug('[Approval] Resolved currentUserLogin:', this.currentUserLogin);
       } else {
         console.debug('[Approval] No user in sessionStorage');
@@ -5241,7 +5245,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   getApprovalStatus(): string | null {
     if (!this.streamItem) return null;
     const status = (this.streamItem as any).approval_status || 'DRAFT';
-    return status === 'DRAFT' ? null : status;
+    return status || null;
   }
 
   /**
@@ -5252,10 +5256,14 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     if (!status) return '';
     
     const labels: {[key: string]: string} = {
+      'DRAFT': 'Draft',
       'PENDING_PROJECT_APPROVAL': 'Pending Project Approval',
       'PROJECT_APPROVED': 'Project Approved',
       'PROJECT_REJECTED': 'Project Rejected',
       'PENDING_ORG_APPROVAL': 'Pending Organization Approval',
+      'ORG_APPROVED': 'Org Approved',
+      'PENDING_PLATFORM_APPROVAL': 'Pending Platform Approval',
+      'GLOBALLY_PUBLISHED': 'Globally Published',
       'PUBLISHED': 'Published',
       'ORG_REJECTED': 'Organization Rejected'
     };
@@ -5290,10 +5298,14 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     if (!status) return '';
     
     const classes: {[key: string]: string} = {
+      'DRAFT': 'draft',
       'PENDING_PROJECT_APPROVAL': 'pending-project',
       'PROJECT_APPROVED': 'approved',
       'PROJECT_REJECTED': 'rejected',
       'PENDING_ORG_APPROVAL': 'pending-org',
+      'ORG_APPROVED': 'org-approved',
+      'PENDING_PLATFORM_APPROVAL': 'pending-org',
+      'GLOBALLY_PUBLISHED': 'published',
       'PUBLISHED': 'published',
       'ORG_REJECTED': 'rejected'
     };
@@ -5309,11 +5321,15 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     if (!status) return '';
     
     const icons: {[key: string]: string} = {
-      'PENDING_PROJECT_APPROVAL': 'schedule',
-      'PROJECT_APPROVED': 'check_circle',
+      'DRAFT': 'edit_note',
+      'PENDING_PROJECT_APPROVAL': 'hourglass_empty',
+      'PROJECT_APPROVED': 'folder_open',
       'PROJECT_REJECTED': 'cancel',
-      'PENDING_ORG_APPROVAL': 'schedule',
-      'PUBLISHED': 'published',
+      'PENDING_ORG_APPROVAL': 'hourglass_empty',
+      'ORG_APPROVED': 'business',
+      'PENDING_PLATFORM_APPROVAL': 'hourglass_empty',
+      'GLOBALLY_PUBLISHED': 'public',
+      'PUBLISHED': 'public',
       'ORG_REJECTED': 'cancel'
     };
     

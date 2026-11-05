@@ -2925,10 +2925,15 @@
     }
 
     // Status-specific colors
+    &.draft {
+      background-color: rgba(100, 116, 139, 0.2);
+      color: #94a3b8;
+    }
+
     &.pending-project {
       background-color: rgba(217, 119, 6, 0.2);
       color: #f59e0b;
-      
+
       .status-icon {
         animation: pulse 2s ease-in-out infinite;
       }
@@ -2947,10 +2952,15 @@
     &.pending-org {
       background-color: rgba(79, 142, 247, 0.2);
       color: #7eb8ff;
-      
+
       .status-icon {
         animation: pulse 2s ease-in-out infinite;
       }
+    }
+
+    &.org-approved {
+      background-color: rgba(124, 58, 237, 0.2);
+      color: #a78bfa;
     }
 
     &.published {

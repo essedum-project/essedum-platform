@@ -194,7 +194,7 @@
       aria-label="Pipeline agent cards">
       <div class="aip-card-wrapper" *ngFor="let card of visibleCards; trackBy: trackByCardId">
 
-        <!-- Cards  -->
+        <!-- Card -->
         <app-aip-card [servicev1]="SERVICE_V1" [card]="card"
           [deleteAuth]="deleteAuth" (viewDetails)="redirection(card)"
           (delete)="deletePipeline(card.cid)" >
