@@ -176,6 +176,8 @@ export class AipCardComponent {
       [SERVICE_TYPES.CONNECTIONS]:
         this.card?.lastmodifiedby || 'Name Not Available',
       [SERVICE_TYPES.MODEL]: this.card?.createdBy || 'Name Not Available',
+      [SERVICE_TYPES.DATASETS]:
+        this.card?.created_by || this.card?.lastmodifiedby || this.card?.createdby || 'Name Not Available',
       [SERVICE_TYPES.PIPELINE]:
         this.card?.target?.created_by || this.card?.createdBy || this.card?.createdby || 'Name Not Available',
       [SERVICE_TYPES.PIPELINEAGENT]:

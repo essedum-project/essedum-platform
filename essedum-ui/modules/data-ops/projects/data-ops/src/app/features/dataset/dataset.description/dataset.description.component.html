@@ -238,8 +238,9 @@
                 </div>
                 <div *ngIf="datasetDataErr">
                   <mat-card>
-                    <div class="d-flex justify-content-center align-items-center flex-column">
-                      <b>There is an application error, please contact the application admin</b>
+                    <div class="d-flex justify-content-center align-items-center flex-column" style="padding: 24px; gap: 8px;">
+                      <mat-icon style="font-size: 36px; height: 36px; width: 36px; color: #64748b;">info_outline</mat-icon>
+                      <span style="color: #64748b; font-size: 14px;">No data preview available for this dataset.</span>
                     </div>
                   </mat-card>
                 </div>
