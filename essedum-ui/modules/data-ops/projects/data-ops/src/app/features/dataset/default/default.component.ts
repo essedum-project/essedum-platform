@@ -220,7 +220,11 @@ export class DefaultComponent {
       if(res.body){
         // this.dataset.attributes['object']=this.dataset.attributes['path'];
         this.dataset.attributes['object']=this.selectedFile.name;
-        this.dataset.attributes['uploadFile']=res.body.uploadFilePath;
+        let uploadPath: string = res.body.uploadFilePath || '';
+        if (uploadPath.endsWith('.xlsx') && !this.selectedFile.name.toLowerCase().endsWith('.xlsx')) {
+          uploadPath = uploadPath.slice(0, -5);
+        }
+        this.dataset.attributes['uploadFile'] = uploadPath;
         this.fileUploader=false
       }
     },

@@ -500,14 +500,16 @@ public class ICIPDatasetController {
 	 *                                            exception
 	 */
 	@PostMapping("/add")
-	public ResponseEntity<ICIPDataset2> createDataset(@RequestBody ICIPDatasetDTO datasetDTO)
+	public ResponseEntity<ICIPDataset2> createDataset(@RequestBody ICIPDatasetDTO datasetDTO,
+			@RequestHeader(name = "user-login", required = false) String userLogin)
 			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
 			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException,
 			UnsupportedOperationException {
-		
+
 		logger.info(String.format("creating dataset %s", datasetDTO.getAlias()));
-		datasetDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
+		String resolvedUser = (userLogin != null && !userLogin.isEmpty()) ? userLogin : ICIPUtils.getUser(claim);
+		datasetDTO.setLastmodifiedby(resolvedUser);
 		datasetDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
 		//datasetDTO.setName(datasetDTO.getName().trim());
 		ModelMapper modelmapper = new ModelMapper();

@@ -72,7 +72,14 @@ export class DatasetServices {
 
   createDataset(dataset: Dataset): Observable<any> {
     dataset.organization = String(sessionStorage.getItem('organization'));
-
+    try {
+      const storedUser = sessionStorage.getItem('user');
+      if (storedUser && !(dataset as any).createdby) {
+        const userObj = JSON.parse(storedUser);
+        const username = userObj?.username || userObj?.preferred_username || userObj?.name;
+        if (username) (dataset as any).createdby = username;
+      }
+    } catch {}
 
     return this.https.post(this.dataUrl + '/datasets/add', dataset, { observe: 'response' })
       .pipe(switchMap(async (response) => {

@@ -581,7 +581,11 @@ export class DatasetDescriptionComponent implements OnInit {
             if(count==Math.ceil(file1.size / chunkSize)){  
             this.uploadPercentage=100;
             this.tempDataset.attributes['object']=file.target.files[i].name;
-            this.tempDataset.attributes['uploadFile']=res.body.uploadFilePath;
+            let uploadPath: string = res.body.uploadFilePath || '';
+            if (uploadPath.endsWith('.xlsx') && !file.target.files[i].name.toLowerCase().endsWith('.xlsx')) {
+              uploadPath = uploadPath.slice(0, -5);
+            }
+            this.tempDataset.attributes['uploadFile'] = uploadPath;
             this.tempDatasetArray.push(JSON.parse(JSON.stringify(this.tempDataset)));  
             this.uploading=false;
             this.service.message('File Chunked Successfully!');
