@@ -324,11 +324,11 @@ public class ICIPStreamingServicesController {
 			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices resource = approvalWorkflowService.approveOrgApproval(resourceId, userRank);
 
 			response.put("success", true);
-			response.put("message", "Resource published to organization");
+			response.put("message", "Resource approved at organization level");
 			response.put("resourceId", resource.getCid());
 			response.put("status", resource.getApprovalStatus());
 
-			logger.info("[Approval] Successfully published resource {} to org", resourceId);
+			logger.info("[Approval] Successfully org-approved resource {}", resourceId);
 			return ResponseEntity.ok(response);
 		} catch (Exception e) {
 			logger.error("[Approval] Error approving org approval for resource {}", resourceId, e);
@@ -449,6 +449,179 @@ public class ICIPStreamingServicesController {
 			return ResponseEntity.ok(response);
 		} catch (Exception e) {
 			logger.error("Error fetching draft resources", e);
+			java.util.Map<String, Object> error = new java.util.HashMap<>();
+			error.put("success", false);
+			error.put("message", e.getMessage());
+			return ResponseEntity.status(400).body(error);
+		}
+	}
+
+	@org.springframework.web.bind.annotation.GetMapping("/approval/org-admin/draft-resources")
+	public ResponseEntity<java.util.Map<String, Object>> getOrgAdminDraftResources(
+			@org.springframework.web.bind.annotation.RequestParam Integer organizationId,
+			jakarta.servlet.http.HttpServletRequest httpRequest) {
+		try {
+			String userRank = httpRequest.getHeader("rank");
+			if (userRank == null || userRank.isEmpty()) {
+				userRank = httpRequest.getHeader("roleId");
+			}
+			if (userRank == null) {
+				userRank = "0";
+			}
+			userRank = userRank.trim();
+
+			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> resources =
+				approvalWorkflowService.getOrgAdminDraftResources(organizationId, userRank);
+
+			java.util.Map<String, Object> response = new java.util.HashMap<>();
+			response.put("success", true);
+			response.put("data", resources);
+			response.put("count", resources.size());
+
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			logger.error("Error fetching org admin draft resources", e);
+			java.util.Map<String, Object> error = new java.util.HashMap<>();
+			error.put("success", false);
+			error.put("message", e.getMessage());
+			return ResponseEntity.status(400).body(error);
+		}
+	}
+
+	@org.springframework.web.bind.annotation.PostMapping("/approval/platform/submit")
+	public ResponseEntity<java.util.Map<String, Object>> submitForPlatformApproval(
+			@org.springframework.web.bind.annotation.RequestBody java.util.Map<String, Object> request,
+			jakarta.servlet.http.HttpServletRequest httpRequest) {
+		java.util.Map<String, Object> response = new java.util.HashMap<>();
+		try {
+			if (!request.containsKey("resourceId")) {
+				response.put("success", false);
+				response.put("message", "Missing resourceId");
+				return ResponseEntity.status(400).body(response);
+			}
+
+			Integer resourceId = ((Number) request.get("resourceId")).intValue();
+
+			String userRank = httpRequest.getHeader("rank");
+			if (userRank == null || userRank.isEmpty()) {
+				userRank = httpRequest.getHeader("roleId");
+			}
+			if (userRank == null || userRank.isEmpty()) {
+				userRank = "3"; // Default to org admin
+			}
+			userRank = userRank.trim();
+
+			logger.info("[Approval] Submitting resource {} for platform approval. Rank: {}", resourceId, userRank);
+
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices resource = approvalWorkflowService.submitForPlatformApproval(resourceId, userRank);
+
+			response.put("success", true);
+			response.put("message", "Resource submitted to Platform Admin for approval");
+			response.put("resourceId", resource.getCid());
+			response.put("status", resource.getApprovalStatus());
+
+			logger.info("[Approval] Successfully submitted resource {} for platform approval", resourceId);
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			logger.error("[Approval] Error submitting for platform approval", e);
+			response.put("success", false);
+			response.put("message", e.getMessage());
+			return ResponseEntity.status(400).body(response);
+		}
+	}
+
+	@org.springframework.web.bind.annotation.PostMapping("/approval/platform/approve/{resourceId}")
+	public ResponseEntity<java.util.Map<String, Object>> approvePlatformApproval(
+			@org.springframework.web.bind.annotation.PathVariable Integer resourceId,
+			jakarta.servlet.http.HttpServletRequest httpRequest) {
+		java.util.Map<String, Object> response = new java.util.HashMap<>();
+		try {
+			String userRank = httpRequest.getHeader("rank");
+			if (userRank == null || userRank.isEmpty()) {
+				userRank = httpRequest.getHeader("roleId");
+			}
+			if (userRank == null || userRank.isEmpty()) {
+				userRank = "4"; // Default to platform admin
+			}
+			userRank = userRank.trim();
+
+			logger.info("[Approval] Approving platform approval for resource {}. Rank: {}", resourceId, userRank);
+
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices resource = approvalWorkflowService.approvePlatformApproval(resourceId, userRank);
+
+			response.put("success", true);
+			response.put("message", "Resource published globally");
+			response.put("resourceId", resource.getCid());
+			response.put("status", resource.getApprovalStatus());
+
+			logger.info("[Approval] Successfully published resource {} globally", resourceId);
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			logger.error("[Approval] Error approving platform approval for resource {}", resourceId, e);
+			response.put("success", false);
+			response.put("message", e.getMessage());
+			return ResponseEntity.status(400).body(response);
+		}
+	}
+
+	@org.springframework.web.bind.annotation.PostMapping("/approval/platform/reject/{resourceId}")
+	public ResponseEntity<java.util.Map<String, Object>> rejectPlatformApproval(
+			@org.springframework.web.bind.annotation.PathVariable Integer resourceId,
+			jakarta.servlet.http.HttpServletRequest httpRequest) {
+		java.util.Map<String, Object> response = new java.util.HashMap<>();
+		try {
+			String userRank = httpRequest.getHeader("rank");
+			if (userRank == null || userRank.isEmpty()) {
+				userRank = httpRequest.getHeader("roleId");
+			}
+			if (userRank == null || userRank.isEmpty()) {
+				userRank = "4"; // Default to platform admin
+			}
+			userRank = userRank.trim();
+
+			logger.info("[Approval] Rejecting platform approval for resource {}. Rank: {}", resourceId, userRank);
+
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices resource = approvalWorkflowService.rejectPlatformApproval(resourceId, userRank);
+
+			response.put("success", true);
+			response.put("message", "Resource rejected at platform level");
+			response.put("resourceId", resource.getCid());
+			response.put("status", resource.getApprovalStatus());
+
+			logger.info("[Approval] Successfully rejected platform approval for resource {}", resourceId);
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			logger.error("[Approval] Error rejecting platform approval for resource {}", resourceId, e);
+			response.put("success", false);
+			response.put("message", e.getMessage());
+			return ResponseEntity.status(400).body(response);
+		}
+	}
+
+	@org.springframework.web.bind.annotation.GetMapping("/approval/platform-admin/list")
+	public ResponseEntity<java.util.Map<String, Object>> getPlatformAdminApprovals(
+			jakarta.servlet.http.HttpServletRequest httpRequest) {
+		try {
+			String userRank = httpRequest.getHeader("rank");
+			if (userRank == null || userRank.isEmpty()) {
+				userRank = httpRequest.getHeader("roleId");
+			}
+			if (userRank == null) {
+				userRank = "0";
+			}
+			userRank = userRank.trim();
+
+			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> approvals =
+				approvalWorkflowService.getPlatformAdminApprovals(userRank);
+
+			java.util.Map<String, Object> response = new java.util.HashMap<>();
+			response.put("success", true);
+			response.put("data", approvals);
+			response.put("count", approvals.size());
+
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			logger.error("Error fetching platform admin approvals", e);
 			java.util.Map<String, Object> error = new java.util.HashMap<>();
 			error.put("success", false);
 			error.put("message", e.getMessage());

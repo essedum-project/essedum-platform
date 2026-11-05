@@ -124,12 +124,14 @@ public class ApprovalWorkflowService {
 	}
 
 	/**
-	 * Org Admin approves and publishes resource
-	 * Status: PENDING_ORG_APPROVAL -> PUBLISHED
-	 * Now visible to ALL users of approved organization
+	 * Org Admin approves org-level publishing
+	 * Status: PENDING_ORG_APPROVAL -> ORG_APPROVED
+	 * Now visible to ALL users of approved organization; awaits an explicit
+	 * submission by the Org Admin to the Platform Admin before it becomes
+	 * globally PUBLISHED.
 	 */
 	public ICIPStreamingServices approveOrgApproval(Integer resourceId, String currentUserRank) {
-		logger.info("[Approval] Org Admin publishing resource {}", resourceId);
+		logger.info("[Approval] Org Admin approving resource {} at org level", resourceId);
 
 		if (!"3".equals(currentUserRank)) {
 			throw new IllegalAccessError("Only Org Admin (rank 3) can approve org-level publishing");
@@ -144,7 +146,76 @@ public class ApprovalWorkflowService {
 			throw new IllegalStateException("Only PENDING_ORG_APPROVAL resources can be org-approved");
 		}
 
+		resource.setApprovalStatus("ORG_APPROVED");
+		return streamingServicesRepository.save(resource);
+	}
+
+	/**
+	 * Org Admin submits an ORG_APPROVED resource to Platform Admin for global publishing
+	 * Status: ORG_APPROVED -> PENDING_PLATFORM_APPROVAL
+	 */
+	public ICIPStreamingServices submitForPlatformApproval(Integer resourceId, String currentUserRank) {
+		logger.info("[Approval] Org Admin submitting resource {} for platform approval", resourceId);
+
+		if (!"3".equals(currentUserRank)) {
+			throw new IllegalAccessError("Only Org Admin (rank 3) can submit to Platform Admin");
+		}
+
+		ICIPStreamingServices resource = streamingServicesRepository.findById(resourceId).orElse(null);
+		if (resource == null) {
+			throw new IllegalArgumentException("Resource not found: " + resourceId);
+		}
+
+		if (!"ORG_APPROVED".equals(resource.getApprovalStatus())) {
+			throw new IllegalStateException("Only ORG_APPROVED resources can be submitted to Platform Admin");
+		}
+
+		resource.setApprovalStatus("PENDING_PLATFORM_APPROVAL");
+		return streamingServicesRepository.save(resource);
+	}
+
+	/**
+	 * Platform Admin approves and publishes resource globally
+	 * Status: PENDING_PLATFORM_APPROVAL -> PUBLISHED (approvedOrganizationId cleared = global visibility)
+	 */
+	public ICIPStreamingServices approvePlatformApproval(Integer resourceId, String currentUserRank) {
+		logger.info("[Approval] Platform Admin publishing resource {} globally", resourceId);
+
+		if (!"4".equals(currentUserRank)) {
+			throw new IllegalAccessError("Only Platform Admin (rank 4) can publish globally");
+		}
+
+		ICIPStreamingServices resource = streamingServicesRepository.findById(resourceId).orElse(null);
+		if (resource == null) {
+			throw new IllegalArgumentException("Resource not found: " + resourceId);
+		}
+
+		if (!"PENDING_PLATFORM_APPROVAL".equals(resource.getApprovalStatus())) {
+			throw new IllegalStateException("Only PENDING_PLATFORM_APPROVAL resources can be platform-approved");
+		}
+
 		resource.setApprovalStatus("PUBLISHED");
+		resource.setApprovedOrganizationId(null);
+		return streamingServicesRepository.save(resource);
+	}
+
+	/**
+	 * Platform Admin rejects resource submitted for global publishing
+	 * Status: PENDING_PLATFORM_APPROVAL -> PLATFORM_REJECTED
+	 */
+	public ICIPStreamingServices rejectPlatformApproval(Integer resourceId, String currentUserRank) {
+		logger.info("[Approval] Platform Admin rejecting resource {}", resourceId);
+
+		if (!"4".equals(currentUserRank)) {
+			throw new IllegalAccessError("Only Platform Admin (rank 4) can reject");
+		}
+
+		ICIPStreamingServices resource = streamingServicesRepository.findById(resourceId).orElse(null);
+		if (resource == null) {
+			throw new IllegalArgumentException("Resource not found: " + resourceId);
+		}
+
+		resource.setApprovalStatus("PLATFORM_REJECTED");
 		return streamingServicesRepository.save(resource);
 	}
 
@@ -229,6 +300,25 @@ public class ApprovalWorkflowService {
 			return sameProject || isSelectedOrgAdmin;
 		}
 
+		// ORG_APPROVED: ALL users of the approved organization + Platform Admins (reviewing before submission)
+		if ("ORG_APPROVED".equals(status)) {
+			boolean sameOrg = userOrganizationId.equals(resource.getApprovedOrganizationId());
+			boolean isPlatformAdmin = "4".equals(userRank);
+			return sameOrg || isPlatformAdmin;
+		}
+
+		// PENDING_PLATFORM_APPROVAL: ALL users of the submitting organization + Platform Admins (global)
+		if ("PENDING_PLATFORM_APPROVAL".equals(status)) {
+			boolean sameOrg = userOrganizationId.equals(resource.getApprovedOrganizationId());
+			boolean isPlatformAdmin = "4".equals(userRank);
+			return sameOrg || isPlatformAdmin;
+		}
+
+		// PLATFORM_REJECTED: ALL users of the submitting organization
+		if ("PLATFORM_REJECTED".equals(status)) {
+			return userOrganizationId.equals(resource.getApprovedOrganizationId());
+		}
+
 		// PROJECT_REJECTED: Creator only
 		if ("PROJECT_REJECTED".equals(status)) {
 			return resource.getCreatedBy().equals(currentUser);
@@ -239,9 +329,11 @@ public class ApprovalWorkflowService {
 			return userProjectId.equals(resource.getProjectId());
 		}
 
-		// PUBLISHED: ALL users of approved organization
+		// PUBLISHED: Globally visible (approvedOrganizationId == null, Platform-approved) to everyone,
+		// or ALL users of approved organization (legacy org-scoped PUBLISHED records)
 		if ("PUBLISHED".equals(status)) {
-			return userOrganizationId.equals(resource.getApprovedOrganizationId());
+			return resource.getApprovedOrganizationId() == null
+					|| userOrganizationId.equals(resource.getApprovedOrganizationId());
 		}
 
 		return false;
@@ -288,6 +380,46 @@ public class ApprovalWorkflowService {
 		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
 		return allResources.stream()
 			.filter(r -> "PROJECT_APPROVED".equals(r.getApprovalStatus()) && projectId.equals(r.getProjectId()))
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Org Admin draft view: ORG_APPROVED resources for this org, waiting to be
+	 * submitted to Platform Admin for global publishing.
+	 */
+	public List<ICIPStreamingServices> getOrgAdminDraftResources(Integer organizationId, String currentUserRank) {
+		if (!"3".equals(currentUserRank)) {
+			return new ArrayList<>();
+		}
+
+		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
+		return allResources.stream()
+			.filter(r -> "ORG_APPROVED".equals(r.getApprovalStatus()) && organizationId.equals(r.getApprovedOrganizationId()))
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Get approval requests for Platform Admin (global publishing requests)
+	 */
+	public List<ICIPStreamingServices> getPlatformAdminApprovals(String currentUserRank) {
+		if (!"4".equals(currentUserRank)) {
+			return new ArrayList<>();
+		}
+
+		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
+		return allResources.stream()
+			.filter(r -> "PENDING_PLATFORM_APPROVAL".equals(r.getApprovalStatus()))
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Catalog for Platform Admin (rank 4): all globally PUBLISHED resources
+	 * (approvedOrganizationId == null means Platform-approved, globally visible).
+	 */
+	public List<ICIPStreamingServices> getGloballyPublishedResources() {
+		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
+		return allResources.stream()
+			.filter(r -> "PUBLISHED".equals(r.getApprovalStatus()) && r.getApprovedOrganizationId() == null)
 			.collect(Collectors.toList());
 	}
 }

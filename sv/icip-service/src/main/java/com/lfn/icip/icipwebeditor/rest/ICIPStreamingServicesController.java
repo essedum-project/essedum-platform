@@ -437,6 +437,120 @@ public class ICIPStreamingServicesController {
 	}
 
 	/**
+	 * POST /approval/platform/submit
+	 * Org Admin submits an ORG_APPROVED resource to Platform Admin (ORG_APPROVED -> PENDING_PLATFORM_APPROVAL)
+	 */
+	@PostMapping("/approval/platform/submit")
+	public ResponseEntity<?> submitForPlatformApproval(
+			@RequestBody java.util.Map<String, Object> request,
+			@RequestParam(value = "rank", required = false) String rank,
+			@RequestHeader(value = "roleId", required = false) String roleId) {
+		try {
+			Integer resourceId = (Integer) request.get("resourceId");
+			if (resourceId == null) {
+				logger.warn("[Approval] Platform submit failed: Missing resourceId");
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId is required"));
+			}
+
+			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
+			if (userRank == null || userRank.isEmpty()) {
+				logger.warn("[Approval] Missing rank/roleId for platform submit");
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
+			}
+
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.submitForPlatformApproval(resourceId, userRank);
+			logger.info("[Approval] Successfully submitted resource {} for platform approval", resourceId);
+			return ResponseEntity.ok(java.util.Map.of(
+				"success", true,
+				"message", "Resource submitted to Platform Admin for approval",
+				"resourceId", resourceId,
+				"status", result.getApprovalStatus()
+			));
+		} catch (IllegalAccessError e) {
+			logger.warn("[Approval] Forbidden: {}", e.getMessage());
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			logger.warn("[Approval] Bad request: {}", e.getMessage());
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[Approval] Error submitting to platform", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/**
+	 * POST /approval/platform/approve/{resourceId}
+	 * Platform Admin approves and publishes globally (PENDING_PLATFORM_APPROVAL -> PUBLISHED)
+	 */
+	@PostMapping("/approval/platform/approve/{resourceId}")
+	public ResponseEntity<?> approvePlatformApproval(
+			@PathVariable Integer resourceId,
+			@RequestParam(value = "rank", required = false) String rank,
+			@RequestHeader(value = "roleId", required = false) String roleId) {
+		try {
+			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
+			if (userRank == null || userRank.isEmpty()) {
+				logger.warn("[Approval] Missing rank/roleId for platform approval");
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
+			}
+
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approvePlatformApproval(resourceId, userRank);
+			logger.info("[Approval] Resource {} approved and published globally", resourceId);
+			return ResponseEntity.ok(java.util.Map.of(
+				"success", true,
+				"message", "Resource published globally",
+				"resourceId", resourceId,
+				"status", result.getApprovalStatus()
+			));
+		} catch (IllegalAccessError e) {
+			logger.warn("[Approval] Forbidden: {}", e.getMessage());
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			logger.warn("[Approval] Bad request: {}", e.getMessage());
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[Approval] Error platform-approving resource", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/**
+	 * POST /approval/platform/reject/{resourceId}
+	 * Platform Admin rejects (PENDING_PLATFORM_APPROVAL -> PLATFORM_REJECTED)
+	 */
+	@PostMapping("/approval/platform/reject/{resourceId}")
+	public ResponseEntity<?> rejectPlatformApproval(
+			@PathVariable Integer resourceId,
+			@RequestParam(value = "rank", required = false) String rank,
+			@RequestHeader(value = "roleId", required = false) String roleId) {
+		try {
+			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
+			if (userRank == null || userRank.isEmpty()) {
+				logger.warn("[Approval] Missing rank/roleId for platform rejection");
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
+			}
+
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectPlatformApproval(resourceId, userRank);
+			logger.info("[Approval] Resource {} rejected at platform level", resourceId);
+			return ResponseEntity.ok(java.util.Map.of(
+				"success", true,
+				"message", "Resource rejected",
+				"resourceId", resourceId,
+				"status", result.getApprovalStatus()
+			));
+		} catch (IllegalAccessError e) {
+			logger.warn("[Approval] Forbidden: {}", e.getMessage());
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			logger.warn("[Approval] Bad request: {}", e.getMessage());
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[Approval] Error platform-rejecting resource", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/**
 	 * GET /approval/project-admin/list?projectId=X&rank=2
 	 * Get resources pending project admin approval
 	 */
@@ -497,8 +611,72 @@ public class ICIPStreamingServicesController {
 	}
 
 	/**
+	 * GET /approval/org-admin/draft-resources?organizationId=X&rank=3
+	 * Get ORG_APPROVED resources available for Platform Admin submission
+	 */
+	@GetMapping("/approval/org-admin/draft-resources")
+	public ResponseEntity<?> getOrgAdminDraftResources(
+			@RequestParam Integer organizationId,
+			@RequestParam(required = false) String rank,
+			@RequestHeader(value = "roleId", required = false) String roleId) {
+		try {
+			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
+			logger.info("[Approval] GET /approval/org-admin/draft-resources - organizationId: {}, rank: {}", organizationId, userRank);
+
+			if (userRank == null || userRank.isEmpty()) {
+				logger.warn("[Approval] Missing rank/roleId for org-admin draft resources");
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
+			}
+
+			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> resources =
+				approvalWorkflowService.getOrgAdminDraftResources(organizationId, userRank);
+			logger.info("[Approval] Retrieved {} ORG_APPROVED resources for organizationId {}", resources.size(), organizationId);
+			return ResponseEntity.ok(java.util.Map.of(
+				"success", true,
+				"data", resources,
+				"count", resources.size()
+			));
+		} catch (Exception e) {
+			logger.error("[Approval] Error getting org-admin draft resources", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/**
+	 * GET /approval/platform-admin/list?rank=4
+	 * Get resources pending platform admin approval (global publishing requests)
+	 */
+	@GetMapping("/approval/platform-admin/list")
+	public ResponseEntity<?> getPlatformAdminApprovals(
+			@RequestParam(required = false) String rank,
+			@RequestHeader(value = "roleId", required = false) String roleId) {
+		try {
+			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
+			logger.info("[Approval] GET /approval/platform-admin/list - rank: {}", userRank);
+
+			if (userRank == null || userRank.isEmpty()) {
+				logger.warn("[Approval] Missing rank/roleId for platform admin list");
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+
+			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> approvals =
+				approvalWorkflowService.getPlatformAdminApprovals(userRank);
+			logger.info("[Approval] Retrieved {} approval requests for platform admin", approvals.size());
+			return ResponseEntity.ok(java.util.Map.of(
+				"success", true,
+				"data", approvals,
+				"count", approvals.size()
+			));
+		} catch (Exception e) {
+			logger.error("[Approval] Error getting platform admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/**
 	 * GET /approval/catalog?projectId=X  → PROJECT_APPROVED pipelines for rank-2 catalog
-	 * GET /approval/catalog?orgId=X      → PUBLISHED pipelines for rank-3 catalog
+	 * GET /approval/catalog?orgId=X      → PUBLISHED (org-scoped) pipelines for rank-3 catalog
+	 * GET /approval/catalog              → globally PUBLISHED pipelines for rank-4 catalog
 	 */
 	@GetMapping("/approval/catalog")
 	public ResponseEntity<?> getCatalog(
@@ -517,7 +695,11 @@ public class ICIPStreamingServicesController {
 				logger.info("[Catalog] orgId={} → {} PUBLISHED items", orgId, items.size());
 				return ResponseEntity.ok(items);
 			}
-			return ResponseEntity.ok(java.util.Collections.emptyList());
+			// rank 4 → all globally PUBLISHED (approvedOrganizationId == null, platform-approved)
+			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> globalItems =
+				approvalWorkflowService.getGloballyPublishedResources();
+			logger.info("[Catalog] no scope params → {} globally PUBLISHED items", globalItems.size());
+			return ResponseEntity.ok(globalItems);
 		} catch (Exception e) {
 			logger.error("[Catalog] Error fetching catalog", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));
