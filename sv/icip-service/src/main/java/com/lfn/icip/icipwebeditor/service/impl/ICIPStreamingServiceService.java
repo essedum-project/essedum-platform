@@ -845,6 +845,17 @@ public class ICIPStreamingServiceService implements IICIPStreamingServiceService
 	}
 
 	@Override
+	public List<ICIPStreamingServices2DTO> getOrgApprovedPipelines(Integer orgId) {
+		if (orgId == null) return new ArrayList<>();
+		return streamingServicesRepository.findByApprovedOrganizationIdAndApprovalStatusIn(
+			orgId, java.util.Arrays.asList("ORG_APPROVED", "PENDING_PLATFORM_APPROVAL"));
+	}
+
+	@Override
+	public List<ICIPStreamingServices2DTO> getGloballyPublishedPipelines() {
+		return streamingServicesRepository.findByApprovalStatusAndApprovedOrganizationIdIsNull("PUBLISHED");
+	}
+
 	public List<ICIPStreamingServices2DTO> getAllPipelinesByTypeAndOrg(String project, Pageable paginate, String query,
 			List<Integer> tags, String orderBy, String type, String interfacetype) {
 		// TODO Auto-generated method stub
