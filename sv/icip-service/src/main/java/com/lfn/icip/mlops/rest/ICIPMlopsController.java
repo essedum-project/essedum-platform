@@ -1457,7 +1457,8 @@ public class ICIPMlopsController {
 					String username = headers.getOrDefault("user-login", "");
 					String projectStr = headers.getOrDefault("project", headers.getOrDefault("Project", ""));
 					String orgStr = headers.getOrDefault("organisation", headers.getOrDefault("organization", ""));
-					String roleIdStr = headers.getOrDefault("roleId", headers.getOrDefault("rank", ""));
+					// Prefer 'rank' (always numeric: 1-4) over 'roleId' (may be a non-numeric UUID from agent-studio)
+					String roleIdStr = headers.getOrDefault("rank", headers.getOrDefault("roleId", ""));
 					
 					logger.info("[Approval] Pipeline list filtering: user={}, project={}, org={}, role={}", 
 						username, projectStr, orgStr, roleIdStr);
