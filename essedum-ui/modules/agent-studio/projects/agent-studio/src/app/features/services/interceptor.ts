@@ -46,6 +46,8 @@ export class AipInterceptorService implements HttpInterceptor {
           }
           if (p?.name?.toString()) {
             request = request.clone({ headers: request.headers.set("ProjectName", p.name.toString()) });
+            // Send project name as 'organisation' header — required by approval workflow filter.
+            request = request.clone({ headers: request.headers.set("organisation", p.name.toString()) });
           }
         } catch { /* ignore parse errors */ }
       }
@@ -55,10 +57,38 @@ export class AipInterceptorService implements HttpInterceptor {
           if (r?.id?.toString()) {
             request = request.clone({ headers: request.headers.set("roleId", r.id.toString()) });
           }
+          // Send rank (approval level 1-4) for the approval workflow filter.
+          if (r?.rank?.toString()) {
+            request = request.clone({ headers: request.headers.set("rank", r.rank.toString()) });
+          }
           if (r?.name?.toString()) {
             request = request.clone({ headers: request.headers.set("roleName", r.name.toString()) });
           }
         } catch { /* ignore parse errors */ }
+      }
+
+      // Send portfolioId (numeric portfolio/org ID) for org-scoped approval visibility.
+      // Required by the pipeline list backend to fetch ORG_APPROVED pipelines cross-project.
+      const portfolioDataRaw = sessionStorage.getItem("portfoliodata");
+      if (portfolioDataRaw) {
+        try {
+          const pd = JSON.parse(portfolioDataRaw);
+          if (pd?.id?.toString()) {
+            request = request.clone({ headers: request.headers.set("portfolioId", pd.id.toString()) });
+          }
+        } catch { /* ignore */ }
+      }
+
+      // Send user-login header — required by the approval workflow filter for DRAFT visibility.
+      const storedUser = sessionStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const userObj = JSON.parse(storedUser);
+          const username = userObj?.username || userObj?.preferred_username || userObj?.name;
+          if (username) {
+            request = request.clone({ headers: request.headers.set("user-login", username) });
+          }
+        } catch { /* ignore */ }
       }
     }
 
