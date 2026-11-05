@@ -10,6 +10,8 @@ import { ApiService } from '../../core/api.service';
 })
 export class CatalogComponent implements OnInit {
   assets: any[] = [];
+  datasetAssets: any[] = [];
+  datasourceAssets: any[] = [];
 
   constructor(private readonly api: ApiService) {}
 
@@ -30,6 +32,14 @@ export class CatalogComponent implements OnInit {
     this.api.getPipelineCatalog(requestProjectId, requestOrgId)
       .pipe(take(1))
       .subscribe(rows => (this.assets = Array.isArray(rows) ? rows : []));
+
+    this.api.getDatasetCatalog(requestProjectId, requestOrgId)
+      .pipe(take(1))
+      .subscribe(rows => (this.datasetAssets = Array.isArray(rows) ? rows : (rows?.data && Array.isArray(rows.data) ? rows.data : [])));
+
+    this.api.getDatasourceCatalog(requestProjectId, requestOrgId)
+      .pipe(take(1))
+      .subscribe(rows => (this.datasourceAssets = Array.isArray(rows) ? rows : (rows?.data && Array.isArray(rows.data) ? rows.data : [])));
   }
 
   badgeClass(item: any): string {

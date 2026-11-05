@@ -521,4 +521,178 @@ export class ApiService {
       catchError(() => of([]))
     );
   }
+
+  // ─── Dataset approval workflow ────────────────────────────────────────────
+
+  getProjectAdminDatasetApprovals(projectId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.get<any>(`/api/aip/datasets/approval/project-admin/list`, { params: { projectId, rank } });
+  }
+
+  getOrgAdminDatasetApprovals(organizationId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.get<any>(`/api/aip/datasets/approval/org-admin/list`, { params: { organizationId, rank } });
+  }
+
+  getPlatformAdminDatasetApprovals(): Observable<any> {
+    let rank = '4';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
+    return this.http.get<any>(`/api/aip/datasets/approval/platform-admin/list`, { params: { rank } });
+  }
+
+  approveDatasetProjectApproval(resourceId: number, projectId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.post<any>(`/api/aip/datasets/approval/project/approve/${resourceId}`, { projectId }, { params: { rank } });
+  }
+
+  rejectDatasetProjectApproval(resourceId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.post<any>(`/api/aip/datasets/approval/project/reject/${resourceId}`, {}, { params: { rank } });
+  }
+
+  submitDatasetForOrgApproval(resourceId: number, organizationId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.post<any>(`/api/aip/datasets/approval/org/submit`, { resourceId, organizationId }, { params: { rank } });
+  }
+
+  approveDatasetOrgApproval(resourceId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.post<any>(`/api/aip/datasets/approval/org/approve/${resourceId}`, {}, { params: { rank } });
+  }
+
+  rejectDatasetOrgApproval(resourceId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.post<any>(`/api/aip/datasets/approval/org/reject/${resourceId}`, {}, { params: { rank } });
+  }
+
+  submitDatasetForPlatformApproval(resourceId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.post<any>(`/api/aip/datasets/approval/platform/submit`, { resourceId }, { params: { rank } });
+  }
+
+  approveDatasetPlatformApproval(resourceId: number): Observable<any> {
+    let rank = '4';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
+    return this.http.post<any>(`/api/aip/datasets/approval/platform/approve/${resourceId}`, {}, { params: { rank } });
+  }
+
+  rejectDatasetPlatformApproval(resourceId: number): Observable<any> {
+    let rank = '4';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
+    return this.http.post<any>(`/api/aip/datasets/approval/platform/reject/${resourceId}`, {}, { params: { rank } });
+  }
+
+  getDatasetDraftResources(projectId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.get<any>(`/api/aip/datasets/approval/draft-resources`, { params: { projectId, rank } });
+  }
+
+  getDatasetOrgDraftResources(organizationId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.get<any>(`/api/aip/datasets/approval/org-admin/draft-resources`, { params: { organizationId, rank } });
+  }
+
+  getDatasetCatalog(projectId?: number | null, orgId?: number | null): Observable<any> {
+    const params: any = {};
+    if (projectId != null) params['projectId'] = projectId;
+    if (orgId != null) params['orgId'] = orgId;
+    return this.http.get<any>(`/api/aip/datasets/approval/catalog`, { params }).pipe(catchError(() => of([])));
+  }
+
+  // ─── Datasource approval workflow ─────────────────────────────────────────
+
+  getProjectAdminDatasourceApprovals(projectId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.get<any>(`/api/aip/datasources/approval/project-admin/list`, { params: { projectId, rank } });
+  }
+
+  getOrgAdminDatasourceApprovals(organizationId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.get<any>(`/api/aip/datasources/approval/org-admin/list`, { params: { organizationId, rank } });
+  }
+
+  getPlatformAdminDatasourceApprovals(): Observable<any> {
+    let rank = '4';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
+    return this.http.get<any>(`/api/aip/datasources/approval/platform-admin/list`, { params: { rank } });
+  }
+
+  approveDatasourceProjectApproval(resourceId: number, projectId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.post<any>(`/api/aip/datasources/approval/project/approve/${resourceId}`, { projectId }, { params: { rank } });
+  }
+
+  rejectDatasourceProjectApproval(resourceId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.post<any>(`/api/aip/datasources/approval/project/reject/${resourceId}`, {}, { params: { rank } });
+  }
+
+  submitDatasourceForOrgApproval(resourceId: number, organizationId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.post<any>(`/api/aip/datasources/approval/org/submit`, { resourceId, organizationId }, { params: { rank } });
+  }
+
+  approveDatasourceOrgApproval(resourceId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.post<any>(`/api/aip/datasources/approval/org/approve/${resourceId}`, {}, { params: { rank } });
+  }
+
+  rejectDatasourceOrgApproval(resourceId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.post<any>(`/api/aip/datasources/approval/org/reject/${resourceId}`, {}, { params: { rank } });
+  }
+
+  submitDatasourceForPlatformApproval(resourceId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.post<any>(`/api/aip/datasources/approval/platform/submit`, { resourceId }, { params: { rank } });
+  }
+
+  approveDatasourcePlatformApproval(resourceId: number): Observable<any> {
+    let rank = '4';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
+    return this.http.post<any>(`/api/aip/datasources/approval/platform/approve/${resourceId}`, {}, { params: { rank } });
+  }
+
+  rejectDatasourcePlatformApproval(resourceId: number): Observable<any> {
+    let rank = '4';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
+    return this.http.post<any>(`/api/aip/datasources/approval/platform/reject/${resourceId}`, {}, { params: { rank } });
+  }
+
+  getDatasourceDraftResources(projectId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.get<any>(`/api/aip/datasources/approval/draft-resources`, { params: { projectId, rank } });
+  }
+
+  getDatasourceOrgDraftResources(organizationId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.get<any>(`/api/aip/datasources/approval/org-admin/draft-resources`, { params: { organizationId, rank } });
+  }
+
+  getDatasourceCatalog(projectId?: number | null, orgId?: number | null): Observable<any> {
+    const params: any = {};
+    if (projectId != null) params['projectId'] = projectId;
+    if (orgId != null) params['orgId'] = orgId;
+    return this.http.get<any>(`/api/aip/datasources/approval/catalog`, { params }).pipe(catchError(() => of([])));
+  }
 }

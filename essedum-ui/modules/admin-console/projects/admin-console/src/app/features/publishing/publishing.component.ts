@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, switchMap, map, of, Subject } from 'rxjs';
-import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, takeUntil, catchError } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
@@ -47,6 +47,18 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
   // Rank 3: ORG_APPROVED resources ready to submit to platform admin
   streamingOrgDrafts: any[] = [];
   streamingOrgDraftsDataSource = new MatTableDataSource<any>([]);
+
+  // Dataset drafts
+  datasetDrafts: any[] = [];
+  datasetDraftsDataSource = new MatTableDataSource<any>([]);
+  datasetOrgDrafts: any[] = [];
+  datasetOrgDraftsDataSource = new MatTableDataSource<any>([]);
+
+  // Datasource drafts
+  datasourceDrafts: any[] = [];
+  datasourceDraftsDataSource = new MatTableDataSource<any>([]);
+  datasourceOrgDrafts: any[] = [];
+  datasourceOrgDraftsDataSource = new MatTableDataSource<any>([]);
   projectId: number | null = null;
   orgId: number | null = null;
 
@@ -129,14 +141,23 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
           // Rank 3: ORG_APPROVED resources ready to submit to platform admin
           const streamingRank3$ = (streamingRank === 3 && orgId) ? this.api.getOrgAdminDraftResources(orgId) : of([]);
 
+          const datasetRank2$ = (streamingRank === 2 && projectId) ? this.api.getDatasetDraftResources(projectId).pipe(catchError(() => of([]))) : of([]);
+          const datasetRank3$ = (streamingRank === 3 && orgId) ? this.api.getDatasetOrgDraftResources(orgId).pipe(catchError(() => of([]))) : of([]);
+          const datasourceRank2$ = (streamingRank === 2 && projectId) ? this.api.getDatasourceDraftResources(projectId).pipe(catchError(() => of([]))) : of([]);
+          const datasourceRank3$ = (streamingRank === 3 && orgId) ? this.api.getDatasourceOrgDraftResources(orgId).pipe(catchError(() => of([]))) : of([]);
+
           return combineLatest([
             this.api.getDraftVersions(userId, orgId, projectId),
             this.api.getAssets(userId, orgId, projectId),
             streamingRank2$,
-            streamingRank3$
+            streamingRank3$,
+            datasetRank2$,
+            datasetRank3$,
+            datasourceRank2$,
+            datasourceRank3$
           ]);
         }),
-        map(([versions, assets, streamingRank2, streamingRank3]) => {
+        map(([versions, assets, streamingRank2, streamingRank3, datasetRank2, datasetRank3, datasourceRank2, datasourceRank3]) => {
           console.log('[PUBLISHING] Data loaded - versions:', versions?.length, 'assets:', assets?.length, 'rank2:', streamingRank2, 'rank3:', streamingRank3);
 
           // Extract rank 2 data (PROJECT_APPROVED)
@@ -176,6 +197,19 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
           this.streamingOrgDrafts = rank3Array;
           console.log('[PUBLISHING] Rank3 org drafts:', this.streamingOrgDrafts.length);
           this.streamingOrgDraftsDataSource.data = this.streamingOrgDrafts;
+
+          // Dataset drafts
+          const extractArr = (raw: any): any[] => Array.isArray(raw) ? raw : (raw?.data && Array.isArray(raw.data) ? raw.data : []);
+          this.datasetDrafts = extractArr(datasetRank2).filter((s: any) => s.approval_status === 'PROJECT_APPROVED');
+          this.datasetDraftsDataSource.data = this.datasetDrafts;
+          this.datasetOrgDrafts = extractArr(datasetRank3);
+          this.datasetOrgDraftsDataSource.data = this.datasetOrgDrafts;
+
+          // Datasource drafts
+          this.datasourceDrafts = extractArr(datasourceRank2).filter((s: any) => s.approval_status === 'PROJECT_APPROVED');
+          this.datasourceDraftsDataSource.data = this.datasourceDrafts;
+          this.datasourceOrgDrafts = extractArr(datasourceRank3);
+          this.datasourceOrgDraftsDataSource.data = this.datasourceOrgDrafts;
 
           return processedVersions;
         }),
@@ -355,5 +389,55 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   isStreamingService(item: any): boolean {
     return item && item.hasOwnProperty('approval_status');
+  }
+
+  submitDatasetToOrg(resource: any): void {
+    if (!this.orgId) { this.notify.error('Organization not set.'); return; }
+    this.api.submitDatasetForOrgApproval(resource.id, this.orgId).subscribe({
+      next: () => {
+        this.notify.success(`${resource.alias || resource.name} submitted to organization for approval`);
+        this.datasetDrafts = this.datasetDrafts.filter(s => s.id !== resource.id);
+        this.datasetDraftsDataSource.data = [...this.datasetDrafts];
+        this.load();
+      },
+      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+    });
+  }
+
+  submitDatasetToPlatform(resource: any): void {
+    this.api.submitDatasetForPlatformApproval(resource.id).subscribe({
+      next: () => {
+        this.notify.success(`${resource.alias || resource.name} submitted to Platform Admin for approval`);
+        this.datasetOrgDrafts = this.datasetOrgDrafts.filter(s => s.id !== resource.id);
+        this.datasetOrgDraftsDataSource.data = [...this.datasetOrgDrafts];
+        this.load();
+      },
+      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+    });
+  }
+
+  submitDatasourceToOrg(resource: any): void {
+    if (!this.orgId) { this.notify.error('Organization not set.'); return; }
+    this.api.submitDatasourceForOrgApproval(resource.id, this.orgId).subscribe({
+      next: () => {
+        this.notify.success(`${resource.alias || resource.name} submitted to organization for approval`);
+        this.datasourceDrafts = this.datasourceDrafts.filter(s => s.id !== resource.id);
+        this.datasourceDraftsDataSource.data = [...this.datasourceDrafts];
+        this.load();
+      },
+      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+    });
+  }
+
+  submitDatasourceToPlatform(resource: any): void {
+    this.api.submitDatasourceForPlatformApproval(resource.id).subscribe({
+      next: () => {
+        this.notify.success(`${resource.alias || resource.name} submitted to Platform Admin for approval`);
+        this.datasourceOrgDrafts = this.datasourceOrgDrafts.filter(s => s.id !== resource.id);
+        this.datasourceOrgDraftsDataSource.data = [...this.datasourceOrgDrafts];
+        this.load();
+      },
+      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+    });
   }
 }

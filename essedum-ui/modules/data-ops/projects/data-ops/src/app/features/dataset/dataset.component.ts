@@ -82,6 +82,11 @@ export class DatasetComponent implements OnInit, OnChanges {
   tagrefresh: boolean = false;
   records: boolean = false;
 
+  // Approval flow
+  currentUserLogin: string = '';
+  userRank: number = 0;
+  datasetProjectId: number | null = null;
+
   isSemanticSearch: boolean = false;
   toggleAdvanced: boolean = false;
   serverUrl = "";
@@ -222,7 +227,77 @@ export class DatasetComponent implements OnInit, OnChanges {
     }
   }
   
+  resolveUserContext(): void {
+    try {
+      const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+      const role = JSON.parse(sessionStorage.getItem('role') || '{}');
+      const rawLogin = (user?.user_login || user?.username || user?.name || '').toLowerCase();
+      const email = (user?.user_email || rawLogin).toLowerCase();
+      const emailPrefix = email.includes('@') ? email.split('@')[0] : email;
+      const resolvedLogin = rawLogin.includes('@') ? rawLogin.split('@')[0] : (rawLogin || emailPrefix);
+      this.currentUserLogin = resolvedLogin;
+      this.userRank = isNaN(Number(role?.rank)) ? 0 : Number(role?.rank);
+      try { this.datasetProjectId = Number(JSON.parse(sessionStorage.getItem('project') || '{}')?.id) || null; } catch {}
+    } catch {}
+  }
+
+  isOwnDatasetCard(card: any): boolean {
+    if (!this.currentUserLogin) return false;
+    const cb = (card.created_by || card.lastmodifiedby || '').toLowerCase();
+    return cb === this.currentUserLogin || cb.startsWith(this.currentUserLogin + '@');
+  }
+
+  getDatasetApprovalStatus(card: any): string {
+    return (card.approval_status || 'GLOBALLY_PUBLISHED');
+  }
+
+  getDatasetApprovalLabel(card: any): string {
+    const labels: Record<string, string> = {
+      'DRAFT': 'Draft',
+      'PENDING_PROJECT_APPROVAL': 'Pending Project Approval',
+      'PROJECT_APPROVED': 'Project Approved',
+      'PENDING_ORG_APPROVAL': 'Pending Org Approval',
+      'ORG_APPROVED': 'Org Approved',
+      'PENDING_PLATFORM_APPROVAL': 'Pending Platform Approval',
+      'GLOBALLY_PUBLISHED': 'Globally Published',
+    };
+    return labels[this.getDatasetApprovalStatus(card)] || this.getDatasetApprovalStatus(card);
+  }
+
+  getDatasetApprovalClass(card: any): string {
+    const classes: Record<string, string> = {
+      'DRAFT': 'draft',
+      'PENDING_PROJECT_APPROVAL': 'pending',
+      'PROJECT_APPROVED': 'project-approved',
+      'PENDING_ORG_APPROVAL': 'pending',
+      'ORG_APPROVED': 'org-approved',
+      'PENDING_PLATFORM_APPROVAL': 'pending',
+      'GLOBALLY_PUBLISHED': 'published',
+    };
+    return classes[this.getDatasetApprovalStatus(card)] || 'draft';
+  }
+
+  showDatasetSubmitButton(card: any): boolean {
+    const status = this.getDatasetApprovalStatus(card);
+    return this.isOwnDatasetCard(card) && (status === 'DRAFT' || status === 'PROJECT_REJECTED');
+  }
+
+  submitDatasetForApproval(card: any): void {
+    if (!this.datasetProjectId) {
+      this.service.message('No project selected', 'error');
+      return;
+    }
+    this.datasetService.submitDatasetForApproval(card.id || card.name, this.datasetProjectId).subscribe({
+      next: () => {
+        this.service.message('Dataset submitted for approval');
+        card.approval_status = 'PENDING_PROJECT_APPROVAL';
+      },
+      error: err => this.service.message(err?.message || 'Failed to submit for approval', 'error')
+    });
+  }
+
   async ngOnInit() {
+    this.resolveUserContext();
     this.count = 0;
     this.records = false;
     this.hasClickedRight = false;

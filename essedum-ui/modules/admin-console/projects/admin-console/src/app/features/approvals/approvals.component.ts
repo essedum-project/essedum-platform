@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ViewChildren, QueryList, AfterViewInit, OnDestroy } from '@angular/core';
 import { combineLatest, switchMap, map, take, of, Subject } from 'rxjs';
-import { takeUntil, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntil, distinctUntilChanged, catchError } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
@@ -35,6 +35,22 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
   streamingApprovalsDataSource = new MatTableDataSource<any>([]);
   streamingOrgApprovalsDataSource = new MatTableDataSource<any>([]);
   streamingPlatformApprovalsDataSource = new MatTableDataSource<any>([]);
+
+  // Dataset approvals
+  datasetApprovals: any[] = [];
+  datasetOrgApprovals: any[] = [];
+  datasetPlatformApprovals: any[] = [];
+  datasetApprovalsDataSource = new MatTableDataSource<any>([]);
+  datasetOrgApprovalsDataSource = new MatTableDataSource<any>([]);
+  datasetPlatformApprovalsDataSource = new MatTableDataSource<any>([]);
+
+  // Datasource approvals
+  datasourceApprovals: any[] = [];
+  datasourceOrgApprovals: any[] = [];
+  datasourcePlatformApprovals: any[] = [];
+  datasourceApprovalsDataSource = new MatTableDataSource<any>([]);
+  datasourceOrgApprovalsDataSource = new MatTableDataSource<any>([]);
+  datasourcePlatformApprovalsDataSource = new MatTableDataSource<any>([]);
 
   projectId: number | null = null;
   orgId: number | null = null;
@@ -159,16 +175,24 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
           // Rank 4: PENDING_PLATFORM_APPROVAL (no project/org needed)
           if (!finalProjectId && !finalOrgId && streamingUserRank !== 4) {
             console.warn('[APPROVALS] WARNING: No projectId or orgId found! Will return empty arrays');
-            return combineLatest([of([]), of([]), of([])]);
+            return combineLatest([of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([])]);
           }
 
           const streamingApi$ = finalProjectId ? this.api.getProjectAdminApprovals(finalProjectId) : of([]);
           const streamingOrgApi$ = finalOrgId ? this.api.getOrgAdminApprovals(finalOrgId) : of([]);
           const platformApi$ = streamingUserRank === 4 ? this.api.getPlatformAdminApprovals() : of([]);
 
-          return combineLatest([streamingApi$, streamingOrgApi$, platformApi$]);
+          const datasetApi$ = finalProjectId ? this.api.getProjectAdminDatasetApprovals(finalProjectId).pipe(catchError(() => of([]))) : of([]);
+          const datasetOrgApi$ = finalOrgId ? this.api.getOrgAdminDatasetApprovals(finalOrgId).pipe(catchError(() => of([]))) : of([]);
+          const datasetPlatformApi$ = streamingUserRank === 4 ? this.api.getPlatformAdminDatasetApprovals().pipe(catchError(() => of([]))) : of([]);
+
+          const datasourceApi$ = finalProjectId ? this.api.getProjectAdminDatasourceApprovals(finalProjectId).pipe(catchError(() => of([]))) : of([]);
+          const datasourceOrgApi$ = finalOrgId ? this.api.getOrgAdminDatasourceApprovals(finalOrgId).pipe(catchError(() => of([]))) : of([]);
+          const datasourcePlatformApi$ = streamingUserRank === 4 ? this.api.getPlatformAdminDatasourceApprovals().pipe(catchError(() => of([]))) : of([]);
+
+          return combineLatest([streamingApi$, streamingOrgApi$, platformApi$, datasetApi$, datasetOrgApi$, datasetPlatformApi$, datasourceApi$, datasourceOrgApi$, datasourcePlatformApi$]);
         }),
-        map(([streamingApprovals, streamingOrgApprovals, platformApprovals]) => {
+        map(([streamingApprovals, streamingOrgApprovals, platformApprovals, datasetApprovals, datasetOrgApprovals, datasetPlatformApprovals, datasourceApprovals, datasourceOrgApprovals, datasourcePlatformApprovals]) => {
           console.log('[APPROVALS] Step 4 - Received raw data:', { streamingApprovals, streamingOrgApprovals, platformApprovals });
           
           try {
@@ -226,16 +250,47 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
 
             this.streamingPlatformApprovals = platformApprovalsList;
             this.streamingPlatformApprovalsDataSource.data = platformApprovalsList;
+
+            // Dataset approvals
+            const extractArray = (raw: any): any[] => {
+              if (Array.isArray(raw)) return raw;
+              if (raw?.data && Array.isArray(raw.data)) return raw.data;
+              return [];
+            };
+            this.datasetApprovals = extractArray(datasetApprovals);
+            this.datasetApprovalsDataSource.data = this.datasetApprovals;
+            this.datasetOrgApprovals = extractArray(datasetOrgApprovals);
+            this.datasetOrgApprovalsDataSource.data = this.datasetOrgApprovals;
+            this.datasetPlatformApprovals = extractArray(datasetPlatformApprovals);
+            this.datasetPlatformApprovalsDataSource.data = this.datasetPlatformApprovals;
+
+            // Datasource approvals
+            this.datasourceApprovals = extractArray(datasourceApprovals);
+            this.datasourceApprovalsDataSource.data = this.datasourceApprovals;
+            this.datasourceOrgApprovals = extractArray(datasourceOrgApprovals);
+            this.datasourceOrgApprovalsDataSource.data = this.datasourceOrgApprovals;
+            this.datasourcePlatformApprovals = extractArray(datasourcePlatformApprovals);
+            this.datasourcePlatformApprovalsDataSource.data = this.datasourcePlatformApprovals;
           } catch (error) {
             console.error('[APPROVALS] Error extracting data:', error);
             this.streamingApprovals = [];
             this.streamingApprovalsDataSource.data = [];
-
             this.streamingOrgApprovals = [];
             this.streamingOrgApprovalsDataSource.data = [];
-
             this.streamingPlatformApprovals = [];
             this.streamingPlatformApprovalsDataSource.data = [];
+            this.datasetApprovals = [];
+            this.datasetApprovalsDataSource.data = [];
+            this.datasetOrgApprovals = [];
+            this.datasetOrgApprovalsDataSource.data = [];
+            this.datasetPlatformApprovals = [];
+            this.datasetPlatformApprovalsDataSource.data = [];
+            this.datasourceApprovals = [];
+            this.datasourceApprovalsDataSource.data = [];
+            this.datasourceOrgApprovals = [];
+            this.datasourceOrgApprovalsDataSource.data = [];
+            this.datasourcePlatformApprovals = [];
+            this.datasourcePlatformApprovalsDataSource.data = [];
           }
           
           // Return empty array for legacy pending table
@@ -251,12 +306,22 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
           console.error('[APPROVALS] Step 6 - Subscribe error:', err);
           this.streamingApprovals = [];
           this.streamingApprovalsDataSource.data = [];
-
           this.streamingOrgApprovals = [];
           this.streamingOrgApprovalsDataSource.data = [];
-
           this.streamingPlatformApprovals = [];
           this.streamingPlatformApprovalsDataSource.data = [];
+          this.datasetApprovals = [];
+          this.datasetApprovalsDataSource.data = [];
+          this.datasetOrgApprovals = [];
+          this.datasetOrgApprovalsDataSource.data = [];
+          this.datasetPlatformApprovals = [];
+          this.datasetPlatformApprovalsDataSource.data = [];
+          this.datasourceApprovals = [];
+          this.datasourceApprovalsDataSource.data = [];
+          this.datasourceOrgApprovals = [];
+          this.datasourceOrgApprovalsDataSource.data = [];
+          this.datasourcePlatformApprovals = [];
+          this.datasourcePlatformApprovalsDataSource.data = [];
         }
       });
   }
@@ -351,5 +416,53 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   isStreamingService(item: any): boolean {
     return item && item.hasOwnProperty('approval_status') && item.hasOwnProperty('cid');
+  }
+
+  approveDataset(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+    const apiCall$ = isPlatformLevel
+      ? this.api.approveDatasetPlatformApproval(resourceId)
+      : isOrgLevel
+        ? this.api.approveDatasetOrgApproval(resourceId)
+        : this.api.approveDatasetProjectApproval(resourceId, this.projectId || 0);
+    apiCall$.subscribe({
+      next: () => { this.notify.success('Dataset approved successfully'); this.load(); },
+      error: err => this.notify.error(err?.error?.message || 'Failed to approve'),
+    });
+  }
+
+  rejectDataset(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+    const apiCall$ = isPlatformLevel
+      ? this.api.rejectDatasetPlatformApproval(resourceId)
+      : isOrgLevel
+        ? this.api.rejectDatasetOrgApproval(resourceId)
+        : this.api.rejectDatasetProjectApproval(resourceId);
+    apiCall$.subscribe({
+      next: () => { this.notify.success('Dataset rejected successfully'); this.load(); },
+      error: err => this.notify.error(err?.error?.message || 'Failed to reject'),
+    });
+  }
+
+  approveDatasource(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+    const apiCall$ = isPlatformLevel
+      ? this.api.approveDatasourcePlatformApproval(resourceId)
+      : isOrgLevel
+        ? this.api.approveDatasourceOrgApproval(resourceId)
+        : this.api.approveDatasourceProjectApproval(resourceId, this.projectId || 0);
+    apiCall$.subscribe({
+      next: () => { this.notify.success('Connection approved successfully'); this.load(); },
+      error: err => this.notify.error(err?.error?.message || 'Failed to approve'),
+    });
+  }
+
+  rejectDatasource(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+    const apiCall$ = isPlatformLevel
+      ? this.api.rejectDatasourcePlatformApproval(resourceId)
+      : isOrgLevel
+        ? this.api.rejectDatasourceOrgApproval(resourceId)
+        : this.api.rejectDatasourceProjectApproval(resourceId);
+    apiCall$.subscribe({
+      next: () => { this.notify.success('Connection rejected successfully'); this.load(); },
+      error: err => this.notify.error(err?.error?.message || 'Failed to reject'),
+    });
   }
 }
