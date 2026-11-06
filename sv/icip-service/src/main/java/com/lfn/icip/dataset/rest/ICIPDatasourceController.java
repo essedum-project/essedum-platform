@@ -113,6 +113,10 @@ public class ICIPDatasourceController {
 	@EssedumProperty("icip.scheduler.pause.status")
 	private String schedulerPauseStatus;
 
+	/** Datasource approval workflow service */
+	@Autowired
+	private com.lfn.icip.dataset.service.impl.DatasourceApprovalWorkflowService datasourceApprovalWorkflowService;
+
 	/**
 	 * Gets the datasources.
 	 *
@@ -373,7 +377,305 @@ public class ICIPDatasourceController {
 		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityCreationAlert(ENTITY_NAME, datasource.getName()))
 				.body(datasource);
 	}
-	
+
+	// ==================== DATASOURCE APPROVAL ENDPOINTS ====================
+
+	/** POST /approval/project/submit — Developer submits DRAFT/PROJECT_REJECTED datasource for Project Admin approval. */
+	@PostMapping("/approval/project/submit")
+	public ResponseEntity<?> submitForProjectApproval(
+			@RequestBody java.util.Map<String, Object> request,
+			@org.springframework.web.bind.annotation.RequestHeader(value = "user-login", required = false) String username,
+			@org.springframework.web.bind.annotation.RequestHeader(value = "project", required = false) String projectHeader) {
+		try {
+			Integer resourceId = (Integer) request.get("resourceId");
+			if (resourceId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId is required"));
+			}
+			Integer projectId = null;
+			if (projectHeader != null && !projectHeader.isEmpty()) {
+				try {
+					projectId = Integer.parseInt(projectHeader);
+				} catch (NumberFormatException e) {
+					logger.warn("[DatasourceApproval] Invalid projectId format: {}", projectHeader);
+				}
+			}
+			if (projectId == null) {
+				Object pid = request.get("projectId");
+				projectId = pid instanceof Number ? ((Number) pid).intValue() : null;
+			}
+			if (projectId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "projectId is required"));
+			}
+			if (username == null || username.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Authentication required"));
+			}
+
+			ICIPDatasource result = datasourceApprovalWorkflowService.submitForProjectApproval(resourceId, projectId, username);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", resourceId,
+					"status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error submitting datasource for approval", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/project/approve/{id}?projectId=X&rank=2 — Project Admin approves. */
+	@PostMapping("/approval/project/approve/{id}")
+	public ResponseEntity<?> approveDatasourceProjectApproval(@PathVariable Integer id,
+			@RequestParam(required = false) Integer projectId, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDatasource result = datasourceApprovalWorkflowService.approveProjectApproval(id, projectId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error approving datasource", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/project/reject/{id}?rank=2 — Project Admin rejects. */
+	@PostMapping("/approval/project/reject/{id}")
+	public ResponseEntity<?> rejectDatasourceProjectApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDatasource result = datasourceApprovalWorkflowService.rejectProjectApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error rejecting datasource", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/org/submit — Project Admin submits PROJECT_APPROVED datasource to Org Admin. */
+	@PostMapping("/approval/org/submit")
+	public ResponseEntity<?> submitDatasourceForOrgApproval(@RequestBody java.util.Map<String, Object> request,
+			@RequestParam(required = false) String rank) {
+		try {
+			Integer resourceId = (Integer) request.get("resourceId");
+			Object orgObj = request.get("organizationId");
+			Integer organizationId = orgObj instanceof Number ? ((Number) orgObj).intValue() : null;
+			if (resourceId == null || organizationId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId and organizationId are required"));
+			}
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDatasource result = datasourceApprovalWorkflowService.submitForOrgApproval(resourceId, organizationId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", resourceId,
+					"organizationId", organizationId, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error submitting datasource to org", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/org/approve/{id}?rank=3 — Org Admin approves (-> ORG_APPROVED). */
+	@PostMapping("/approval/org/approve/{id}")
+	public ResponseEntity<?> approveDatasourceOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDatasource result = datasourceApprovalWorkflowService.approveOrgApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error org-approving datasource", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/org/reject/{id}?rank=3 — Org Admin rejects. */
+	@PostMapping("/approval/org/reject/{id}")
+	public ResponseEntity<?> rejectDatasourceOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDatasource result = datasourceApprovalWorkflowService.rejectOrgApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error org-rejecting datasource", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/platform/submit — Org Admin submits ORG_APPROVED datasource to Platform Admin. */
+	@PostMapping("/approval/platform/submit")
+	public ResponseEntity<?> submitDatasourceForPlatformApproval(@RequestBody java.util.Map<String, Object> request,
+			@RequestParam(required = false) String rank) {
+		try {
+			Integer resourceId = (Integer) request.get("resourceId");
+			if (resourceId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId is required"));
+			}
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDatasource result = datasourceApprovalWorkflowService.submitForPlatformApproval(resourceId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", resourceId, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error submitting datasource to platform", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/platform/approve/{id}?rank=4 — Platform Admin approves (-> GLOBALLY_PUBLISHED). */
+	@PostMapping("/approval/platform/approve/{id}")
+	public ResponseEntity<?> approveDatasourcePlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDatasource result = datasourceApprovalWorkflowService.approvePlatformApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error platform-approving datasource", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/platform/reject/{id}?rank=4 — Platform Admin rejects. */
+	@PostMapping("/approval/platform/reject/{id}")
+	public ResponseEntity<?> rejectDatasourcePlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDatasource result = datasourceApprovalWorkflowService.rejectPlatformApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error platform-rejecting datasource", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /approval/project-admin/list?projectId=X&rank=2 */
+	@GetMapping("/approval/project-admin/list")
+	public ResponseEntity<?> getDatasourceProjectAdminApprovals(@RequestParam Integer projectId, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPDatasource> result = datasourceApprovalWorkflowService.getProjectAdminApprovals(projectId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error getting project admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /approval/org-admin/list?organizationId=X&rank=3 */
+	@GetMapping("/approval/org-admin/list")
+	public ResponseEntity<?> getDatasourceOrgAdminApprovals(@RequestParam Integer organizationId, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPDatasource> result = datasourceApprovalWorkflowService.getOrgAdminApprovals(organizationId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error getting org admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /approval/platform-admin/list?rank=4 */
+	@GetMapping("/approval/platform-admin/list")
+	public ResponseEntity<?> getDatasourcePlatformAdminApprovals(@RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPDatasource> result = datasourceApprovalWorkflowService.getPlatformAdminApprovals(rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error getting platform admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /approval/draft-resources?projectId=X&rank=2 — PROJECT_APPROVED items ready to submit to org. */
+	@GetMapping("/approval/draft-resources")
+	public ResponseEntity<?> getDatasourceDraftResources(@RequestParam Integer projectId, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPDatasource> result = datasourceApprovalWorkflowService.getDraftResources(projectId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error getting draft resources", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /approval/org-admin/draft-resources?organizationId=X&rank=3 — ORG_APPROVED items ready to submit to platform. */
+	@GetMapping("/approval/org-admin/draft-resources")
+	public ResponseEntity<?> getDatasourceOrgAdminDraftResources(@RequestParam Integer organizationId, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPDatasource> result = datasourceApprovalWorkflowService.getOrgAdminDraftResources(organizationId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error getting org admin draft resources", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /approval/catalog?projectId=X&orgId=Y — visible items based on scope (neither = globally published). */
+	@GetMapping("/approval/catalog")
+	public ResponseEntity<?> getDatasourceCatalog(@RequestParam(required = false) Integer projectId, @RequestParam(required = false) Integer orgId) {
+		try {
+			List<ICIPDatasource> result = datasourceApprovalWorkflowService.getCatalog(projectId, orgId);
+			return ResponseEntity.ok(result);
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error fetching datasource catalog", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));
+		}
+	}
+
 
 	/**
 	 * Delete datasource.

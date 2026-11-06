@@ -314,4 +314,13 @@ public interface ICIPDatasetRepository extends Repository<ICIPDataset, Integer> 
 			String aliasOrName, List<String> types, List<String> knowledgeBases, Pageable pageable);
 
 	List<String> getDatasetTypesForAdvancedFilter(String organization);
+
+	/** Active (approval workflow) resources for a project, by status — e.g. PENDING_PROJECT_APPROVAL, PROJECT_APPROVED. */
+	List<ICIPDataset> findByApprovalStatusAndProjectId(String approvalStatus, Integer projectId);
+
+	/** Active (approval workflow) resources for an org, by status — e.g. PENDING_ORG_APPROVAL, ORG_APPROVED. */
+	List<ICIPDataset> findByApprovalStatusAndApprovedOrganizationId(String approvalStatus, Integer approvedOrganizationId);
+
+	/** All resources with a given approval status, regardless of scope — e.g. PENDING_PLATFORM_APPROVAL. */
+	List<ICIPDataset> findByApprovalStatus(String approvalStatus);
 }

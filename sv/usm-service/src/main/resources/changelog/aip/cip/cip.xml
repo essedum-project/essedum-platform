@@ -1031,4 +1031,28 @@
 			<column name="approved_organization_id" type="int" />
 		</addColumn>
 	</changeSet>
+	<changeSet author="Essedum" id="3v0-cip-9-dataset-datasource-approval-workflow">
+		<!--
+			Backward-compat note: default MUST be GLOBALLY_PUBLISHED (not DRAFT) here,
+			unlike mlpipeline above. mldataset/mldatasource already have production rows
+			that were always implicitly visible org-wide with no approval concept; defaulting
+			them to DRAFT would suddenly hide every existing dataset/datasource from everyone.
+			Newly created datasets/datasources must explicitly set approval_status='DRAFT'
+			in the create (/add) REST endpoint — see ICIPDatasetController/ICIPDatasourceController.
+		-->
+		<addColumn tableName="mldataset">
+			<column name="approval_status" type="varchar(50)" defaultValue="GLOBALLY_PUBLISHED">
+				<constraints nullable="false" />
+			</column>
+			<column name="project_id" type="int" />
+			<column name="approved_organization_id" type="int" />
+		</addColumn>
+		<addColumn tableName="mldatasource">
+			<column name="approval_status" type="varchar(50)" defaultValue="GLOBALLY_PUBLISHED">
+				<constraints nullable="false" />
+			</column>
+			<column name="project_id" type="int" />
+			<column name="approved_organization_id" type="int" />
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>

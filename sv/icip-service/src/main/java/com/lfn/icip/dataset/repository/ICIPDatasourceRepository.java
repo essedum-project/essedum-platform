@@ -277,4 +277,13 @@ public interface ICIPDatasourceRepository extends JpaRepository<ICIPDatasource, 
 
 			List<ICIPDatasource> getForModelsTypeAndOrganization(String org, String type);
 
+	/** Active (approval workflow) resources for a project, by status — e.g. PENDING_PROJECT_APPROVAL, PROJECT_APPROVED. */
+	List<ICIPDatasource> findByApprovalStatusAndProjectId(String approvalStatus, Integer projectId);
+
+	/** Active (approval workflow) resources for an org, by status — e.g. PENDING_ORG_APPROVAL, ORG_APPROVED. */
+	List<ICIPDatasource> findByApprovalStatusAndApprovedOrganizationId(String approvalStatus, Integer approvedOrganizationId);
+
+	/** All resources with a given approval status, regardless of scope — e.g. PENDING_PLATFORM_APPROVAL. */
+	List<ICIPDatasource> findByApprovalStatus(String approvalStatus);
+
 }
