@@ -620,3 +620,45 @@ select.form-control {
     option { background: #1a2540 !important; color: #e2e8f0 !important; }
   }
 }
+
+// ── Approval flow styles ──────────────────────────────────────────────────
+.conn-approval-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
+}
+
+.conn-approval-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+
+  &--draft           { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+  &--pending         { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
+  &--project-approved{ background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
+  &--org-approved    { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+  &--rejected        { background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
+  &--published       { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+}
+
+.conn-submit-approval-btn {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  &:hover { background: #1d4ed8; }
+}
+
+.gap-8 { gap: 8px; }

@@ -20,7 +20,7 @@ import com.lfn.icip.dataset.repository.ICIPDatasetRepository;
  *
  * Status flow:
  * DRAFT -> PENDING_PROJECT_APPROVAL -> PROJECT_APPROVED -> PENDING_ORG_APPROVAL
- *       -> ORG_APPROVED -> PENDING_PLATFORM_APPROVAL -> GLOBALLY_PUBLISHED
+ *       -> ORG_APPROVED -> PENDING_PLATFORM_APPROVAL -> PUBLISHED
  * (with PROJECT_REJECTED / ORG_REJECTED / PLATFORM_REJECTED side-states at each gate)
  */
 @Service
@@ -200,7 +200,7 @@ public class DatasetApprovalWorkflowService {
 
 	/**
 	 * Platform Admin approves and publishes resource globally.
-	 * Status: PENDING_PLATFORM_APPROVAL -> GLOBALLY_PUBLISHED (approvedOrganizationId cleared = global visibility)
+	 * Status: PENDING_PLATFORM_APPROVAL -> PUBLISHED (approvedOrganizationId cleared = global visibility)
 	 */
 	public ICIPDataset approvePlatformApproval(Integer id, String currentUserRank) {
 		logger.info("[DatasetApproval] Platform Admin publishing dataset {} globally", id);
@@ -218,7 +218,7 @@ public class DatasetApprovalWorkflowService {
 			throw new IllegalStateException("Only PENDING_PLATFORM_APPROVAL resources can be platform-approved");
 		}
 
-		resource.setApprovalStatus("GLOBALLY_PUBLISHED");
+		resource.setApprovalStatus("PUBLISHED");
 		resource.setApprovedOrganizationId(null);
 		return datasetRepository.save(resource);
 	}
@@ -286,8 +286,8 @@ public class DatasetApprovalWorkflowService {
 	/**
 	 * Catalog: visible items based on scope.
 	 * projectId provided -> PROJECT_APPROVED items for that project.
-	 * orgId provided -> GLOBALLY_PUBLISHED items with that org (legacy org-scoped) OR org-wide ORG_APPROVED.
-	 * neither -> all GLOBALLY_PUBLISHED (platform-approved, global) items.
+	 * orgId provided -> PUBLISHED items with that org (legacy org-scoped) OR org-wide ORG_APPROVED.
+	 * neither -> all PUBLISHED (platform-approved, global) items.
 	 */
 	public List<ICIPDataset> getCatalog(Integer projectId, Integer orgId) {
 		if (projectId != null) {
@@ -296,7 +296,7 @@ public class DatasetApprovalWorkflowService {
 		if (orgId != null) {
 			return datasetRepository.findByApprovalStatusAndApprovedOrganizationId("ORG_APPROVED", orgId);
 		}
-		return datasetRepository.findByApprovalStatus("GLOBALLY_PUBLISHED").stream()
+		return datasetRepository.findByApprovalStatus("PUBLISHED").stream()
 				.filter(r -> r.getApprovedOrganizationId() == null)
 				.collect(Collectors.toList());
 	}

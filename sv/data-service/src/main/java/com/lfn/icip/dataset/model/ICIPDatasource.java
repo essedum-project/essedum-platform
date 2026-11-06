@@ -145,7 +145,8 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
             String dshashcode, Timestamp activetime, String category, String interfacetype,
             Boolean fordataset, Boolean forruntime, Boolean foradapter, Boolean formodel,
             Boolean forpromptprovider, Boolean forendpoint, Boolean forapp,
-            String lastmodifiedby, Timestamp lastmodifieddate, String alias) {
+            String lastmodifiedby, Timestamp lastmodifieddate, String alias,
+            String approvalStatus, Integer projectId, Integer approvedOrganizationId) {
 		
         this.id = id;
 		this.name = name;
@@ -167,6 +168,9 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 		this.lastmodifiedby = lastmodifiedby;
 		this.lastmodifieddate = lastmodifieddate;
 		this.alias = alias;
+		this.approvalStatus = approvalStatus;
+		this.projectId = projectId;
+		this.approvedOrganizationId = approvedOrganizationId;
 }
 
 
@@ -233,21 +237,23 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 
 	/**
 	 * Approval workflow status: DRAFT, PENDING_PROJECT_APPROVAL, PROJECT_APPROVED,
-	 * PENDING_ORG_APPROVAL, ORG_APPROVED, PENDING_PLATFORM_APPROVAL, GLOBALLY_PUBLISHED,
+	 * PENDING_ORG_APPROVAL, ORG_APPROVED, PENDING_PLATFORM_APPROVAL, PUBLISHED,
 	 * PROJECT_REJECTED, ORG_REJECTED, PLATFORM_REJECTED.
-	 * No Java-level default here on purpose — existing rows rely on the DB column
-	 * default (GLOBALLY_PUBLISHED) for backward compatibility; new datasources must have
-	 * this explicitly set to DRAFT by the create (/add) endpoint.
+	 * New datasources default to DRAFT; pre-existing rows keep the DB column default
+	 * (PUBLISHED) for backward compatibility.
 	 */
 	@Column(name = "approval_status")
-	private String approvalStatus;
+	@com.fasterxml.jackson.annotation.JsonProperty("approval_status")
+	private String approvalStatus = "DRAFT";
 
-	/** Project ID for project-level approvals. */
+	/** The project the connection was submitted to for project level approval. */
 	@Column(name = "project_id")
+	@com.fasterxml.jackson.annotation.JsonProperty("project_id")
 	private Integer projectId;
 
-	/** Organization ID for org-level / platform-level approvals. */
+	/** The organization that approved the connection at org level / platform level. */
 	@Column(name = "approved_organization_id")
+	@com.fasterxml.jackson.annotation.JsonProperty("approved_organization_id")
 	private Integer approvedOrganizationId;
 
 	/**
@@ -260,9 +266,29 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 	 * set alias,last modified by, last modified date by
 	 * return ds*/
 	public ICIPDatasource clone() {
-		ICIPDatasource ds = new ICIPDatasource(id, name, description, type, connectionDetails, salt, organization,
-				dshashcode, activetime, category,extras, interfacetype,fordataset,forruntime,foradapter,formodel,forpromptprovider,forendpoint,forapp,
-				null, null, null);
+		ICIPDatasource ds = new ICIPDatasource();
+		ds.setId(id);
+		ds.setName(name);
+		ds.setDescription(description);
+		ds.setType(type);
+		ds.setConnectionDetails(connectionDetails);
+		ds.setSalt(salt);
+		ds.setOrganization(organization);
+		ds.setDshashcode(dshashcode);
+		ds.setActivetime(activetime);
+		ds.setCategory(category);
+		ds.setExtras(extras);
+		ds.setInterfacetype(interfacetype);
+		ds.setFordataset(fordataset);
+		ds.setForruntime(forruntime);
+		ds.setForadapter(foradapter);
+		ds.setFormodel(formodel);
+		ds.setForpromptprovider(forpromptprovider);
+		ds.setForendpoint(forendpoint);
+		ds.setForapp(forapp);
+		ds.setApprovalStatus(approvalStatus);
+		ds.setProjectId(projectId);
+		ds.setApprovedOrganizationId(approvedOrganizationId);
 		ds.setAlias(alias);
 		ds.setLastmodifiedby(lastmodifiedby);
 		ds.setLastmodifieddate(lastmodifieddate);

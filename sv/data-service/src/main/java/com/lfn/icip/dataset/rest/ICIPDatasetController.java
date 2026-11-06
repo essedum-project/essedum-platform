@@ -531,7 +531,7 @@ public class ICIPDatasetController {
 
 		ICIPDataset dataset = modelmapper.map(datasetDTO, ICIPDataset.class);
 		// New datasets must start in the approval workflow as DRAFT (visible only to creator)
-		// — existing rows rely on the DB default (GLOBALLY_PUBLISHED) for backward compatibility.
+		// — existing rows rely on the DB default (PUBLISHED) for backward compatibility.
 		dataset.setApprovalStatus("DRAFT");
 		ICIPDataset dataset2save = pluginService.getDataSetService(dataset).updateDataset(dataset);
 		dataset2save = dataset2save != null ? dataset2save : dataset;
@@ -763,7 +763,7 @@ public class ICIPDatasetController {
 		}
 	}
 
-	/** POST /approval/platform/approve/{id}?rank=4 — Platform Admin approves (-> GLOBALLY_PUBLISHED). */
+	/** POST /approval/platform/approve/{id}?rank=4 — Platform Admin approves (-> PUBLISHED). */
 	@PostMapping("/approval/platform/approve/{id}")
 	public ResponseEntity<?> approveDatasetPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
 		try {

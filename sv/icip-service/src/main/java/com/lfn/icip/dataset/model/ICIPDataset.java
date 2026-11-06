@@ -213,10 +213,10 @@ public class ICIPDataset extends BaseDomain implements Serializable {
 
 	/**
 	 * Approval workflow status: DRAFT, PENDING_PROJECT_APPROVAL, PROJECT_APPROVED,
-	 * PENDING_ORG_APPROVAL, ORG_APPROVED, PENDING_PLATFORM_APPROVAL, GLOBALLY_PUBLISHED,
+	 * PENDING_ORG_APPROVAL, ORG_APPROVED, PENDING_PLATFORM_APPROVAL, PUBLISHED,
 	 * PROJECT_REJECTED, ORG_REJECTED, PLATFORM_REJECTED.
 	 * No Java-level default here on purpose — existing rows rely on the DB column
-	 * default (GLOBALLY_PUBLISHED) for backward compatibility; new datasets must have
+	 * default (PUBLISHED) for backward compatibility; new datasets must have
 	 * this explicitly set to DRAFT by the create (/add) endpoint.
 	 */
 	@Column(name = "approval_status")

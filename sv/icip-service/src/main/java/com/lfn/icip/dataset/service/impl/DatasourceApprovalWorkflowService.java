@@ -20,7 +20,7 @@ import com.lfn.icip.dataset.repository.ICIPDatasourceRepository;
  *
  * Status flow:
  * DRAFT -> PENDING_PROJECT_APPROVAL -> PROJECT_APPROVED -> PENDING_ORG_APPROVAL
- *       -> ORG_APPROVED -> PENDING_PLATFORM_APPROVAL -> GLOBALLY_PUBLISHED
+ *       -> ORG_APPROVED -> PENDING_PLATFORM_APPROVAL -> PUBLISHED
  * (with PROJECT_REJECTED / ORG_REJECTED / PLATFORM_REJECTED side-states at each gate)
  */
 @Service
@@ -200,7 +200,7 @@ public class DatasourceApprovalWorkflowService {
 
 	/**
 	 * Platform Admin approves and publishes resource globally.
-	 * Status: PENDING_PLATFORM_APPROVAL -> GLOBALLY_PUBLISHED (approvedOrganizationId cleared = global visibility)
+	 * Status: PENDING_PLATFORM_APPROVAL -> PUBLISHED (approvedOrganizationId cleared = global visibility)
 	 */
 	public ICIPDatasource approvePlatformApproval(Integer id, String currentUserRank) {
 		logger.info("[DatasourceApproval] Platform Admin publishing datasource {} globally", id);
@@ -218,7 +218,7 @@ public class DatasourceApprovalWorkflowService {
 			throw new IllegalStateException("Only PENDING_PLATFORM_APPROVAL resources can be platform-approved");
 		}
 
-		resource.setApprovalStatus("GLOBALLY_PUBLISHED");
+		resource.setApprovalStatus("PUBLISHED");
 		resource.setApprovedOrganizationId(null);
 		return datasourceRepository.save(resource);
 	}
@@ -287,7 +287,7 @@ public class DatasourceApprovalWorkflowService {
 	 * Catalog: visible items based on scope.
 	 * projectId provided -> PROJECT_APPROVED items for that project.
 	 * orgId provided -> ORG_APPROVED items for that org.
-	 * neither -> all GLOBALLY_PUBLISHED (platform-approved, global) items.
+	 * neither -> all PUBLISHED (platform-approved, global) items.
 	 */
 	public List<ICIPDatasource> getCatalog(Integer projectId, Integer orgId) {
 		if (projectId != null) {
@@ -296,7 +296,7 @@ public class DatasourceApprovalWorkflowService {
 		if (orgId != null) {
 			return datasourceRepository.findByApprovalStatusAndApprovedOrganizationId("ORG_APPROVED", orgId);
 		}
-		return datasourceRepository.findByApprovalStatus("GLOBALLY_PUBLISHED").stream()
+		return datasourceRepository.findByApprovalStatus("PUBLISHED").stream()
 				.filter(r -> r.getApprovedOrganizationId() == null)
 				.collect(Collectors.toList());
 	}

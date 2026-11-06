@@ -239,7 +239,8 @@ public interface ICIPDatasourceRepository extends JpaRepository<ICIPDatasource, 
 		        ds.dshashcode, ds.activetime, ds.category, ds.interfacetype,
 		        ds.fordataset, ds.forruntime, ds.foradapter, ds.formodel,
 		        ds.forpromptprovider, ds.forendpoint, ds.forapp,
-		        ds.lastmodifiedby, ds.lastmodifieddate, ds.alias
+		        ds.lastmodifiedby, ds.lastmodifieddate, ds.alias,
+		        ds.approvalStatus, ds.projectId, ds.approvedOrganizationId
 		    )
 		    FROM ICIPDatasource ds
 		    WHERE ds.organization = :org

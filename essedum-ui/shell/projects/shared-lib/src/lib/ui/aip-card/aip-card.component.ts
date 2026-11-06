@@ -215,4 +215,71 @@ export class AipCardComponent {
     }
     return 0;
   }
+
+  // ── Connection approval-status badge (Connections cards only) ────────────
+  // Mirrors the status machine used on the connection detail page:
+  // DRAFT -> PENDING_PROJECT_APPROVAL -> PROJECT_APPROVED -> PENDING_ORG_APPROVAL
+  // -> ORG_APPROVED -> PENDING_PLATFORM_APPROVAL -> PUBLISHED (+ *_REJECTED states)
+
+  private static readonly APPROVAL_LABELS: Record<string, string> = {
+    DRAFT: 'Draft',
+    PENDING_PROJECT_APPROVAL: 'Pending Project Approval',
+    PROJECT_APPROVED: 'Project Approved',
+    PROJECT_REJECTED: 'Project Rejected',
+    PENDING_ORG_APPROVAL: 'Pending Org Approval',
+    ORG_APPROVED: 'Org Approved',
+    ORG_REJECTED: 'Org Rejected',
+    PENDING_PLATFORM_APPROVAL: 'Pending Platform Approval',
+    PLATFORM_REJECTED: 'Platform Rejected',
+    PUBLISHED: 'Published',
+  };
+
+  private static readonly APPROVAL_CLASSES: Record<string, string> = {
+    DRAFT: 'draft',
+    PENDING_PROJECT_APPROVAL: 'pending',
+    PROJECT_APPROVED: 'project-approved',
+    PROJECT_REJECTED: 'rejected',
+    PENDING_ORG_APPROVAL: 'pending',
+    ORG_APPROVED: 'org-approved',
+    ORG_REJECTED: 'rejected',
+    PENDING_PLATFORM_APPROVAL: 'pending',
+    PLATFORM_REJECTED: 'rejected',
+    PUBLISHED: 'published',
+  };
+
+  private static readonly APPROVAL_ICONS: Record<string, string> = {
+    DRAFT: 'edit_note',
+    PENDING_PROJECT_APPROVAL: 'hourglass_empty',
+    PROJECT_APPROVED: 'folder_open',
+    PROJECT_REJECTED: 'cancel',
+    PENDING_ORG_APPROVAL: 'hourglass_empty',
+    ORG_APPROVED: 'business',
+    ORG_REJECTED: 'cancel',
+    PENDING_PLATFORM_APPROVAL: 'hourglass_empty',
+    PLATFORM_REJECTED: 'cancel',
+    PUBLISHED: 'public',
+  };
+
+  /** Raw approval status, scoped to Connections cards only. Empty string hides the badge. */
+  getConnectionApprovalStatus(): string {
+    if (this.servicev1 !== SERVICE_TYPES.CONNECTIONS) {
+      return '';
+    }
+    return this.card?.approval_status || this.card?.approvalStatus || '';
+  }
+
+  getConnectionApprovalStatusLabel(): string {
+    const status = this.getConnectionApprovalStatus();
+    return AipCardComponent.APPROVAL_LABELS[status] || status;
+  }
+
+  getConnectionApprovalStatusClass(): string {
+    const status = this.getConnectionApprovalStatus();
+    return AipCardComponent.APPROVAL_CLASSES[status] || 'draft';
+  }
+
+  getConnectionApprovalStatusIcon(): string {
+    const status = this.getConnectionApprovalStatus();
+    return AipCardComponent.APPROVAL_ICONS[status] || 'info';
+  }
 }

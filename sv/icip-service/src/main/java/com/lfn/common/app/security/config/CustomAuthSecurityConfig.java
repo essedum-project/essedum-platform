@@ -183,11 +183,7 @@ class CustomAuthSecurityConfig {
 
 			@Override
 			public boolean matches(HttpServletRequest request) {
-				// Exclude the langflow_agent_export, file/create, streamingServices/update, and approval endpoints from authentication filter
-				if (request.getRequestURI().contains("/api/aip/langflow/langflow_agent_export") || request.getRequestURI().contains("/api/aip/file/create") || request.getRequestURI().contains("/api/aip/service/v1/streamingServices/update") || request.getRequestURI().contains("/api/aip/streamingServices/approval")) {
-					return AntPathRequestMatcher.antMatcher("/api/**").matches(request);
-				}
-				return false;
+				return AntPathRequestMatcher.antMatcher("/api/**").matches(request);
 			}
 
 			@Override

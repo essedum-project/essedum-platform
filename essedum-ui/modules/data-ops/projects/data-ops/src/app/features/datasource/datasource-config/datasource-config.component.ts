@@ -5,6 +5,7 @@ import { angularMaterialRenderers } from '@jsonforms/angular-material';
 import { LocationStrategy } from '@angular/common';
 import { Location } from '@angular/common';
 import { RaiservicesService } from '../../services/raiservices.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 
 @Component({
@@ -82,6 +83,10 @@ export class DatasourceConfigComponent implements OnInit {
   portPayload: any;
   showCustomIcon: boolean = true;
 
+  // Approval flow
+  currentUserLogin: string = '';
+  selectedProjectId: number | null = null;
+
   constructor(
     private Services: Services,
     private route: ActivatedRoute,
@@ -90,9 +95,11 @@ export class DatasourceConfigComponent implements OnInit {
     private _location: Location,
     private raiService: RaiservicesService,
     private eventBus: EventBusService,
+    private http: HttpClient,
   ) { }
 
   ngOnInit() {
+    this.resolveUserContext();
     this.initiativeCreate ? this.initiativeView = false : this.initiativeView = true
     this.router.url.includes('initiative') ? (this.initiativeView = false) : (this.initiativeView = true);
     if (this.router.url.includes('connections')) {
@@ -608,7 +615,6 @@ shouldShowCustomIcon(): boolean {
 }
 
 ngAfterViewInit() {
-  // Check after view initialization
   setTimeout(() => {
     const selectElement = document.querySelector('.mat-mdc-select-trigger');
     if (selectElement) {
@@ -618,5 +624,95 @@ ngAfterViewInit() {
     }
   }, 100);
 }
+
+  // ── Approval flow ────────────────────────────────────────────────────────
+
+  private resolveUserContext(): void {
+    try {
+      const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+      const role = JSON.parse(sessionStorage.getItem('role') || '{}');
+      const rawLogin = (user?.user_login || user?.username || user?.name || '').toLowerCase();
+      const email = (user?.user_email || rawLogin).toLowerCase();
+      const emailPrefix = email.includes('@') ? email.split('@')[0] : email;
+      this.currentUserLogin = rawLogin.includes('@') ? rawLogin.split('@')[0] : (rawLogin || emailPrefix);
+      try {
+        const projectObj = JSON.parse(sessionStorage.getItem('project') || '{}');
+        this.selectedProjectId = projectObj?.id || Number(sessionStorage.getItem('projectId')) || null;
+      } catch { }
+    } catch { }
+  }
+
+  isOwnConnection(): boolean {
+    if (!this.currentUserLogin || !this.data) return false;
+    const cb = (this.data.created_by || this.data.lastmodifiedby || '').toLowerCase();
+    return cb === this.currentUserLogin || cb.startsWith(this.currentUserLogin + '@');
+  }
+
+  getApprovalStatus(): string {
+    // Empty until loaded, otherwise an unloaded connection renders as a false DRAFT.
+    if (!this.data?.id) return '';
+    // /service/v1/fetchDatasource serializes camelCase, the datasource APIs use snake_case.
+    return this.data.approval_status || this.data.approvalStatus || 'DRAFT';
+  }
+
+  hasApprovalStatus(): boolean {
+    return !!this.getApprovalStatus();
+  }
+
+  getApprovalStatusLabel(): string {
+    const labels: Record<string, string> = {
+      DRAFT: 'Draft',
+      PENDING_PROJECT_APPROVAL: 'Pending Project Approval',
+      PROJECT_APPROVED: 'Project Approved',
+      PROJECT_REJECTED: 'Project Rejected',
+      PENDING_ORG_APPROVAL: 'Pending Org Approval',
+      ORG_APPROVED: 'Org Approved',
+      ORG_REJECTED: 'Org Rejected',
+      PENDING_PLATFORM_APPROVAL: 'Pending Platform Approval',
+      PLATFORM_REJECTED: 'Platform Rejected',
+      PUBLISHED: 'Published',
+    };
+    return labels[this.getApprovalStatus()] || this.getApprovalStatus();
+  }
+
+  getApprovalStatusClass(): string {
+    const classes: Record<string, string> = {
+      DRAFT: 'draft',
+      PENDING_PROJECT_APPROVAL: 'pending',
+      PROJECT_APPROVED: 'project-approved',
+      PROJECT_REJECTED: 'rejected',
+      PENDING_ORG_APPROVAL: 'pending',
+      ORG_APPROVED: 'org-approved',
+      ORG_REJECTED: 'rejected',
+      PENDING_PLATFORM_APPROVAL: 'pending',
+      PLATFORM_REJECTED: 'rejected',
+      PUBLISHED: 'published',
+    };
+    return classes[this.getApprovalStatus()] || 'draft';
+  }
+
+  showSubmitButton(): boolean {
+    const status = this.getApprovalStatus();
+    return status === 'DRAFT' || status === 'PROJECT_REJECTED';
+  }
+
+  submitForApproval(): void {
+    if (!this.selectedProjectId) {
+      this.Services.message('No project selected', 'error');
+      return;
+    }
+    this.http.post(
+      `/api/aip/datasources/approval/project/submit`,
+      { resourceId: this.data.id, projectId: this.selectedProjectId },
+      { headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }), observe: 'response' }
+    ).subscribe({
+      next: () => {
+        this.Services.message('Connection submitted for approval');
+        this.data.approval_status = 'PENDING_PROJECT_APPROVAL';
+        this.data.approvalStatus = 'PENDING_PROJECT_APPROVAL';
+      },
+      error: err => this.Services.message(err?.error?.message || 'Failed to submit for approval', 'error'),
+    });
+  }
 
 }

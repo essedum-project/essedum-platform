@@ -551,7 +551,7 @@ public class ICIPDatasourceController {
 		}
 	}
 
-	/** POST /approval/platform/approve/{id}?rank=4 — Platform Admin approves (-> GLOBALLY_PUBLISHED). */
+	/** POST /approval/platform/approve/{id}?rank=4 — Platform Admin approves (-> PUBLISHED). */
 	@PostMapping("/approval/platform/approve/{id}")
 	public ResponseEntity<?> approveDatasourcePlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
 		try {

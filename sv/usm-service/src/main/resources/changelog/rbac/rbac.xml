@@ -756,6 +756,51 @@
 		</sql>
 	</changeSet>
 
+	<!-- rbac-29: grant the seed 'admin' user the platform-wide Admin role.
+	     rbac-6-seed intentionally seeds NO rbac_role_assignment row (auto-granting
+	     platform_admin would be a silent privilege escalation), so out of the box every
+	     user — including admin — resolves to highestRank = 0. This grants only the known
+	     seed admin account (matched by login/email, not id), scoped organization_id/
+	     project_id = NULL = platform-wide. Safe to re-run. -->
+	<changeSet author="Essedum (rbac)" id="rbac-29">
+		<sql>
+			INSERT INTO rbac_role_assignment (user_id, role_id, organization_id, project_id, granted_at)
+			SELECT u.id, r.id, NULL, NULL, NOW(6)
+			FROM usm_users u
+			JOIN rbac_role r ON r.name = 'Admin'
+			WHERE (u.user_login = 'admin' OR u.user_email = 'admin@lfn.com')
+			  AND NOT EXISTS (
+			    SELECT 1 FROM rbac_role_assignment ra
+			    WHERE ra.user_id = u.id AND ra.role_id = r.id AND ra.revoked_at IS NULL
+			  );
+		</sql>
+	</changeSet>
+
+	<!-- rbac-30: register POST /api/aip/datasources/approval/project/submit in usm_permission_api.
+	     The endpoint was added to the backend after rbac-28 ran, so it was never recorded in
+	     usm_permission_api. CustomAuthorizationManager checks this table on every request and
+	     returns 403 for any method+path not present, regardless of role.
+	     Fix: map the new path to an existing POST datasources permission_id — both Developer
+	     and AI Client already hold that permission (Developer originally; AI Client via rbac-28),
+	     so no usm_role_permissions change is needed. Idempotent: skips if the row exists. -->
+	<changeSet author="Essedum (rbac)" id="rbac-30">
+		<sql>
+			INSERT INTO usm_permission_api (permission_id, api, type)
+			SELECT pa.permission_id,
+			       '/api/aip/datasources/approval/project/submit',
+			       'POST'
+			FROM usm_permission_api pa
+			WHERE UPPER(pa.type) = 'POST'
+			  AND LOWER(pa.api) LIKE '%datasources%'
+			  AND NOT EXISTS (
+			      SELECT 1 FROM usm_permission_api pa2
+			      WHERE pa2.api = '/api/aip/datasources/approval/project/submit'
+			        AND UPPER(pa2.type) = 'POST'
+			  )
+			LIMIT 1;
+		</sql>
+	</changeSet>
+
 	<!-- rbac-29: rbac-16 backfilled usm_project.organisation_id from portfolio_id
 	     only once, and no application code ever set it afterwards (fixed now in
 	     ProjectServiceImpl#save). Any project created/re-portfolio'd between

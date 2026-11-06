@@ -56,6 +56,7 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				AntPathRequestMatcher.antMatcher("/api/tad/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/automation/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/file/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/"+icipPathPrefix.trim()+"/file/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/batch/client/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/batch/generic/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/datasets/upload").matcher(authorizationContext.getRequest()).isMatch() ||
@@ -126,8 +127,13 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/service/v1/streamingServices/add"))
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasources/test"))
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasources/add"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasources/save"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasources/approval"))
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasets/test"))
-				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasets/add"))) {
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasets/add"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/git-configs/save"))
+				|| pipelineUri.contains("/folder/upload/")
+				|| pipelineUri.contains("/folder/update/")) {
 			return new AuthorizationDecision(true);
 		}
 

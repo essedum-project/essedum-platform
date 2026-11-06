@@ -75,11 +75,6 @@ export class DatasourceComponent implements OnInit, OnChanges {
   filter: string = '';
   records: boolean = false;
 
-  // Approval flow
-  currentUserLogin: string = '';
-  userRank: number = 0;
-  datasourceProjectId: number | null = null;
-
   isExpanded = false;
   tooltip: string = 'above';
   filtbackup: any="";
@@ -96,79 +91,6 @@ export class DatasourceComponent implements OnInit, OnChanges {
     private location: Location,
     private http: HttpClient
   ) {}
-  resolveUserContext(): void {
-    try {
-      const user = JSON.parse(sessionStorage.getItem('user') || '{}');
-      const role = JSON.parse(sessionStorage.getItem('role') || '{}');
-      const rawLogin = (user?.user_login || user?.username || user?.name || '').toLowerCase();
-      const email = (user?.user_email || rawLogin).toLowerCase();
-      const emailPrefix = email.includes('@') ? email.split('@')[0] : email;
-      const resolvedLogin = rawLogin.includes('@') ? rawLogin.split('@')[0] : (rawLogin || emailPrefix);
-      this.currentUserLogin = resolvedLogin;
-      this.userRank = isNaN(Number(role?.rank)) ? 0 : Number(role?.rank);
-      try { this.datasourceProjectId = Number(JSON.parse(sessionStorage.getItem('project') || '{}')?.id) || null; } catch {}
-    } catch {}
-  }
-
-  isOwnDatasourceCard(card: any): boolean {
-    if (!this.currentUserLogin) return false;
-    const cb = (card.created_by || card.lastmodifiedby || '').toLowerCase();
-    return cb === this.currentUserLogin || cb.startsWith(this.currentUserLogin + '@');
-  }
-
-  getDatasourceApprovalStatus(card: any): string {
-    return (card.approval_status || 'GLOBALLY_PUBLISHED');
-  }
-
-  getDatasourceApprovalLabel(card: any): string {
-    const labels: Record<string, string> = {
-      'DRAFT': 'Draft',
-      'PENDING_PROJECT_APPROVAL': 'Pending Project Approval',
-      'PROJECT_APPROVED': 'Project Approved',
-      'PENDING_ORG_APPROVAL': 'Pending Org Approval',
-      'ORG_APPROVED': 'Org Approved',
-      'PENDING_PLATFORM_APPROVAL': 'Pending Platform Approval',
-      'GLOBALLY_PUBLISHED': 'Globally Published',
-    };
-    return labels[this.getDatasourceApprovalStatus(card)] || this.getDatasourceApprovalStatus(card);
-  }
-
-  getDatasourceApprovalClass(card: any): string {
-    const classes: Record<string, string> = {
-      'DRAFT': 'draft',
-      'PENDING_PROJECT_APPROVAL': 'pending',
-      'PROJECT_APPROVED': 'project-approved',
-      'PENDING_ORG_APPROVAL': 'pending',
-      'ORG_APPROVED': 'org-approved',
-      'PENDING_PLATFORM_APPROVAL': 'pending',
-      'GLOBALLY_PUBLISHED': 'published',
-    };
-    return classes[this.getDatasourceApprovalStatus(card)] || 'draft';
-  }
-
-  showDatasourceSubmitButton(card: any): boolean {
-    const status = this.getDatasourceApprovalStatus(card);
-    return this.isOwnDatasourceCard(card) && (status === 'DRAFT' || status === 'PROJECT_REJECTED');
-  }
-
-  submitDatasourceForApproval(card: any): void {
-    if (!this.datasourceProjectId) {
-      this.service.message('No project selected', 'error');
-      return;
-    }
-    const org = sessionStorage.getItem('organization') || '';
-    this.http.post(
-      `/api/aip/datasources/approval/project/submit`,
-      { resourceId: card.id || card.alias, projectId: this.datasourceProjectId },
-      { headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }), observe: 'response' }
-    ).subscribe({
-      next: () => {
-        this.service.message('Connection submitted for approval');
-        card.approval_status = 'PENDING_PROJECT_APPROVAL';
-      },
-      error: err => this.service.message(err?.message || 'Failed to submit for approval', 'error')
-    });
-  }
 
   ngOnChanges(changes: SimpleChanges): void {}
 
@@ -203,7 +125,6 @@ export class DatasourceComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    this.resolveUserContext();
     this.updatePageSize();
     const currentRoute = this.router.url;
     if (currentRoute === '/landing/aip/core-datasources') {

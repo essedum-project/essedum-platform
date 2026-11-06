@@ -32,6 +32,15 @@
                 <mat-icon class="date-icon">schedule</mat-icon>
                 {{ getDate() | date : "mediumDate" }}
             </p>
+
+            <!-- Connection approval-status pill (Connections cards only) -->
+            <span *ngIf="getConnectionApprovalStatus()"
+                class="card-approval-badge"
+                [ngClass]="'approval-' + getConnectionApprovalStatusClass()"
+                [matTooltip]="getConnectionApprovalStatusLabel()" matTooltipPosition="above">
+                <mat-icon class="approval-badge-icon">{{ getConnectionApprovalStatusIcon() }}</mat-icon>
+                {{ getConnectionApprovalStatusLabel() }}
+            </span>
         </div>
 
         <!-- Type badge (right side) -->
