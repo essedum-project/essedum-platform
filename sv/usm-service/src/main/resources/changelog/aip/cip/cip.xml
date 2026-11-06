@@ -1042,7 +1042,7 @@
 		</addColumn>
 		<!-- Connections that existed before the approval workflow are treated as already published. -->
 		<sql splitStatements="true" stripComments="true">
-			UPDATE mldatasource SET approval_status = 'GLOBALLY_PUBLISHED'
+			UPDATE mldatasource SET approval_status = 'PUBLISHED'
 		</sql>
 	</changeSet>
 	<changeSet author="Essedum" id="3v0-cip-10-datasource-approval-scope">
@@ -1058,22 +1058,24 @@
 	</changeSet>
 	<changeSet author="Essedum" id="3v0-cip-9-dataset-datasource-approval-workflow">
 		<!--
-			Backward-compat note: default MUST be GLOBALLY_PUBLISHED (not DRAFT) here,
-			unlike mlpipeline above. mldataset/mldatasource already have production rows
+			Backward-compat note: default MUST be PUBLISHED (not DRAFT) here,
+			unlike mlpipeline above. mldataset already has production rows
 			that were always implicitly visible org-wide with no approval concept; defaulting
-			them to DRAFT would suddenly hide every existing dataset/datasource from everyone.
-			Newly created datasets/datasources must explicitly set approval_status='DRAFT'
-			in the create (/add) REST endpoint — see ICIPDatasetController/ICIPDatasourceController.
+			them to DRAFT would suddenly hide every existing dataset from everyone.
+			Newly created datasets must explicitly set approval_status='DRAFT'
+			in the create (/add) REST endpoint — see ICIPDatasetController.
+
+			mldatasource is intentionally NOT handled here: changeSets
+			3v0-cip-9-datasource-approval-status and 3v0-cip-10-datasource-approval-scope
+			above already add the same three columns to that table.
 		-->
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="mldataset" columnName="approval_status" />
+			</not>
+		</preConditions>
 		<addColumn tableName="mldataset">
-			<column name="approval_status" type="varchar(50)" defaultValue="GLOBALLY_PUBLISHED">
-				<constraints nullable="false" />
-			</column>
-			<column name="project_id" type="int" />
-			<column name="approved_organization_id" type="int" />
-		</addColumn>
-		<addColumn tableName="mldatasource">
-			<column name="approval_status" type="varchar(50)" defaultValue="GLOBALLY_PUBLISHED">
+			<column name="approval_status" type="varchar(50)" defaultValue="PUBLISHED">
 				<constraints nullable="false" />
 			</column>
 			<column name="project_id" type="int" />

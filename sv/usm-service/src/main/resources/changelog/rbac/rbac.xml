@@ -756,13 +756,13 @@
 		</sql>
 	</changeSet>
 
-	<!-- rbac-29: grant the seed 'admin' user the platform-wide Admin role.
+	<!-- rbac-31: grant the seed 'admin' user the platform-wide Admin role.
 	     rbac-6-seed intentionally seeds NO rbac_role_assignment row (auto-granting
 	     platform_admin would be a silent privilege escalation), so out of the box every
 	     user — including admin — resolves to highestRank = 0. This grants only the known
 	     seed admin account (matched by login/email, not id), scoped organization_id/
 	     project_id = NULL = platform-wide. Safe to re-run. -->
-	<changeSet author="Essedum (rbac)" id="rbac-29">
+	<changeSet author="Essedum (rbac)" id="rbac-31">
 		<sql>
 			INSERT INTO rbac_role_assignment (user_id, role_id, organization_id, project_id, granted_at)
 			SELECT u.id, r.id, NULL, NULL, NOW(6)
@@ -811,6 +811,8 @@
 	     Re-run the same backfill (idempotent: only touches NULL rows) to catch
 	     everything created since. -->
 	<changeSet author="Essedum (rbac)" id="rbac-29">
+		<validCheckSum>8:e4562ee58bb4491f6720429684e7dab7</validCheckSum>
+		<validCheckSum>8:eacffab13e6c4048c4060ecfef62a229</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="1">
 				SELECT CASE WHEN EXISTS (
