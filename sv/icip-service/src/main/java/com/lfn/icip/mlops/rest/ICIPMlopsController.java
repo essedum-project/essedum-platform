@@ -1223,17 +1223,12 @@ public class ICIPMlopsController {
 	}
 	
 	/**
-	 * Gets the searched objects.
+	 * Gets the model file data as bytes.
 	 *
-	 * @param datasetName        the dataset name
-	 * @param projectName        the project name
-	 * @param size               the size
-	 * @param page               the page
-	 * @param sortEvent          the sort event
-	 * @param sortOrder          the sort order
-	 * @param searchParams       the search params
-	 * @param selectClauseParams the select clause params
-	 * @return the searched objects
+	 * @param modelName the model name
+	 * @param fileName  the file name
+	 * @param org       the organization
+	 * @return the file data
 	 */
 	@GetMapping(path = "models/fileData", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	public ResponseEntity<byte[]> getfileData(@RequestParam(required = true, name = "modelName") String modelName,
@@ -1441,6 +1436,14 @@ public class ICIPMlopsController {
 					logger.warn("[Approval] Error fetching globally-published pipelines: {}", e.getMessage());
 				}
 
+				// getOrgApprovedPipelinesByOrgId/getOrgApprovedPipelines/getGloballyPublishedPipelines fetch
+				// across ALL pipeline types - without this filter, approved/published pipelines of other
+				// types (e.g. Agent) leak into every tab's results (mcp, app, pipeline, etc.).
+				List<String> requestedTypes = (type != null && !type.isEmpty() && !"undefined".equals(type))
+						? Arrays.asList(type.split(",")) : null;
+				orgApprovedPipelines = filterByTypeAndInterfacetype(orgApprovedPipelines, requestedTypes, interfacetype);
+				globallyPublishedPipelines = filterByTypeAndInterfacetype(globallyPublishedPipelines, requestedTypes, interfacetype);
+
 				// Combine project-scoped + org-approved + globally-published; deduplicate by id-name key.
 				Map<String, ICIPStreamingServices2DTO> combined = new LinkedHashMap<>();
 				for (ICIPStreamingServices2DTO result : results) {
@@ -1646,6 +1649,25 @@ public class ICIPMlopsController {
 				return ResponseEntity.status(500).body("{\"error\": \"An internal error occurred. Please try again later.\"}");
 			}
 		}
+	}
+
+	/**
+	 * Keeps only pipelines whose type (when requestedTypes is non-null) and interfacetype
+	 * (when non-null/empty) match the requested filters. Used to scope approval-derived
+	 * pipeline lists (which are fetched without a type filter) to the caller's requested tab.
+	 */
+	private List<ICIPStreamingServices2DTO> filterByTypeAndInterfacetype(
+			List<ICIPStreamingServices2DTO> pipelines, List<String> requestedTypes, String interfacetype) {
+		List<ICIPStreamingServices2DTO> filtered = new ArrayList<>();
+		for (ICIPStreamingServices2DTO pipeline : pipelines) {
+			boolean typeMatches = requestedTypes == null || requestedTypes.contains(pipeline.getType());
+			boolean interfaceMatches = interfacetype == null || interfacetype.isEmpty()
+					|| interfacetype.equalsIgnoreCase(pipeline.getInterfacetype());
+			if (typeMatches && interfaceMatches) {
+				filtered.add(pipeline);
+			}
+		}
+		return filtered;
 	}
 
 	@GetMapping("/pipelines/count")
@@ -2504,11 +2526,11 @@ public class ICIPMlopsController {
 	/**
 	 * Trigger post event.
 	 *
-	 * @param name    the name
-	 * @param org     the org
-	 * @param corelid the corelid
-	 * @param params  the params
-	 * @param payload the payload
+	 * @param name           the name
+	 * @param org            the org
+	 * @param corelid        the corelid
+	 * @param datasourceName the datasource name
+	 * @param payload        the payload
 	 * @return the response entity
 	 */
 	@PostMapping(value = "/event/trigger/{name}", produces = "application/json")
