@@ -756,4 +756,25 @@
 		</sql>
 	</changeSet>
 
+	<!-- rbac-29: rbac-16 backfilled usm_project.organisation_id from portfolio_id
+	     only once, and no application code ever set it afterwards (fixed now in
+	     ProjectServiceImpl#save). Any project created/re-portfolio'd between
+	     rbac-16 and that fix — e.g. a project under an org whose role grants
+	     stopped resolving via AccessContextService's org-expansion and whose
+	     /access/role-assignments/by-user-project response was missing
+	     projectOrganizationId/Name — is stuck with organisation_id NULL forever.
+	     Re-run the same backfill (idempotent: only touches NULL rows) to catch
+	     everything created since. -->
+	<changeSet author="Essedum (rbac)" id="rbac-29">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">
+				SELECT CASE WHEN EXISTS (
+					SELECT 1 FROM usm_project WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL
+				) THEN 1 ELSE 0 END
+			</sqlCheck>
+		</preConditions>
+		<sql>UPDATE usm_project SET organisation_id = portfolio_id
+		     WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL</sql>
+	</changeSet>
+
 </databaseChangeLog>
