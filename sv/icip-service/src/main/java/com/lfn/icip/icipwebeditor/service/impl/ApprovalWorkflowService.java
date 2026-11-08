@@ -1,5 +1,6 @@
 package com.lfn.icip.icipwebeditor.service.impl;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -11,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.lfn.icip.approval.ApprovalCloneSupport;
 import com.lfn.icip.icipwebeditor.model.ICIPStreamingServices;
 import com.lfn.icip.icipwebeditor.repository.ICIPStreamingServicesRepository;
 
@@ -519,6 +522,60 @@ public class ApprovalWorkflowService {
 		List<ICIPStreamingServices> result = new ArrayList<>(deduped.values());
 		logger.info("[Catalog] projectId={}, orgId={} → {} items", projectId, orgId, result.size());
 		return result;
+	}
+
+	/**
+	 * Clone an approved/published pipeline into a brand-new DRAFT pipeline.
+	 *
+	 * The original row is never touched — it keeps serving at its current
+	 * approval level. The clone is named {@code <base>-v<n>} (next free n) and
+	 * re-enters the approval chain from DRAFT, so it must be submitted for
+	 * project -> org -> platform approval again.
+	 */
+	@Transactional
+	public ICIPStreamingServices cloneResource(Integer resourceId, Integer projectId, String currentUser) {
+		ICIPStreamingServices original = streamingServicesRepository.findById(resourceId).orElse(null);
+		if (original == null) {
+			throw new IllegalArgumentException("Resource not found: " + resourceId);
+		}
+		if (!ApprovalCloneSupport.isCloneable(original.getApprovalStatus())) {
+			throw new IllegalStateException(
+					"Only approved or published pipelines can be cloned (current status: " + original.getApprovalStatus() + ")");
+		}
+
+		String org = original.getOrganization();
+		String newName = ApprovalCloneSupport.nextVersionName(original.getName(),
+				candidate -> streamingServicesRepository.findByNameAndOrganization(candidate, org) != null);
+
+		ICIPStreamingServices clone = new ICIPStreamingServices();
+		clone.setName(newName);
+		clone.setAlias(ApprovalCloneSupport.cloneAlias(original.getAlias(), original.getName(), newName));
+		clone.setDescription(original.getDescription());
+		clone.setTags(original.getTags());
+		clone.setJsonContent(original.getJsonContent());
+		clone.setPipelineMetadata(original.getPipelineMetadata());
+		clone.setType(original.getType());
+		clone.setInterfacetype(original.getInterfacetype());
+		clone.setTemplate(original.isTemplate());
+		clone.setApp(original.isApp());
+		clone.setRunnerServiceStatus(original.getRunnerServiceStatus());
+		clone.setOrganization(org);
+		clone.setDeleted(false);
+		clone.setVersion(ApprovalCloneSupport.versionSuffixOf(newName));
+		clone.setCreatedBy(currentUser != null && !currentUser.isEmpty() ? currentUser : original.getCreatedBy());
+		clone.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+		clone.setLastmodifiedby(clone.getCreatedBy());
+		clone.setLastmodifieddate(clone.getCreatedDate());
+
+		// Clone re-enters the chain at the bottom, scoped to the caller's project.
+		clone.setApprovalStatus("DRAFT");
+		clone.setProjectId(projectId != null ? projectId : original.getProjectId());
+		clone.setApprovedOrganizationId(null);
+
+		ICIPStreamingServices saved = streamingServicesRepository.save(clone);
+		logger.info("[Clone] Pipeline {} ('{}') cloned -> {} ('{}') as DRAFT in project {}",
+				resourceId, original.getName(), saved.getCid(), saved.getName(), saved.getProjectId());
+		return saved;
 	}
 
 	/**

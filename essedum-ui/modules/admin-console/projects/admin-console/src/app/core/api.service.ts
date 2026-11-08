@@ -707,4 +707,34 @@ export class ApiService {
     if (orgId != null) params['orgId'] = orgId;
     return this.http.get<any>(`/api/aip/datasources/approval/catalog`, { params }).pipe(catchError(() => of([])));
   }
+
+  // ─── Clone (new version) ──────────────────────────────────────────────────
+  // Clones an approved/published asset into a new DRAFT named "<base>-v<n>".
+  // The original is left untouched; the clone re-enters the approval chain.
+
+  clonePipeline(resourceId: number): Observable<any> {
+    return this.http.post<any>(`/api/aip/streamingServices/approval/clone/${resourceId}`, this.cloneContext());
+  }
+
+  cloneDataset(resourceId: number): Observable<any> {
+    return this.http.post<any>(`/api/aip/datasets/approval/clone/${resourceId}`, this.cloneContext());
+  }
+
+  cloneDatasource(resourceId: number): Observable<any> {
+    return this.http.post<any>(`/api/aip/datasources/approval/clone/${resourceId}`, this.cloneContext());
+  }
+
+  // admin-console has no HTTP interceptor of its own, so the project/user the
+  // clone should be created under is read from the shell's sessionStorage and
+  // sent in the body instead of relying on the "project"/"user-login" headers.
+  private cloneContext(): { projectId: number | null; username: string | null } {
+    let projectId: number | null = null;
+    let username: string | null = null;
+    try { projectId = Number(JSON.parse(sessionStorage.getItem('project') || '{}')?.id) || null; } catch {}
+    try {
+      const u = JSON.parse(sessionStorage.getItem('user') || '{}');
+      username = u?.username || u?.preferred_username || u?.name || null;
+    } catch {}
+    return { projectId, username };
+  }
 }

@@ -1,5 +1,6 @@
 package com.lfn.icip.dataset.service.impl;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,9 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.lfn.icip.approval.ApprovalCloneSupport;
 import com.lfn.icip.dataset.model.ICIPDataset;
+import com.lfn.icip.dataset.model.ICIPDataset2;
 import com.lfn.icip.dataset.repository.ICIPDatasetRepository;
+import com.lfn.icip.dataset.repository.ICIPDatasetRepository2;
 
 /**
  * Dataset Approval Workflow Service.
@@ -30,6 +35,9 @@ public class DatasetApprovalWorkflowService {
 
 	@Autowired
 	private ICIPDatasetRepository datasetRepository;
+
+	@Autowired
+	private ICIPDatasetRepository2 datasetRepository2;
 
 	/**
 	 * Submit resource for Project Admin approval.
@@ -281,6 +289,84 @@ public class DatasetApprovalWorkflowService {
 			return new ArrayList<>();
 		}
 		return datasetRepository.findByApprovalStatusAndApprovedOrganizationId("ORG_APPROVED", organizationId);
+	}
+
+	/**
+	 * Clone an approved/published dataset into a brand-new DRAFT dataset.
+	 *
+	 * The original row is never touched — it keeps serving at its current
+	 * approval level. The clone is named {@code <base>-v<n>} (next free n) and
+	 * re-enters the approval chain from DRAFT.
+	 *
+	 * The copy goes through {@link ICIPDataset2} because {@link ICIPDataset}
+	 * maps dataset_schema / datasource / backing_dataset as non-insertable
+	 * associations, which would otherwise be dropped on insert.
+	 */
+	@Transactional
+	public ICIPDataset cloneDataset(Integer id, Integer projectId, String currentUser) {
+		ICIPDataset original = datasetRepository.findById(id).orElse(null);
+		if (original == null) {
+			throw new IllegalArgumentException("Dataset not found: " + id);
+		}
+		if (!ApprovalCloneSupport.isCloneable(original.getApprovalStatus())) {
+			throw new IllegalStateException(
+					"Only approved or published datasets can be cloned (current status: " + original.getApprovalStatus() + ")");
+		}
+
+		ICIPDataset2 source = datasetRepository2.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Dataset not found: " + id));
+		String org = source.getOrganization();
+		String newName = ApprovalCloneSupport.nextVersionName(source.getName(),
+				candidate -> datasetRepository.findByNameAndOrganization(candidate, org) != null);
+
+		ICIPDataset2 clone = new ICIPDataset2();
+		clone.setName(newName);
+		clone.setAlias(ApprovalCloneSupport.cloneAlias(source.getAlias(), source.getName(), newName));
+		clone.setDescription(source.getDescription());
+		clone.setSchema(source.getSchema());
+		clone.setSchemajson(source.getSchemajson());
+		clone.setAttributes(source.getAttributes());
+		clone.setType(source.getType());
+		clone.setDatasource(source.getDatasource());
+		clone.setBackingDataset(source.getBackingDataset());
+		clone.setOrganization(org);
+		clone.setExpStatus(source.getExpStatus());
+		clone.setViews(source.getViews());
+		clone.setContext(source.getContext());
+		clone.setArchivalConfig(source.getArchivalConfig());
+		clone.setIsArchivalEnabled(source.getIsArchivalEnabled());
+		clone.setIsApprovalRequired(source.getIsApprovalRequired());
+		clone.setIsPermissionManaged(source.getIsPermissionManaged());
+		clone.setIsAuditRequired(source.getIsAuditRequired());
+		clone.setIsInboxRequired(source.getIsInboxRequired());
+		clone.setDashboard(source.getDashboard());
+		clone.setMetadata(source.getMetadata());
+		clone.setModeltype(source.getModeltype());
+		clone.setTaskdetails(source.getTaskdetails());
+		clone.setTags(source.getTags());
+		clone.setInterfacetype(source.getInterfacetype());
+		clone.setAdaptername(source.getAdaptername());
+		clone.setIsadapteractive(source.getIsadapteractive());
+		clone.setIndexname(source.getIndexname());
+		clone.setSummary(source.getSummary());
+		clone.setEvent_details(source.getEvent_details());
+		clone.setLastmodifiedby(currentUser != null && !currentUser.isEmpty() ? currentUser : source.getLastmodifiedby());
+		clone.setLastmodifieddate(new Timestamp(System.currentTimeMillis()));
+
+		ICIPDataset2 savedClone = datasetRepository2.save(clone);
+
+		// approval_status / project_id are not mapped on ICIPDataset2, so the
+		// insert picks up the DB default — reset the clone to DRAFT explicitly.
+		ICIPDataset draft = datasetRepository.findById(savedClone.getId())
+				.orElseThrow(() -> new IllegalStateException("Clone not found after save: " + savedClone.getId()));
+		draft.setApprovalStatus("DRAFT");
+		draft.setProjectId(projectId != null ? projectId : original.getProjectId());
+		draft.setApprovedOrganizationId(null);
+		ICIPDataset saved = datasetRepository.save(draft);
+
+		logger.info("[Clone] Dataset {} ('{}') cloned -> {} ('{}') as DRAFT in project {}",
+				id, original.getName(), saved.getId(), saved.getName(), saved.getProjectId());
+		return saved;
 	}
 
 	/**

@@ -238,6 +238,43 @@
   }
 }
 
+// ── Card actions ──────────────────────────────────────────────────────────────
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 14px 12px;
+  margin-top: auto;
+
+  .clone-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    padding: 0 12px;
+    min-height: 30px;
+    border-radius: 6px;
+    color: #a5b4fc;
+    border-color: rgba(99, 102, 241, 0.4);
+
+    &:hover:not([disabled]) {
+      background: rgba(99, 102, 241, 0.14);
+    }
+
+    &[disabled] {
+      opacity: 0.55;
+    }
+
+    mat-icon {
+      font-size: 15px !important;
+      width: 15px !important;
+      height: 15px !important;
+      line-height: 15px !important;
+    }
+  }
+}
+
 // ── Empty state ───────────────────────────────────────────────────────────────
 .empty-state {
   display: flex;
@@ -312,5 +349,14 @@
     .meta-icon  { color: #94a3b8; }
     .meta-label { color: #94a3b8; }
     .meta-value { color: #1e293b; }
+  }
+
+  .card-actions .clone-btn {
+    color: #4742dc;
+    border-color: rgba(71, 66, 220, 0.3);
+
+    &:hover:not([disabled]) {
+      background: rgba(71, 66, 220, 0.08);
+    }
   }
 }

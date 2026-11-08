@@ -694,6 +694,52 @@ public class ICIPStreamingServicesController {
 	}
 
 	/**
+	 * POST /approval/clone/{resourceId}
+	 * Clone an approved/published pipeline into a new DRAFT pipeline named
+	 * {@code <base>-v<n>}. The original stays untouched at its current approval
+	 * level; the clone must go through the approval chain again.
+	 */
+	@PostMapping("/approval/clone/{resourceId}")
+	public ResponseEntity<?> clonePipeline(
+			@PathVariable Integer resourceId,
+			@RequestBody(required = false) java.util.Map<String, Object> request,
+			@RequestParam(required = false) Integer projectId,
+			@RequestParam(required = false) String username,
+			@RequestHeader(value = "user-login", required = false) String userLogin,
+			@RequestHeader(value = "project", required = false) String projectHeader) {
+		try {
+			Integer effectiveProjectId = projectId;
+			if (effectiveProjectId == null && request != null && request.get("projectId") instanceof Number) {
+				effectiveProjectId = ((Number) request.get("projectId")).intValue();
+			}
+			if (effectiveProjectId == null && projectHeader != null && !projectHeader.isEmpty()) {
+				try {
+					effectiveProjectId = Integer.parseInt(projectHeader);
+				} catch (NumberFormatException ignored) {
+					logger.warn("[Clone] Invalid project header: {}", projectHeader);
+				}
+			}
+
+			String currentUser = (username != null && !username.isEmpty()) ? username : userLogin;
+			if ((currentUser == null || currentUser.isEmpty()) && request != null) {
+				Object bodyUser = request.get("username");
+				currentUser = bodyUser != null ? bodyUser.toString() : null;
+			}
+
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices clone =
+				approvalWorkflowService.cloneResource(resourceId, effectiveProjectId, currentUser);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", clone));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(404).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(409).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[Clone] Error cloning pipeline {}", resourceId, e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/**
 	 * GET /approval/draft-resources?projectId=X&rank=2
 	 * Get PROJECT_APPROVED resources available for org submission
 	 */

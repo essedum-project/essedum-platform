@@ -888,6 +888,41 @@ public class ICIPDatasetController {
 		}
 	}
 
+	/**
+	 * POST /approval/clone/{id}
+	 * Clone an approved/published dataset into a new DRAFT dataset named
+	 * {@code <base>-v<n>}. The original stays untouched; the clone must go
+	 * through the approval chain again.
+	 */
+	@PostMapping("/approval/clone/{id}")
+	public ResponseEntity<?> cloneDataset(
+			@PathVariable Integer id,
+			@RequestBody(required = false) java.util.Map<String, Object> request,
+			@RequestParam(required = false) Integer projectId,
+			@RequestParam(required = false) String username,
+			@RequestHeader(value = "user-login", required = false) String userLogin) {
+		try {
+			Integer effectiveProjectId = projectId;
+			if (effectiveProjectId == null && request != null && request.get("projectId") instanceof Number) {
+				effectiveProjectId = ((Number) request.get("projectId")).intValue();
+			}
+			String currentUser = (username != null && !username.isEmpty()) ? username : userLogin;
+			if ((currentUser == null || currentUser.isEmpty()) && request != null && request.get("username") != null) {
+				currentUser = request.get("username").toString();
+			}
+
+			ICIPDataset clone = datasetApprovalWorkflowService.cloneDataset(id, effectiveProjectId, currentUser);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", clone));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(404).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(409).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error cloning dataset {}", id, e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
 	@PostMapping(path = "/set/corelid")
 	public ResponseEntity<ICIPDataset2> setCorelId(@RequestParam(name = "id") String id,
 			@RequestParam(name = "corelid") String corelId,@RequestParam(name = "event") String eventName) throws InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, UnsupportedEncodingException{

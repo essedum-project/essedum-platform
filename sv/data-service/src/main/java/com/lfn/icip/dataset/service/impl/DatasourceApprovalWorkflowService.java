@@ -15,6 +15,7 @@
 
 package com.lfn.icip.dataset.service.impl;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.lfn.icip.approval.ApprovalCloneSupport;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.repository.ICIPDatasourceRepository;
 
@@ -354,5 +357,60 @@ public class DatasourceApprovalWorkflowService {
 
 		logger.info("[Catalog] projectId={}, orgId={} -> {} datasource items", projectId, orgId, result.size());
 		return result;
+	}
+
+	/**
+	 * Clone an approved/published datasource into a brand-new DRAFT datasource.
+	 *
+	 * The original row is never touched — it keeps serving at its current
+	 * approval level. The clone is named {@code <base>-v<n>} (next free n) and
+	 * re-enters the approval chain from DRAFT.
+	 */
+	@Transactional
+	public ICIPDatasource cloneDatasource(Integer resourceId, Integer projectId, String currentUser) {
+		ICIPDatasource original = datasourceRepository.findById(resourceId).orElse(null);
+		if (original == null) {
+			throw new IllegalArgumentException("Datasource not found: " + resourceId);
+		}
+		if (!ApprovalCloneSupport.isCloneable(original.getApprovalStatus())) {
+			throw new IllegalStateException(
+					"Only approved or published connections can be cloned (current status: " + original.getApprovalStatus() + ")");
+		}
+
+		String org = original.getOrganization();
+		String newName = ApprovalCloneSupport.nextVersionName(original.getName(),
+				candidate -> datasourceRepository.findByNameAndOrganization(candidate, org) != null);
+
+		ICIPDatasource clone = new ICIPDatasource();
+		clone.setName(newName);
+		clone.setAlias(ApprovalCloneSupport.cloneAlias(original.getAlias(), original.getName(), newName));
+		clone.setDescription(original.getDescription());
+		clone.setType(original.getType());
+		clone.setConnectionDetails(original.getConnectionDetails());
+		clone.setSalt(original.getSalt());
+		clone.setOrganization(org);
+		clone.setDshashcode(original.getDshashcode());
+		clone.setActivetime(original.getActivetime());
+		clone.setCategory(original.getCategory());
+		clone.setExtras(original.getExtras());
+		clone.setInterfacetype(original.getInterfacetype());
+		clone.setFordataset(original.getFordataset());
+		clone.setForruntime(original.getForruntime());
+		clone.setForadapter(original.getForadapter());
+		clone.setFormodel(original.getFormodel());
+		clone.setForpromptprovider(original.getForpromptprovider());
+		clone.setForendpoint(original.getForendpoint());
+		clone.setForapp(original.getForapp());
+		clone.setLastmodifiedby(currentUser != null && !currentUser.isEmpty() ? currentUser : original.getLastmodifiedby());
+		clone.setLastmodifieddate(new Timestamp(System.currentTimeMillis()));
+
+		clone.setApprovalStatus("DRAFT");
+		clone.setProjectId(projectId != null ? projectId : original.getProjectId());
+		clone.setApprovedOrganizationId(null);
+
+		ICIPDatasource saved = datasourceRepository.save(clone);
+		logger.info("[Clone] Datasource {} ('{}') cloned -> {} ('{}') as DRAFT in project {}",
+				resourceId, original.getName(), saved.getId(), saved.getName(), saved.getProjectId());
+		return saved;
 	}
 }

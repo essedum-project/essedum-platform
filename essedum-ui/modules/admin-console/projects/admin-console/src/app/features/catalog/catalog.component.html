@@ -56,6 +56,16 @@
         </div>
       </div>
 
+      <div class="card-actions">
+        <button mat-stroked-button class="clone-btn" type="button"
+                [disabled]="isCloning('pipeline', asset)"
+                (click)="clone('pipeline', asset)"
+                matTooltip="Create an editable new version of this pipeline as a draft">
+          <mat-icon>content_copy</mat-icon>
+          {{ isCloning('pipeline', asset) ? 'Cloning…' : 'Clone' }}
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -103,6 +113,15 @@
             <span class="meta-value">{{ displayDate(asset.lastmodifieddate) }}</span>
           </div>
         </div>
+        <div class="card-actions">
+          <button mat-stroked-button class="clone-btn" type="button"
+                  [disabled]="isCloning('dataset', asset)"
+                  (click)="clone('dataset', asset)"
+                  matTooltip="Create an editable new version of this dataset as a draft">
+            <mat-icon>content_copy</mat-icon>
+            {{ isCloning('dataset', asset) ? 'Cloning…' : 'Clone' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -144,6 +163,15 @@
             <span class="meta-label">Date</span>
             <span class="meta-value">{{ displayDate(asset.lastmodifieddate) }}</span>
           </div>
+        </div>
+        <div class="card-actions">
+          <button mat-stroked-button class="clone-btn" type="button"
+                  [disabled]="isCloning('datasource', asset)"
+                  (click)="clone('datasource', asset)"
+                  matTooltip="Create an editable new version of this connection as a draft">
+            <mat-icon>content_copy</mat-icon>
+            {{ isCloning('datasource', asset) ? 'Cloning…' : 'Clone' }}
+          </button>
         </div>
       </div>
     </div>

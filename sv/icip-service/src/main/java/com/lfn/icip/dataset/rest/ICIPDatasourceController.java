@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -673,6 +674,41 @@ public class ICIPDatasourceController {
 		} catch (Exception e) {
 			logger.error("[DatasourceApproval] Error fetching datasource catalog", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));
+		}
+	}
+
+	/**
+	 * POST /approval/clone/{resourceId}
+	 * Clone an approved/published connection into a new DRAFT connection named
+	 * {@code <base>-v<n>}. The original stays untouched; the clone must go
+	 * through the approval chain again.
+	 */
+	@PostMapping("/approval/clone/{resourceId}")
+	public ResponseEntity<?> cloneDatasource(
+			@PathVariable Integer resourceId,
+			@RequestBody(required = false) java.util.Map<String, Object> request,
+			@RequestParam(required = false) Integer projectId,
+			@RequestParam(required = false) String username,
+			@RequestHeader(value = "user-login", required = false) String userLogin) {
+		try {
+			Integer effectiveProjectId = projectId;
+			if (effectiveProjectId == null && request != null && request.get("projectId") instanceof Number) {
+				effectiveProjectId = ((Number) request.get("projectId")).intValue();
+			}
+			String currentUser = (username != null && !username.isEmpty()) ? username : userLogin;
+			if ((currentUser == null || currentUser.isEmpty()) && request != null && request.get("username") != null) {
+				currentUser = request.get("username").toString();
+			}
+
+			ICIPDatasource clone = datasourceApprovalWorkflowService.cloneDatasource(resourceId, effectiveProjectId, currentUser);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", clone));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(404).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(409).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasourceApproval] Error cloning datasource {}", resourceId, e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
 		}
 	}
 

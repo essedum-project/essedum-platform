@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { take } from 'rxjs';
+import { Observable, take } from 'rxjs';
 import { ApiService } from '../../core/api.service';
+import { NotificationService } from '../../core/notification.service';
+
+type AssetKind = 'pipeline' | 'dataset' | 'datasource';
 
 @Component({
   selector: 'app-catalog',
@@ -13,31 +16,105 @@ export class CatalogComponent implements OnInit {
   datasetAssets: any[] = [];
   datasourceAssets: any[] = [];
 
-  constructor(private readonly api: ApiService) {}
+  // Keyed by "<kind>:<id>" so only the card being cloned shows a spinner.
+  cloning: Record<string, boolean> = {};
+
+  private projectId: number | null = null;
+  private orgId: number | null = null;
+
+  constructor(
+    private readonly api: ApiService,
+    private readonly notify: NotificationService,
+  ) {}
 
   ngOnInit(): void {
-    let projectId: number | null = null;
-    let orgId: number | null = null;
-    try { projectId = Number(JSON.parse(sessionStorage.getItem('project') || '{}')?.id) || null; } catch {}
-    try { orgId = Number(JSON.parse(sessionStorage.getItem('portfoliodata') || '{}')?.id) || null; } catch {}
+    try { this.projectId = Number(JSON.parse(sessionStorage.getItem('project') || '{}')?.id) || null; } catch {}
+    try { this.orgId = Number(JSON.parse(sessionStorage.getItem('portfoliodata') || '{}')?.id) || null; } catch {}
 
+    this.loadCatalog();
+  }
+
+  private loadCatalog(): void {
     // Pass both projectId and orgId for every user — backend returns the full approved scope:
     // PROJECT_APPROVED (project) + ORG_APPROVED (org) + PUBLISHED (globally)
-    this.api.getPipelineCatalog(projectId, orgId)
+    this.api.getPipelineCatalog(this.projectId, this.orgId)
       .pipe(take(1))
-      .subscribe(rows => (this.assets = Array.isArray(rows) ? rows : []));
+      .subscribe(rows => (this.assets = this.toRows(rows)));
 
-    this.api.getDatasetCatalog(projectId, orgId)
+    this.api.getDatasetCatalog(this.projectId, this.orgId)
       .pipe(take(1))
-      .subscribe(rows => (this.datasetAssets = Array.isArray(rows) ? rows : (rows?.data && Array.isArray(rows.data) ? rows.data : [])));
+      .subscribe(rows => (this.datasetAssets = this.toRows(rows)));
 
-    this.api.getDatasourceCatalog(projectId, orgId)
+    this.api.getDatasourceCatalog(this.projectId, this.orgId)
       .pipe(take(1))
-      .subscribe(rows => (this.datasourceAssets = Array.isArray(rows) ? rows : (rows?.data && Array.isArray(rows.data) ? rows.data : [])));
+      .subscribe(rows => (this.datasourceAssets = this.toRows(rows)));
+  }
+
+  private toRows(rows: any): any[] {
+    if (Array.isArray(rows)) return rows;
+    return Array.isArray(rows?.data) ? rows.data : [];
+  }
+
+  // ---- clone ----
+
+  /** Pipelines key on `cid`, datasets/connections on `id`. */
+  assetId(item: any): number | null {
+    const id = item?.cid ?? item?.id;
+    return Number.isFinite(Number(id)) ? Number(id) : null;
+  }
+
+  cloneKey(kind: AssetKind, item: any): string {
+    return `${kind}:${this.assetId(item)}`;
+  }
+
+  isCloning(kind: AssetKind, item: any): boolean {
+    return !!this.cloning[this.cloneKey(kind, item)];
+  }
+
+  /**
+   * Clones an approved/published asset into a new DRAFT "<name>-v<n>". The
+   * original stays as-is in the catalog; the clone appears in the
+   * pipeline/dataset/connection tab and must be submitted for approval again.
+   */
+  clone(kind: AssetKind, item: any): void {
+    const id = this.assetId(item);
+    if (id == null) {
+      this.notify.error('Cannot clone: asset id is missing.');
+      return;
+    }
+
+    const key = this.cloneKey(kind, item);
+    if (this.cloning[key]) return;
+    this.cloning[key] = true;
+
+    const request: Observable<any> =
+      kind === 'pipeline' ? this.api.clonePipeline(id)
+      : kind === 'dataset' ? this.api.cloneDataset(id)
+      : this.api.cloneDatasource(id);
+
+    request.pipe(take(1)).subscribe({
+      next: res => {
+        this.cloning[key] = false;
+        const created = res?.data ?? res;
+        const name = created?.name || created?.alias || 'new version';
+        this.notify.success(`Created draft "${name}". Submit it for approval to publish this version.`);
+        this.loadCatalog();
+      },
+      error: err => {
+        this.cloning[key] = false;
+        this.notify.error(err?.error?.error || `Failed to clone ${this.kindLabel(kind)}.`);
+      },
+    });
+  }
+
+  private kindLabel(kind: AssetKind): string {
+    if (kind === 'pipeline') return 'pipeline';
+    if (kind === 'dataset') return 'dataset';
+    return 'connection';
   }
 
   badgeClass(item: any): string {
-    const s: string = item?.approval_status ?? '';
+    const s: string = item?.approval_status ?? item?.approvalStatus ?? '';
     if (s === 'PROJECT_APPROVED')   return 'badge-project';
     if (s === 'PUBLISHED')          return 'badge-organization';
     if (s === 'GLOBALLY_PUBLISHED') return 'badge-global';
@@ -45,7 +122,7 @@ export class CatalogComponent implements OnInit {
   }
 
   scopeLabel(item: any): string {
-    const s: string = item?.approval_status ?? '';
+    const s: string = item?.approval_status ?? item?.approvalStatus ?? '';
     if (s === 'PROJECT_APPROVED')   return 'Project';
     if (s === 'PUBLISHED')          return 'Organization';
     if (s === 'GLOBALLY_PUBLISHED') return 'Global';
@@ -53,7 +130,7 @@ export class CatalogComponent implements OnInit {
   }
 
   scopeIcon(item: any): string {
-    const s: string = item?.approval_status ?? '';
+    const s: string = item?.approval_status ?? item?.approvalStatus ?? '';
     if (s === 'PROJECT_APPROVED')   return 'folder';
     if (s === 'PUBLISHED')          return 'business';
     if (s === 'GLOBALLY_PUBLISHED') return 'public';
