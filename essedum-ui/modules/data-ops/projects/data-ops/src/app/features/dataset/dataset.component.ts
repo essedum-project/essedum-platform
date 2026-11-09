@@ -378,7 +378,7 @@ export class DatasetComponent implements OnInit, OnChanges {
         this.datasetService.getCountDatasets(params).subscribe((res) => {
           this.noOfItems = res;
         });
-        this.service.getDatasetCards("", "1000", "", false).subscribe((res) => {
+        this.service.getDatasetCards("1", "1000", "", false).subscribe((res) => {
           this.allCards = res;
         })
     
@@ -1021,10 +1021,10 @@ export class DatasetComponent implements OnInit, OnChanges {
       this.datasetService.getCountDatasets(params).subscribe((res) => {
         this.noOfItems = res;
       });
-      this.service.getDatasetCards("", "1000", "", false).subscribe((res) => {
+      this.service.getDatasetCards("1", "1000", "", false).subscribe((res) => {
         this.allCards = res;
       })
-  
+
       this.route.queryParams.subscribe((params) => {
         if (params['page']) {
           this.pageNumber = params['page'];
