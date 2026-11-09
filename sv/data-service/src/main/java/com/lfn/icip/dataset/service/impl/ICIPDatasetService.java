@@ -769,7 +769,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 
 	@Override
 	public List<ICIPDataset> getAllDatasetsByDatasource(String project,String datasource,String search, Pageable paginate) {
-		if(!search.isEmpty()) {
+		if(search != null && !search.isEmpty()) {
 			return datasetRepository.getAllDatasetsByDatasourceAndSearch(project,datasource,search,paginate);
 		}else {
 			return datasetRepository.getAllDatasetsByDatasource(project,datasource,paginate);
