@@ -435,9 +435,14 @@ public class AccessContextService {
 					.filter(a -> organisationId.equals(a.getOrganizationId()))
 					.forEach(result::add);
 		}
-		// Platform Admin (rank >= 4) is a global role — include it regardless of which
-		// project or org the assignment was originally scoped to.
+		// Platform Admin (rank >= 4) is a global role, but only when the grant itself
+		// is platform-wide (organization_id and project_id both NULL — see
+		// RoleAssignment's "scoped to exactly one of organization/project, or
+		// neither for a platform-wide grant" invariant). A Platform Admin grant
+		// that was deliberately scoped to one org/project must not leak into an
+		// unrelated project and mask that project's own role assignment.
 		roleAssignmentRepository.findByUserIdAndRevokedAtIsNull(userId).stream()
+				.filter(a -> a.getOrganizationId() == null && a.getProjectId() == null)
 				.filter(a -> {
 					RbacRole role = rbacRoleRepository.findById(a.getRoleId()).orElse(null);
 					return role != null && role.getRank() != null && role.getRank() >= PLATFORM_ADMIN_RANK;
