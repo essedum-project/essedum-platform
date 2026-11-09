@@ -2963,7 +2963,7 @@ public class ICIPDatasetController {
 			@RequestParam(value = "types", required = false) List<String> types,
 			@RequestParam(value = "tags", required = false) List<String> tags,
 			@RequestParam(value = "knowledgeBases", required = false) List<String> knowledgeBases,
-			@RequestParam(name = "page", defaultValue = "1", required = false) String page,
+			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
 			@RequestParam(name = "size", defaultValue = "8", required = false) String size) {
 		logger.info("Advance Filter -List called : {}", organization);
 		List<ICIPDataset> results = datasetService.getDatasetsCountForAdvancedFilter(organization, aliasOrName, types,

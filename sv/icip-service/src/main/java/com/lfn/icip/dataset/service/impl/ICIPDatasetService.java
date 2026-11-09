@@ -737,7 +737,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 
 	public List<ICIPDataset> getDatasetsByOrgandPage(String organization,String search,Pageable paginate, Boolean isTemplate) {
 //		return datasetRepository.findByOrganization(organization,paginate);
-		if(search != null && !search.isEmpty()) {
+		if(!search.isEmpty()) {
 			return datasetRepository.findByOrganization(organization,search,paginate);
 		}
 		else if(isTemplate == true) {
