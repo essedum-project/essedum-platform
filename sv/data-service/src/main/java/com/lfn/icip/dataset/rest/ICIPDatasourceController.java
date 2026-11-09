@@ -560,6 +560,21 @@ public class ICIPDatasourceController {
 
 	// ==================== APPROVAL ENDPOINTS ====================
 
+	/** Default page size for the datasource (connections) approval/draft/catalog list endpoints. */
+	private static final int DEFAULT_PAGE_SIZE = 5;
+
+	/**
+	 * Slices an already-filtered list into the requested page. {@code page} is 0-based;
+	 * both params default (page=0, size={@link #DEFAULT_PAGE_SIZE}) when null/invalid.
+	 */
+	private <T> java.util.List<T> paginate(java.util.List<T> list, Integer page, Integer size) {
+		int safeSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
+		int safePage = (page == null || page < 0) ? 0 : page;
+		int from = Math.min(safePage * safeSize, list.size());
+		int to = Math.min(from + safeSize, list.size());
+		return list.subList(from, to);
+	}
+
 	@PostMapping("/approval/project/submit")
 	public ResponseEntity<java.util.Map<String, Object>> submitForApproval(
 			@RequestBody java.util.Map<String, Object> request,
@@ -711,9 +726,11 @@ public class ICIPDatasourceController {
 	}
 
 	@GetMapping("/approval/project-admin/list")
-	public ResponseEntity<java.util.List<ICIPDatasource>> getPendingApprovalList(
+	public ResponseEntity<?> getPendingApprovalList(
 			@RequestParam String projectId,
 			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size,
 			jakarta.servlet.http.HttpServletRequest httpRequest) {
 		try {
 			String org = httpRequest.getHeader("organisation");
@@ -726,14 +743,15 @@ public class ICIPDatasourceController {
 			logger.info("[Approval] Fetching pending approval list for org={}, projectId={}", org, projectId);
 			if (org == null || org.isEmpty()) {
 				logger.warn("[Approval] No organisation header found in request, returning empty list");
-				return ResponseEntity.ok(java.util.Collections.emptyList());
+				return ResponseEntity.ok(java.util.Map.of("success", true, "data", java.util.Collections.emptyList(), "count", 0));
 			}
 			java.util.List<ICIPDatasource> all = iICIPDatasourceService.findByOrganization(org);
 			java.util.List<ICIPDatasource> pending = all.stream()
 				.filter(ds -> "PENDING_PROJECT_APPROVAL".equals(ds.getApprovalStatus()))
 				.collect(java.util.stream.Collectors.toList());
 			logger.info("[Approval] Found {} pending datasources for org={}", pending.size(), org);
-			return ResponseEntity.ok(pending);
+			java.util.List<ICIPDatasource> pageSlice = paginate(pending, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", pending.size()));
 		} catch (Exception e) {
 			logger.error("[Approval] Error fetching pending approval list", e);
 			return ResponseEntity.status(500).build();
@@ -748,6 +766,8 @@ public class ICIPDatasourceController {
 	public ResponseEntity<?> getDraftResources(
 			@RequestParam Integer projectId,
 			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
@@ -757,7 +777,8 @@ public class ICIPDatasourceController {
 
 			java.util.List<ICIPDatasource> resources = approvalWorkflowService.getDraftResources(projectId, userRank);
 			logger.info("[Approval] Retrieved {} PROJECT_APPROVED datasources for projectId {}", resources.size(), projectId);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "data", resources, "count", resources.size()));
+			java.util.List<ICIPDatasource> pageSlice = paginate(resources, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", resources.size()));
 		} catch (Exception e) {
 			logger.error("[Approval] Error getting draft datasource resources", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
@@ -996,6 +1017,8 @@ public class ICIPDatasourceController {
 	public ResponseEntity<?> getOrgAdminApprovals(
 			@RequestParam Integer organizationId,
 			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
@@ -1005,7 +1028,8 @@ public class ICIPDatasourceController {
 
 			java.util.List<ICIPDatasource> approvals = approvalWorkflowService.getOrgAdminApprovals(organizationId, userRank);
 			logger.info("[Approval] Retrieved {} datasource approval requests for org admin, organizationId={}", approvals.size(), organizationId);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "data", approvals, "count", approvals.size()));
+			java.util.List<ICIPDatasource> pageSlice = paginate(approvals, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", approvals.size()));
 		} catch (Exception e) {
 			logger.error("[Approval] Error getting org admin datasource approvals", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
@@ -1020,6 +1044,8 @@ public class ICIPDatasourceController {
 	public ResponseEntity<?> getOrgAdminDraftResources(
 			@RequestParam Integer organizationId,
 			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
@@ -1029,7 +1055,8 @@ public class ICIPDatasourceController {
 
 			java.util.List<ICIPDatasource> resources = approvalWorkflowService.getOrgAdminDraftResources(organizationId, userRank);
 			logger.info("[Approval] Retrieved {} ORG_APPROVED datasources for organizationId {}", resources.size(), organizationId);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "data", resources, "count", resources.size()));
+			java.util.List<ICIPDatasource> pageSlice = paginate(resources, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", resources.size()));
 		} catch (Exception e) {
 			logger.error("[Approval] Error getting org-admin draft datasource resources", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
@@ -1043,6 +1070,8 @@ public class ICIPDatasourceController {
 	@GetMapping("/approval/platform-admin/list")
 	public ResponseEntity<?> getPlatformAdminApprovals(
 			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
@@ -1052,7 +1081,8 @@ public class ICIPDatasourceController {
 
 			java.util.List<ICIPDatasource> approvals = approvalWorkflowService.getPlatformAdminApprovals(userRank);
 			logger.info("[Approval] Retrieved {} datasource approval requests for platform admin", approvals.size());
-			return ResponseEntity.ok(java.util.Map.of("success", true, "data", approvals, "count", approvals.size()));
+			java.util.List<ICIPDatasource> pageSlice = paginate(approvals, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", approvals.size()));
 		} catch (Exception e) {
 			logger.error("[Approval] Error getting platform admin datasource approvals", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
@@ -1067,10 +1097,13 @@ public class ICIPDatasourceController {
 	@GetMapping("/approval/catalog")
 	public ResponseEntity<?> getCatalog(
 			@RequestParam(required = false) Integer projectId,
-			@RequestParam(required = false) Integer orgId) {
+			@RequestParam(required = false) Integer orgId,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
 		try {
 			java.util.List<ICIPDatasource> items = approvalWorkflowService.getCatalogResources(projectId, orgId);
-			return ResponseEntity.ok(items);
+			java.util.List<ICIPDatasource> pageSlice = paginate(items, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", items.size()));
 		} catch (Exception e) {
 			logger.error("[Catalog] Error fetching datasource catalog", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));

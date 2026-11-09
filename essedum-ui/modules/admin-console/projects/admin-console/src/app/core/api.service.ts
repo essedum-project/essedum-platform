@@ -623,22 +623,22 @@ export class ApiService {
 
   // ─── Datasource approval workflow ─────────────────────────────────────────
 
-  getProjectAdminDatasourceApprovals(projectId: number): Observable<any> {
+  getProjectAdminDatasourceApprovals(projectId: number, page: number = 0, size: number = 5): Observable<any> {
     let rank = '2';
     try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
-    return this.http.get<any>(`/api/aip/datasources/approval/project-admin/list`, { params: { projectId, rank } });
+    return this.http.get<any>(`/api/aip/datasources/approval/project-admin/list`, { params: { projectId, rank, page, size } });
   }
 
-  getOrgAdminDatasourceApprovals(organizationId: number): Observable<any> {
+  getOrgAdminDatasourceApprovals(organizationId: number, page: number = 0, size: number = 5): Observable<any> {
     let rank = '3';
     try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
-    return this.http.get<any>(`/api/aip/datasources/approval/org-admin/list`, { params: { organizationId, rank } });
+    return this.http.get<any>(`/api/aip/datasources/approval/org-admin/list`, { params: { organizationId, rank, page, size } });
   }
 
-  getPlatformAdminDatasourceApprovals(): Observable<any> {
+  getPlatformAdminDatasourceApprovals(page: number = 0, size: number = 5): Observable<any> {
     let rank = '4';
     try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
-    return this.http.get<any>(`/api/aip/datasources/approval/platform-admin/list`, { params: { rank } });
+    return this.http.get<any>(`/api/aip/datasources/approval/platform-admin/list`, { params: { rank, page, size } });
   }
 
   approveDatasourceProjectApproval(resourceId: number, projectId: number): Observable<any> {
@@ -689,20 +689,20 @@ export class ApiService {
     return this.http.post<any>(`/api/aip/datasources/approval/platform/reject/${resourceId}`, {}, { params: { rank } });
   }
 
-  getDatasourceDraftResources(projectId: number): Observable<any> {
+  getDatasourceDraftResources(projectId: number, page: number = 0, size: number = 5): Observable<any> {
     let rank = '2';
     try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
-    return this.http.get<any>(`/api/aip/datasources/approval/draft-resources`, { params: { projectId, rank } });
+    return this.http.get<any>(`/api/aip/datasources/approval/draft-resources`, { params: { projectId, rank, page, size } });
   }
 
-  getDatasourceOrgDraftResources(organizationId: number): Observable<any> {
+  getDatasourceOrgDraftResources(organizationId: number, page: number = 0, size: number = 5): Observable<any> {
     let rank = '3';
     try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
-    return this.http.get<any>(`/api/aip/datasources/approval/org-admin/draft-resources`, { params: { organizationId, rank } });
+    return this.http.get<any>(`/api/aip/datasources/approval/org-admin/draft-resources`, { params: { organizationId, rank, page, size } });
   }
 
-  getDatasourceCatalog(projectId?: number | null, orgId?: number | null): Observable<any> {
-    const params: any = {};
+  getDatasourceCatalog(projectId?: number | null, orgId?: number | null, page: number = 0, size: number = 5): Observable<any> {
+    const params: any = { page, size };
     if (projectId != null) params['projectId'] = projectId;
     if (orgId != null) params['orgId'] = orgId;
     return this.http.get<any>(`/api/aip/datasources/approval/catalog`, { params }).pipe(catchError(() => of([])));

@@ -8,6 +8,14 @@
     </div>
   </div>
 
+  <mat-tab-group class="drafts-tab-group">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">hub</mat-icon>
+        <span>Pipelines &amp; Agents</span>
+        <span class="count-chip" *ngIf="(streamingServicesDrafts.length + streamingOrgDrafts.length) > 0">{{ streamingServicesDrafts.length + streamingOrgDrafts.length }}</span>
+      </ng-template>
+
   <!-- STREAMING SERVICES (Pipeline/Agent/MCP) - Ready for Organization Approval (Rank 2) -->
   <div class="streaming-drafts-section" *ngIf="streamingServicesDrafts.length > 0">
     <div class="section-title">
@@ -152,6 +160,19 @@
     </p>
   </div>
 
+      <div class="empty-state" *ngIf="streamingServicesDrafts.length === 0 && streamingOrgDrafts.length === 0">
+        <mat-icon>hub</mat-icon>
+        <span>No pipeline or agent drafts awaiting approval.</span>
+      </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">storage</mat-icon>
+        <span>Datasets</span>
+        <span class="count-chip" *ngIf="(datasetDrafts.length + datasetOrgDrafts.length) > 0">{{ datasetDrafts.length + datasetOrgDrafts.length }}</span>
+      </ng-template>
+
   <!-- DATASETS - Ready for Organization Approval (Rank 2) -->
   <div class="streaming-drafts-section" *ngIf="datasetDrafts.length > 0">
     <div class="section-title">
@@ -222,6 +243,19 @@
     <p *ngIf="datasetOrgDrafts.length === 0" class="empty-state"><mat-icon>info</mat-icon><span>No datasets awaiting platform admin approval.</span></p>
   </div>
 
+      <div class="empty-state" *ngIf="datasetDrafts.length === 0 && datasetOrgDrafts.length === 0">
+        <mat-icon>storage</mat-icon>
+        <span>No dataset drafts awaiting approval.</span>
+      </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">cable</mat-icon>
+        <span>Connections</span>
+        <span class="count-chip" *ngIf="(datasourceDraftsTotal + datasourceOrgDraftsTotal) > 0">{{ datasourceDraftsTotal + datasourceOrgDraftsTotal }}</span>
+      </ng-template>
+
   <!-- CONNECTIONS - Ready for Organization Approval (Rank 2) -->
   <div class="streaming-drafts-section" *ngIf="datasourceDrafts.length > 0">
     <div class="section-title">
@@ -254,7 +288,17 @@
       <tr mat-header-row *matHeaderRowDef="streamingColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: streamingColumns"></tr>
     </table>
-    <p *ngIf="datasourceDrafts.length === 0" class="empty-state"><mat-icon>info</mat-icon><span>No connections ready for organization approval.</span></p>
+    <div class="table-footer" *ngIf="datasourceDraftsTotal > 0">
+      <mat-paginator
+        [length]="datasourceDraftsTotal"
+        [pageIndex]="datasourceDraftsPageIndex"
+        [pageSize]="datasourceDraftsPageSize"
+        [pageSizeOptions]="datasourcePageSizeOptions"
+        showFirstLastButtons
+        (page)="onDatasourceDraftsPage($event)">
+      </mat-paginator>
+    </div>
+    <p *ngIf="datasourceDraftsTotal === 0" class="empty-state"><mat-icon>info</mat-icon><span>No connections ready for organization approval.</span></p>
   </div>
 
   <!-- CONNECTIONS - Org Approved, Ready for Platform Admin (Rank 3) -->
@@ -289,6 +333,23 @@
       <tr mat-header-row *matHeaderRowDef="orgStreamingColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: orgStreamingColumns"></tr>
     </table>
-    <p *ngIf="datasourceOrgDrafts.length === 0" class="empty-state"><mat-icon>info</mat-icon><span>No connections awaiting platform admin approval.</span></p>
+    <div class="table-footer" *ngIf="datasourceOrgDraftsTotal > 0">
+      <mat-paginator
+        [length]="datasourceOrgDraftsTotal"
+        [pageIndex]="datasourceOrgDraftsPageIndex"
+        [pageSize]="datasourceOrgDraftsPageSize"
+        [pageSizeOptions]="datasourcePageSizeOptions"
+        showFirstLastButtons
+        (page)="onDatasourceOrgDraftsPage($event)">
+      </mat-paginator>
+    </div>
+    <p *ngIf="datasourceOrgDraftsTotal === 0" class="empty-state"><mat-icon>info</mat-icon><span>No connections awaiting platform admin approval.</span></p>
   </div>
+
+      <div class="empty-state" *ngIf="datasourceDraftsTotal === 0 && datasourceOrgDraftsTotal === 0">
+        <mat-icon>cable</mat-icon>
+        <span>No connection drafts awaiting approval.</span>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
 </div>

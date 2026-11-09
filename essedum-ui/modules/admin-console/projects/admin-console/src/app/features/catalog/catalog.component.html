@@ -3,14 +3,19 @@
   <div class="page-header">
     <div class="page-header-left">
       <div>
-        <div class="title-row">
-          <h2>Asset Catalog</h2>
-          <span class="count-chip" *ngIf="assets.length > 0">{{ assets.length }} pipeline{{ assets.length !== 1 ? 's' : '' }}</span>
-        </div>
-        <span class="page-subtitle">Browse approved pipelines available in your scope</span>
+        <h2>Asset Catalog</h2>
+        <span class="page-subtitle">Browse approved pipelines, datasets, and connections available in your scope</span>
       </div>
     </div>
   </div>
+
+  <mat-tab-group class="catalog-tab-group">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">hub</mat-icon>
+        <span>Pipelines &amp; Agents</span>
+        <span class="count-chip" *ngIf="assets.length > 0">{{ assets.length }}</span>
+      </ng-template>
 
   <div class="catalog-grid" *ngIf="assets.length > 0">
     <div *ngFor="let asset of assets" class="catalog-card">
@@ -74,14 +79,17 @@
     <span class="empty-title">No approved pipelines</span>
     <span class="empty-sub">Nothing approved in your scope yet.</span>
   </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">storage</mat-icon>
+        <span>Datasets</span>
+        <span class="count-chip" *ngIf="datasetAssets.length > 0">{{ datasetAssets.length }}</span>
+      </ng-template>
 
   <!-- Dataset catalog section -->
   <div *ngIf="datasetAssets.length > 0">
-    <div class="section-title" style="margin-top: 32px;">
-      <mat-icon>storage</mat-icon>
-      <span>Approved Datasets</span>
-      <span class="count-chip">{{ datasetAssets.length }}</span>
-    </div>
     <div class="catalog-grid">
       <div *ngFor="let asset of datasetAssets" class="catalog-card">
         <div class="card-main-header">
@@ -125,14 +133,22 @@
       </div>
     </div>
   </div>
+  <div *ngIf="datasetAssets.length === 0" class="empty-state">
+    <mat-icon>storage</mat-icon>
+    <span class="empty-title">No approved datasets</span>
+    <span class="empty-sub">Nothing approved in your scope yet.</span>
+  </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">cable</mat-icon>
+        <span>Connections</span>
+        <span class="count-chip" *ngIf="datasourceTotal > 0">{{ datasourceTotal }}</span>
+      </ng-template>
 
   <!-- Datasource catalog section -->
   <div *ngIf="datasourceAssets.length > 0">
-    <div class="section-title" style="margin-top: 32px;">
-      <mat-icon>cable</mat-icon>
-      <span>Approved Connections</span>
-      <span class="count-chip">{{ datasourceAssets.length }}</span>
-    </div>
     <div class="catalog-grid">
       <div *ngFor="let asset of datasourceAssets" class="catalog-card">
         <div class="card-main-header">
@@ -176,4 +192,21 @@
       </div>
     </div>
   </div>
+  <div class="table-footer" *ngIf="datasourceTotal > 0">
+    <mat-paginator
+      [length]="datasourceTotal"
+      [pageIndex]="datasourcePageIndex"
+      [pageSize]="datasourcePageSize"
+      [pageSizeOptions]="datasourcePageSizeOptions"
+      showFirstLastButtons
+      (page)="onDatasourcePage($event)">
+    </mat-paginator>
+  </div>
+  <div *ngIf="datasourceTotal === 0" class="empty-state">
+    <mat-icon>cable</mat-icon>
+    <span class="empty-title">No approved connections</span>
+    <span class="empty-sub">Nothing approved in your scope yet.</span>
+  </div>
+    </mat-tab>
+  </mat-tab-group>
 </div>

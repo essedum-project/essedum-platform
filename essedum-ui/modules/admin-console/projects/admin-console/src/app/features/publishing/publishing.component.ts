@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewEncapsulation, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, switchMap, map, of, Subject } from 'rxjs';
-import { distinctUntilChanged, takeUntil, catchError } from 'rxjs/operators';
+import { distinctUntilChanged, takeUntil, catchError, take } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import { NotificationService } from '../../core/notification.service';
@@ -59,8 +59,20 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
   datasourceDraftsDataSource = new MatTableDataSource<any>([]);
   datasourceOrgDrafts: any[] = [];
   datasourceOrgDraftsDataSource = new MatTableDataSource<any>([]);
+
+  // Server-side pagination for the Connections tab (datasources).
+  datasourceDraftsTotal = 0;
+  datasourceDraftsPageIndex = 0;
+  datasourceDraftsPageSize = 5;
+  datasourceOrgDraftsTotal = 0;
+  datasourceOrgDraftsPageIndex = 0;
+  datasourceOrgDraftsPageSize = 5;
+  readonly datasourcePageSizeOptions = [5, 10, 25];
+
   projectId: number | null = null;
   orgId: number | null = null;
+  /** Org id used for ORG_APPROVED lookups (portfoliodata.id — see load()). */
+  private approvalOrgId: number | null = null;
 
   @ViewChild(MatPaginator) legacyPaginator!: MatPaginator;
   @ViewChild('streamingPaginator') streamingPaginator!: MatPaginator;
@@ -146,12 +158,17 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
             const pd = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}');
             if (pd?.id) { approvalOrgId = Number(pd.id); }
           } catch {}
+          this.approvalOrgId = approvalOrgId;
           const streamingRank3$ = (streamingRank === 3 && approvalOrgId) ? this.api.getOrgAdminDraftResources(approvalOrgId) : of([]);
 
           const datasetRank2$ = (streamingRank === 2 && projectId) ? this.api.getDatasetDraftResources(projectId).pipe(catchError(() => of([]))) : of([]);
           const datasetRank3$ = (streamingRank === 3 && approvalOrgId) ? this.api.getDatasetOrgDraftResources(approvalOrgId).pipe(catchError(() => of([]))) : of([]);
-          const datasourceRank2$ = (streamingRank === 2 && projectId) ? this.api.getDatasourceDraftResources(projectId).pipe(catchError(() => of([]))) : of([]);
-          const datasourceRank3$ = (streamingRank === 3 && approvalOrgId) ? this.api.getDatasourceOrgDraftResources(approvalOrgId).pipe(catchError(() => of([]))) : of([]);
+          const datasourceRank2$ = (streamingRank === 2 && projectId)
+            ? this.api.getDatasourceDraftResources(projectId, this.datasourceDraftsPageIndex, this.datasourceDraftsPageSize).pipe(catchError(() => of([])))
+            : of([]);
+          const datasourceRank3$ = (streamingRank === 3 && approvalOrgId)
+            ? this.api.getDatasourceOrgDraftResources(approvalOrgId, this.datasourceOrgDraftsPageIndex, this.datasourceOrgDraftsPageSize).pipe(catchError(() => of([])))
+            : of([]);
 
           return combineLatest([
             this.api.getDraftVersions(userId, orgId, projectId),
@@ -212,11 +229,13 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
           this.datasetOrgDrafts = extractArr(datasetRank3);
           this.datasetOrgDraftsDataSource.data = this.datasetOrgDrafts;
 
-          // Datasource drafts
+          // Datasource drafts (Connections tab — server-paginated)
           this.datasourceDrafts = extractArr(datasourceRank2).filter((s: any) => s.approval_status === 'PROJECT_APPROVED');
           this.datasourceDraftsDataSource.data = this.datasourceDrafts;
+          this.datasourceDraftsTotal = this.extractCount(datasourceRank2, this.datasourceDrafts);
           this.datasourceOrgDrafts = extractArr(datasourceRank3);
           this.datasourceOrgDraftsDataSource.data = this.datasourceOrgDrafts;
+          this.datasourceOrgDraftsTotal = this.extractCount(datasourceRank3, this.datasourceOrgDrafts);
 
           return processedVersions;
         }),
@@ -446,5 +465,39 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
     });
+  }
+
+  /** Total record count for server-side pagination, falling back to the page length. */
+  private extractCount(raw: any, pageRows: any[]): number {
+    const count = raw?.count;
+    return typeof count === 'number' ? count : pageRows.length;
+  }
+
+  onDatasourceDraftsPage(event: PageEvent): void {
+    this.datasourceDraftsPageIndex = event.pageIndex;
+    this.datasourceDraftsPageSize = event.pageSize;
+    if (!this.projectId) return;
+    this.api.getDatasourceDraftResources(this.projectId, this.datasourceDraftsPageIndex, this.datasourceDraftsPageSize)
+      .pipe(take(1), catchError(() => of([])))
+      .subscribe((raw: any) => {
+        const rows = (Array.isArray(raw) ? raw : (raw?.data ?? [])).filter((s: any) => s.approval_status === 'PROJECT_APPROVED');
+        this.datasourceDrafts = rows;
+        this.datasourceDraftsDataSource.data = rows;
+        this.datasourceDraftsTotal = this.extractCount(raw, rows);
+      });
+  }
+
+  onDatasourceOrgDraftsPage(event: PageEvent): void {
+    this.datasourceOrgDraftsPageIndex = event.pageIndex;
+    this.datasourceOrgDraftsPageSize = event.pageSize;
+    if (!this.approvalOrgId) return;
+    this.api.getDatasourceOrgDraftResources(this.approvalOrgId, this.datasourceOrgDraftsPageIndex, this.datasourceOrgDraftsPageSize)
+      .pipe(take(1), catchError(() => of([])))
+      .subscribe((raw: any) => {
+        const rows = Array.isArray(raw) ? raw : (raw?.data ?? []);
+        this.datasourceOrgDrafts = rows;
+        this.datasourceOrgDraftsDataSource.data = rows;
+        this.datasourceOrgDraftsTotal = this.extractCount(raw, rows);
+      });
   }
 }

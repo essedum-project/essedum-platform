@@ -64,23 +64,43 @@ body.header-light-theme mat-tab-group .mat-mdc-tab-list {
   border-bottom: 2px solid rgba(15, 23, 42, 0.12) !important;
 }
 
-mat-tab-group ::ng-deep .mdc-tab {
+// Tabs hug their own content and sit at the start of the row instead of
+// stretching to fill the full width of the page.
+// NOTE: no ::ng-deep — this component uses ViewEncapsulation.None, so Angular never
+// strips ::ng-deep from the compiled CSS, leaving it as literal (invalid) text that
+// browsers discard the whole rule for. Plain selectors already reach Material's
+// internal DOM under None.
+mat-tab-group .mat-mdc-tab-label-container {
+  flex-grow: 0 !important;
+}
+mat-tab-group .mat-mdc-tab-labels {
+  justify-content: flex-start !important;
+  gap: 8px !important;
+}
+mat-tab-group .mat-mdc-tab {
+  flex: none !important;
+  min-width: auto !important;
+  max-width: fit-content !important;
+  padding: 0 24px !important;
+}
+
+mat-tab-group .mdc-tab {
   color: #94a3b8 !important;
   font-weight: 600 !important;
   font-size: 0.95rem !important;
 }
 
-mat-tab-group ::ng-deep .mdc-tab__text-label {
+mat-tab-group .mdc-tab__text-label {
   font-size: 0.95rem !important;
   font-weight: 600 !important;
 }
 
-mat-tab-group ::ng-deep .mdc-tab--active {
+mat-tab-group .mdc-tab--active {
   color: #4f8ef7 !important;
 }
 
-:host-context(body.header-light-theme) mat-tab-group ::ng-deep .mdc-tab { color: #64748b !important; }
-:host-context(body.header-light-theme) mat-tab-group ::ng-deep .mdc-tab--active { color: #2563eb !important; }
+body.header-light-theme mat-tab-group .mdc-tab { color: #64748b !important; }
+body.header-light-theme mat-tab-group .mdc-tab--active { color: #2563eb !important; }
 
 .tab-actions {
   display: flex !important;

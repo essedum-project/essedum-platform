@@ -120,17 +120,66 @@ body.header-light-theme mat-tab-group .mat-mdc-tab-list {
   border-bottom: 2px solid rgba(15, 23, 42, 0.12) !important;
 }
 
-mat-tab-group ::ng-deep .mdc-tab {
+// Tabs hug their own content and sit at the start of the row instead of
+// stretching to fill the full width of the page.
+// NOTE: no ::ng-deep here — this component uses ViewEncapsulation.None, so Angular
+// never strips ::ng-deep from the compiled CSS, which leaves it as literal (invalid)
+// text that browsers silently discard the whole rule for. Plain selectors already
+// reach into Material's internal DOM under None (see .admin-console-table below).
+mat-tab-group .mat-mdc-tab-label-container {
+  flex-grow: 0 !important;
+}
+mat-tab-group .mat-mdc-tab-labels {
+  justify-content: flex-start !important;
+  gap: 8px !important;
+}
+mat-tab-group .mat-mdc-tab {
+  flex: none !important;
+  min-width: auto !important;
+  max-width: fit-content !important;
+  padding: 0 24px !important;
+}
+
+mat-tab-group .mdc-tab {
   color: #94a3b8 !important;
   font-weight: 600 !important;
 }
 
-mat-tab-group ::ng-deep .mdc-tab--active {
+mat-tab-group .mdc-tab--active {
   color: #4f8ef7 !important;
 }
 
-:host-context(body.header-light-theme) mat-tab-group ::ng-deep .mdc-tab { color: #64748b !important; }
-:host-context(body.header-light-theme) mat-tab-group ::ng-deep .mdc-tab--active { color: #2563eb !important; }
+body.header-light-theme mat-tab-group .mdc-tab { color: #64748b !important; }
+body.header-light-theme mat-tab-group .mdc-tab--active { color: #2563eb !important; }
+
+mat-tab-group .mat-mdc-tab-body-content {
+  padding-top: 20px;
+}
+
+.tab-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.count-chip {
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(79, 70, 229, 0.16);
+  color: #818cf8;
+  padding: 2px 10px;
+  border-radius: 20px;
+  margin-left: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  line-height: 1.6;
+}
+body.header-light-theme .count-chip {
+  background: rgba(79, 70, 229, 0.08);
+  color: #4f46e5;
+}
 
 .tab-actions {
   display: flex !important;

@@ -2,6 +2,75 @@
 
 .admin-console-page { padding: 14px 24px; }
 
+// ── Approval tabs (Pipelines & Agents / Datasets / Connections side by side) ──
+mat-tab-group.approvals-tab-group {
+  display: block !important;
+  margin-top: 20px !important;
+}
+
+mat-tab-group.approvals-tab-group ::ng-deep .mat-mdc-tab-list {
+  border-bottom: 2px solid rgba(148, 163, 184, 0.18) !important;
+  background: transparent !important;
+}
+body.header-light-theme mat-tab-group.approvals-tab-group ::ng-deep .mat-mdc-tab-list {
+  border-bottom: 2px solid rgba(15, 23, 42, 0.12) !important;
+}
+
+// Tabs hug their own content and sit at the start of the row instead of
+// stretching to fill the full width of the page.
+mat-tab-group.approvals-tab-group ::ng-deep .mat-mdc-tab-label-container {
+  flex-grow: 0 !important;
+}
+mat-tab-group.approvals-tab-group ::ng-deep .mat-mdc-tab-labels {
+  justify-content: flex-start !important;
+  gap: 8px !important;
+}
+mat-tab-group.approvals-tab-group ::ng-deep .mat-mdc-tab {
+  flex: none !important;
+  min-width: auto !important;
+  max-width: fit-content !important;
+  padding: 0 24px !important;
+}
+
+mat-tab-group.approvals-tab-group ::ng-deep .mdc-tab {
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+}
+mat-tab-group.approvals-tab-group ::ng-deep .mdc-tab--active {
+  color: #4f8ef7 !important;
+}
+:host-context(body.header-light-theme) mat-tab-group.approvals-tab-group ::ng-deep .mdc-tab { color: #64748b !important; }
+:host-context(body.header-light-theme) mat-tab-group.approvals-tab-group ::ng-deep .mdc-tab--active { color: #2563eb !important; }
+
+mat-tab-group.approvals-tab-group ::ng-deep .mat-mdc-tab-body-content {
+  padding-top: 20px;
+}
+
+.tab-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.count-chip {
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(79, 70, 229, 0.16);
+  color: #818cf8;
+  padding: 2px 10px;
+  border-radius: 20px;
+  margin-left: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  line-height: 1.6;
+}
+body.header-light-theme .count-chip {
+  background: rgba(79, 70, 229, 0.08);
+  color: #4f46e5;
+}
+
 // ── Page header (title area) ──────────────────────────────────────────────────
 .page-header {
   display: flex;
@@ -220,6 +289,30 @@
   font-size: 14px;
 
   mat-icon { font-size: 20px; width: 20px; height: 20px; }
+}
+
+// Per-tab empty state (shown when none of a resource type's 3 rank sections have data).
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: #94a3b8;
+  text-align: center;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    opacity: 0.7;
+  }
+
+  span {
+    font-size: 14px;
+    line-height: 1.5;
+  }
 }
 
 // ── Table footer (pagination container) ───────────────────────────────────────

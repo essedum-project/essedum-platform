@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, ViewChildren, QueryList, AfterViewInit, O
 import { combineLatest, switchMap, map, take, of, Subject } from 'rxjs';
 import { takeUntil, distinctUntilChanged, catchError } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
@@ -51,6 +51,18 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
   datasourceApprovalsDataSource = new MatTableDataSource<any>([]);
   datasourceOrgApprovalsDataSource = new MatTableDataSource<any>([]);
   datasourcePlatformApprovalsDataSource = new MatTableDataSource<any>([]);
+
+  // Server-side pagination for the Connections tab (datasources).
+  datasourceApprovalsTotal = 0;
+  datasourceApprovalsPageIndex = 0;
+  datasourceApprovalsPageSize = 5;
+  datasourceOrgApprovalsTotal = 0;
+  datasourceOrgApprovalsPageIndex = 0;
+  datasourceOrgApprovalsPageSize = 5;
+  datasourcePlatformApprovalsTotal = 0;
+  datasourcePlatformApprovalsPageIndex = 0;
+  datasourcePlatformApprovalsPageSize = 5;
+  readonly datasourcePageSizeOptions = [5, 10, 25];
 
   projectId: number | null = null;
   orgId: number | null = null;
@@ -186,9 +198,15 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
           const datasetOrgApi$ = finalOrgId ? this.api.getOrgAdminDatasetApprovals(finalOrgId).pipe(catchError(() => of([]))) : of([]);
           const datasetPlatformApi$ = streamingUserRank === 4 ? this.api.getPlatformAdminDatasetApprovals().pipe(catchError(() => of([]))) : of([]);
 
-          const datasourceApi$ = finalProjectId ? this.api.getProjectAdminDatasourceApprovals(finalProjectId).pipe(catchError(() => of([]))) : of([]);
-          const datasourceOrgApi$ = finalOrgId ? this.api.getOrgAdminDatasourceApprovals(finalOrgId).pipe(catchError(() => of([]))) : of([]);
-          const datasourcePlatformApi$ = streamingUserRank === 4 ? this.api.getPlatformAdminDatasourceApprovals().pipe(catchError(() => of([]))) : of([]);
+          const datasourceApi$ = finalProjectId
+            ? this.api.getProjectAdminDatasourceApprovals(finalProjectId, this.datasourceApprovalsPageIndex, this.datasourceApprovalsPageSize).pipe(catchError(() => of([])))
+            : of([]);
+          const datasourceOrgApi$ = finalOrgId
+            ? this.api.getOrgAdminDatasourceApprovals(finalOrgId, this.datasourceOrgApprovalsPageIndex, this.datasourceOrgApprovalsPageSize).pipe(catchError(() => of([])))
+            : of([]);
+          const datasourcePlatformApi$ = streamingUserRank === 4
+            ? this.api.getPlatformAdminDatasourceApprovals(this.datasourcePlatformApprovalsPageIndex, this.datasourcePlatformApprovalsPageSize).pipe(catchError(() => of([])))
+            : of([]);
 
           return combineLatest([streamingApi$, streamingOrgApi$, platformApi$, datasetApi$, datasetOrgApi$, datasetPlatformApi$, datasourceApi$, datasourceOrgApi$, datasourcePlatformApi$]);
         }),
@@ -264,13 +282,20 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
             this.datasetPlatformApprovals = extractArray(datasetPlatformApprovals);
             this.datasetPlatformApprovalsDataSource.data = this.datasetPlatformApprovals;
 
-            // Datasource approvals
+            // Datasource approvals (Connections tab — server-paginated)
+            const extractCount = (raw: any, pageRows: any[]): number => {
+              const count = raw?.count;
+              return typeof count === 'number' ? count : pageRows.length;
+            };
             this.datasourceApprovals = extractArray(datasourceApprovals);
             this.datasourceApprovalsDataSource.data = this.datasourceApprovals;
+            this.datasourceApprovalsTotal = extractCount(datasourceApprovals, this.datasourceApprovals);
             this.datasourceOrgApprovals = extractArray(datasourceOrgApprovals);
             this.datasourceOrgApprovalsDataSource.data = this.datasourceOrgApprovals;
+            this.datasourceOrgApprovalsTotal = extractCount(datasourceOrgApprovals, this.datasourceOrgApprovals);
             this.datasourcePlatformApprovals = extractArray(datasourcePlatformApprovals);
             this.datasourcePlatformApprovalsDataSource.data = this.datasourcePlatformApprovals;
+            this.datasourcePlatformApprovalsTotal = extractCount(datasourcePlatformApprovals, this.datasourcePlatformApprovals);
           } catch (error) {
             console.error('[APPROVALS] Error extracting data:', error);
             this.streamingApprovals = [];
@@ -464,5 +489,56 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       next: () => { this.notify.success('Connection rejected successfully'); this.load(); },
       error: err => this.notify.error(err?.error?.message || 'Failed to reject'),
     });
+  }
+
+  private extractRows(raw: any): any[] {
+    if (Array.isArray(raw)) return raw;
+    return Array.isArray(raw?.data) ? raw.data : [];
+  }
+
+  private extractTotal(raw: any, pageRows: any[]): number {
+    const count = raw?.count;
+    return typeof count === 'number' ? count : pageRows.length;
+  }
+
+  onDatasourceApprovalsPage(event: PageEvent): void {
+    this.datasourceApprovalsPageIndex = event.pageIndex;
+    this.datasourceApprovalsPageSize = event.pageSize;
+    if (!this.projectId) return;
+    this.api.getProjectAdminDatasourceApprovals(this.projectId, this.datasourceApprovalsPageIndex, this.datasourceApprovalsPageSize)
+      .pipe(take(1), catchError(() => of([])))
+      .subscribe((raw: any) => {
+        const rows = this.extractRows(raw);
+        this.datasourceApprovals = rows;
+        this.datasourceApprovalsDataSource.data = rows;
+        this.datasourceApprovalsTotal = this.extractTotal(raw, rows);
+      });
+  }
+
+  onDatasourceOrgApprovalsPage(event: PageEvent): void {
+    this.datasourceOrgApprovalsPageIndex = event.pageIndex;
+    this.datasourceOrgApprovalsPageSize = event.pageSize;
+    if (!this.orgId) return;
+    this.api.getOrgAdminDatasourceApprovals(this.orgId, this.datasourceOrgApprovalsPageIndex, this.datasourceOrgApprovalsPageSize)
+      .pipe(take(1), catchError(() => of([])))
+      .subscribe((raw: any) => {
+        const rows = this.extractRows(raw);
+        this.datasourceOrgApprovals = rows;
+        this.datasourceOrgApprovalsDataSource.data = rows;
+        this.datasourceOrgApprovalsTotal = this.extractTotal(raw, rows);
+      });
+  }
+
+  onDatasourcePlatformApprovalsPage(event: PageEvent): void {
+    this.datasourcePlatformApprovalsPageIndex = event.pageIndex;
+    this.datasourcePlatformApprovalsPageSize = event.pageSize;
+    this.api.getPlatformAdminDatasourceApprovals(this.datasourcePlatformApprovalsPageIndex, this.datasourcePlatformApprovalsPageSize)
+      .pipe(take(1), catchError(() => of([])))
+      .subscribe((raw: any) => {
+        const rows = this.extractRows(raw);
+        this.datasourcePlatformApprovals = rows;
+        this.datasourcePlatformApprovalsDataSource.data = rows;
+        this.datasourcePlatformApprovalsTotal = this.extractTotal(raw, rows);
+      });
   }
 }

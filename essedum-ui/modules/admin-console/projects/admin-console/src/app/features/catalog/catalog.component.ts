@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, take } from 'rxjs';
+import { PageEvent } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { NotificationService } from '../../core/notification.service';
 
@@ -15,6 +16,12 @@ export class CatalogComponent implements OnInit {
   assets: any[] = [];
   datasetAssets: any[] = [];
   datasourceAssets: any[] = [];
+
+  // Server-side pagination for the Connections tab (datasources).
+  datasourceTotal = 0;
+  datasourcePageIndex = 0;
+  datasourcePageSize = 5;
+  readonly datasourcePageSizeOptions = [5, 10, 25];
 
   // Keyed by "<kind>:<id>" so only the card being cloned shows a spinner.
   cloning: Record<string, boolean> = {};
@@ -45,14 +52,34 @@ export class CatalogComponent implements OnInit {
       .pipe(take(1))
       .subscribe(rows => (this.datasetAssets = this.toRows(rows)));
 
-    this.api.getDatasourceCatalog(this.projectId, this.orgId)
+    this.loadDatasourceCatalog();
+  }
+
+  /** Loads just the Connections (datasources) tab's current page. */
+  private loadDatasourceCatalog(): void {
+    this.api.getDatasourceCatalog(this.projectId, this.orgId, this.datasourcePageIndex, this.datasourcePageSize)
       .pipe(take(1))
-      .subscribe(rows => (this.datasourceAssets = this.toRows(rows)));
+      .subscribe(rows => {
+        this.datasourceAssets = this.toRows(rows);
+        this.datasourceTotal = this.toCount(rows, this.datasourceAssets);
+      });
+  }
+
+  onDatasourcePage(event: PageEvent): void {
+    this.datasourcePageIndex = event.pageIndex;
+    this.datasourcePageSize = event.pageSize;
+    this.loadDatasourceCatalog();
   }
 
   private toRows(rows: any): any[] {
     if (Array.isArray(rows)) return rows;
     return Array.isArray(rows?.data) ? rows.data : [];
+  }
+
+  /** Total record count for server-side pagination, falling back to the page length. */
+  private toCount(rows: any, pageRows: any[]): number {
+    const count = rows?.count;
+    return typeof count === 'number' ? count : pageRows.length;
   }
 
   // ---- clone ----

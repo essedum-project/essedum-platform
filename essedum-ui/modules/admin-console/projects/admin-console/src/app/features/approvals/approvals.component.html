@@ -65,6 +65,14 @@
     <mat-paginator #legacyPaginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
   </div>
 
+  <mat-tab-group class="approvals-tab-group">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">hub</mat-icon>
+        <span>Pipelines &amp; Agents</span>
+        <span class="count-chip" *ngIf="(streamingApprovals.length + streamingOrgApprovals.length + streamingPlatformApprovals.length) > 0">{{ streamingApprovals.length + streamingOrgApprovals.length + streamingPlatformApprovals.length }}</span>
+      </ng-template>
+
   <!-- STREAMING SERVICES - RANK 2 PROJECT-LEVEL APPROVALS -->
   <div *ngIf="streamingApprovals.length > 0" class="streaming-approvals-section">
     <div class="section-title">
@@ -279,6 +287,19 @@
     </div>
   </div>
 
+      <div class="empty-state" *ngIf="streamingApprovals.length === 0 && streamingOrgApprovals.length === 0 && streamingPlatformApprovals.length === 0">
+        <mat-icon>hub</mat-icon>
+        <span>No pipeline or agent approvals pending at your gates.</span>
+      </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">storage</mat-icon>
+        <span>Datasets</span>
+        <span class="count-chip" *ngIf="(datasetApprovals.length + datasetOrgApprovals.length + datasetPlatformApprovals.length) > 0">{{ datasetApprovals.length + datasetOrgApprovals.length + datasetPlatformApprovals.length }}</span>
+      </ng-template>
+
   <!-- DATASET - RANK 2 PROJECT-LEVEL APPROVALS -->
   <div *ngIf="datasetApprovals.length > 0" class="streaming-approvals-section">
     <div class="section-title">
@@ -394,6 +415,19 @@
     </table>
   </div>
 
+      <div class="empty-state" *ngIf="datasetApprovals.length === 0 && datasetOrgApprovals.length === 0 && datasetPlatformApprovals.length === 0">
+        <mat-icon>storage</mat-icon>
+        <span>No dataset approvals pending at your gates.</span>
+      </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">cable</mat-icon>
+        <span>Connections</span>
+        <span class="count-chip" *ngIf="(datasourceApprovalsTotal + datasourceOrgApprovalsTotal + datasourcePlatformApprovalsTotal) > 0">{{ datasourceApprovalsTotal + datasourceOrgApprovalsTotal + datasourcePlatformApprovalsTotal }}</span>
+      </ng-template>
+
   <!-- DATASOURCE - RANK 2 PROJECT-LEVEL APPROVALS -->
   <div *ngIf="datasourceApprovals.length > 0" class="streaming-approvals-section">
     <div class="section-title">
@@ -433,6 +467,16 @@
       <tr mat-header-row *matHeaderRowDef="streamingColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: streamingColumns"></tr>
     </table>
+    <div class="table-footer" *ngIf="datasourceApprovalsTotal > 0">
+      <mat-paginator
+        [length]="datasourceApprovalsTotal"
+        [pageIndex]="datasourceApprovalsPageIndex"
+        [pageSize]="datasourceApprovalsPageSize"
+        [pageSizeOptions]="datasourcePageSizeOptions"
+        showFirstLastButtons
+        (page)="onDatasourceApprovalsPage($event)">
+      </mat-paginator>
+    </div>
   </div>
 
   <!-- DATASOURCE - RANK 3 ORG-LEVEL APPROVALS -->
@@ -470,6 +514,16 @@
       <tr mat-header-row *matHeaderRowDef="streamingOrgColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: streamingOrgColumns"></tr>
     </table>
+    <div class="table-footer" *ngIf="datasourceOrgApprovalsTotal > 0">
+      <mat-paginator
+        [length]="datasourceOrgApprovalsTotal"
+        [pageIndex]="datasourceOrgApprovalsPageIndex"
+        [pageSize]="datasourceOrgApprovalsPageSize"
+        [pageSizeOptions]="datasourcePageSizeOptions"
+        showFirstLastButtons
+        (page)="onDatasourceOrgApprovalsPage($event)">
+      </mat-paginator>
+    </div>
   </div>
 
   <!-- DATASOURCE - RANK 4 PLATFORM-LEVEL APPROVALS -->
@@ -507,7 +561,24 @@
       <tr mat-header-row *matHeaderRowDef="streamingPlatformColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: streamingPlatformColumns"></tr>
     </table>
+    <div class="table-footer" *ngIf="datasourcePlatformApprovalsTotal > 0">
+      <mat-paginator
+        [length]="datasourcePlatformApprovalsTotal"
+        [pageIndex]="datasourcePlatformApprovalsPageIndex"
+        [pageSize]="datasourcePlatformApprovalsPageSize"
+        [pageSizeOptions]="datasourcePageSizeOptions"
+        showFirstLastButtons
+        (page)="onDatasourcePlatformApprovalsPage($event)">
+      </mat-paginator>
+    </div>
   </div>
+
+      <div class="empty-state" *ngIf="datasourceApprovalsTotal === 0 && datasourceOrgApprovalsTotal === 0 && datasourcePlatformApprovalsTotal === 0">
+        <mat-icon>cable</mat-icon>
+        <span>No connection approvals pending at your gates.</span>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
 
   <div *ngIf="pending.data.length === 0 && streamingApprovals.length === 0 && streamingOrgApprovals.length === 0 && streamingPlatformApprovals.length === 0 && datasetApprovals.length === 0 && datasetOrgApprovals.length === 0 && datasetPlatformApprovals.length === 0 && datasourceApprovals.length === 0 && datasourceOrgApprovals.length === 0 && datasourcePlatformApprovals.length === 0" class="approvals-empty">
     <mat-icon>task_alt</mat-icon>

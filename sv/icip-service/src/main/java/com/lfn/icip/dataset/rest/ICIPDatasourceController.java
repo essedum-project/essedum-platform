@@ -590,15 +590,35 @@ public class ICIPDatasourceController {
 		}
 	}
 
+	/** Default page size for the datasource (connections) approval/draft/catalog list endpoints. */
+	private static final int DEFAULT_PAGE_SIZE = 5;
+
+	/**
+	 * Slices an already-filtered list into the requested page. {@code page} is 0-based;
+	 * both params default (page=0, size={@link #DEFAULT_PAGE_SIZE}) when null/invalid.
+	 */
+	private <T> List<T> paginate(List<T> list, Integer page, Integer size) {
+		int safeSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
+		int safePage = (page == null || page < 0) ? 0 : page;
+		int from = Math.min(safePage * safeSize, list.size());
+		int to = Math.min(from + safeSize, list.size());
+		return list.subList(from, to);
+	}
+
 	/** GET /approval/project-admin/list?projectId=X&rank=2 */
 	@GetMapping("/approval/project-admin/list")
-	public ResponseEntity<?> getDatasourceProjectAdminApprovals(@RequestParam Integer projectId, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> getDatasourceProjectAdminApprovals(
+			@RequestParam Integer projectId,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
 			List<ICIPDatasource> result = datasourceApprovalWorkflowService.getProjectAdminApprovals(projectId, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+			List<ICIPDatasource> pageSlice = paginate(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
 		} catch (Exception e) {
 			logger.error("[DatasourceApproval] Error getting project admin approvals", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
@@ -607,13 +627,18 @@ public class ICIPDatasourceController {
 
 	/** GET /approval/org-admin/list?organizationId=X&rank=3 */
 	@GetMapping("/approval/org-admin/list")
-	public ResponseEntity<?> getDatasourceOrgAdminApprovals(@RequestParam Integer organizationId, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> getDatasourceOrgAdminApprovals(
+			@RequestParam Integer organizationId,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
 			List<ICIPDatasource> result = datasourceApprovalWorkflowService.getOrgAdminApprovals(organizationId, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+			List<ICIPDatasource> pageSlice = paginate(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
 		} catch (Exception e) {
 			logger.error("[DatasourceApproval] Error getting org admin approvals", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
@@ -622,13 +647,17 @@ public class ICIPDatasourceController {
 
 	/** GET /approval/platform-admin/list?rank=4 */
 	@GetMapping("/approval/platform-admin/list")
-	public ResponseEntity<?> getDatasourcePlatformAdminApprovals(@RequestParam(required = false) String rank) {
+	public ResponseEntity<?> getDatasourcePlatformAdminApprovals(
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
 			List<ICIPDatasource> result = datasourceApprovalWorkflowService.getPlatformAdminApprovals(rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+			List<ICIPDatasource> pageSlice = paginate(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
 		} catch (Exception e) {
 			logger.error("[DatasourceApproval] Error getting platform admin approvals", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
@@ -637,13 +666,18 @@ public class ICIPDatasourceController {
 
 	/** GET /approval/draft-resources?projectId=X&rank=2 — PROJECT_APPROVED items ready to submit to org. */
 	@GetMapping("/approval/draft-resources")
-	public ResponseEntity<?> getDatasourceDraftResources(@RequestParam Integer projectId, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> getDatasourceDraftResources(
+			@RequestParam Integer projectId,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
 			List<ICIPDatasource> result = datasourceApprovalWorkflowService.getDraftResources(projectId, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+			List<ICIPDatasource> pageSlice = paginate(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
 		} catch (Exception e) {
 			logger.error("[DatasourceApproval] Error getting draft resources", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
@@ -652,13 +686,18 @@ public class ICIPDatasourceController {
 
 	/** GET /approval/org-admin/draft-resources?organizationId=X&rank=3 — ORG_APPROVED items ready to submit to platform. */
 	@GetMapping("/approval/org-admin/draft-resources")
-	public ResponseEntity<?> getDatasourceOrgAdminDraftResources(@RequestParam Integer organizationId, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> getDatasourceOrgAdminDraftResources(
+			@RequestParam Integer organizationId,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
 			List<ICIPDatasource> result = datasourceApprovalWorkflowService.getOrgAdminDraftResources(organizationId, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+			List<ICIPDatasource> pageSlice = paginate(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
 		} catch (Exception e) {
 			logger.error("[DatasourceApproval] Error getting org admin draft resources", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
@@ -667,10 +706,15 @@ public class ICIPDatasourceController {
 
 	/** GET /approval/catalog?projectId=X&orgId=Y — visible items based on scope (neither = globally published). */
 	@GetMapping("/approval/catalog")
-	public ResponseEntity<?> getDatasourceCatalog(@RequestParam(required = false) Integer projectId, @RequestParam(required = false) Integer orgId) {
+	public ResponseEntity<?> getDatasourceCatalog(
+			@RequestParam(required = false) Integer projectId,
+			@RequestParam(required = false) Integer orgId,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
 		try {
 			List<ICIPDatasource> result = datasourceApprovalWorkflowService.getCatalog(projectId, orgId);
-			return ResponseEntity.ok(result);
+			List<ICIPDatasource> pageSlice = paginate(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
 		} catch (Exception e) {
 			logger.error("[DatasourceApproval] Error fetching datasource catalog", e);
 			return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));
