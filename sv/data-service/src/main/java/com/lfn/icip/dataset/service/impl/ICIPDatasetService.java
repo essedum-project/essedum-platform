@@ -420,6 +420,12 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 		if(iCIPDataset2Save.getEvent_details()!=null) {
 			iCIPDataset.setEvent_details(iCIPDataset2Save.getEvent_details());
 		}
+		if (iCIPDataset2Save.getApprovalStatus() != null) {
+			iCIPDataset.setApprovalStatus(iCIPDataset2Save.getApprovalStatus());
+		}
+		if (iCIPDataset2Save.getProjectId() != null) {
+			iCIPDataset.setProjectId(iCIPDataset2Save.getProjectId());
+		}
 		logger.info("________________>>>>>>>>>>>>>>>{}", iCIPDataset.getId());
 		ICIPDataset2 result = null;
 		try {

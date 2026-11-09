@@ -213,6 +213,13 @@ public class ICIPDataset2 extends BaseDomain implements Serializable {
 	private String summary;
 	
 	private String event_details;
+
+	@Column(name = "approval_status")
+	private String approvalStatus;
+
+	@Column(name = "project_id")
+	private Integer projectId;
+
 	/**
 	 * Equals.
 	 *
