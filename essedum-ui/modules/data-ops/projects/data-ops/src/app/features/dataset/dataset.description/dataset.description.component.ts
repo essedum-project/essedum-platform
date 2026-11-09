@@ -201,7 +201,7 @@ export class DatasetDescriptionComponent implements OnInit {
   }
 
   getApprovalStatus(): string {
-    return (this.card?.approval_status || 'GLOBALLY_PUBLISHED');
+    return (this.card?.approvalStatus || this.card?.approval_status || 'GLOBALLY_PUBLISHED');
   }
 
   getApprovalLabel(): string {
