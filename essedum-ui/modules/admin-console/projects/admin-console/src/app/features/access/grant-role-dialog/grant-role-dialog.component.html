@@ -4,7 +4,10 @@
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>User</mat-label>
     <mat-select [(ngModel)]="userId" name="userId">
-      <mat-option *ngFor="let u of users" [value]="u.id">{{ u.name }}</mat-option>
+      <mat-option *ngFor="let u of users" [value]="u.id">
+        {{ u.name }}
+        <span style="font-size:11px;opacity:0.55;margin-left:4px;">[#{{ u.id }}]</span>
+      </mat-option>
     </mat-select>
   </mat-form-field>
 
