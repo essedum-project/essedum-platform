@@ -427,13 +427,22 @@ public class AccessContextService {
 
 		Project project = projectRepository.findById(projectId).orElse(null);
 		Integer organisationId = project != null ? project.getOrganisationId() : null;
-		if (organisationId == null) {
-			return direct;
-		}
 
 		List<RoleAssignment> result = new ArrayList<>(direct);
+		if (organisationId != null) {
+			// Org-scoped assignments that cover this project through its organisation.
+			roleAssignmentRepository.findByUserIdAndRevokedAtIsNull(userId).stream()
+					.filter(a -> organisationId.equals(a.getOrganizationId()))
+					.forEach(result::add);
+		}
+		// Platform Admin (rank >= 4) is a global role — include it regardless of which
+		// project or org the assignment was originally scoped to.
 		roleAssignmentRepository.findByUserIdAndRevokedAtIsNull(userId).stream()
-				.filter(a -> organisationId.equals(a.getOrganizationId()))
+				.filter(a -> {
+					RbacRole role = rbacRoleRepository.findById(a.getRoleId()).orElse(null);
+					return role != null && role.getRank() != null && role.getRank() >= PLATFORM_ADMIN_RANK;
+				})
+				.filter(a -> result.stream().noneMatch(r -> r.getId().equals(a.getId())))
 				.forEach(result::add);
 		return result;
 	}
