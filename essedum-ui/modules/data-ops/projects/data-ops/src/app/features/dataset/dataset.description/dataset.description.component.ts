@@ -145,7 +145,12 @@ export class DatasetDescriptionComponent implements OnInit {
   event_status : string = '';
   htmlstring: any;
   dataDoc: boolean = false;
-  
+
+  currentUserLogin: string = '';
+  userRank: number = 0;
+  datasetProjectId: number = null;
+  approvalSubmitting: boolean = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -163,7 +168,83 @@ export class DatasetDescriptionComponent implements OnInit {
   ) { }
 
 
+  resolveUserContext(): void {
+    try {
+      const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+      const role = JSON.parse(sessionStorage.getItem('role') || '{}');
+      const rawLogin = (user?.user_login || user?.username || user?.name || '').toLowerCase();
+      const email = (user?.user_email || rawLogin).toLowerCase();
+      const emailPrefix = email.includes('@') ? email.split('@')[0] : email;
+      const resolvedLogin = rawLogin.includes('@') ? rawLogin.split('@')[0] : (rawLogin || emailPrefix);
+      this.currentUserLogin = resolvedLogin;
+      this.userRank = isNaN(Number(role?.rank)) ? 0 : Number(role?.rank);
+      const projectStr = sessionStorage.getItem('project');
+      if (projectStr) {
+        try {
+          const projectObj = JSON.parse(projectStr);
+          this.datasetProjectId = projectObj?.id || projectObj?.projectId || Number(projectStr) || null;
+        } catch {
+          this.datasetProjectId = Number(projectStr) || null;
+        }
+      }
+      if (!this.datasetProjectId) {
+        const projIdStr = sessionStorage.getItem('projectId') || sessionStorage.getItem('CURRENTPRJID');
+        if (projIdStr) this.datasetProjectId = Number(projIdStr) || null;
+      }
+    } catch {}
+  }
+
+  isOwnDataset(): boolean {
+    if (!this.currentUserLogin || !this.card) return false;
+    const cb = (this.card.created_by || this.card.lastmodifiedby || '').toLowerCase();
+    return cb === this.currentUserLogin || cb.startsWith(this.currentUserLogin + '@');
+  }
+
+  getApprovalStatus(): string {
+    return (this.card?.approval_status || 'GLOBALLY_PUBLISHED');
+  }
+
+  getApprovalLabel(): string {
+    const labels: Record<string, string> = {
+      'DRAFT': 'Draft', 'PENDING_PROJECT_APPROVAL': 'Pending Project Approval',
+      'PROJECT_APPROVED': 'Project Approved', 'PROJECT_REJECTED': 'Project Rejected',
+      'PENDING_ORG_APPROVAL': 'Pending Org Approval', 'ORG_APPROVED': 'Org Approved',
+      'ORG_REJECTED': 'Org Rejected', 'PENDING_PLATFORM_APPROVAL': 'Pending Platform Approval',
+      'PLATFORM_REJECTED': 'Platform Rejected', 'GLOBALLY_PUBLISHED': 'Globally Published',
+    };
+    return labels[this.getApprovalStatus()] || this.getApprovalStatus();
+  }
+
+  getApprovalClass(): string {
+    const classes: Record<string, string> = {
+      'DRAFT': 'draft', 'PENDING_PROJECT_APPROVAL': 'pending', 'PROJECT_APPROVED': 'project-approved',
+      'PROJECT_REJECTED': 'rejected', 'PENDING_ORG_APPROVAL': 'pending', 'ORG_APPROVED': 'org-approved',
+      'ORG_REJECTED': 'rejected', 'PENDING_PLATFORM_APPROVAL': 'pending',
+      'PLATFORM_REJECTED': 'rejected', 'GLOBALLY_PUBLISHED': 'published',
+    };
+    return classes[this.getApprovalStatus()] || 'draft';
+  }
+
+  showSubmitButton(): boolean {
+    const s = this.getApprovalStatus();
+    return this.isOwnDataset() && (s === 'DRAFT' || s === 'PROJECT_REJECTED');
+  }
+
+  submitForApproval(): void {
+    if (!this.datasetProjectId) { this.service.message('No project selected', 'error'); return; }
+    this.approvalSubmitting = true;
+    this.datasetsService.submitDatasetForApproval(this.card.id, this.datasetProjectId).subscribe({
+      next: () => {
+        this.service.message('Dataset submitted for approval');
+        this.card.approval_status = 'PENDING_PROJECT_APPROVAL';
+        this.approvalSubmitting = false;
+      },
+      error: err => { this.service.message(err?.message || 'Failed to submit for approval', 'error'); this.approvalSubmitting = false; }
+    });
+  }
+
   ngOnInit(): void {
+    this.resolveUserContext();
     this.route.params.subscribe((params) => {
       this.datasetName = params['cname'];
     });
