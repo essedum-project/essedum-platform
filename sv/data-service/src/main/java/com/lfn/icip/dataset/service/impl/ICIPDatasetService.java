@@ -1659,6 +1659,18 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 		return filteredDatasets.subList(start, end);
 	}
 
+	public List<ICIPDataset> getAllDatasetsForAdvancedFilter(String organization, String aliasOrName,
+	                                                        List<String> types, List<String> knowledgeBases) {
+		List<ICIPDataset> result;
+		if (knowledgeBases == null || knowledgeBases.isEmpty()) {
+			result = datasetRepository.getDatasetsForAdvancedFilterTypes(organization, aliasOrName, types);
+		} else {
+			result = datasetRepository.getDatasetsForAdvancedFilterTypesAndKnowledgeBases(organization, aliasOrName,
+					types, knowledgeBases);
+		}
+		return result != null ? result : new ArrayList<>();
+	}
+
 	public List<String> getDatasetTypesForAdvancedFilter(String organization) {
 		List<String> datasetTypes = datasetRepository.getDatasetTypesForAdvancedFilter(organization);
 		if (datasetTypes == null)

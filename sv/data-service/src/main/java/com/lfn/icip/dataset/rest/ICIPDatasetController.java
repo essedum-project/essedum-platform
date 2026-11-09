@@ -2949,11 +2949,21 @@ public class ICIPDatasetController {
 			@RequestParam(value = "aliasOrName", required = false) String aliasOrName,
 			@RequestParam(value = "types", required = false) List<String> types,
 			@RequestParam(value = "tags", required = false) List<String> tags,
-			@RequestParam(value = "knowledgeBases", required = false) List<String> knowledgeBases) {
+			@RequestParam(value = "knowledgeBases", required = false) List<String> knowledgeBases,
+			@RequestHeader(value = "user-login", required = false) String userLogin,
+			@RequestHeader(value = "project", required = false) String projectHeader,
+			@RequestHeader(value = "rank", required = false) String rankHeader,
+			@RequestHeader(value = "roleId", required = false) String roleIdHeader,
+			@RequestHeader(value = "portfolioId", required = false) String portfolioIdHeader,
+			@RequestHeader(value = "organisation", required = false) String orgHeader) {
 		logger.info("Advance Filter -Count called : {}", organization);
-		Long results = datasetService.getDatasetsCountForAdvancedFilter(organization, aliasOrName, types, tags,
-			knowledgeBases);
-		return ResponseEntity.status(200).body(results);
+		List<ICIPDataset> allDatasets = datasetService.getAllDatasetsForAdvancedFilter(organization, aliasOrName, types, knowledgeBases);
+		if (tags != null && !tags.isEmpty()) {
+			allDatasets = ICIPDatasetService.filterDatasets(allDatasets, tags);
+		}
+		List<ICIPDataset> filtered = applyDatasetVisibilityFilter(allDatasets, userLogin, projectHeader,
+				rankHeader != null ? rankHeader : roleIdHeader, portfolioIdHeader, orgHeader);
+		return ResponseEntity.status(200).body((long) filtered.size());
 	}
 
 	@GetMapping("/filter/advanced/list")
@@ -2963,12 +2973,107 @@ public class ICIPDatasetController {
 			@RequestParam(value = "types", required = false) List<String> types,
 			@RequestParam(value = "tags", required = false) List<String> tags,
 			@RequestParam(value = "knowledgeBases", required = false) List<String> knowledgeBases,
-			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
-			@RequestParam(name = "size", defaultValue = "8", required = false) String size) {
+			@RequestParam(name = "page", defaultValue = "1", required = false) String page,
+			@RequestParam(name = "size", defaultValue = "8", required = false) String size,
+			@RequestHeader(value = "user-login", required = false) String userLogin,
+			@RequestHeader(value = "project", required = false) String projectHeader,
+			@RequestHeader(value = "rank", required = false) String rankHeader,
+			@RequestHeader(value = "roleId", required = false) String roleIdHeader,
+			@RequestHeader(value = "portfolioId", required = false) String portfolioIdHeader,
+			@RequestHeader(value = "organisation", required = false) String orgHeader) {
 		logger.info("Advance Filter -List called : {}", organization);
-		List<ICIPDataset> results = datasetService.getDatasetsCountForAdvancedFilter(organization, aliasOrName, types,
-			tags, knowledgeBases, page, size);
-		return ResponseEntity.status(200).body(results);
+		List<ICIPDataset> allDatasets = datasetService.getAllDatasetsForAdvancedFilter(organization, aliasOrName, types, knowledgeBases);
+		if (tags != null && !tags.isEmpty()) {
+			allDatasets = ICIPDatasetService.filterDatasets(allDatasets, tags);
+		}
+		List<ICIPDataset> filtered = applyDatasetVisibilityFilter(allDatasets, userLogin, projectHeader,
+				rankHeader != null ? rankHeader : roleIdHeader, portfolioIdHeader, orgHeader);
+		int pageNum = Math.max(0, Integer.parseInt(page) - 1);
+		int pageSize = Integer.parseInt(size);
+		int start = pageNum * pageSize;
+		int end = Math.min(start + pageSize, filtered.size());
+		List<ICIPDataset> paged = (start >= filtered.size()) ? new ArrayList<>() : filtered.subList(start, end);
+		return ResponseEntity.status(200).body(paged);
+	}
+
+	private List<ICIPDataset> applyDatasetVisibilityFilter(List<ICIPDataset> datasets, String userLogin,
+			String projectHeader, String roleHeader, String portfolioIdHeader, String orgHeader) {
+		String username = userLogin != null ? userLogin : "";
+		if (projectHeader == null || projectHeader.isEmpty() || roleHeader == null || roleHeader.isEmpty()) {
+			logger.info("[Approval] Dataset list - missing project/role headers, returning all results");
+			return datasets;
+		}
+		try {
+			Integer userProjectId = Integer.parseInt(projectHeader);
+			Integer userRoleId = Integer.parseInt(roleHeader);
+			Integer userPortfolioId = null;
+			try { userPortfolioId = Integer.parseInt(portfolioIdHeader != null ? portfolioIdHeader : ""); } catch (NumberFormatException ignored) {}
+			String effectiveOrg = orgHeader != null ? orgHeader : "";
+
+			List<ICIPDataset> visible = new ArrayList<>();
+			for (ICIPDataset ds : datasets) {
+				String status = ds.getApprovalStatus();
+				if (status == null || status.isEmpty()) {
+					visible.add(ds);
+					continue;
+				}
+				String createdBy = ds.lastmodifiedby;
+				if ("admin".equals(createdBy)) {
+					visible.add(ds);
+					continue;
+				}
+				boolean isVisible = false;
+				if ("DRAFT".equals(status)) {
+					isVisible = username.isEmpty() || username.equals(createdBy);
+				} else if ("PENDING_PROJECT_APPROVAL".equals(status)) {
+					Integer resourceProject = ds.getProjectId();
+					isVisible = username.isEmpty() || username.equals(createdBy)
+							|| (userRoleId >= 2 && userProjectId.equals(resourceProject));
+				} else if ("PROJECT_APPROVED".equals(status)) {
+					isVisible = userProjectId.equals(ds.getProjectId());
+				} else if ("PENDING_ORG_APPROVAL".equals(status)) {
+					Integer resourceProject = ds.getProjectId();
+					Integer approvedOrgId = ds.getApprovedOrganizationId();
+					isVisible = userProjectId.equals(resourceProject);
+					if (!isVisible && approvedOrgId != null && userPortfolioId != null && approvedOrgId.equals(userPortfolioId) && userRoleId >= 3) {
+						isVisible = true;
+					}
+				} else if ("ORG_APPROVED".equals(status)) {
+					Integer approvedOrgId = ds.getApprovedOrganizationId();
+					if (approvedOrgId != null && userPortfolioId != null && approvedOrgId.equals(userPortfolioId)) {
+						isVisible = true;
+					} else {
+						String resourceOrg = ds.getOrganization();
+						isVisible = resourceOrg != null && !effectiveOrg.isEmpty() && resourceOrg.equals(effectiveOrg);
+					}
+				} else if ("PENDING_PLATFORM_APPROVAL".equals(status)) {
+					Integer approvedOrgId = ds.getApprovedOrganizationId();
+					if (approvedOrgId != null && userPortfolioId != null && approvedOrgId.equals(userPortfolioId)) {
+						isVisible = true;
+					} else {
+						String resourceOrg = ds.getOrganization();
+						if (resourceOrg != null && !effectiveOrg.isEmpty() && resourceOrg.equals(effectiveOrg)) {
+							isVisible = true;
+						}
+					}
+					if (!isVisible && userRoleId >= 4) isVisible = true;
+				} else if ("PUBLISHED".equals(status) || "GLOBALLY_PUBLISHED".equals(status)) {
+					isVisible = true;
+				} else if ("PROJECT_REJECTED".equals(status)) {
+					isVisible = username.isEmpty() || username.equals(createdBy);
+				} else if ("ORG_REJECTED".equals(status)) {
+					isVisible = userProjectId.equals(ds.getProjectId());
+				} else {
+					isVisible = true;
+				}
+				if (isVisible) visible.add(ds);
+			}
+			logger.info("[Approval] Dataset list returning {} of {} after visibility filter", visible.size(), datasets.size());
+			return visible;
+		} catch (NumberFormatException e) {
+			logger.warn("[Approval] Invalid numeric header values: {}", e.getMessage());
+			return datasets;
+		}
 	}
 	
 	@GetMapping("/filter/advanced/types")
