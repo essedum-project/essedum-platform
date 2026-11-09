@@ -2,20 +2,73 @@
 //  DATASET DESCRIPTION / METADATA PANEL — Enterprise AI Platform
 // ═══════════════════════════════════════════════════════════════════
 
-.ds-approval-badge {
-  display: inline-block;
-  font-size: 0.75rem;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-weight: 600;
-  white-space: nowrap;
+.ds-approval-actions-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 
-  &--draft        { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
-  &--pending      { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
-  &--project-approved { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-  &--org-approved { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-  &--published    { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
-  &--rejected     { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+  .approval-status-inline {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    background-color: rgba(79, 142, 247, 0.15);
+    color: #7eb8ff;
+
+    &.ds-status-draft          { background-color: rgba(100, 116, 139, 0.2); color: #94a3b8; }
+    &.ds-status-pending        { background-color: rgba(217, 119, 6, 0.2);   color: #f59e0b; }
+    &.ds-status-project-approved { background-color: rgba(16, 185, 129, 0.2); color: #34d399; }
+    &.ds-status-org-approved   { background-color: rgba(124, 58, 237, 0.2);  color: #a78bfa; }
+    &.ds-status-published      { background-color: rgba(5, 150, 105, 0.2);   color: #10b981; }
+    &.ds-status-rejected       { background-color: rgba(239, 68, 68, 0.2);   color: #f87171; }
+  }
+}
+
+.ds-approval-button-container {
+  display: inline-flex;
+  align-items: center;
+
+  .ds-send-approval-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #4f8fe7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+      background-color: #3a7cc7;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &:disabled {
+      background-color: #a0b5d8;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    &.ds-resubmit-btn {
+      background-color: #d97706;
+      &:hover:not(:disabled) { background-color: #b45309; }
+    }
+  }
 }
 :host {
   display: block !important;

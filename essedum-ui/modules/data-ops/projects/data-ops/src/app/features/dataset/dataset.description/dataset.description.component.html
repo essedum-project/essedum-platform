@@ -21,16 +21,17 @@
                 <span *ngIf="initiativeView">
                   <div class="selector-model-title-tail">
                     <ul class="d-flex justify-content-between align-items-center py-2 px-4" id="aip-dataset-desc-icon">
-                      <li *ngIf="card && getApprovalStatus() !== 'GLOBALLY_PUBLISHED'" class="d-flex align-items-center" style="gap:8px; list-style:none;">
-                        <span class="ds-approval-badge ds-approval-badge--{{ getApprovalClass() }}"
-                              style="font-size:0.75rem; padding:3px 10px; border-radius:12px; font-weight:600; white-space:nowrap;">
-                          {{ getApprovalLabel() }}
-                        </span>
-                        <button *ngIf="showSubmitButton()" [disabled]="approvalSubmitting"
-                                (click)="submitForApproval()"
-                                style="padding:4px 14px; border-radius:6px; font-size:0.8rem; cursor:pointer; border:1px solid #1976d2; background:#1976d2; color:#fff; white-space:nowrap;">
-                          Submit for Approval
-                        </button>
+                      <li *ngIf="card && getApprovalStatus() !== 'GLOBALLY_PUBLISHED'" class="ds-approval-actions-container" style="list-style:none;">
+                        <div class="approval-status-inline ds-status-{{ getApprovalClass() }}">
+                          <span class="status-label">{{ getApprovalLabel() }}</span>
+                        </div>
+                        <div class="ds-approval-button-container" *ngIf="showSubmitButton()">
+                          <button [disabled]="approvalSubmitting"
+                                  (click)="submitForApproval()"
+                                  [class]="getApprovalStatus() === 'PROJECT_REJECTED' ? 'ds-send-approval-btn ds-resubmit-btn' : 'ds-send-approval-btn'">
+                            {{ getApprovalStatus() === 'PROJECT_REJECTED' ? 'Resubmit' : 'Submit for Approval' }}
+                          </button>
+                        </div>
                       </li>
                       <li *ngIf="!isGitUrl">
                         <mat-menu #overflowMenu="matMenu">

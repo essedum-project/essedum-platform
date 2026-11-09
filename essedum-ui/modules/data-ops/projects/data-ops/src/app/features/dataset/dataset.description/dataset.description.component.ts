@@ -236,6 +236,7 @@ export class DatasetDescriptionComponent implements OnInit {
     this.datasetsService.submitDatasetForApproval(this.card.id, this.datasetProjectId).subscribe({
       next: () => {
         this.service.message('Dataset submitted for approval');
+        this.card.approvalStatus = 'PENDING_PROJECT_APPROVAL';
         this.card.approval_status = 'PENDING_PROJECT_APPROVAL';
         this.approvalSubmitting = false;
       },
