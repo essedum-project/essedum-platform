@@ -294,7 +294,13 @@ export class DatasetDescriptionComponent implements OnInit {
       this.getRelatedComponent();
     }
     else if (this.datasetName){
-      this.getDatasetByName();
+      // For cross-org published datasets the catalog passes the full card via
+      // navigation state. Use it directly so we don't fetch with the wrong org.
+      if (history.state?.card) {
+        this.initFromCard(history.state.card);
+      } else {
+        this.getDatasetByName();
+      }
     }
     else {
       this.chatUrl = this.injector.get('chatData');
@@ -351,6 +357,33 @@ export class DatasetDescriptionComponent implements OnInit {
         this.eventData = JSON.parse(this.card.event_details);
     });
   }
+  initFromCard(c: any) {
+    this.card = c;
+    this.tempDataset['attributes'] = c.attributes;
+    this.tempDataset['datasource'] = c.datasource;
+    try { this.metaData = JSON.parse(c.attributes); } catch { this.metaData = {}; }
+    this.metaDataKeys = Object.keys(this.metaData || {});
+    this.metaDataValues = Object.values(this.metaData || {});
+    this.datasetAlias = c.alias;
+    this.rowObj = c;
+    if (c?.tags == '[\"Doc Labelling\"]') { this.AnnotateFlag = true; this.cdRef.detectChanges(); }
+    this.description = c.description;
+    this.isGitUrl = c.datasource?.type === 'GIT';
+    if (c.indexname) this.index = c.indexname;
+    this.getActions();
+    this.getRelatedComponent();
+    this.metaDataDescKey = this.metaDataKeys[2];
+    this.metaDataUrlKey = this.metaDataKeys[4];
+    this.descValue = this.metaData?.description;
+    this.urlValue = this.metaData?.url;
+    this.path = this.metaData?.path;
+    this.fileName = this.path + '/' + this.metaData?.object;
+    this.datasetId = c.id;
+    this.viewType = c.views;
+    this.fileType(this.viewType);
+    if (c.event_details) { try { this.eventData = JSON.parse(c.event_details); } catch {} }
+  }
+
   getRelatedComponent(){
     this.component = [];
     this.service.getRelatedComponent(this.card.id, 'DATASET').subscribe((res) => {

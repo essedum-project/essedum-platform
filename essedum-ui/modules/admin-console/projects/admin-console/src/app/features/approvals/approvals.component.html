@@ -380,10 +380,10 @@
 
   <!-- DATASET - RANK 4 PLATFORM-LEVEL APPROVALS -->
   <div *ngIf="datasetPlatformApprovals.length > 0" class="streaming-platform-approvals-section">
-    <div class="section-title">
+    <!-- <div class="section-title">
       <mat-icon>storage</mat-icon>
       <span>Datasets Pending Platform Approval</span>
-    </div>
+    </div> -->
     <table mat-table [dataSource]="datasetPlatformApprovalsDataSource" class="admin-console-table streaming-platform-table">
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>Dataset Name</th>
@@ -528,10 +528,10 @@
 
   <!-- DATASOURCE - RANK 4 PLATFORM-LEVEL APPROVALS -->
   <div *ngIf="datasourcePlatformApprovals.length > 0" class="streaming-platform-approvals-section">
-    <div class="section-title">
+     <!-- <div class="section-title">
       <mat-icon>cable</mat-icon>
       <span>Connections Pending Platform Approval</span>
-    </div>
+    </div> -->
     <table mat-table [dataSource]="datasourcePlatformApprovalsDataSource" class="admin-console-table streaming-platform-table">
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>Connection Name</th>
