@@ -381,15 +381,22 @@ public class DatasetApprovalWorkflowService {
 	 * neither -> all PUBLISHED (platform-approved, global) items.
 	 */
 	public List<ICIPDataset> getCatalog(Integer projectId, Integer orgId) {
+		if (projectId == null && orgId == null) {
+			return datasetRepository.findByApprovalStatus("PUBLISHED").stream()
+					.filter(r -> r.getApprovedOrganizationId() == null)
+					.collect(Collectors.toList());
+		}
+		List<ICIPDataset> result = new ArrayList<>();
+		java.util.Set<Integer> seen = new java.util.HashSet<>();
 		if (projectId != null) {
-			return datasetRepository.findByApprovalStatusAndProjectId("PROJECT_APPROVED", projectId);
+			datasetRepository.findByApprovalStatusAndProjectId("PROJECT_APPROVED", projectId)
+					.forEach(d -> { if (seen.add(d.getId())) result.add(d); });
 		}
 		if (orgId != null) {
-			return datasetRepository.findByApprovalStatusAndApprovedOrganizationId("ORG_APPROVED", orgId);
+			datasetRepository.findByApprovalStatusAndApprovedOrganizationId("ORG_APPROVED", orgId)
+					.forEach(d -> { if (seen.add(d.getId())) result.add(d); });
 		}
-		return datasetRepository.findByApprovalStatus("PUBLISHED").stream()
-				.filter(r -> r.getApprovedOrganizationId() == null)
-				.collect(Collectors.toList());
+		return result;
 	}
 }
 
