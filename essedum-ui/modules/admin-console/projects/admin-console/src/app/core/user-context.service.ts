@@ -61,6 +61,17 @@ export class UserContextService {
   }
 
   private resolveOrgIdFromSession(): number | null {
+    // portfoliodata.id is the canonical org ID shown in the UI (e.g. or-sc1 [#28]).
+    // project.organisationId is a FK from a different table and can differ — using
+    // it causes mismatches in org-approval queries (submit stores one ID, query uses
+    // the other). portfoliodata.id is consistent with what the data-ops interceptor
+    // also sends as portfolioId, so all org-level operations align on one value.
+    try {
+      const pd = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}');
+      const id = Number(pd?.id);
+      if (Number.isFinite(id) && id > 0) return id;
+    } catch {}
+    // Fall back to project.organisationId if portfoliodata is unavailable.
     try {
       const raw = sessionStorage.getItem('project');
       if (!raw) return null;
