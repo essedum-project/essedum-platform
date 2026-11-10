@@ -48,9 +48,42 @@ export class AipInterceptorService implements HttpInterceptor {
           request = request.clone({ headers: request.headers.set("roleId", JSON.parse(role).id.toString()   )});
         if(JSON.parse(role).name.toString() !="")
           request = request.clone({ headers: request.headers.set("roleName", JSON.parse(role).name.toString()   )});
+        try {
+          const r = JSON.parse(role);
+          if (r?.rank?.toString())
+            request = request.clone({ headers: request.headers.set("rank", r.rank.toString()) });
+        } catch { /* ignore */ }
       }
-  
-    
+
+      // portfolioId — required by backend ORG_APPROVED visibility filter (org admin flow).
+      const portfolioDataRaw = sessionStorage.getItem("portfoliodata");
+      if (portfolioDataRaw) {
+        try {
+          const pd = JSON.parse(portfolioDataRaw);
+          if (pd?.id?.toString())
+            request = request.clone({ headers: request.headers.set("portfolioId", pd.id.toString()) });
+        } catch { /* ignore */ }
+      }
+
+      // organisation — org name fallback for ORG_APPROVED visibility.
+      if (project) {
+        try {
+          const p = JSON.parse(project);
+          if (p?.name?.toString())
+            request = request.clone({ headers: request.headers.set("organisation", p.name.toString()) });
+        } catch { /* ignore */ }
+      }
+
+      // user-login — required for DRAFT-only-creator visibility.
+      const storedUser = sessionStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const userObj = JSON.parse(storedUser);
+          const username = userObj?.username || userObj?.preferred_username || userObj?.name;
+          if (username)
+            request = request.clone({ headers: request.headers.set("user-login", username) });
+        } catch { /* ignore */ }
+      }
     }
     if(request.url.includes("service") && localStorage.hasOwnProperty("accessToken")){  
       request = request.clone({ headers: request.headers.append('access-token', accessToken) });    

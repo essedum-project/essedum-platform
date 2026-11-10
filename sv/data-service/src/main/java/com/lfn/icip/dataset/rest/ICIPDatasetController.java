@@ -2962,7 +2962,7 @@ public class ICIPDatasetController {
 			allDatasets = ICIPDatasetService.filterDatasets(allDatasets, tags);
 		}
 		List<ICIPDataset> filtered = applyDatasetVisibilityFilter(allDatasets, userLogin, projectHeader,
-				rankHeader != null ? rankHeader : roleIdHeader, portfolioIdHeader, orgHeader);
+				rankHeader != null ? rankHeader : roleIdHeader, portfolioIdHeader, orgHeader, organization);
 		return ResponseEntity.status(200).body((long) filtered.size());
 	}
 
@@ -2987,7 +2987,7 @@ public class ICIPDatasetController {
 			allDatasets = ICIPDatasetService.filterDatasets(allDatasets, tags);
 		}
 		List<ICIPDataset> filtered = applyDatasetVisibilityFilter(allDatasets, userLogin, projectHeader,
-				rankHeader != null ? rankHeader : roleIdHeader, portfolioIdHeader, orgHeader);
+				rankHeader != null ? rankHeader : roleIdHeader, portfolioIdHeader, orgHeader, organization);
 		int pageNum = Math.max(0, Integer.parseInt(page) - 1);
 		int pageSize = Integer.parseInt(size);
 		int start = pageNum * pageSize;
@@ -2997,7 +2997,7 @@ public class ICIPDatasetController {
 	}
 
 	private List<ICIPDataset> applyDatasetVisibilityFilter(List<ICIPDataset> datasets, String userLogin,
-			String projectHeader, String roleHeader, String portfolioIdHeader, String orgHeader) {
+			String projectHeader, String roleHeader, String portfolioIdHeader, String orgHeader, String queryOrg) {
 		String username = userLogin != null ? userLogin : "";
 		if (projectHeader == null || projectHeader.isEmpty() || roleHeader == null || roleHeader.isEmpty()) {
 			logger.info("[Approval] Dataset list - missing project/role headers, returning all results");
@@ -3008,7 +3008,8 @@ public class ICIPDatasetController {
 			Integer userRoleId = Integer.parseInt(roleHeader);
 			Integer userPortfolioId = null;
 			try { userPortfolioId = Integer.parseInt(portfolioIdHeader != null ? portfolioIdHeader : ""); } catch (NumberFormatException ignored) {}
-			String effectiveOrg = orgHeader != null ? orgHeader : "";
+			// effectiveOrg: prefer org header; fall back to the organization query param (always present)
+			String effectiveOrg = (orgHeader != null && !orgHeader.isEmpty()) ? orgHeader : (queryOrg != null ? queryOrg : "");
 
 			List<ICIPDataset> visible = new ArrayList<>();
 			for (ICIPDataset ds : datasets) {

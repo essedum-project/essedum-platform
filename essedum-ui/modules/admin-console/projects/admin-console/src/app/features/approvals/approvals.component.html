@@ -580,10 +580,6 @@
     </mat-tab>
   </mat-tab-group>
 
-  <div *ngIf="pending.data.length === 0 && streamingApprovals.length === 0 && streamingOrgApprovals.length === 0 && streamingPlatformApprovals.length === 0 && datasetApprovals.length === 0 && datasetOrgApprovals.length === 0 && datasetPlatformApprovals.length === 0 && datasourceApprovals.length === 0 && datasourceOrgApprovals.length === 0 && datasourcePlatformApprovals.length === 0" class="approvals-empty">
-    <mat-icon>task_alt</mat-icon>
-    <span>Nothing pending at your gates.</span>
-  </div>
 
   <!-- Org Escalation Panel — appears after Project Admin approves -->
   <div *ngIf="readyForOrgEscalation.length > 0" class="org-escalation-panel">
