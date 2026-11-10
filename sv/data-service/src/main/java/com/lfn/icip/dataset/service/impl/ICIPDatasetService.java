@@ -1673,12 +1673,30 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 
 	/** Fetch datasets from other projects approved at org/platform level for this portfolio (for cross-project visibility). */
 	public List<ICIPDataset> getOrgLevelDatasetsForPortfolio(Integer portfolioId) {
-		if (portfolioId == null) return new ArrayList<>();
 		List<ICIPDataset> extra = new ArrayList<>();
+		// Datasets explicitly platform-approved for global visibility carry approvedOrganizationId = -1
+		// (set by approvePlatformApproval). Legacy "PUBLISHED" rows with null were created before the
+		// approval workflow and must stay org-scoped, so we do NOT include them here.
+		List<ICIPDataset> globallyPublished = datasetRepository.findByApprovalStatusAndApprovedOrganizationId("PUBLISHED", -1);
+		logger.info("[OrgLevel] Globally-published datasets (approvedOrgId=-1): {}", globallyPublished != null ? globallyPublished.size() : 0);
+		if (globallyPublished != null) {
+			globallyPublished.forEach(d -> {
+				logger.info("[OrgLevel] Adding globally-published dataset id={} org={}", d.getId(), d.getOrganization());
+				extra.add(d);
+			});
+		}
+		if (portfolioId == null) {
+			logger.info("[OrgLevel] portfolioId is null, returning {} extra datasets", extra.size());
+			return extra;
+		}
 		for (String status : java.util.Arrays.asList("ORG_APPROVED", "PENDING_ORG_APPROVAL", "PENDING_PLATFORM_APPROVAL")) {
 			List<ICIPDataset> batch = datasetRepository.findByApprovalStatusAndApprovedOrganizationId(status, portfolioId);
-			if (batch != null) extra.addAll(batch);
+			if (batch != null) {
+				logger.info("[OrgLevel] status={} portfolioId={} found={}", status, portfolioId, batch.size());
+				extra.addAll(batch);
+			}
 		}
+		logger.info("[OrgLevel] Total extra datasets for portfolioId={}: {}", portfolioId, extra.size());
 		return extra;
 	}
 

@@ -213,7 +213,8 @@ public class DatasetApprovalWorkflowService {
 
 	/**
 	 * Platform Admin approves and publishes resource globally.
-	 * Status: PENDING_PLATFORM_APPROVAL -> PUBLISHED (approvedOrganizationId cleared = global visibility)
+	 * Status: PENDING_PLATFORM_APPROVAL -> PUBLISHED (approvedOrganizationId = -1 = global visibility sentinel)
+	 * Also accepts already-PUBLISHED datasets so platform admin can re-mark them as globally visible.
 	 */
 	public ICIPDataset approvePlatformApproval(Integer id, String currentUserRank) {
 		logger.info("[DatasetApproval] Platform Admin publishing dataset {} globally", id);
@@ -227,12 +228,15 @@ public class DatasetApprovalWorkflowService {
 			throw new IllegalArgumentException("Dataset not found: " + id);
 		}
 
-		if (!"PENDING_PLATFORM_APPROVAL".equals(resource.getApprovalStatus())) {
-			throw new IllegalStateException("Only PENDING_PLATFORM_APPROVAL resources can be platform-approved");
+		String currentStatus = resource.getApprovalStatus();
+		if (!"PENDING_PLATFORM_APPROVAL".equals(currentStatus) && !"PUBLISHED".equals(currentStatus)) {
+			throw new IllegalStateException("Only PENDING_PLATFORM_APPROVAL (or already PUBLISHED) resources can be platform-approved");
 		}
 
+		// approvedOrganizationId = -1 is the sentinel meaning "platform-approved, globally visible".
+		// Legacy rows that were directly PUBLISHED (never through the workflow) have null and stay org-scoped.
 		resource.setApprovalStatus("PUBLISHED");
-		resource.setApprovedOrganizationId(null);
+		resource.setApprovedOrganizationId(-1);
 		return datasetRepository.save(resource);
 	}
 
