@@ -122,15 +122,15 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
           prev[0] === curr[0] && prev[1] === curr[1] && prev[2] === curr[2]
         ),
         switchMap(([userId, ctxOrgId, ctxProjectId]) => {
-          // userContext.orgId$ reads project.organisationId which is often null;
-          // fall back to portfoliodata.id (the org the user selected in the thumbnail).
-          let orgId = ctxOrgId;
-          if (!orgId) {
-            try {
-              const pd = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}');
-              orgId = pd?.id ? Number(pd.id) : null;
-            } catch {}
-          }
+          // portfoliodata.id is the canonical org ID used throughout the system (shown in UI as
+          // org [#id]). project.organisationId is a different FK from a different table and must
+          // not be used for org-approval operations — it causes a mismatch with stored records.
+          let orgId: number | null = null;
+          try {
+            const pd = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}');
+            if (pd?.id) { orgId = Number(pd.id); }
+          } catch {}
+          if (!orgId) { orgId = ctxOrgId; }
           let projectId = ctxProjectId;
           if (!projectId) {
             try {
