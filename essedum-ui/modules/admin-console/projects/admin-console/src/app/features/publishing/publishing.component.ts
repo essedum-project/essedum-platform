@@ -224,7 +224,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
 
           // Dataset drafts
           const extractArr = (raw: any): any[] => Array.isArray(raw) ? raw : (raw?.data && Array.isArray(raw.data) ? raw.data : []);
-          this.datasetDrafts = extractArr(datasetRank2).filter((s: any) => s.approval_status === 'PROJECT_APPROVED');
+          this.datasetDrafts = extractArr(datasetRank2).filter((s: any) => (s.approvalStatus || s.approval_status) === 'PROJECT_APPROVED');
           this.datasetDraftsDataSource.data = this.datasetDrafts;
           this.datasetOrgDrafts = extractArr(datasetRank3);
           this.datasetOrgDraftsDataSource.data = this.datasetOrgDrafts;
