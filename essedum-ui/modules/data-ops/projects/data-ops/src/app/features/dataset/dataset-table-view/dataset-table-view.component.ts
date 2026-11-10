@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, Pipe, PipeTransform } from '@angular/core';
+import { of } from 'rxjs';
 import { Dataset } from '@essedum/shared-lib';
 import { saveAs as importedSaveAs } from "file-saver";
 import { Services } from '@essedum/shared-lib';
@@ -300,8 +301,10 @@ export class DatasetTableViewComponent implements OnInit {
           })
       }
       else if (this.isRest) {
-        this.showPublicDataset = true
-        this.service.getDatasource(this.dataset?.datasource).subscribe(resp => {
+        this.showPublicDataset = true;
+        const dsSrc = this.dataset?.datasource;
+        const dsObs$ = (dsSrc && typeof dsSrc === 'object') ? of(dsSrc) : this.service.getDatasource(dsSrc);
+        dsObs$.subscribe(resp => {
           this.busy = this.service.getProxyDatasetDetails(this.dataset, resp, this.formParam, null, sessionStorage.getItem("organization")).subscribe(res => {
             this.displayedColumns = Object.keys(res[0]);
             this.newDatasource = new MatTableDataSource(res);
@@ -311,7 +314,9 @@ export class DatasetTableViewComponent implements OnInit {
       else {
         this.useDirectPaginated = true;
         this.allRowsCache = [];
-        this.service.getDatasource(this.dataset?.datasource).subscribe(dsource => {
+        const dsSrc = this.dataset?.datasource;
+        const dsObs$ = (dsSrc && typeof dsSrc === 'object') ? of(dsSrc) : this.service.getDatasource(dsSrc);
+        dsObs$.subscribe(dsource => {
           if (!dsource) {
             this.service.message("Datasource not found", "error");
             this.appLoading = false;
