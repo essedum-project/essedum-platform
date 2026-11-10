@@ -575,7 +575,14 @@ export class ApiService {
   approveDatasetOrgApproval(resourceId: number): Observable<any> {
     let rank = '3';
     try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
-    return this.http.post<any>(`/api/aip/datasets/approval/org/approve/${resourceId}`, {}, { params: { rank } });
+    let portfolioId: string | undefined;
+    try {
+      const pd = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}');
+      if (pd?.id) { portfolioId = pd.id.toString(); }
+    } catch {}
+    const params: any = { rank };
+    if (portfolioId) { params['organizationId'] = portfolioId; }
+    return this.http.post<any>(`/api/aip/datasets/approval/org/approve/${resourceId}`, {}, { params });
   }
 
   rejectDatasetOrgApproval(resourceId: number): Observable<any> {

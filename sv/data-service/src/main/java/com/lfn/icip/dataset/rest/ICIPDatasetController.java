@@ -701,14 +701,16 @@ public class ICIPDatasetController {
 		}
 	}
 
-	/** POST /approval/org/approve/{id}?rank=3 — Org Admin approves (-> ORG_APPROVED). */
+	/** POST /approval/org/approve/{id}?rank=3&organizationId=X — Org Admin approves (-> ORG_APPROVED). */
 	@PostMapping("/approval/org/approve/{id}")
-	public ResponseEntity<?> approveDatasetOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> approveDatasetOrgApproval(@PathVariable Integer id,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer organizationId) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPDataset result = datasetApprovalWorkflowService.approveOrgApproval(id, rank);
+			ICIPDataset result = datasetApprovalWorkflowService.approveOrgApproval(id, rank, organizationId);
 			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));

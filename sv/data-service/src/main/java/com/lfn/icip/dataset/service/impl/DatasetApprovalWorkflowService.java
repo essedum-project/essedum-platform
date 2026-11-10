@@ -141,9 +141,11 @@ public class DatasetApprovalWorkflowService {
 	/**
 	 * Org Admin approves org-level publishing.
 	 * Status: PENDING_ORG_APPROVAL -> ORG_APPROVED (org-wide visible, awaiting platform submission)
+	 * organizationId: the approving org admin's portfolioId — stamped onto the record so queries
+	 * using that same portfolioId can find it reliably.
 	 */
-	public ICIPDataset approveOrgApproval(Integer id, String currentUserRank) {
-		logger.info("[DatasetApproval] Org Admin approving dataset {} at org level", id);
+	public ICIPDataset approveOrgApproval(Integer id, String currentUserRank, Integer organizationId) {
+		logger.info("[DatasetApproval] Org Admin approving dataset {} at org level, orgId={}", id, organizationId);
 
 		if (!"3".equals(currentUserRank)) {
 			throw new IllegalAccessError("Only Org Admin (rank 3) can approve org-level publishing");
@@ -159,6 +161,9 @@ public class DatasetApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("ORG_APPROVED");
+		if (organizationId != null) {
+			resource.setApprovedOrganizationId(organizationId);
+		}
 		return datasetRepository.save(resource);
 	}
 
