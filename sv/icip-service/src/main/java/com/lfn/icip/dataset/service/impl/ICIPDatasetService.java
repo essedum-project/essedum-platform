@@ -736,16 +736,26 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 	}
 
 	public List<ICIPDataset> getDatasetsByOrgandPage(String organization,String search,Pageable paginate, Boolean isTemplate) {
-//		return datasetRepository.findByOrganization(organization,paginate);
+		List<ICIPDataset> orgDatasets;
 		if(!search.isEmpty()) {
-			return datasetRepository.findByOrganization(organization,search,paginate);
+			orgDatasets = new java.util.ArrayList<>(datasetRepository.findByOrganization(organization,search,paginate));
 		}
 		else if(isTemplate == true) {
-			return datasetRepository.findByOrganizationWithTemplate(organization,search,paginate);
+			orgDatasets = new java.util.ArrayList<>(datasetRepository.findByOrganizationWithTemplate(organization,search,paginate));
 		}
 		else {
-			return datasetRepository.findByOrganization(organization,paginate);
+			orgDatasets = new java.util.ArrayList<>(datasetRepository.findByOrganization(organization,paginate));
 		}
+		// Merge globally-published datasets (approvedOrganizationId = -1) from other orgs
+		List<ICIPDataset> globalPublished = datasetRepository.findByApprovalStatusAndApprovedOrganizationId("PUBLISHED", -1);
+		if (globalPublished != null && !globalPublished.isEmpty()) {
+			java.util.Set<Integer> seen = new java.util.HashSet<>();
+			orgDatasets.forEach(d -> seen.add(d.getId()));
+			globalPublished.stream()
+				.filter(d -> !seen.contains(d.getId()))
+				.forEach(orgDatasets::add);
+		}
+		return orgDatasets;
 	}
 
 	@Override
