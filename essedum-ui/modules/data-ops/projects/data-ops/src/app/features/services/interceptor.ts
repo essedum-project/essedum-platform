@@ -65,12 +65,12 @@ export class AipInterceptorService implements HttpInterceptor {
         } catch { /* ignore */ }
       }
 
-      // organisation — org name fallback for ORG_APPROVED visibility.
-      if (project) {
+      // organisation — portfolio/org name for ORG_APPROVED visibility.
+      if (portfolioDataRaw) {
         try {
-          const p = JSON.parse(project);
-          if (p?.name?.toString())
-            request = request.clone({ headers: request.headers.set("organisation", p.name.toString()) });
+          const pd = JSON.parse(portfolioDataRaw);
+          if (pd?.portfolioName)
+            request = request.clone({ headers: request.headers.set("organisation", pd.portfolioName) });
         } catch { /* ignore */ }
       }
 

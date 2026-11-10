@@ -179,7 +179,7 @@ export class DatasetByNameComponent {
       }
       this.updatePageSize();
       let param: HttpParams = new HttpParams();
-      let organization = sessionStorage.getItem('organization')
+      let organization = this.getOrgName();
       param = param.set('organization', organization);
       if (this.filt && this.filt != '') {
         param = param.set('aliasOrName', this.filt);
@@ -284,6 +284,14 @@ export class DatasetByNameComponent {
     this.lastRefreshTime();
 
   }
+  private getOrgName(): string {
+    try {
+      const pd = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}');
+      if (pd?.portfolioName) return pd.portfolioName;
+    } catch {}
+    return sessionStorage.getItem('organization') || '';
+  }
+
   toggleSearch(): void {
     this.isSearchVisible = true;
   }
@@ -300,7 +308,7 @@ export class DatasetByNameComponent {
 
     this.filteredCards = [];
     let param: HttpParams = new HttpParams();
-    let organization = sessionStorage.getItem('organization')
+    let organization = this.getOrgName();
     param = param.set('organization', organization);
     if (this.filt && this.filt != '' && this.filt != null) {
       param = param.set('aliasOrName', this.filt);
@@ -477,7 +485,7 @@ export class DatasetByNameComponent {
     this.records = false;
     this.filteredCards = [];
     let param: HttpParams = new HttpParams();
-    let organization = sessionStorage.getItem('organization')
+    let organization = this.getOrgName();
     param = param.set('organization', organization);
     if (this.filt && this.filt != '' && this.filt != null) {
       param = param.set('aliasOrName', this.filt);
@@ -530,7 +538,7 @@ export class DatasetByNameComponent {
     this.records = false;
     this.filteredCards = [];
     let param: HttpParams = new HttpParams();
-    let organization = sessionStorage.getItem('organization')
+    let organization = this.getOrgName();
     param = param.set('organization', organization);
     if (this.filt && this.filt != '' && this.filt != null) {
       param = param.set('aliasOrName', this.filt);
