@@ -65,14 +65,10 @@ export class AipInterceptorService implements HttpInterceptor {
         } catch { /* ignore */ }
       }
 
-      // organisation — portfolio/org name for ORG_APPROVED visibility.
-      if (portfolioDataRaw) {
-        try {
-          const pd = JSON.parse(portfolioDataRaw);
-          if (pd?.portfolioName)
-            request = request.clone({ headers: request.headers.set("organisation", pd.portfolioName) });
-        } catch { /* ignore */ }
-      }
+      // organisation — org name matching sessionStorage.organization (set from portfoliodata.portfolioName).
+      const orgName = sessionStorage.getItem('organization');
+      if (orgName)
+        request = request.clone({ headers: request.headers.set("organisation", orgName) });
 
       // user-login — required for DRAFT-only-creator visibility.
       const storedUser = sessionStorage.getItem("user");

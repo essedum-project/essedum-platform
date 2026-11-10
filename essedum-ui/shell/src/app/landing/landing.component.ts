@@ -1622,9 +1622,17 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       (this.user.user_l_name ? this.user.user_l_name.charAt(0) : "");
     let organization;
     try {
-      organization = JSON.parse(sessionStorage.getItem("project") || "").name;
+      const pd = JSON.parse(sessionStorage.getItem("portfoliodata") || "{}");
+      organization = pd?.portfolioName || pd?.name;
     } catch (e: any) {
-      console.error("JSON.parse error - ", e.message);
+      console.error("JSON.parse error getting org from portfoliodata - ", e.message);
+    }
+    if (!organization) {
+      try {
+        organization = JSON.parse(sessionStorage.getItem("project") || "{}").name;
+      } catch (e: any) {
+        console.error("JSON.parse error - ", e.message);
+      }
     }
     localStorage.setItem("organization", organization);
     sessionStorage.setItem("organization", organization);
