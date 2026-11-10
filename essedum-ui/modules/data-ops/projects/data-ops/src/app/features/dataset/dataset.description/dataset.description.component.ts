@@ -15,7 +15,7 @@ import { SemanticSearchContext } from '@essedum/shared-lib';
 import { SemanticService } from '../../services/semantic.services';
 import { SemanticSearchResult } from '@essedum/shared-lib';
 import { EventsService } from '../../services/event.service';
-import { Subscription } from 'rxjs';
+import { Subscription, of } from 'rxjs';
 import mammoth from 'mammoth';
 import { HttpClient } from '@angular/common/http';
 
@@ -450,13 +450,26 @@ export class DatasetDescriptionComponent implements OnInit {
   }
 
   checkTableSupport() {
-          this.appLoading = true;
+    this.appLoading = true;
+    // For cross-org published datasets the session org differs from the dataset org.
+    // Use the card object we already have instead of re-fetching with the wrong org.
+    const sessionOrg = sessionStorage.getItem('organization');
+    const isCrossOrg = !!(this.card?.organization && this.card.organization !== sessionOrg);
+    const datasetFetch = isCrossOrg
+      ? of(this.card)
+      : this.service.getDataset(this.selectedDatasetName);
 
-    this.service.checkVisualizeSupport(this.selectedDatasetName)
+    // checkVisualizeSupport uses session org in the URL → returns 400 for cross-org datasets.
+    // Use of([]) to skip the call; filter().length === 0 falls through to the data-loading branch.
+    const visualizeSupportFetch = isCrossOrg
+      ? of([])
+      : this.service.checkVisualizeSupport(this.selectedDatasetName);
+
+    visualizeSupportFetch
       .subscribe(res => {
         if (res && res.filter(ele => ele["Tabular View"]).length > 0) {
 
-          this.service.getDataset(this.selectedDatasetName).subscribe(resp => {
+          datasetFetch.subscribe(resp => {
             this.dataset = resp;
             try {
               try {
@@ -474,7 +487,12 @@ export class DatasetDescriptionComponent implements OnInit {
             }
 
             if (this.dataset.views) {
-              this.service.getDatasource(this.dataset.datasource).subscribe(resp => {
+              // If the datasource is already a full object (from catalog), skip re-fetching
+              // with the wrong session org — use it directly.
+              const dsFetch = (this.dataset.datasource && typeof this.dataset.datasource === 'object')
+                ? of(this.dataset.datasource)
+                : this.service.getDatasource(this.dataset.datasource);
+              dsFetch.subscribe(resp => {
                 this.dataset.datasource = resp;
                 let params = { page: 0, size: 50 }
                 this.service.getProxyDbDatasetDetails(
@@ -513,17 +531,17 @@ export class DatasetDescriptionComponent implements OnInit {
                   this.datasetDataErr = err;
                   this.appLoading=false;
                 });
-              }, err => { console.log(err) });
+              }, err => { console.log(err); this.appLoading = false; });
 
             }
             else {
               this.tableviewsupport = false
             }
-          }, err => { console.log(err) });
+          }, err => { console.log(err); this.appLoading = false; });
         }
         else {
 
-          this.service.getDataset(this.selectedDatasetName).subscribe(resp => {
+          datasetFetch.subscribe(resp => {
             this.dataset = resp;
             try {
               try {
@@ -542,7 +560,10 @@ export class DatasetDescriptionComponent implements OnInit {
             }
 
             if (this.dataset.views) {
-              this.service.getDatasource(this.dataset.datasource).subscribe(resp => {
+              const dsFetch = (this.dataset.datasource && typeof this.dataset.datasource === 'object')
+                ? of(this.dataset.datasource)
+                : this.service.getDatasource(this.dataset.datasource);
+              dsFetch.subscribe(resp => {
                 this.dataset.datasource = resp;
                 let params = { page: 0, size: 50 }
                 this.service.getProxyDbDatasetDetails(
@@ -571,16 +592,18 @@ export class DatasetDescriptionComponent implements OnInit {
                   this.datasetData = err.text;
                   this.appLoading=false;
                 });
-              }, err => { console.log(err) });
+              }, err => { console.log(err); this.appLoading = false; });
 
             }
             else {
-              this.tableviewsupport = false
+              this.tableviewsupport = false;
+              this.appLoading = false;
             }
-          }, err => { console.log(err) });
+          }, err => { console.log(err); this.appLoading = false; });
         }
       }, err => {
-        this.tableviews = 'no'
+        this.tableviews = 'no';
+        this.appLoading = false;
       })
     this.selectedDataset["name"] = this.selectedDatasetName;
   }

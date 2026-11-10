@@ -168,6 +168,18 @@ export class DatasetTableViewComponent implements OnInit {
               this.appLoading = true;
 
     try {
+      // If the parent passed a full dataset object (cross-org scenario), use it directly
+      // to avoid calling getDataset() with the wrong session org.
+      if (this.data && (this.data as any).id !== undefined) {
+        this.dataset = this.data as any;
+        this.showSpinnertable = false;
+        this.schemaName = this.dataset.schema || '';
+        this.datasetAlias = this.dataset.alias;
+        this.datasetName = this.dataset.name;
+        this.getDatasetFormTemplate();
+        this.appLoading = false;
+        return;
+      }
       try {
         if (this.router.url.includes("/workflows/")) throw '';
         this.route.params.subscribe(param => {
