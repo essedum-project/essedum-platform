@@ -1668,7 +1668,18 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 			result = datasetRepository.getDatasetsForAdvancedFilterTypesAndKnowledgeBases(organization, aliasOrName,
 					types, knowledgeBases);
 		}
-		return result != null ? result : new ArrayList<>();
+		return result != null ? new ArrayList<>(result) : new ArrayList<>();
+	}
+
+	/** Fetch datasets from other projects approved at org/platform level for this portfolio (for cross-project visibility). */
+	public List<ICIPDataset> getOrgLevelDatasetsForPortfolio(Integer portfolioId) {
+		if (portfolioId == null) return new ArrayList<>();
+		List<ICIPDataset> extra = new ArrayList<>();
+		for (String status : java.util.Arrays.asList("ORG_APPROVED", "PENDING_ORG_APPROVAL", "PENDING_PLATFORM_APPROVAL")) {
+			List<ICIPDataset> batch = datasetRepository.findByApprovalStatusAndApprovedOrganizationId(status, portfolioId);
+			if (batch != null) extra.addAll(batch);
+		}
+		return extra;
 	}
 
 	public List<String> getDatasetTypesForAdvancedFilter(String organization) {

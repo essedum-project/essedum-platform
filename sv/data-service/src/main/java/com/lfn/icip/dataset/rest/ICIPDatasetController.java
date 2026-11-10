@@ -2958,6 +2958,13 @@ public class ICIPDatasetController {
 			@RequestHeader(value = "organisation", required = false) String orgHeader) {
 		logger.info("Advance Filter -Count called : {}", organization);
 		List<ICIPDataset> allDatasets = datasetService.getAllDatasetsForAdvancedFilter(organization, aliasOrName, types, knowledgeBases);
+		// Merge cross-project org-level datasets visible to this user's portfolio
+		Integer pId = null;
+		try { pId = Integer.parseInt(portfolioIdHeader != null ? portfolioIdHeader : ""); } catch (NumberFormatException ignored) {}
+		List<ICIPDataset> orgExtra = datasetService.getOrgLevelDatasetsForPortfolio(pId);
+		java.util.Set<Integer> seen = new java.util.HashSet<>();
+		allDatasets.forEach(d -> seen.add(d.getId()));
+		orgExtra.stream().filter(d -> !seen.contains(d.getId())).forEach(allDatasets::add);
 		if (tags != null && !tags.isEmpty()) {
 			allDatasets = ICIPDatasetService.filterDatasets(allDatasets, tags);
 		}
@@ -2983,6 +2990,13 @@ public class ICIPDatasetController {
 			@RequestHeader(value = "organisation", required = false) String orgHeader) {
 		logger.info("Advance Filter -List called : {}", organization);
 		List<ICIPDataset> allDatasets = datasetService.getAllDatasetsForAdvancedFilter(organization, aliasOrName, types, knowledgeBases);
+		// Merge cross-project org-level datasets visible to this user's portfolio
+		Integer pId = null;
+		try { pId = Integer.parseInt(portfolioIdHeader != null ? portfolioIdHeader : ""); } catch (NumberFormatException ignored) {}
+		List<ICIPDataset> orgExtra = datasetService.getOrgLevelDatasetsForPortfolio(pId);
+		java.util.Set<Integer> seen = new java.util.HashSet<>();
+		allDatasets.forEach(d -> seen.add(d.getId()));
+		orgExtra.stream().filter(d -> !seen.contains(d.getId())).forEach(allDatasets::add);
 		if (tags != null && !tags.isEmpty()) {
 			allDatasets = ICIPDatasetService.filterDatasets(allDatasets, tags);
 		}
