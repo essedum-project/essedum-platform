@@ -4192,6 +4192,79 @@ export class Services {
       );
   }
 
+  /**
+   * Submit native pipeline for project-level approval
+   * Creator submits DRAFT native pipeline to Project Admin
+   */
+  submitNativePipelineForApproval(pipelineId: number, userContext: any): Observable<any> {
+    return this.https
+      .post(`${this.dataUrl}/service/v1/pipelines/native/submit-for-approval`, {
+        resourceId: pipelineId
+      }, {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json; charset=utf-8',
+          ...(userContext?.headers?.keys ? 
+            Object.fromEntries(
+              userContext.headers.keys().map((key: string) => [key, userContext.headers.get(key)])
+            ) : {})
+        }),
+        observe: 'response'
+      })
+      .pipe(
+        map((response) => response.body),
+        catchError((err) => this.handleError(err))
+      );
+  }
+
+  /**
+   * Approve native pipeline (Project Admin or Org Admin)
+   * Moves pipeline to next approval stage
+   */
+  approveNativePipeline(pipelineId: number, userContext: any): Observable<any> {
+    return this.https
+      .post(`${this.dataUrl}/service/v1/pipelines/native/approve`, {
+        resourceId: pipelineId
+      }, {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json; charset=utf-8',
+          ...(userContext?.headers?.keys ? 
+            Object.fromEntries(
+              userContext.headers.keys().map((key: string) => [key, userContext.headers.get(key)])
+            ) : {})
+        }),
+        observe: 'response'
+      })
+      .pipe(
+        map((response) => response.body),
+        catchError((err) => this.handleError(err))
+      );
+  }
+
+  /**
+   * Reject native pipeline (Project Admin or Org Admin)
+   * Returns pipeline to creator with rejection reason
+   */
+  rejectNativePipeline(pipelineId: number, reason: string, userContext: any): Observable<any> {
+    return this.https
+      .post(`${this.dataUrl}/service/v1/pipelines/native/reject`, {
+        resourceId: pipelineId,
+        reason: reason
+      }, {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json; charset=utf-8',
+          ...(userContext?.headers?.keys ? 
+            Object.fromEntries(
+              userContext.headers.keys().map((key: string) => [key, userContext.headers.get(key)])
+            ) : {})
+        }),
+        observe: 'response'
+      })
+      .pipe(
+        map((response) => response.body),
+        catchError((err) => this.handleError(err))
+      );
+  }
+
 }
 
 export type CustomRemoteConfig = RemoteConfig & {

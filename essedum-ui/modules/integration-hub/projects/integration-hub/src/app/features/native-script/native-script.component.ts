@@ -22,10 +22,13 @@ import { NativeScriptDialogComponent } from './native-script-dialog/native-scrip
 import { PipelineCreateComponent } from '../pipeline/pipeline-create/pipeline-create.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { HttpParams } from '@angular/common/http';
+import { HttpParams, HttpHeaders, HttpClient } from '@angular/common/http';
 import { DynamicParamsGrid, DynamicSecretsGrid } from './pipeline.models';
 import { NotebookDialogComponent, NotebookDialogData } from '../pipeline.description/notebook-dialog/notebook-dialog.component';
 import { io } from 'socket.io-client';
+import { Subject } from 'rxjs';
+import { takeUntil, timeout, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 interface FileNode {
   name: string;
@@ -146,6 +149,17 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     secretsEditMode: boolean = false;
     secretsShowValue: boolean[] = [];
     private _saveDebounceTimer: any = null;
+
+    // Approval workflow properties
+    approvalStatus: string = 'DRAFT';
+    isSubmittingForApproval: boolean = false;
+    submitError: string = '';
+    private currentUserLogin: string = '';
+    private currentProjectId: number | null = null;
+    private userOrganization: string = '';
+    private userRank: number = 0;
+    private destroy$ = new Subject<void>();
+
   constructor(
     @Inject('envi') private baseUrl: string,
     private service: Services,
@@ -153,7 +167,8 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     private _location: Location,
     private router: Router,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef 
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
   ) 
  
   {
@@ -167,6 +182,8 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
+    this.extractUserContext();
+    
     this.route.params.subscribe((params) => {
       if (params['cname']) {
         this.cardName = params['cname'];
@@ -194,6 +211,13 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
       this.streamItem = res;
       this.pipelineAlias = res.alias;
+      
+      // Extract approval_status from response for approval workflow
+      if (res.approval_status) {
+        this.approvalStatus = res.approval_status;
+        console.debug('[NativeScript] Pipeline approval status:', this.approvalStatus);
+      }
+      
       // Restore persistent container deployment state
       try {
         const parsed = JSON.parse(res.json_content || '{}');
@@ -351,6 +375,81 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
+  /**
+   * Extract user context from sessionStorage for approval workflow
+   * Used to build HTTP headers for API calls with user context
+   */
+  private extractUserContext(): void {
+    try {
+      // Extract user login
+      const userSession = sessionStorage.getItem('user');
+      if (userSession) {
+        const user = JSON.parse(userSession);
+        const rawLogin = (user.user_login || user.username || user.name || '').toLowerCase();
+        const email = (user.user_email || rawLogin).toLowerCase();
+        const emailPrefix = email.includes('@') ? email.split('@')[0] : email;
+        this.currentUserLogin = rawLogin.includes('@') ? rawLogin.split('@')[0] : (rawLogin || emailPrefix);
+      }
+
+      // Extract project ID
+      const projectSession = sessionStorage.getItem('project');
+      if (projectSession) {
+        const project = JSON.parse(projectSession);
+        this.currentProjectId = project?.id ? Number(project.id) : null;
+      }
+
+      // Extract organization
+      this.userOrganization = sessionStorage.getItem('organization') || '';
+
+      // Extract user rank
+      const roleSession = sessionStorage.getItem('role');
+      if (roleSession) {
+        const role = JSON.parse(roleSession);
+        this.userRank = role?.rank != null ? Number(role.rank) : 0;
+      }
+
+      console.debug('[NativeScript] User context resolved:', {
+        currentUserLogin: this.currentUserLogin,
+        currentProjectId: this.currentProjectId,
+        userOrganization: this.userOrganization,
+        userRank: this.userRank
+      });
+    } catch (error) {
+      console.error('[NativeScript] Error extracting user context:', error);
+    }
+  }
+
+  /**
+   * Build HTTP headers with user context for approval workflow filtering
+   */
+  private buildHttpOptions(): any {
+    try {
+      let headers = new HttpHeaders();
+      let hasHeaders = false;
+
+      if (this.currentUserLogin) {
+        headers = headers.set('user-login', this.currentUserLogin);
+        hasHeaders = true;
+      }
+      if (this.currentProjectId !== null && this.currentProjectId !== undefined) {
+        headers = headers.set('project', String(this.currentProjectId));
+        hasHeaders = true;
+      }
+      if (this.userOrganization) {
+        headers = headers.set('organisation', this.userOrganization);
+        hasHeaders = true;
+      }
+      if (this.userRank >= 0) {
+        headers = headers.set('roleId', String(this.userRank));
+        hasHeaders = true;
+      }
+
+      return hasHeaders ? { headers } : {};
+    } catch (error) {
+      console.warn('[NativeScript] Error building HTTP options:', error);
+      return {};
+    }
+  }
 
   ngOnChanges() {
     this.ngOnInit();
@@ -1078,6 +1177,9 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.disconnectContainerSocket();
+    // Cleanup approval workflow subscriptions
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   copyPipeline() {
@@ -1734,4 +1836,110 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   hasChild = (_: number, node: FileNode) => !!node.children && node.children.length > 0;
+
+  /**
+   * Check if current user is the creator of this native pipeline
+   */
+  isOwnPipeline(): boolean {
+    if (!this.streamItem || !this.currentUserLogin) {
+      return false;
+    }
+    const createdBy = (this.streamItem as any).created_by || '';
+    return createdBy.toLowerCase().includes(this.currentUserLogin.toLowerCase());
+  }
+
+  /**
+   * Check if creator is allowed to submit for approval (must be in DRAFT status)
+   */
+  canSubmitForApproval(): boolean {
+    return this.isOwnPipeline() && this.approvalStatus === 'DRAFT';
+  }
+
+  /**
+   * Submit native pipeline for approval to Project Admin
+   * Only available for creator when pipeline is in DRAFT status
+   */
+  submitForApproval(): void {
+    if (!this.isOwnPipeline()) {
+      this.service.message('You can only submit your own pipelines for approval', 'warning');
+      return;
+    }
+
+    if (this.approvalStatus !== 'DRAFT') {
+      this.service.message('Only pipelines in DRAFT status can be submitted for approval', 'warning');
+      return;
+    }
+
+    if (!this.streamItem || !this.streamItem.cid) {
+      this.service.message('Pipeline ID is missing', 'error');
+      return;
+    }
+
+    // Get current project from session or environment
+    const projectId = this.currentProjectId;
+    if (!projectId) {
+      this.service.message('Project ID is missing. Please ensure you are logged in to a project.', 'error');
+      return;
+    }
+
+    this.isSubmittingForApproval = true;
+    this.submitError = '';
+
+    console.debug('[NativeScript] Submitting for approval:', {
+      resourceId: this.streamItem.cid,
+      projectId: projectId,
+      resourceName: this.streamItem.name
+    });
+
+    // Call backend API to submit for approval
+    this.http.post(`/api/aip/streamingServices/approval/submit`, {
+      resourceId: this.streamItem.cid,
+      projectId: projectId
+    }).pipe(
+      timeout(10000),
+      takeUntil(this.destroy$),
+      catchError((error) => {
+        console.error('[NativeScript] Error submitting for approval:', error);
+        this.submitError = error?.error?.message || 'Failed to submit for approval';
+        this.isSubmittingForApproval = false;
+        this.cdr.detectChanges();
+        return of(null);
+      })
+    ).subscribe(
+      (response: any) => {
+        console.debug('[NativeScript] Approval request submitted:', response);
+        this.service.message('Pipeline submitted for project approval', 'success');
+        
+        // Reload pipeline data to get updated approval_status
+        if (this.streamItem?.name && this.streamItem?.organization) {
+          this.http.get<any>(`/api/aip/streamingServices/${this.streamItem.name}/${this.streamItem.organization}`).pipe(
+            timeout(5000),
+            takeUntil(this.destroy$),
+            catchError((reloadErr) => {
+              console.warn('[NativeScript] Could not reload pipeline data:', reloadErr);
+              // Fallback: assume status changed
+              this.approvalStatus = 'PENDING_PROJECT_APPROVAL';
+              this.isSubmittingForApproval = false;
+              this.cdr.detectChanges();
+              return of(null);
+            })
+          ).subscribe((updatedPipeline: any) => {
+            if (updatedPipeline?.approval_status) {
+              console.debug('[NativeScript] Pipeline reloaded with new status:', updatedPipeline.approval_status);
+              this.streamItem.approval_status = updatedPipeline.approval_status;
+              this.approvalStatus = updatedPipeline.approval_status;
+            } else {
+              this.approvalStatus = 'PENDING_PROJECT_APPROVAL';
+            }
+            this.isSubmittingForApproval = false;
+            this.cdr.detectChanges();
+          });
+        } else {
+          this.approvalStatus = 'PENDING_PROJECT_APPROVAL';
+          this.isSubmittingForApproval = false;
+          this.cdr.detectChanges();
+        }
+      }
+    );
+  }
 }
