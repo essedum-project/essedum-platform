@@ -15,6 +15,7 @@ type AssetKind = 'pipeline' | 'dataset' | 'datasource';
 export class CatalogComponent implements OnInit {
   assets: any[] = [];
   datasetAssets: any[] = [];
+  modelAssets: any[] = [];
   datasourceAssets: any[] = [];
 
   // Server-side pagination for the Connections tab (datasources).
@@ -51,6 +52,10 @@ export class CatalogComponent implements OnInit {
     this.api.getDatasetCatalog(this.projectId, this.orgId)
       .pipe(take(1))
       .subscribe(rows => (this.datasetAssets = this.toRows(rows)));
+
+    this.api.getModelCatalog(this.projectId, this.orgId)
+      .pipe(take(1))
+      .subscribe(rows => (this.modelAssets = this.toRows(rows)));
 
     this.loadDatasourceCatalog();
   }

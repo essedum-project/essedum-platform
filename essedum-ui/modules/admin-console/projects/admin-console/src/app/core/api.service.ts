@@ -628,6 +628,13 @@ export class ApiService {
     return this.http.get<any>(`/api/aip/datasets/approval/catalog`, { params }).pipe(catchError(() => of([])));
   }
 
+  getModelCatalog(projectId?: number | null, orgId?: number | null): Observable<any> {
+    const params: any = {};
+    if (projectId != null) params['projectId'] = projectId;
+    if (orgId != null) params['orgId'] = orgId;
+    return this.http.get<any>(`/api/aip/service/v1/models/approval/catalog`, { params }).pipe(catchError(() => of([])));
+  }
+
   // ─── Datasource approval workflow ─────────────────────────────────────────
 
   getProjectAdminDatasourceApprovals(projectId: number, page: number = 0, size: number = 5): Observable<any> {
@@ -743,5 +750,85 @@ export class ApiService {
       username = u?.username || u?.preferred_username || u?.name || null;
     } catch {}
     return { projectId, username };
+  }
+
+  // ─── Model approval workflow ──────────────────────────────────────────────
+
+  getProjectAdminModelApprovals(projectId: number, page: number = 0, size: number = 5): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.get<any>(`/api/aip/service/v1/models/approval/project-admin/list`, { params: { projectId, rank, page, size } });
+  }
+
+  getOrgAdminModelApprovals(organizationId: number, page: number = 0, size: number = 5): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.get<any>(`/api/aip/service/v1/models/approval/org-admin/list`, { params: { organizationId, rank, page, size } });
+  }
+
+  getPlatformAdminModelApprovals(page: number = 0, size: number = 5): Observable<any> {
+    let rank = '4';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
+    return this.http.get<any>(`/api/aip/service/v1/models/approval/platform-admin/list`, { params: { rank, page, size } });
+  }
+
+  approveModelProjectApproval(resourceId: number, projectId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.post<any>(`/api/aip/service/v1/models/approval/project/approve/${resourceId}`, { projectId }, { params: { rank } });
+  }
+
+  rejectModelProjectApproval(resourceId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.post<any>(`/api/aip/service/v1/models/approval/project/reject/${resourceId}`, {}, { params: { rank } });
+  }
+
+  submitModelForOrgApproval(resourceId: number, organizationId: number): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.post<any>(`/api/aip/service/v1/models/approval/org/submit`, { resourceId, organizationId }, { params: { rank } });
+  }
+
+  approveModelOrgApproval(resourceId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.post<any>(`/api/aip/service/v1/models/approval/org/approve/${resourceId}`, {}, { params: { rank } });
+  }
+
+  rejectModelOrgApproval(resourceId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.post<any>(`/api/aip/service/v1/models/approval/org/reject/${resourceId}`, {}, { params: { rank } });
+  }
+
+  submitModelForPlatformApproval(resourceId: number): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.post<any>(`/api/aip/service/v1/models/approval/platform/submit`, { resourceId }, { params: { rank } });
+  }
+
+  approveModelPlatformApproval(resourceId: number): Observable<any> {
+    let rank = '4';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
+    return this.http.post<any>(`/api/aip/service/v1/models/approval/platform/approve/${resourceId}`, {}, { params: { rank } });
+  }
+
+  rejectModelPlatformApproval(resourceId: number): Observable<any> {
+    let rank = '4';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '4'; } catch {}
+    return this.http.post<any>(`/api/aip/service/v1/models/approval/platform/reject/${resourceId}`, {}, { params: { rank } });
+  }
+
+  getModelDraftResources(projectId: number, page: number = 0, size: number = 5): Observable<any> {
+    let rank = '2';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '2'; } catch {}
+    return this.http.get<any>(`/api/aip/service/v1/models/approval/draft-resources`, { params: { projectId, rank, page, size } });
+  }
+
+  getModelOrgDraftResources(organizationId: number, page: number = 0, size: number = 5): Observable<any> {
+    let rank = '3';
+    try { rank = JSON.parse(sessionStorage.getItem('role') || '{}')?.rank?.toString() || '3'; } catch {}
+    return this.http.get<any>(`/api/aip/service/v1/models/approval/org-admin/draft-resources`, { params: { organizationId, rank, page, size } });
   }
 }

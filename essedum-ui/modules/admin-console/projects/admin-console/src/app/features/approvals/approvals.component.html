@@ -578,6 +578,165 @@
         <span>No connection approvals pending at your gates.</span>
       </div>
     </mat-tab>
+
+    <!-- ========== MODELS TAB ========== -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">model_training</mat-icon>
+        <span>Models</span>
+        <span class="count-chip" *ngIf="(modelApprovalsTotal + modelOrgApprovalsTotal + modelPlatformApprovalsTotal) > 0">{{ modelApprovalsTotal + modelOrgApprovalsTotal + modelPlatformApprovalsTotal }}</span>
+      </ng-template>
+
+  <!-- MODEL - RANK 2 PROJECT-LEVEL APPROVALS -->
+  <div *ngIf="modelApprovals.length > 0" class="streaming-approvals-section">
+    <div class="section-title">
+      <mat-icon>model_training</mat-icon>
+      <span>Models Pending Project Approval</span>
+    </div>
+    <table mat-table [dataSource]="modelApprovalsDataSource" class="admin-console-table streaming-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Model Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.modelName || row.model_name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">{{ row.modelType || row.model_type || 'Model' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.createdBy || row.created_by }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdDate">
+        <th mat-header-cell *matHeaderCellDef>Submitted Date</th>
+        <td mat-cell *matCellDef="let row"><span class="date-text">{{ row.modifiedDate | date: 'medium' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-pending"><mat-icon>hourglass_empty</mat-icon> Pending Project Approval</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveModel(row.id)"><mat-icon>check</mat-icon> Approve</button>
+            <button mat-button class="btn-reject" (click)="rejectModel(row.id)"><mat-icon>close</mat-icon> Reject</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="modelApprovalsTotal > 0">
+      <mat-paginator
+        [length]="modelApprovalsTotal"
+        [pageIndex]="modelApprovalsPageIndex"
+        [pageSize]="modelApprovalsPageSize"
+        [pageSizeOptions]="modelPageSizeOptions"
+        showFirstLastButtons
+        (page)="onModelApprovalsPage($event)">
+      </mat-paginator>
+    </div>
+  </div>
+
+  <!-- MODEL - RANK 3 ORG-LEVEL APPROVALS -->
+  <div *ngIf="modelOrgApprovals.length > 0" class="streaming-org-approvals-section">
+    <div class="section-title">
+      <mat-icon>model_training</mat-icon>
+      <span>Models Pending Organization Approval</span>
+    </div>
+    <table mat-table [dataSource]="modelOrgApprovalsDataSource" class="admin-console-table streaming-org-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Model Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.modelName || row.model_name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">{{ row.modelType || row.model_type || 'Model' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.createdBy || row.created_by }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-org-pending"><mat-icon>hourglass_empty</mat-icon> Pending Org Approval</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveModel(row.id, true)"><mat-icon>check</mat-icon> Approve</button>
+            <button mat-button class="btn-reject" (click)="rejectModel(row.id, true)"><mat-icon>close</mat-icon> Reject</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingOrgColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingOrgColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="modelOrgApprovalsTotal > 0">
+      <mat-paginator
+        [length]="modelOrgApprovalsTotal"
+        [pageIndex]="modelOrgApprovalsPageIndex"
+        [pageSize]="modelOrgApprovalsPageSize"
+        [pageSizeOptions]="modelPageSizeOptions"
+        showFirstLastButtons
+        (page)="onModelOrgApprovalsPage($event)">
+      </mat-paginator>
+    </div>
+  </div>
+
+  <!-- MODEL - RANK 4 PLATFORM-LEVEL APPROVALS -->
+  <div *ngIf="modelPlatformApprovals.length > 0" class="streaming-platform-approvals-section">
+    <div class="section-title">
+      <mat-icon>model_training</mat-icon>
+      <span>Models Pending Platform Approval</span>
+    </div>
+    <table mat-table [dataSource]="modelPlatformApprovalsDataSource" class="admin-console-table streaming-platform-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Model Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.modelName || row.model_name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">{{ row.modelType || row.model_type || 'Model' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.createdBy || row.created_by }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-platform-pending"><mat-icon>hourglass_empty</mat-icon> Pending Platform Approval</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveModel(row.id, false, true)"><mat-icon>public</mat-icon> Publish Globally</button>
+            <button mat-button class="btn-reject" (click)="rejectModel(row.id, false, true)"><mat-icon>close</mat-icon> Reject</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingPlatformColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingPlatformColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="modelPlatformApprovalsTotal > 0">
+      <mat-paginator
+        [length]="modelPlatformApprovalsTotal"
+        [pageIndex]="modelPlatformApprovalsPageIndex"
+        [pageSize]="modelPlatformApprovalsPageSize"
+        [pageSizeOptions]="modelPageSizeOptions"
+        showFirstLastButtons
+        (page)="onModelPlatformApprovalsPage($event)">
+      </mat-paginator>
+    </div>
+  </div>
+
+      <div class="empty-state" *ngIf="modelApprovalsTotal === 0 && modelOrgApprovalsTotal === 0 && modelPlatformApprovalsTotal === 0">
+        <mat-icon>model_training</mat-icon>
+        <span>No model approvals pending at your gates.</span>
+      </div>
+    </mat-tab>
   </mat-tab-group>
 
 

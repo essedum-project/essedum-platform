@@ -255,6 +255,10 @@ public class ICIPMlopsController {
 	@Autowired
 	private com.lfn.icip.icipwebeditor.service.impl.ApprovalWorkflowService approvalWorkflowService;
 
+	/** Model approval workflow service */
+	@Autowired
+	private com.lfn.icip.icipwebeditor.service.impl.ModelApprovalWorkflowService modelApprovalWorkflowService;
+
 	/** The claim. */
 	@Value("${security.claim:#{null}}")
 	private String claim;
@@ -1249,12 +1253,384 @@ public class ICIPMlopsController {
 			@RequestParam(required = false, name = "fileUploaded") String fileUploaded){
 		ResponseEntity<?> resp;
 		try {
-			return iCIPMlOpsRestAdapterService.uploadModel(requestBody,fileUploaded);	
+			return iCIPMlOpsRestAdapterService.uploadModel(requestBody,fileUploaded);
 		} catch (Exception e) {
 			resp = new ResponseEntity<>("Request failed", HttpStatus.INTERNAL_SERVER_ERROR);
 			logger.error("EXCEPTION:", e.getMessage());
 		}
 		return resp;
+	}
+
+	// ==================== MODEL APPROVAL ENDPOINTS ====================
+
+	/** POST /models/approval/project/submit — Developer submits DRAFT/PROJECT_REJECTED model for Project Admin approval. */
+	@PostMapping("/models/approval/project/submit")
+	public ResponseEntity<?> submitModelForProjectApproval(
+			@RequestBody java.util.Map<String, Object> request,
+			@org.springframework.web.bind.annotation.RequestHeader(value = "user-login", required = false) String username,
+			@org.springframework.web.bind.annotation.RequestHeader(value = "project", required = false) String projectHeader) {
+		try {
+			Object ridObj = request.get("resourceId");
+			Integer resourceId = ridObj instanceof Number ? ((Number) ridObj).intValue() : null;
+			if (resourceId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId is required"));
+			}
+			Integer projectId = null;
+			if (projectHeader != null && !projectHeader.isEmpty()) {
+				try { projectId = Integer.parseInt(projectHeader); } catch (NumberFormatException ignored) {}
+			}
+			if (projectId == null) {
+				Object pid = request.get("projectId");
+				projectId = pid instanceof Number ? ((Number) pid).intValue() : null;
+			}
+			if (projectId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "projectId is required"));
+			}
+			if (username == null || username.isEmpty()) {
+				// Fall back to the authenticated principal so this endpoint does not depend on the
+				// client-supplied user-login header (mirrors createdBy resolution in registerModels).
+				username = ICIPUtils.getUser(claim);
+			}
+			if (username == null || username.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Authentication required"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.submitForProjectApproval(resourceId, projectId, username);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", resourceId, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error submitting model for approval", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /models/approval/catalog?projectId=X&orgId=Y — approved models visible to the caller's scope. */
+	@GetMapping("/models/approval/catalog")
+	public ResponseEntity<?> getModelCatalog(
+			@RequestParam(required = false) Integer projectId,
+			@RequestParam(required = false) Integer orgId) {
+		try {
+			return ResponseEntity.ok(modelApprovalWorkflowService.getCatalogResources(projectId, orgId));
+		} catch (Exception e) {
+			logger.error("[ModelCatalog] Error fetching catalog", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/clone/{resourceId} — clone an approved/published model into a new DRAFT. */
+	@PostMapping("/models/approval/clone/{resourceId}")
+	public ResponseEntity<?> cloneModel(
+			@PathVariable Integer resourceId,
+			@RequestBody(required = false) java.util.Map<String, Object> request,
+			@RequestParam(required = false) Integer projectId,
+			@RequestParam(required = false) String username,
+			@org.springframework.web.bind.annotation.RequestHeader(value = "user-login", required = false) String userLogin,
+			@org.springframework.web.bind.annotation.RequestHeader(value = "project", required = false) String projectHeader) {
+		try {
+			Integer effectiveProjectId = projectId;
+			if (effectiveProjectId == null && request != null && request.get("projectId") instanceof Number) {
+				effectiveProjectId = ((Number) request.get("projectId")).intValue();
+			}
+			if (effectiveProjectId == null && projectHeader != null && !projectHeader.isEmpty()) {
+				try { effectiveProjectId = Integer.parseInt(projectHeader); } catch (NumberFormatException ignored) {}
+			}
+			String currentUser = (username != null && !username.isEmpty()) ? username : userLogin;
+			if ((currentUser == null || currentUser.isEmpty()) && request != null) {
+				Object bodyUser = request.get("username");
+				currentUser = bodyUser != null ? bodyUser.toString() : null;
+			}
+			if (currentUser == null || currentUser.isEmpty()) {
+				currentUser = ICIPUtils.getUser(claim);
+			}
+			ICIPMLFederatedModel clone = modelApprovalWorkflowService.cloneResource(resourceId, effectiveProjectId, currentUser);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", clone));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(404).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(409).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelClone] Error cloning model {}", resourceId, e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/project/approve/{id}?projectId=X&rank=2 — Project Admin approves. */
+	@PostMapping("/models/approval/project/approve/{id}")
+	public ResponseEntity<?> approveModelProjectApproval(@PathVariable Integer id,
+			@RequestParam(required = false) Integer projectId, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.approveProjectApproval(id, projectId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error approving model at project level", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/project/reject/{id}?rank=2 — Project Admin rejects. */
+	@PostMapping("/models/approval/project/reject/{id}")
+	public ResponseEntity<?> rejectModelProjectApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.rejectProjectApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error rejecting model at project level", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/org/submit — Project Admin submits PROJECT_APPROVED model to Org Admin. */
+	@PostMapping("/models/approval/org/submit")
+	public ResponseEntity<?> submitModelForOrgApproval(@RequestBody java.util.Map<String, Object> request,
+			@RequestParam(required = false) String rank) {
+		try {
+			Object ridObj = request.get("resourceId");
+			Integer resourceId = ridObj instanceof Number ? ((Number) ridObj).intValue() : null;
+			Object orgObj = request.get("organizationId");
+			Integer organizationId = orgObj instanceof Number ? ((Number) orgObj).intValue() : null;
+			if (resourceId == null || organizationId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId and organizationId are required"));
+			}
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.submitForOrgApproval(resourceId, organizationId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", resourceId,
+					"organizationId", organizationId, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error submitting model to org", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/org/approve/{id}?rank=3 — Org Admin approves (-> ORG_APPROVED). */
+	@PostMapping("/models/approval/org/approve/{id}")
+	public ResponseEntity<?> approveModelOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.approveOrgApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error org-approving model", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/org/reject/{id}?rank=3 — Org Admin rejects. */
+	@PostMapping("/models/approval/org/reject/{id}")
+	public ResponseEntity<?> rejectModelOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.rejectOrgApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error org-rejecting model", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/platform/submit — Org Admin submits ORG_APPROVED model to Platform Admin. */
+	@PostMapping("/models/approval/platform/submit")
+	public ResponseEntity<?> submitModelForPlatformApproval(@RequestBody java.util.Map<String, Object> request,
+			@RequestParam(required = false) String rank) {
+		try {
+			Object ridObj = request.get("resourceId");
+			Integer resourceId = ridObj instanceof Number ? ((Number) ridObj).intValue() : null;
+			if (resourceId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId is required"));
+			}
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.submitForPlatformApproval(resourceId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", resourceId, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error submitting model to platform", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/platform/approve/{id}?rank=4 — Platform Admin approves (-> PUBLISHED). */
+	@PostMapping("/models/approval/platform/approve/{id}")
+	public ResponseEntity<?> approveModelPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.approvePlatformApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error platform-approving model", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/platform/reject/{id}?rank=4 — Platform Admin rejects. */
+	@PostMapping("/models/approval/platform/reject/{id}")
+	public ResponseEntity<?> rejectModelPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.rejectPlatformApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error platform-rejecting model", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	private static final int MODEL_APPROVAL_DEFAULT_PAGE_SIZE = 5;
+
+	private <T> List<T> paginateModels(List<T> list, Integer page, Integer size) {
+		int safeSize = (size == null || size <= 0) ? MODEL_APPROVAL_DEFAULT_PAGE_SIZE : size;
+		int safePage = (page == null || page < 0) ? 0 : page;
+		int from = Math.min(safePage * safeSize, list.size());
+		int to = Math.min(from + safeSize, list.size());
+		return list.subList(from, to);
+	}
+
+	/** GET /models/approval/project-admin/list?projectId=X&rank=2 */
+	@GetMapping("/models/approval/project-admin/list")
+	public ResponseEntity<?> getModelProjectAdminApprovals(
+			@RequestParam Integer projectId,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPMLFederatedModel> result = modelApprovalWorkflowService.getProjectAdminApprovals(projectId, rank);
+			List<ICIPMLFederatedModel> pageSlice = paginateModels(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error getting project admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /models/approval/org-admin/list?organizationId=X&rank=3 */
+	@GetMapping("/models/approval/org-admin/list")
+	public ResponseEntity<?> getModelOrgAdminApprovals(
+			@RequestParam Integer organizationId,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPMLFederatedModel> result = modelApprovalWorkflowService.getOrgAdminApprovals(organizationId, rank);
+			List<ICIPMLFederatedModel> pageSlice = paginateModels(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error getting org admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /models/approval/platform-admin/list?rank=4 */
+	@GetMapping("/models/approval/platform-admin/list")
+	public ResponseEntity<?> getModelPlatformAdminApprovals(
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPMLFederatedModel> result = modelApprovalWorkflowService.getPlatformAdminApprovals(rank);
+			List<ICIPMLFederatedModel> pageSlice = paginateModels(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error getting platform admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /models/approval/draft-resources?projectId=X&rank=2 — PROJECT_APPROVED models ready to submit to org. */
+	@GetMapping("/models/approval/draft-resources")
+	public ResponseEntity<?> getModelDraftResources(
+			@RequestParam Integer projectId,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPMLFederatedModel> result = modelApprovalWorkflowService.getDraftResources(projectId, rank);
+			List<ICIPMLFederatedModel> pageSlice = paginateModels(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error getting model draft resources", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /models/approval/org-admin/draft-resources?organizationId=X&rank=3 — ORG_APPROVED models ready to submit to platform. */
+	@GetMapping("/models/approval/org-admin/draft-resources")
+	public ResponseEntity<?> getModelOrgAdminDraftResources(
+			@RequestParam Integer organizationId,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPMLFederatedModel> result = modelApprovalWorkflowService.getOrgAdminDraftResources(organizationId, rank);
+			List<ICIPMLFederatedModel> pageSlice = paginateModels(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error getting model org admin draft resources", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
 	}
 
 	@GetMapping("endpoints/listAdapters")

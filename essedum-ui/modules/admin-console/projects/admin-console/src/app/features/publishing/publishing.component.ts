@@ -60,6 +60,20 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
   datasourceOrgDrafts: any[] = [];
   datasourceOrgDraftsDataSource = new MatTableDataSource<any>([]);
 
+  // Model drafts
+  modelDrafts: any[] = [];
+  modelDraftsDataSource = new MatTableDataSource<any>([]);
+  modelOrgDrafts: any[] = [];
+  modelOrgDraftsDataSource = new MatTableDataSource<any>([]);
+
+  modelDraftsTotal = 0;
+  modelDraftsPageIndex = 0;
+  modelDraftsPageSize = 5;
+  modelOrgDraftsTotal = 0;
+  modelOrgDraftsPageIndex = 0;
+  modelOrgDraftsPageSize = 5;
+  readonly modelPageSizeOptions = [5, 10, 25];
+
   // Server-side pagination for the Connections tab (datasources).
   datasourceDraftsTotal = 0;
   datasourceDraftsPageIndex = 0;
@@ -170,6 +184,13 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
             ? this.api.getDatasourceOrgDraftResources(approvalOrgId, this.datasourceOrgDraftsPageIndex, this.datasourceOrgDraftsPageSize).pipe(catchError(() => of([])))
             : of([]);
 
+          const modelRank2$ = (streamingRank === 2 && projectId)
+            ? this.api.getModelDraftResources(projectId, this.modelDraftsPageIndex, this.modelDraftsPageSize).pipe(catchError(() => of([])))
+            : of([]);
+          const modelRank3$ = (streamingRank === 3 && approvalOrgId)
+            ? this.api.getModelOrgDraftResources(approvalOrgId, this.modelOrgDraftsPageIndex, this.modelOrgDraftsPageSize).pipe(catchError(() => of([])))
+            : of([]);
+
           return combineLatest([
             this.api.getDraftVersions(userId, orgId, projectId),
             this.api.getAssets(userId, orgId, projectId),
@@ -178,10 +199,12 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
             datasetRank2$,
             datasetRank3$,
             datasourceRank2$,
-            datasourceRank3$
+            datasourceRank3$,
+            modelRank2$,
+            modelRank3$
           ]);
         }),
-        map(([versions, assets, streamingRank2, streamingRank3, datasetRank2, datasetRank3, datasourceRank2, datasourceRank3]) => {
+        map(([versions, assets, streamingRank2, streamingRank3, datasetRank2, datasetRank3, datasourceRank2, datasourceRank3, modelRank2, modelRank3]) => {
           console.log('[PUBLISHING] Data loaded - versions:', versions?.length, 'assets:', assets?.length, 'rank2:', streamingRank2, 'rank3:', streamingRank3);
 
           // Extract rank 2 data (PROJECT_APPROVED)
@@ -236,6 +259,14 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
           this.datasourceOrgDrafts = extractArr(datasourceRank3);
           this.datasourceOrgDraftsDataSource.data = this.datasourceOrgDrafts;
           this.datasourceOrgDraftsTotal = this.extractCount(datasourceRank3, this.datasourceOrgDrafts);
+
+          // Model drafts (server-paginated)
+          this.modelDrafts = extractArr(modelRank2).filter((s: any) => (s.approvalStatus || s.approval_status) === 'PROJECT_APPROVED');
+          this.modelDraftsDataSource.data = this.modelDrafts;
+          this.modelDraftsTotal = this.extractCount(modelRank2, this.modelDrafts);
+          this.modelOrgDrafts = extractArr(modelRank3);
+          this.modelOrgDraftsDataSource.data = this.modelOrgDrafts;
+          this.modelOrgDraftsTotal = this.extractCount(modelRank3, this.modelOrgDrafts);
 
           return processedVersions;
         }),
@@ -498,6 +529,59 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.datasourceOrgDrafts = rows;
         this.datasourceOrgDraftsDataSource.data = rows;
         this.datasourceOrgDraftsTotal = this.extractCount(raw, rows);
+      });
+  }
+
+  submitModelToOrg(resource: any): void {
+    if (!this.orgId) { this.notify.error('Organization not set.'); return; }
+    this.api.submitModelForOrgApproval(resource.id, this.orgId).subscribe({
+      next: () => {
+        this.notify.success(`${resource.modelName || resource.model_name} submitted to organization for approval`);
+        this.modelDrafts = this.modelDrafts.filter(s => s.id !== resource.id);
+        this.modelDraftsDataSource.data = [...this.modelDrafts];
+        this.load();
+      },
+      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+    });
+  }
+
+  submitModelToPlatform(resource: any): void {
+    this.api.submitModelForPlatformApproval(resource.id).subscribe({
+      next: () => {
+        this.notify.success(`${resource.modelName || resource.model_name} submitted to Platform Admin for approval`);
+        this.modelOrgDrafts = this.modelOrgDrafts.filter(s => s.id !== resource.id);
+        this.modelOrgDraftsDataSource.data = [...this.modelOrgDrafts];
+        this.load();
+      },
+      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+    });
+  }
+
+  onModelDraftsPage(event: PageEvent): void {
+    this.modelDraftsPageIndex = event.pageIndex;
+    this.modelDraftsPageSize = event.pageSize;
+    if (!this.projectId) return;
+    this.api.getModelDraftResources(this.projectId, this.modelDraftsPageIndex, this.modelDraftsPageSize)
+      .pipe(take(1), catchError(() => of([])))
+      .subscribe((raw: any) => {
+        const rows = (Array.isArray(raw) ? raw : (raw?.data ?? [])).filter((s: any) => (s.approvalStatus || s.approval_status) === 'PROJECT_APPROVED');
+        this.modelDrafts = rows;
+        this.modelDraftsDataSource.data = rows;
+        this.modelDraftsTotal = this.extractCount(raw, rows);
+      });
+  }
+
+  onModelOrgDraftsPage(event: PageEvent): void {
+    this.modelOrgDraftsPageIndex = event.pageIndex;
+    this.modelOrgDraftsPageSize = event.pageSize;
+    if (!this.approvalOrgId) return;
+    this.api.getModelOrgDraftResources(this.approvalOrgId, this.modelOrgDraftsPageIndex, this.modelOrgDraftsPageSize)
+      .pipe(take(1), catchError(() => of([])))
+      .subscribe((raw: any) => {
+        const rows = Array.isArray(raw) ? raw : (raw?.data ?? []);
+        this.modelOrgDrafts = rows;
+        this.modelOrgDraftsDataSource.data = rows;
+        this.modelOrgDraftsTotal = this.extractCount(raw, rows);
       });
   }
 }

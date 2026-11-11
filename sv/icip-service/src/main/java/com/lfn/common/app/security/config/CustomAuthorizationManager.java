@@ -133,7 +133,10 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasets/add"))
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/git-configs/save"))
 				|| pipelineUri.contains("/folder/upload/")
-				|| pipelineUri.contains("/folder/update/")) {
+				|| pipelineUri.contains("/folder/update/")
+				|| ("POST".equals(pipelineMethod) && pipelineUri.endsWith("/service/v1/models/register"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/service/v1/models/upload"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/models/approval"))) {
 			return new AuthorizationDecision(true);
 		}
 

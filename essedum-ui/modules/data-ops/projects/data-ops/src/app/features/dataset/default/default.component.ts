@@ -26,6 +26,7 @@ export class DefaultComponent {
   @Input() copyDataset:boolean;
   @Input('edit') edit;
   @Input('schemaVal') schemaVal;
+  @Input() model: boolean = false;
   @Output('action') action = new EventEmitter();
   @Output('cache') cache = new EventEmitter();
 

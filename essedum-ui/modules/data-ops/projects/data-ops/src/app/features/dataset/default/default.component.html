@@ -169,12 +169,12 @@
                 Test
             </button>
         </div>
-        <div *ngIf="!copyDataset || isGitDataset" [ngStyle]="{'pointer-events': (!testSuccessful) ? 'none' : 'auto'}">
-            <button mat-flat-button *ngIf="!isAuth" [disabled]="!testSuccessful" (click)="saveDataset()"
+        <div *ngIf="!copyDataset || isGitDataset" [ngStyle]="{'pointer-events': (!testSuccessful && !model) ? 'none' : 'auto'}">
+            <button mat-flat-button *ngIf="!isAuth" [disabled]="!testSuccessful && !model" (click)="saveDataset()"
                 id="modalDef-SaveDataset" class="test-btn">Save</button>
         </div>
-        <div *ngIf="copyDataset && !isGitDataset" [ngStyle]="{'pointer-events': (!testSuccessful) ? 'none' : 'auto'}">
-            <button mat-flat-button *ngIf="!isAuth" [disabled]="!testSuccessful"
+        <div *ngIf="copyDataset && !isGitDataset" [ngStyle]="{'pointer-events': (!testSuccessful && !model) ? 'none' : 'auto'}">
+            <button mat-flat-button *ngIf="!isAuth" [disabled]="!testSuccessful && !model"
                 (click)="createDataset()" id="modalDef-SaveDataset" class="test-btn">Save</button>
         </div>
     </div>

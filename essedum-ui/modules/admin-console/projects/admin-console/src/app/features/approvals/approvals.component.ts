@@ -52,6 +52,25 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
   datasourceOrgApprovalsDataSource = new MatTableDataSource<any>([]);
   datasourcePlatformApprovalsDataSource = new MatTableDataSource<any>([]);
 
+  // Model approvals
+  modelApprovals: any[] = [];
+  modelOrgApprovals: any[] = [];
+  modelPlatformApprovals: any[] = [];
+  modelApprovalsDataSource = new MatTableDataSource<any>([]);
+  modelOrgApprovalsDataSource = new MatTableDataSource<any>([]);
+  modelPlatformApprovalsDataSource = new MatTableDataSource<any>([]);
+
+  modelApprovalsTotal = 0;
+  modelApprovalsPageIndex = 0;
+  modelApprovalsPageSize = 5;
+  modelOrgApprovalsTotal = 0;
+  modelOrgApprovalsPageIndex = 0;
+  modelOrgApprovalsPageSize = 5;
+  modelPlatformApprovalsTotal = 0;
+  modelPlatformApprovalsPageIndex = 0;
+  modelPlatformApprovalsPageSize = 5;
+  readonly modelPageSizeOptions = [5, 10, 25];
+
   // Server-side pagination for the Connections tab (datasources).
   datasourceApprovalsTotal = 0;
   datasourceApprovalsPageIndex = 0;
@@ -187,7 +206,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
           // Rank 4: PENDING_PLATFORM_APPROVAL (no project/org needed)
           if (!finalProjectId && !finalOrgId && streamingUserRank !== 4) {
             console.warn('[APPROVALS] WARNING: No projectId or orgId found! Will return empty arrays');
-            return combineLatest([of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([])]);
+            return combineLatest([of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([])]);
           }
 
           const streamingApi$ = finalProjectId ? this.api.getProjectAdminApprovals(finalProjectId) : of([]);
@@ -208,9 +227,19 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
             ? this.api.getPlatformAdminDatasourceApprovals(this.datasourcePlatformApprovalsPageIndex, this.datasourcePlatformApprovalsPageSize).pipe(catchError(() => of([])))
             : of([]);
 
-          return combineLatest([streamingApi$, streamingOrgApi$, platformApi$, datasetApi$, datasetOrgApi$, datasetPlatformApi$, datasourceApi$, datasourceOrgApi$, datasourcePlatformApi$]);
+          const modelApi$ = finalProjectId
+            ? this.api.getProjectAdminModelApprovals(finalProjectId, this.modelApprovalsPageIndex, this.modelApprovalsPageSize).pipe(catchError(() => of([])))
+            : of([]);
+          const modelOrgApi$ = finalOrgId
+            ? this.api.getOrgAdminModelApprovals(finalOrgId, this.modelOrgApprovalsPageIndex, this.modelOrgApprovalsPageSize).pipe(catchError(() => of([])))
+            : of([]);
+          const modelPlatformApi$ = streamingUserRank === 4
+            ? this.api.getPlatformAdminModelApprovals(this.modelPlatformApprovalsPageIndex, this.modelPlatformApprovalsPageSize).pipe(catchError(() => of([])))
+            : of([]);
+
+          return combineLatest([streamingApi$, streamingOrgApi$, platformApi$, datasetApi$, datasetOrgApi$, datasetPlatformApi$, datasourceApi$, datasourceOrgApi$, datasourcePlatformApi$, modelApi$, modelOrgApi$, modelPlatformApi$]);
         }),
-        map(([streamingApprovals, streamingOrgApprovals, platformApprovals, datasetApprovals, datasetOrgApprovals, datasetPlatformApprovals, datasourceApprovals, datasourceOrgApprovals, datasourcePlatformApprovals]) => {
+        map(([streamingApprovals, streamingOrgApprovals, platformApprovals, datasetApprovals, datasetOrgApprovals, datasetPlatformApprovals, datasourceApprovals, datasourceOrgApprovals, datasourcePlatformApprovals, modelApprovals, modelOrgApprovals, modelPlatformApprovals]) => {
           console.log('[APPROVALS] Step 4 - Received raw data:', { streamingApprovals, streamingOrgApprovals, platformApprovals });
           
           try {
@@ -296,6 +325,17 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
             this.datasourcePlatformApprovals = extractArray(datasourcePlatformApprovals);
             this.datasourcePlatformApprovalsDataSource.data = this.datasourcePlatformApprovals;
             this.datasourcePlatformApprovalsTotal = extractCount(datasourcePlatformApprovals, this.datasourcePlatformApprovals);
+
+            // Model approvals (server-paginated)
+            this.modelApprovals = extractArray(modelApprovals);
+            this.modelApprovalsDataSource.data = this.modelApprovals;
+            this.modelApprovalsTotal = extractCount(modelApprovals, this.modelApprovals);
+            this.modelOrgApprovals = extractArray(modelOrgApprovals);
+            this.modelOrgApprovalsDataSource.data = this.modelOrgApprovals;
+            this.modelOrgApprovalsTotal = extractCount(modelOrgApprovals, this.modelOrgApprovals);
+            this.modelPlatformApprovals = extractArray(modelPlatformApprovals);
+            this.modelPlatformApprovalsDataSource.data = this.modelPlatformApprovals;
+            this.modelPlatformApprovalsTotal = extractCount(modelPlatformApprovals, this.modelPlatformApprovals);
           } catch (error) {
             console.error('[APPROVALS] Error extracting data:', error);
             this.streamingApprovals = [];
@@ -316,8 +356,14 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
             this.datasourceOrgApprovalsDataSource.data = [];
             this.datasourcePlatformApprovals = [];
             this.datasourcePlatformApprovalsDataSource.data = [];
+            this.modelApprovals = [];
+            this.modelApprovalsDataSource.data = [];
+            this.modelOrgApprovals = [];
+            this.modelOrgApprovalsDataSource.data = [];
+            this.modelPlatformApprovals = [];
+            this.modelPlatformApprovalsDataSource.data = [];
           }
-          
+
           // Return empty array for legacy pending table
           return [];
         }),
@@ -347,6 +393,12 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
           this.datasourceOrgApprovalsDataSource.data = [];
           this.datasourcePlatformApprovals = [];
           this.datasourcePlatformApprovalsDataSource.data = [];
+          this.modelApprovals = [];
+          this.modelApprovalsDataSource.data = [];
+          this.modelOrgApprovals = [];
+          this.modelOrgApprovalsDataSource.data = [];
+          this.modelPlatformApprovals = [];
+          this.modelPlatformApprovalsDataSource.data = [];
         }
       });
   }
@@ -539,6 +591,71 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.datasourcePlatformApprovals = rows;
         this.datasourcePlatformApprovalsDataSource.data = rows;
         this.datasourcePlatformApprovalsTotal = this.extractTotal(raw, rows);
+      });
+  }
+
+  approveModel(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+    const apiCall$ = isPlatformLevel
+      ? this.api.approveModelPlatformApproval(resourceId)
+      : isOrgLevel
+        ? this.api.approveModelOrgApproval(resourceId)
+        : this.api.approveModelProjectApproval(resourceId, this.projectId || 0);
+    apiCall$.subscribe({
+      next: () => { this.notify.success('Model approved successfully'); this.load(); },
+      error: err => this.notify.error(err?.error?.message || 'Failed to approve'),
+    });
+  }
+
+  rejectModel(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+    const apiCall$ = isPlatformLevel
+      ? this.api.rejectModelPlatformApproval(resourceId)
+      : isOrgLevel
+        ? this.api.rejectModelOrgApproval(resourceId)
+        : this.api.rejectModelProjectApproval(resourceId);
+    apiCall$.subscribe({
+      next: () => { this.notify.success('Model rejected successfully'); this.load(); },
+      error: err => this.notify.error(err?.error?.message || 'Failed to reject'),
+    });
+  }
+
+  onModelApprovalsPage(event: PageEvent): void {
+    this.modelApprovalsPageIndex = event.pageIndex;
+    this.modelApprovalsPageSize = event.pageSize;
+    if (!this.projectId) return;
+    this.api.getProjectAdminModelApprovals(this.projectId, this.modelApprovalsPageIndex, this.modelApprovalsPageSize)
+      .pipe(take(1), catchError(() => of([])))
+      .subscribe((raw: any) => {
+        const rows = this.extractRows(raw);
+        this.modelApprovals = rows;
+        this.modelApprovalsDataSource.data = rows;
+        this.modelApprovalsTotal = this.extractTotal(raw, rows);
+      });
+  }
+
+  onModelOrgApprovalsPage(event: PageEvent): void {
+    this.modelOrgApprovalsPageIndex = event.pageIndex;
+    this.modelOrgApprovalsPageSize = event.pageSize;
+    if (!this.orgId) return;
+    this.api.getOrgAdminModelApprovals(this.orgId, this.modelOrgApprovalsPageIndex, this.modelOrgApprovalsPageSize)
+      .pipe(take(1), catchError(() => of([])))
+      .subscribe((raw: any) => {
+        const rows = this.extractRows(raw);
+        this.modelOrgApprovals = rows;
+        this.modelOrgApprovalsDataSource.data = rows;
+        this.modelOrgApprovalsTotal = this.extractTotal(raw, rows);
+      });
+  }
+
+  onModelPlatformApprovalsPage(event: PageEvent): void {
+    this.modelPlatformApprovalsPageIndex = event.pageIndex;
+    this.modelPlatformApprovalsPageSize = event.pageSize;
+    this.api.getPlatformAdminModelApprovals(this.modelPlatformApprovalsPageIndex, this.modelPlatformApprovalsPageSize)
+      .pipe(take(1), catchError(() => of([])))
+      .subscribe((raw: any) => {
+        const rows = this.extractRows(raw);
+        this.modelPlatformApprovals = rows;
+        this.modelPlatformApprovalsDataSource.data = rows;
+        this.modelPlatformApprovalsTotal = this.extractTotal(raw, rows);
       });
   }
 }

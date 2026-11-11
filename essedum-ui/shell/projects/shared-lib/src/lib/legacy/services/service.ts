@@ -1546,6 +1546,23 @@ export class Services {
       );
   }
 
+  // SUBMIT MODEL FOR PROJECT APPROVAL
+  submitModelForApproval(resourceId: number, projectId: number): Observable<any> {
+    return this.https
+      .post(
+        this.dataUrl + '/service/v1/models/approval/project/submit',
+        { resourceId, projectId },
+        {
+          headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }),
+          observe: 'response',
+        }
+      )
+      .pipe(
+        map((response) => response.body),
+        catchError((err) => this.handleError(err))
+      );
+  }
+
   callGetApi(url, parameters?, headers?) {
     return this.https
       .get(url, {

@@ -12,6 +12,12 @@
                         <span *ngIf="isInEdit">Edit Model</span>
                     </span>
                 </div>
+                <div class="col-7 d-flex justify-content-end align-items-center" *ngIf="isInEdit">
+                    <span *ngIf="hasApprovalStatus()"
+                        class="model-approval-badge model-approval-badge--{{ getApprovalStatusClass() }}">{{ getApprovalStatusLabel() }}</span>
+                    <button *ngIf="showSubmitButton()" class="btn-submit-approval" [disabled]="approvalSubmitting"
+                        (click)="submitForApproval()">Submit for Approval</button>
+                </div>
                 <mat-card class="lfx-card ml-12">
                     <div class="align-items-center d-flex">
                         <span class="lfx-u-mar-l-8 header-p-title">Models Properties </span>
@@ -62,7 +68,7 @@
                         </form>
                         <div *ngIf="data_datasource">
                             <app-default [dataset]="data" (action)="eventHandler($event)"
-                                [testSuccessful]="testSuccessful" [edit]="contentVal" [model]="'true'"
+                                [testSuccessful]="testSuccessful" [edit]="contentVal" [model]="true"
                                 [schemaVal]="schemaBol" (cache)="getCache($event)">
                             </app-default>
                         </div>

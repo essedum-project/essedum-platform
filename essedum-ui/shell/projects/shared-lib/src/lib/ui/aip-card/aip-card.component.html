@@ -33,13 +33,13 @@
                 {{ getDate() | date : "mediumDate" }}
             </p>
 
-            <!-- Connection approval-status pill (Connections cards only) -->
-            <span *ngIf="getConnectionApprovalStatus()"
+            <!-- Approval-status pill (Connections and Models cards) -->
+            <span *ngIf="getApprovalStatus()"
                 class="card-approval-badge"
-                [ngClass]="'approval-' + getConnectionApprovalStatusClass()"
-                [matTooltip]="getConnectionApprovalStatusLabel()" matTooltipPosition="above">
-                <mat-icon class="approval-badge-icon">{{ getConnectionApprovalStatusIcon() }}</mat-icon>
-                {{ getConnectionApprovalStatusLabel() }}
+                [ngClass]="'approval-' + getApprovalStatusClass()"
+                [matTooltip]="getApprovalStatusLabel()" matTooltipPosition="above">
+                <mat-icon class="approval-badge-icon">{{ getApprovalStatusIcon() }}</mat-icon>
+                {{ getApprovalStatusLabel() }}
             </span>
         </div>
 

@@ -216,7 +216,7 @@ export class AipCardComponent {
     return 0;
   }
 
-  // ── Connection approval-status badge (Connections cards only) ────────────
+  // ── Approval-status badge (Connections and Models cards) ──────────────────
   // Mirrors the status machine used on the connection detail page:
   // DRAFT -> PENDING_PROJECT_APPROVAL -> PROJECT_APPROVED -> PENDING_ORG_APPROVAL
   // -> ORG_APPROVED -> PENDING_PLATFORM_APPROVAL -> PUBLISHED (+ *_REJECTED states)
@@ -260,26 +260,26 @@ export class AipCardComponent {
     PUBLISHED: 'public',
   };
 
-  /** Raw approval status, scoped to Connections cards only. Empty string hides the badge. */
-  getConnectionApprovalStatus(): string {
-    if (this.servicev1 !== SERVICE_TYPES.CONNECTIONS) {
+  /** Raw approval status for cards that carry one (Connections and Models). Empty string hides the badge. */
+  getApprovalStatus(): string {
+    if (this.servicev1 !== SERVICE_TYPES.CONNECTIONS && this.servicev1 !== SERVICE_TYPES.MODEL) {
       return '';
     }
     return this.card?.approval_status || this.card?.approvalStatus || '';
   }
 
-  getConnectionApprovalStatusLabel(): string {
-    const status = this.getConnectionApprovalStatus();
+  getApprovalStatusLabel(): string {
+    const status = this.getApprovalStatus();
     return AipCardComponent.APPROVAL_LABELS[status] || status;
   }
 
-  getConnectionApprovalStatusClass(): string {
-    const status = this.getConnectionApprovalStatus();
+  getApprovalStatusClass(): string {
+    const status = this.getApprovalStatus();
     return AipCardComponent.APPROVAL_CLASSES[status] || 'draft';
   }
 
-  getConnectionApprovalStatusIcon(): string {
-    const status = this.getConnectionApprovalStatus();
+  getApprovalStatusIcon(): string {
+    const status = this.getApprovalStatus();
     return AipCardComponent.APPROVAL_ICONS[status] || 'info';
   }
 }

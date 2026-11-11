@@ -4,7 +4,7 @@
     <div class="page-header-left">
       <div>
         <h2>Asset Catalog</h2>
-        <span class="page-subtitle">Browse approved pipelines, datasets, and connections available in your scope</span>
+        <span class="page-subtitle">Browse approved pipelines, datasets, connections, and models available in your scope</span>
       </div>
     </div>
   </div>
@@ -61,7 +61,7 @@
         </div>
       </div>
 
-      <div class="card-actions">
+      <!-- <div class="card-actions">
         <button mat-stroked-button class="clone-btn" type="button"
                 [disabled]="isCloning('pipeline', asset)"
                 (click)="clone('pipeline', asset)"
@@ -69,7 +69,7 @@
           <mat-icon>content_copy</mat-icon>
           {{ isCloning('pipeline', asset) ? 'Cloning…' : 'Clone' }}
         </button>
-      </div>
+      </div> -->
 
     </div>
   </div>
@@ -121,7 +121,7 @@
             <span class="meta-value">{{ displayDate(asset.lastmodifieddate) }}</span>
           </div>
         </div>
-        <div class="card-actions">
+        <!-- <div class="card-actions">
           <button mat-stroked-button class="clone-btn" type="button"
                   [disabled]="isCloning('dataset', asset)"
                   (click)="clone('dataset', asset)"
@@ -129,13 +129,68 @@
             <mat-icon>content_copy</mat-icon>
             {{ isCloning('dataset', asset) ? 'Cloning…' : 'Clone' }}
           </button>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
   <div *ngIf="datasetAssets.length === 0" class="empty-state">
     <mat-icon>storage</mat-icon>
     <span class="empty-title">No approved datasets</span>
+    <span class="empty-sub">Nothing approved in your scope yet.</span>
+  </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">model_training</mat-icon>
+        <span>Models</span>
+        <span class="count-chip" *ngIf="modelAssets.length > 0">{{ modelAssets.length }}</span>
+      </ng-template>
+
+  <div class="catalog-grid" *ngIf="modelAssets.length > 0">
+    <div *ngFor="let asset of modelAssets" class="catalog-card">
+      <div class="card-main-header">
+        <div class="card-title-group">
+          <div class="card-main-title" [title]="asset.modelName || asset.name">{{ asset.modelName || asset.name }}</div>
+          <div class="card-main-sub">
+            <mat-icon class="sub-icon">model_training</mat-icon>
+            {{ asset.version ? ('v' + asset.version) : 'Model' }}
+          </div>
+        </div>
+        <div class="card-badge-group">
+          <span class="card-type-badge" [ngClass]="badgeClass(asset)">
+            <mat-icon class="badge-icon">{{ scopeIcon(asset) }}</mat-icon>
+            {{ scopeLabel(asset) }}
+          </span>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="meta-row" *ngIf="asset.organisation || asset.organization">
+          <mat-icon class="meta-icon">corporate_fare</mat-icon>
+          <span class="meta-label">Org</span>
+          <span class="meta-value">{{ asset.organisation || asset.organization }}</span>
+        </div>
+        <div class="meta-row" *ngIf="asset.datasource">
+          <mat-icon class="meta-icon">storage</mat-icon>
+          <span class="meta-label">Datasource</span>
+          <span class="meta-value">{{ asset.datasource }}</span>
+        </div>
+        <div class="meta-row" *ngIf="asset.createdBy || asset.created_by">
+          <mat-icon class="meta-icon">person</mat-icon>
+          <span class="meta-label">By</span>
+          <span class="meta-value">{{ asset.createdBy || asset.created_by }}</span>
+        </div>
+        <div class="meta-row" *ngIf="asset.createdOn || asset.created_date">
+          <mat-icon class="meta-icon">calendar_today</mat-icon>
+          <span class="meta-label">Date</span>
+          <span class="meta-value">{{ displayDate(asset.createdOn || asset.created_date) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="modelAssets.length === 0" class="empty-state">
+    <mat-icon>model_training</mat-icon>
+    <span class="empty-title">No approved models</span>
     <span class="empty-sub">Nothing approved in your scope yet.</span>
   </div>
     </mat-tab>
@@ -180,7 +235,7 @@
             <span class="meta-value">{{ displayDate(asset.lastmodifieddate) }}</span>
           </div>
         </div>
-        <div class="card-actions">
+        <!-- <div class="card-actions">
           <button mat-stroked-button class="clone-btn" type="button"
                   [disabled]="isCloning('datasource', asset)"
                   (click)="clone('datasource', asset)"
@@ -188,7 +243,7 @@
             <mat-icon>content_copy</mat-icon>
             {{ isCloning('datasource', asset) ? 'Cloning…' : 'Clone' }}
           </button>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>

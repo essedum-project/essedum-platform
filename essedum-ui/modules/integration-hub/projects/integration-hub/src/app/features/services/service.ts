@@ -4202,6 +4202,15 @@ export class Services {
       );
   }
 
+  submitModelForApproval(resourceId: number, projectId: number): Observable<any> {
+    return this.https
+      .post(this.dataUrl + '/service/v1/models/approval/project/submit', { resourceId, projectId }, { observe: 'response' })
+      .pipe(
+        map(response => response.body),
+        catchError(err => this.handleError(err))
+      );
+  }
+
 }
 
 export type CustomRemoteConfig = RemoteConfig & {

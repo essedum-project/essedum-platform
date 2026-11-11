@@ -351,5 +351,111 @@
         <span>No connection drafts awaiting approval.</span>
       </div>
     </mat-tab>
+
+    <!-- ========== MODELS TAB ========== -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">model_training</mat-icon>
+        <span>Models</span>
+        <span class="count-chip" *ngIf="(modelDraftsTotal + modelOrgDraftsTotal) > 0">{{ modelDraftsTotal + modelOrgDraftsTotal }}</span>
+      </ng-template>
+
+  <div class="streaming-drafts-section" *ngIf="modelDrafts.length > 0">
+    <div class="section-title">
+      <mat-icon>model_training</mat-icon>
+      <span>Models Ready for Organization Approval</span>
+    </div>
+    <table mat-table [dataSource]="modelDraftsDataSource" class="admin-console-table streaming-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Model Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.modelName || row.model_name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">{{ row.modelType || row.model_type || 'Model' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.createdBy || row.created_by }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-project-approved"><mat-icon>check_circle</mat-icon> Project Approved</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-submit-org" (click)="submitModelToOrg(row)"><mat-icon>send</mat-icon> Submit to Organization</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="modelDraftsTotal > 0">
+      <mat-paginator
+        [length]="modelDraftsTotal"
+        [pageIndex]="modelDraftsPageIndex"
+        [pageSize]="modelDraftsPageSize"
+        [pageSizeOptions]="modelPageSizeOptions"
+        showFirstLastButtons
+        (page)="onModelDraftsPage($event)">
+      </mat-paginator>
+    </div>
+    <p *ngIf="modelDraftsTotal === 0" class="empty-state"><mat-icon>info</mat-icon><span>No models ready for organization approval.</span></p>
+  </div>
+
+  <div class="streaming-org-drafts-section" *ngIf="modelOrgDrafts.length > 0">
+    <div class="section-title">
+      <mat-icon>model_training</mat-icon>
+      <span>Models Ready for Platform Admin Approval</span>
+    </div>
+    <table mat-table [dataSource]="modelOrgDraftsDataSource" class="admin-console-table streaming-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Model Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.modelName || row.model_name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">{{ row.modelType || row.model_type || 'Model' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.createdBy || row.created_by }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-org-approved"><mat-icon>check_circle</mat-icon> Org Approved</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-submit-platform" (click)="submitModelToPlatform(row)"><mat-icon>upload</mat-icon> Submit to Platform Admin</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="modelOrgDraftsTotal > 0">
+      <mat-paginator
+        [length]="modelOrgDraftsTotal"
+        [pageIndex]="modelOrgDraftsPageIndex"
+        [pageSize]="modelOrgDraftsPageSize"
+        [pageSizeOptions]="modelPageSizeOptions"
+        showFirstLastButtons
+        (page)="onModelOrgDraftsPage($event)">
+      </mat-paginator>
+    </div>
+    <p *ngIf="modelOrgDraftsTotal === 0" class="empty-state"><mat-icon>info</mat-icon><span>No models awaiting platform admin approval.</span></p>
+  </div>
+
+      <div class="empty-state" *ngIf="modelDraftsTotal === 0 && modelOrgDraftsTotal === 0">
+        <mat-icon>model_training</mat-icon>
+        <span>No model drafts awaiting approval.</span>
+      </div>
+    </mat-tab>
   </mat-tab-group>
 </div>
