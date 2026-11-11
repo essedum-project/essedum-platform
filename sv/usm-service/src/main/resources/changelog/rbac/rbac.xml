@@ -824,4 +824,37 @@
 		     WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL</sql>
 	</changeSet>
 
+	<!-- rbac-32/33/34: add the model approval-workflow columns to mlfederatedmodels.
+	     ICIPMLFederatedModel maps approval_status / project_id / approved_organization_id,
+	     but no migration ever created them and ddl-auto is none, so every query that
+	     hydrates that entity failed (HTTP 500) — including POST /service/v1/models/register
+	     and GET /service/v1/models/getAll/{org}. Mirrors changelog/rbac/model-approval-columns.sql.
+	     Each changeSet is guarded so it is a no-op where the column already exists. -->
+	<changeSet author="Essedum (rbac)" id="rbac-32">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="mlfederatedmodels" columnName="approval_status" /></not>
+		</preConditions>
+		<addColumn tableName="mlfederatedmodels">
+			<column name="approval_status" type="varchar(50)" defaultValue="DRAFT" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-33">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="mlfederatedmodels" columnName="project_id" /></not>
+		</preConditions>
+		<addColumn tableName="mlfederatedmodels">
+			<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-34">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="mlfederatedmodels" columnName="approved_organization_id" /></not>
+		</preConditions>
+		<addColumn tableName="mlfederatedmodels">
+			<column name="approved_organization_id" type="int" />
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>
