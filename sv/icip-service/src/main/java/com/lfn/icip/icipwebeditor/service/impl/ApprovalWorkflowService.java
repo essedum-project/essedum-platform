@@ -57,13 +57,13 @@ public class ApprovalWorkflowService {
 
 		resource.setApprovalStatus("PENDING_PROJECT_APPROVAL");
 		resource.setProjectId(projectId);
-		logger.info("[Approval] Resource {} - After setting: status={}, projectId={}", 
-			resourceId, resource.getApprovalStatus(), resource.getProjectId());
-		
+		logger.info("[Approval] Resource {} - After setting: status={}, projectId={}",
+				resourceId, resource.getApprovalStatus(), resource.getProjectId());
+
 		ICIPStreamingServices saved = streamingServicesRepository.save(resource);
-		logger.info("[Approval] Resource {} saved - Verified: status={}, projectId={}", 
-			saved.getCid(), saved.getApprovalStatus(), saved.getProjectId());
-		
+		logger.info("[Approval] Resource {} saved - Verified: status={}, projectId={}",
+				saved.getCid(), saved.getApprovalStatus(), saved.getProjectId());
+
 		return saved;
 	}
 
@@ -84,8 +84,8 @@ public class ApprovalWorkflowService {
 			throw new IllegalArgumentException("Resource not found: " + resourceId);
 		}
 
-		logger.info("[Approval] Found resource: cid={}, name={}, currentStatus={}, currentProjectId={}", 
-			resource.getCid(), resource.getName(), resource.getApprovalStatus(), resource.getProjectId());
+		logger.info("[Approval] Found resource: cid={}, name={}, currentStatus={}, currentProjectId={}",
+				resource.getCid(), resource.getName(), resource.getApprovalStatus(), resource.getProjectId());
 
 		if (!"PENDING_PROJECT_APPROVAL".equals(resource.getApprovalStatus())) {
 			throw new IllegalStateException("Only PENDING_PROJECT_APPROVAL resources can be approved");
@@ -101,8 +101,8 @@ public class ApprovalWorkflowService {
 
 		resource.setApprovalStatus("PROJECT_APPROVED");
 		ICIPStreamingServices saved = streamingServicesRepository.save(resource);
-		logger.info("[Approval] Resource approved - cid={}, newStatus={}, projectId in DB={}", 
-			saved.getCid(), saved.getApprovalStatus(), saved.getProjectId());
+		logger.info("[Approval] Resource approved - cid={}, newStatus={}, projectId in DB={}",
+				saved.getCid(), saved.getApprovalStatus(), saved.getProjectId());
 		return saved;
 	}
 
@@ -112,6 +112,10 @@ public class ApprovalWorkflowService {
 	 * Only visible to creator
 	 */
 	public ICIPStreamingServices rejectProjectApproval(Integer resourceId, String currentUserRank) {
+		return rejectProjectApproval(resourceId, currentUserRank, null);
+	}
+
+	public ICIPStreamingServices rejectProjectApproval(Integer resourceId, String currentUserRank, String reason) {
 		logger.info("[Approval] Project Admin rejecting resource {}", resourceId);
 
 		if (!"2".equals(currentUserRank)) {
@@ -124,6 +128,9 @@ public class ApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PROJECT_REJECTED");
+		if (reason != null && !reason.isBlank()) {
+			resource.setRejectionReason(reason);
+		}
 		return streamingServicesRepository.save(resource);
 	}
 
@@ -176,7 +183,7 @@ public class ApprovalWorkflowService {
 		}
 
 		logger.info("[Approval] Before org-approve - resource: id={}, name={}, status={}, approvedOrgId={}, org={}",
-			resourceId, resource.getName(), resource.getApprovalStatus(), resource.getApprovedOrganizationId(), resource.getOrganization());
+				resourceId, resource.getName(), resource.getApprovalStatus(), resource.getApprovedOrganizationId(), resource.getOrganization());
 
 		resource.setApprovalStatus("ORG_APPROVED");
 		// Normalize approvedOrganizationId to portfoliodata.id (the same value the catalog and pipeline-list
@@ -187,10 +194,10 @@ public class ApprovalWorkflowService {
 			logger.info("[Approval] Normalized approvedOrganizationId to portfolioOrgId={}", portfolioOrgId);
 		}
 		ICIPStreamingServices saved = streamingServicesRepository.save(resource);
-		
+
 		logger.info("[Approval] After org-approve - resource: id={}, name={}, status={}, approvedOrgId={}",
-			saved.getCid(), saved.getName(), saved.getApprovalStatus(), saved.getApprovedOrganizationId());
-		
+				saved.getCid(), saved.getName(), saved.getApprovalStatus(), saved.getApprovedOrganizationId());
+
 		return saved;
 	}
 
@@ -252,6 +259,10 @@ public class ApprovalWorkflowService {
 	 * Status: PENDING_PLATFORM_APPROVAL -> PLATFORM_REJECTED
 	 */
 	public ICIPStreamingServices rejectPlatformApproval(Integer resourceId, String currentUserRank) {
+		return rejectPlatformApproval(resourceId, currentUserRank, null);
+	}
+
+	public ICIPStreamingServices rejectPlatformApproval(Integer resourceId, String currentUserRank, String reason) {
 		logger.info("[Approval] Platform Admin rejecting resource {}", resourceId);
 
 		if (!"4".equals(currentUserRank)) {
@@ -264,6 +275,9 @@ public class ApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PLATFORM_REJECTED");
+		if (reason != null && !reason.isBlank()) {
+			resource.setRejectionReason(reason);
+		}
 		return streamingServicesRepository.save(resource);
 	}
 
@@ -273,6 +287,10 @@ public class ApprovalWorkflowService {
 	 * Resource remains visible to same project users
 	 */
 	public ICIPStreamingServices rejectOrgApproval(Integer resourceId, String currentUserRank) {
+		return rejectOrgApproval(resourceId, currentUserRank, null);
+	}
+
+	public ICIPStreamingServices rejectOrgApproval(Integer resourceId, String currentUserRank, String reason) {
 		logger.info("[Approval] Org Admin rejecting org approval for resource {}", resourceId);
 
 		if (!"3".equals(currentUserRank)) {
@@ -285,6 +303,9 @@ public class ApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("ORG_REJECTED");
+		if (reason != null && !reason.isBlank()) {
+			resource.setRejectionReason(reason);
+		}
 		return streamingServicesRepository.save(resource);
 	}
 
@@ -292,8 +313,8 @@ public class ApprovalWorkflowService {
 	 * Get resources visible to current user based on approval status and user context
 	 */
 	public List<ICIPStreamingServices> getVisibleResources(String currentUser, Integer userProjectId, Integer userOrganizationId, String userRank) {
-		logger.debug("[Approval] Getting visible resources for user: {}, projectId: {}, orgId: {}, rank: {}", 
-			currentUser, userProjectId, userOrganizationId, userRank);
+		logger.debug("[Approval] Getting visible resources for user: {}, projectId: {}, orgId: {}, rank: {}",
+				currentUser, userProjectId, userOrganizationId, userRank);
 
 		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
 		List<ICIPStreamingServices> visibleResources = new ArrayList<>();
@@ -310,8 +331,8 @@ public class ApprovalWorkflowService {
 	/**
 	 * Check if a resource is visible to the current user
 	 */
-	public boolean isResourceVisibleToUser(ICIPStreamingServices resource, String currentUser, 
-			Integer userProjectId, Integer userOrganizationId, String userRank) {
+	public boolean isResourceVisibleToUser(ICIPStreamingServices resource, String currentUser,
+	                                       Integer userProjectId, Integer userOrganizationId, String userRank) {
 
 		String status = resource.getApprovalStatus();
 		boolean isVisible = false;
@@ -375,11 +396,11 @@ public class ApprovalWorkflowService {
 			isVisible = resource.getApprovedOrganizationId() == null
 					|| userOrganizationId.equals(resource.getApprovedOrganizationId());
 			if (!isVisible) {
-				logger.debug("[Approval] PUBLISHED resource {} not visible: userOrgId={}, resourceApprovedOrgId={}", 
-					resource.getCid(), userOrganizationId, resource.getApprovedOrganizationId());
+				logger.debug("[Approval] PUBLISHED resource {} not visible: userOrgId={}, resourceApprovedOrgId={}",
+						resource.getCid(), userOrganizationId, resource.getApprovedOrganizationId());
 			} else {
-				logger.debug("[Approval] PUBLISHED resource {} IS visible to user: userOrgId={}, resourceApprovedOrgId={}", 
-					resource.getCid(), userOrganizationId, resource.getApprovedOrganizationId());
+				logger.debug("[Approval] PUBLISHED resource {} IS visible to user: userOrgId={}, resourceApprovedOrgId={}",
+						resource.getCid(), userOrganizationId, resource.getApprovedOrganizationId());
 			}
 		}
 
@@ -397,25 +418,25 @@ public class ApprovalWorkflowService {
 
 		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
 		logger.info("[Approval] Total resources in DB: {}", allResources.size());
-		
+
 		// Debug: log resources with PENDING_PROJECT_APPROVAL
 		long pendingCount = allResources.stream()
-			.filter(r -> "PENDING_PROJECT_APPROVAL".equals(r.getApprovalStatus()))
-			.count();
+				.filter(r -> "PENDING_PROJECT_APPROVAL".equals(r.getApprovalStatus()))
+				.count();
 		logger.info("[Approval] Resources with PENDING_PROJECT_APPROVAL status: {}", pendingCount);
-		
+
 		// Debug: log projectId distribution
 		allResources.stream()
-			.filter(r -> "PENDING_PROJECT_APPROVAL".equals(r.getApprovalStatus()))
-			.forEach(r -> logger.info("[Approval] Resource ID: {}, Name: {}, Status: {}, ProjectId: {}", 
-				r.getCid(), r.getName(), r.getApprovalStatus(), r.getProjectId()));
-		
+				.filter(r -> "PENDING_PROJECT_APPROVAL".equals(r.getApprovalStatus()))
+				.forEach(r -> logger.info("[Approval] Resource ID: {}, Name: {}, Status: {}, ProjectId: {}",
+						r.getCid(), r.getName(), r.getApprovalStatus(), r.getProjectId()));
+
 		logger.info("[Approval] Filtering for projectId: {}", projectId);
-		
+
 		List<ICIPStreamingServices> result = allResources.stream()
-			.filter(r -> "PENDING_PROJECT_APPROVAL".equals(r.getApprovalStatus()) && projectId.equals(r.getProjectId()))
-			.collect(Collectors.toList());
-		
+				.filter(r -> "PENDING_PROJECT_APPROVAL".equals(r.getApprovalStatus()) && projectId.equals(r.getProjectId()))
+				.collect(Collectors.toList());
+
 		logger.info("[Approval] Found {} resources for project admin with projectId: {}", result.size(), projectId);
 		return result;
 	}
@@ -430,8 +451,8 @@ public class ApprovalWorkflowService {
 
 		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
 		return allResources.stream()
-			.filter(r -> "PENDING_ORG_APPROVAL".equals(r.getApprovalStatus()) && organizationId.equals(r.getApprovedOrganizationId()))
-			.collect(Collectors.toList());
+				.filter(r -> "PENDING_ORG_APPROVAL".equals(r.getApprovalStatus()) && organizationId.equals(r.getApprovedOrganizationId()))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -440,8 +461,8 @@ public class ApprovalWorkflowService {
 	public List<ICIPStreamingServices> getPublishedResourcesForOrg(Integer organizationId) {
 		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
 		return allResources.stream()
-			.filter(r -> "PUBLISHED".equals(r.getApprovalStatus()) && organizationId.equals(r.getApprovedOrganizationId()))
-			.collect(Collectors.toList());
+				.filter(r -> "PUBLISHED".equals(r.getApprovalStatus()) && organizationId.equals(r.getApprovedOrganizationId()))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -455,8 +476,8 @@ public class ApprovalWorkflowService {
 
 		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
 		return allResources.stream()
-			.filter(r -> "ORG_APPROVED".equals(r.getApprovalStatus()) && organizationId.equals(r.getApprovedOrganizationId()))
-			.collect(Collectors.toList());
+				.filter(r -> "ORG_APPROVED".equals(r.getApprovalStatus()) && organizationId.equals(r.getApprovedOrganizationId()))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -469,8 +490,8 @@ public class ApprovalWorkflowService {
 
 		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
 		return allResources.stream()
-			.filter(r -> "PENDING_PLATFORM_APPROVAL".equals(r.getApprovalStatus()))
-			.collect(Collectors.toList());
+				.filter(r -> "PENDING_PLATFORM_APPROVAL".equals(r.getApprovalStatus()))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -480,8 +501,8 @@ public class ApprovalWorkflowService {
 	public List<ICIPStreamingServices> getGloballyPublishedResources() {
 		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
 		return allResources.stream()
-			.filter(r -> "PUBLISHED".equals(r.getApprovalStatus()) && r.getApprovedOrganizationId() == null)
-			.collect(Collectors.toList());
+				.filter(r -> "PUBLISHED".equals(r.getApprovalStatus()) && r.getApprovedOrganizationId() == null)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -582,9 +603,9 @@ public class ApprovalWorkflowService {
 	 * Get PROJECT_APPROVED resources for a project
 	 */
 	public List<ICIPStreamingServices> getDraftResources(Integer projectId, String currentUserRank) {
-		logger.info("[Approval] getDraftResources called - projectId: {} (type: {}), rank: {}", 
-			projectId, projectId != null ? projectId.getClass().getSimpleName() : "null", currentUserRank);
-		
+		logger.info("[Approval] getDraftResources called - projectId: {} (type: {}), rank: {}",
+				projectId, projectId != null ? projectId.getClass().getSimpleName() : "null", currentUserRank);
+
 		if (!"2".equals(currentUserRank)) {
 			logger.warn("[Approval] User rank is not 2 (project admin): {}", currentUserRank);
 			return new ArrayList<>();
@@ -592,34 +613,34 @@ public class ApprovalWorkflowService {
 
 		List<ICIPStreamingServices> allResources = streamingServicesRepository.findAll();
 		logger.info("[Approval] Total resources in DB: {}", allResources.size());
-		
+
 		// Log all resources for debugging
 		for (ICIPStreamingServices r : allResources) {
-			logger.debug("[Approval] Resource in DB - cid={}, status={}, projectId={}, statusMatch={}, projectMatch={}", 
-				r.getCid(), r.getApprovalStatus(), r.getProjectId(), 
-				"PROJECT_APPROVED".equals(r.getApprovalStatus()),
-				projectId != null && projectId.equals(r.getProjectId()));
+			logger.debug("[Approval] Resource in DB - cid={}, status={}, projectId={}, statusMatch={}, projectMatch={}",
+					r.getCid(), r.getApprovalStatus(), r.getProjectId(),
+					"PROJECT_APPROVED".equals(r.getApprovalStatus()),
+					projectId != null && projectId.equals(r.getProjectId()));
 		}
-		
+
 		List<ICIPStreamingServices> draftResources = allResources.stream()
-			.filter(r -> {
-				boolean statusMatch = "PROJECT_APPROVED".equals(r.getApprovalStatus());
-				boolean projectMatch = projectId != null && projectId.equals(r.getProjectId());
-				boolean keep = statusMatch && projectMatch;
-				if (!keep && (statusMatch || projectMatch)) {
-					logger.debug("[Approval] Resource FILTERED OUT - cid={}: status={} (match={}), projectId={} (match={}, param={})", 
-						r.getCid(), r.getApprovalStatus(), statusMatch, r.getProjectId(), projectMatch, projectId);
-				}
-				return keep;
-			})
-			.collect(Collectors.toList());
-		
+				.filter(r -> {
+					boolean statusMatch = "PROJECT_APPROVED".equals(r.getApprovalStatus());
+					boolean projectMatch = projectId != null && projectId.equals(r.getProjectId());
+					boolean keep = statusMatch && projectMatch;
+					if (!keep && (statusMatch || projectMatch)) {
+						logger.debug("[Approval] Resource FILTERED OUT - cid={}: status={} (match={}), projectId={} (match={}, param={})",
+								r.getCid(), r.getApprovalStatus(), statusMatch, r.getProjectId(), projectMatch, projectId);
+					}
+					return keep;
+				})
+				.collect(Collectors.toList());
+
 		logger.info("[Approval] Found {} PROJECT_APPROVED resources for projectId {}", draftResources.size(), projectId);
 		for (ICIPStreamingServices resource : draftResources) {
-			logger.info("[Approval] Draft resource MATCH: cid={}, name={}, status={}, projectId={}", 
-				resource.getCid(), resource.getName(), resource.getApprovalStatus(), resource.getProjectId());
+			logger.info("[Approval] Draft resource MATCH: cid={}, name={}, status={}, projectId={}",
+					resource.getCid(), resource.getName(), resource.getApprovalStatus(), resource.getProjectId());
 		}
-		
+
 		return draftResources;
 	}
 }

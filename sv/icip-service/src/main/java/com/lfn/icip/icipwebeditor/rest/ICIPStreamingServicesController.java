@@ -1,13 +1,13 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -71,7 +71,7 @@ public class ICIPStreamingServicesController {
 	/** The streaming services repository */
 	@Autowired
 	private com.lfn.icip.icipwebeditor.repository.ICIPStreamingServicesRepository streamingServicesRepository;
-	
+
 	/** The claim. */
 	@Value("${security.claim:#{null}}")
 	private String claim;
@@ -82,10 +82,10 @@ public class ICIPStreamingServicesController {
 	 * @param id the id
 	 * @return the response entity
 	 * @throws SQLException the SQL exception
-	 * @throws GitAPIException 
-	 * @throws IOException 
-	 * @throws TransportException 
-	 * @throws InvalidRemoteException 
+	 * @throws GitAPIException
+	 * @throws IOException
+	 * @throws TransportException
+	 * @throws InvalidRemoteException
 	 */
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Void> deleteStreamingServices(@PathVariable(name = "id") Integer id) throws SQLException, InvalidRemoteException, TransportException, IOException, GitAPIException {
@@ -93,7 +93,7 @@ public class ICIPStreamingServicesController {
 			streamingServicesService.delete(id);
 			logger.info("Deleting streaming service by Id : {}", id);
 			return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString()))
-				.build();
+					.build();
 		} catch (Exception e) {
 			logger.error("Error deleting streaming service with id: {}", id, e);
 			return ResponseEntity.status(500).build();
@@ -114,7 +114,7 @@ public class ICIPStreamingServicesController {
 		try {
 			Integer resourceId = (Integer) request.get("resourceId");
 			Integer projectId = null;
-			
+
 			if (resourceId == null) {
 				logger.warn("[Approval] Submit failed: Missing resourceId");
 				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId is required"));
@@ -149,10 +149,10 @@ public class ICIPStreamingServicesController {
 			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.submitForProjectApproval(resourceId, projectId, username);
 			logger.info("[Approval] Successfully submitted resource {} for approval", resourceId);
 			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"message", "Resource submitted for approval",
-				"resourceId", resourceId,
-				"status", result.getApprovalStatus()
+					"success", true,
+					"message", "Resource submitted for approval",
+					"resourceId", resourceId,
+					"status", result.getApprovalStatus()
 			));
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
@@ -180,12 +180,12 @@ public class ICIPStreamingServicesController {
 			@RequestHeader(value = "organisation", required = false) String orgHeader,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
-			logger.info("[Approval] getVisibleResources - user: {}, project: {}, org: {}, role: {}", 
-				username, projectHeader, orgHeader, roleId);
-			
+			logger.info("[Approval] getVisibleResources - user: {}, project: {}, org: {}, role: {}",
+					username, projectHeader, orgHeader, roleId);
+
 			Integer userProjectId = null;
 			Integer userOrganizationId = null;
-			
+
 			if (projectHeader != null && !projectHeader.isEmpty()) {
 				try {
 					userProjectId = Integer.parseInt(projectHeader);
@@ -193,7 +193,7 @@ public class ICIPStreamingServicesController {
 					logger.warn("[Approval] Invalid projectId format: {}", projectHeader);
 				}
 			}
-			
+
 			if (orgHeader != null && !orgHeader.isEmpty()) {
 				try {
 					userOrganizationId = Integer.parseInt(orgHeader);
@@ -207,16 +207,16 @@ public class ICIPStreamingServicesController {
 				return ResponseEntity.status(400).body(java.util.Map.of("error", "Missing user context headers"));
 			}
 
-			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> visibleResources = 
-				approvalWorkflowService.getVisibleResources(username, userProjectId, userOrganizationId, roleId);
-			
-			logger.info("[Approval] Found {} visible resources for user {} in projectId: {}, orgId: {}", 
-				visibleResources.size(), username, userProjectId, userOrganizationId);
-			
+			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> visibleResources =
+					approvalWorkflowService.getVisibleResources(username, userProjectId, userOrganizationId, roleId);
+
+			logger.info("[Approval] Found {} visible resources for user {} in projectId: {}, orgId: {}",
+					visibleResources.size(), username, userProjectId, userOrganizationId);
+
 			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"data", visibleResources,
-				"count", visibleResources.size()
+					"success", true,
+					"data", visibleResources,
+					"count", visibleResources.size()
 			));
 		} catch (Exception e) {
 			logger.error("[Approval] Error getting visible resources", e);
@@ -234,23 +234,23 @@ public class ICIPStreamingServicesController {
 			@RequestParam(required = false) Integer projectId,
 			@RequestParam(required = false) String rank) {
 		try {
-			logger.info("[Approval] POST /approval/project/approve/{} - projectId: {} (type: {}), rank: {}", 
-				resourceId, projectId, projectId != null ? projectId.getClass().getSimpleName() : "null", rank);
-			
+			logger.info("[Approval] POST /approval/project/approve/{} - projectId: {} (type: {}), rank: {}",
+					resourceId, projectId, projectId != null ? projectId.getClass().getSimpleName() : "null", rank);
+
 			if (rank == null || rank.isEmpty()) {
 				logger.warn("[Approval] Missing rank parameter for project approval");
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
 
 			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approveProjectApproval(resourceId, projectId, rank);
-			logger.info("[Approval] Resource {} approved at project level - Saved status: {}, projectId in DB: {}", 
-				resourceId, result.getApprovalStatus(), result.getProjectId());
+			logger.info("[Approval] Resource {} approved at project level - Saved status: {}, projectId in DB: {}",
+					resourceId, result.getApprovalStatus(), result.getProjectId());
 			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"message", "Resource approved",
-				"resourceId", resourceId,
-				"status", result.getApprovalStatus(),
-				"projectIdInDb", result.getProjectId()
+					"success", true,
+					"message", "Resource approved",
+					"resourceId", resourceId,
+					"status", result.getApprovalStatus(),
+					"projectIdInDb", result.getProjectId()
 			));
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
@@ -271,23 +271,25 @@ public class ICIPStreamingServicesController {
 	@PostMapping("/approval/project/reject/{resourceId}")
 	public ResponseEntity<?> rejectProjectApproval(
 			@PathVariable Integer resourceId,
-			@RequestParam(required = false) String rank) {
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) String reason) {
 		try {
 			logger.info("[Approval] POST /approval/project/reject/{} - rank: {}", resourceId, rank);
-			
+
 			if (rank == null || rank.isEmpty()) {
 				logger.warn("[Approval] Missing rank parameter for project rejection");
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
 
-			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectProjectApproval(resourceId, rank);
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectProjectApproval(resourceId, rank, reason);
 			logger.info("[Approval] Resource {} rejected at project level by rank: {}", resourceId, rank);
-			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"message", "Resource rejected",
-				"resourceId", resourceId,
-				"status", result.getApprovalStatus()
-			));
+			java.util.Map<String, Object> resp = new java.util.LinkedHashMap<>();
+			resp.put("success", true);
+			resp.put("message", "Resource rejected");
+			resp.put("resourceId", resourceId);
+			resp.put("status", result.getApprovalStatus());
+			resp.put("rejection_reason", result.getRejectionReason() != null ? result.getRejectionReason() : "");
+			return ResponseEntity.ok(resp);
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
@@ -312,7 +314,7 @@ public class ICIPStreamingServicesController {
 		try {
 			Integer resourceId = (Integer) request.get("resourceId");
 			Integer organizationId = null;
-			
+
 			if (resourceId == null) {
 				logger.warn("[Approval] Org submit failed: Missing resourceId");
 				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId is required"));
@@ -345,11 +347,11 @@ public class ICIPStreamingServicesController {
 			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.submitForOrgApproval(resourceId, organizationId, userRank);
 			logger.info("[Approval] Successfully submitted resource {} to org {} for approval", resourceId, organizationId);
 			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"message", "Resource submitted to organization for approval",
-				"resourceId", resourceId,
-				"organizationId", organizationId,
-				"status", result.getApprovalStatus()
+					"success", true,
+					"message", "Resource submitted to organization for approval",
+					"resourceId", resourceId,
+					"organizationId", organizationId,
+					"status", result.getApprovalStatus()
 			));
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
@@ -384,10 +386,10 @@ public class ICIPStreamingServicesController {
 			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approveOrgApproval(resourceId, userRank, orgName, orgId);
 			logger.info("[Approval] Resource {} approved and published at org level", resourceId);
 			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"message", "Resource published",
-				"resourceId", resourceId,
-				"status", result.getApprovalStatus()
+					"success", true,
+					"message", "Resource published",
+					"resourceId", resourceId,
+					"status", result.getApprovalStatus()
 			));
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
@@ -409,7 +411,8 @@ public class ICIPStreamingServicesController {
 	public ResponseEntity<?> rejectOrgApproval(
 			@PathVariable Integer resourceId,
 			@RequestParam(value = "rank", required = false) String rank,
-			@RequestHeader(value = "roleId", required = false) String roleId) {
+			@RequestHeader(value = "roleId", required = false) String roleId,
+			@RequestParam(required = false) String reason) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
 			if (userRank == null || userRank.isEmpty()) {
@@ -417,14 +420,15 @@ public class ICIPStreamingServicesController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
 			}
 
-			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectOrgApproval(resourceId, userRank);
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectOrgApproval(resourceId, userRank, reason);
 			logger.info("[Approval] Resource {} rejected at org level", resourceId);
-			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"message", "Resource rejected",
-				"resourceId", resourceId,
-				"status", result.getApprovalStatus()
-			));
+			java.util.Map<String, Object> resp = new java.util.LinkedHashMap<>();
+			resp.put("success", true);
+			resp.put("message", "Resource rejected");
+			resp.put("resourceId", resourceId);
+			resp.put("status", result.getApprovalStatus());
+			resp.put("rejection_reason", result.getRejectionReason() != null ? result.getRejectionReason() : "");
+			return ResponseEntity.ok(resp);
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
@@ -462,10 +466,10 @@ public class ICIPStreamingServicesController {
 			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.submitForPlatformApproval(resourceId, userRank);
 			logger.info("[Approval] Successfully submitted resource {} for platform approval", resourceId);
 			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"message", "Resource submitted to Platform Admin for approval",
-				"resourceId", resourceId,
-				"status", result.getApprovalStatus()
+					"success", true,
+					"message", "Resource submitted to Platform Admin for approval",
+					"resourceId", resourceId,
+					"status", result.getApprovalStatus()
 			));
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
@@ -498,10 +502,10 @@ public class ICIPStreamingServicesController {
 			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approvePlatformApproval(resourceId, userRank);
 			logger.info("[Approval] Resource {} approved and published globally", resourceId);
 			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"message", "Resource published globally",
-				"resourceId", resourceId,
-				"status", result.getApprovalStatus()
+					"success", true,
+					"message", "Resource published globally",
+					"resourceId", resourceId,
+					"status", result.getApprovalStatus()
 			));
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
@@ -523,7 +527,8 @@ public class ICIPStreamingServicesController {
 	public ResponseEntity<?> rejectPlatformApproval(
 			@PathVariable Integer resourceId,
 			@RequestParam(value = "rank", required = false) String rank,
-			@RequestHeader(value = "roleId", required = false) String roleId) {
+			@RequestHeader(value = "roleId", required = false) String roleId,
+			@RequestParam(required = false) String reason) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
 			if (userRank == null || userRank.isEmpty()) {
@@ -531,14 +536,15 @@ public class ICIPStreamingServicesController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
 			}
 
-			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectPlatformApproval(resourceId, userRank);
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectPlatformApproval(resourceId, userRank, reason);
 			logger.info("[Approval] Resource {} rejected at platform level", resourceId);
-			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"message", "Resource rejected",
-				"resourceId", resourceId,
-				"status", result.getApprovalStatus()
-			));
+			java.util.Map<String, Object> resp = new java.util.LinkedHashMap<>();
+			resp.put("success", true);
+			resp.put("message", "Resource rejected");
+			resp.put("resourceId", resourceId);
+			resp.put("status", result.getApprovalStatus());
+			resp.put("rejection_reason", result.getRejectionReason() != null ? result.getRejectionReason() : "");
+			return ResponseEntity.ok(resp);
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
@@ -561,19 +567,19 @@ public class ICIPStreamingServicesController {
 			@RequestParam(required = false) String rank) {
 		try {
 			logger.info("[Approval] GET /approval/project-admin/list - projectId: {}, rank param: {}", projectId, rank);
-			
+
 			if (rank == null || rank.isEmpty()) {
 				logger.warn("[Approval] Missing rank parameter for project admin list");
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
 
 			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> approvals = approvalWorkflowService.getProjectAdminApprovals(projectId, rank);
-			logger.info("[Approval] Retrieved {} approval requests for project admin with projectId: {} and rank: {}", 
-				approvals.size(), projectId, rank);
+			logger.info("[Approval] Retrieved {} approval requests for project admin with projectId: {} and rank: {}",
+					approvals.size(), projectId, rank);
 			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"data", approvals,
-				"count", approvals.size()
+					"success", true,
+					"data", approvals,
+					"count", approvals.size()
 			));
 		} catch (Exception e) {
 			logger.error("[Approval] Error getting project admin approvals", e);
@@ -591,19 +597,19 @@ public class ICIPStreamingServicesController {
 			@RequestParam(required = false) String rank) {
 		try {
 			logger.info("[Approval] GET /approval/org-admin/list - organizationId: {}, rank param: {}", organizationId, rank);
-			
+
 			if (rank == null || rank.isEmpty()) {
 				logger.warn("[Approval] Missing rank parameter for org admin list");
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
 
 			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> approvals = approvalWorkflowService.getOrgAdminApprovals(organizationId, rank);
-			logger.info("[Approval] Retrieved {} approval requests for org admin with organizationId: {} and rank: {}", 
-				approvals.size(), organizationId, rank);
+			logger.info("[Approval] Retrieved {} approval requests for org admin with organizationId: {} and rank: {}",
+					approvals.size(), organizationId, rank);
 			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"data", approvals,
-				"count", approvals.size()
+					"success", true,
+					"data", approvals,
+					"count", approvals.size()
 			));
 		} catch (Exception e) {
 			logger.error("[Approval] Error getting org admin approvals", e);
@@ -630,12 +636,12 @@ public class ICIPStreamingServicesController {
 			}
 
 			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> resources =
-				approvalWorkflowService.getOrgAdminDraftResources(organizationId, userRank);
+					approvalWorkflowService.getOrgAdminDraftResources(organizationId, userRank);
 			logger.info("[Approval] Retrieved {} ORG_APPROVED resources for organizationId {}", resources.size(), organizationId);
 			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"data", resources,
-				"count", resources.size()
+					"success", true,
+					"data", resources,
+					"count", resources.size()
 			));
 		} catch (Exception e) {
 			logger.error("[Approval] Error getting org-admin draft resources", e);
@@ -661,12 +667,12 @@ public class ICIPStreamingServicesController {
 			}
 
 			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> approvals =
-				approvalWorkflowService.getPlatformAdminApprovals(userRank);
+					approvalWorkflowService.getPlatformAdminApprovals(userRank);
 			logger.info("[Approval] Retrieved {} approval requests for platform admin", approvals.size());
 			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"data", approvals,
-				"count", approvals.size()
+					"success", true,
+					"data", approvals,
+					"count", approvals.size()
 			));
 		} catch (Exception e) {
 			logger.error("[Approval] Error getting platform admin approvals", e);
@@ -685,7 +691,7 @@ public class ICIPStreamingServicesController {
 			@RequestParam(required = false) Integer orgId) {
 		try {
 			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> items =
-				approvalWorkflowService.getCatalogResources(projectId, orgId);
+					approvalWorkflowService.getCatalogResources(projectId, orgId);
 			return ResponseEntity.ok(items);
 		} catch (Exception e) {
 			logger.error("[Catalog] Error fetching catalog", e);
@@ -727,7 +733,7 @@ public class ICIPStreamingServicesController {
 			}
 
 			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices clone =
-				approvalWorkflowService.cloneResource(resourceId, effectiveProjectId, currentUser);
+					approvalWorkflowService.cloneResource(resourceId, effectiveProjectId, currentUser);
 			return ResponseEntity.ok(java.util.Map.of("success", true, "data", clone));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.status(404).body(java.util.Map.of("error", e.getMessage()));
@@ -750,9 +756,9 @@ public class ICIPStreamingServicesController {
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
-			logger.info("[Approval] getDraftResources endpoint called - projectId: {} (type: {}), rank param: {}, roleId header: {}, final rank: {}", 
-				projectId, projectId != null ? projectId.getClass().getSimpleName() : "null", rank, roleId, userRank);
-			
+			logger.info("[Approval] getDraftResources endpoint called - projectId: {} (type: {}), rank param: {}, roleId header: {}, final rank: {}",
+					projectId, projectId != null ? projectId.getClass().getSimpleName() : "null", rank, roleId, userRank);
+
 			if (userRank == null || userRank.isEmpty()) {
 				logger.warn("[Approval] Missing rank/roleId for draft resources");
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
@@ -760,7 +766,7 @@ public class ICIPStreamingServicesController {
 
 			java.util.List<com.lfn.icip.icipwebeditor.model.ICIPStreamingServices> resources = approvalWorkflowService.getDraftResources(projectId, userRank);
 			logger.info("[Approval] Retrieved {} draft resources for projectId {}", resources.size(), projectId);
-			
+
 			// Additional debug logging to understand what's in DB
 			if (resources.isEmpty()) {
 				logger.warn("[Approval] EMPTY RESULT - projectId: {} - Checking all resources in DB for diagnosis...", projectId);
@@ -770,11 +776,11 @@ public class ICIPStreamingServicesController {
 					logger.warn("[Approval] Resource cid={}, status={}, projectId={}", r.getCid(), r.getApprovalStatus(), r.getProjectId());
 				}
 			}
-			
+
 			return ResponseEntity.ok(java.util.Map.of(
-				"success", true,
-				"data", resources,
-				"count", resources.size()
+					"success", true,
+					"data", resources,
+					"count", resources.size()
 			));
 		} catch (Exception e) {
 			logger.error("[Approval] Error getting draft resources", e);
@@ -795,12 +801,12 @@ public class ICIPStreamingServicesController {
 			@RequestHeader(value = "organisation", required = false) String orgHeader,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
-			logger.info("[Approval] Retrieving streaming service: {}/{} for user: {}, project: {}, org: {}, role: {}", 
-				name, org, username, projectHeader, orgHeader, roleId);
-			
+			logger.info("[Approval] Retrieving streaming service: {}/{} for user: {}, project: {}, org: {}, role: {}",
+					name, org, username, projectHeader, orgHeader, roleId);
+
 			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices service = streamingServicesRepository
-				.findByNameAndOrganization(name, org);
-			
+					.findByNameAndOrganization(name, org);
+
 			if (service == null) {
 				logger.warn("[Approval] Service not found: {}/{}", name, org);
 				return ResponseEntity.status(404).body(java.util.Map.of("error", "Service not found"));
@@ -810,7 +816,7 @@ public class ICIPStreamingServicesController {
 			Integer userProjectId = null;
 			Integer userOrganizationId = null;
 			String userRank = roleId;
-			
+
 			if (projectHeader != null && !projectHeader.isEmpty()) {
 				try {
 					userProjectId = Integer.parseInt(projectHeader);
@@ -818,7 +824,7 @@ public class ICIPStreamingServicesController {
 					logger.warn("[Approval] Invalid projectId format: {}", projectHeader);
 				}
 			}
-			
+
 			if (orgHeader != null && !orgHeader.isEmpty()) {
 				try {
 					userOrganizationId = Integer.parseInt(orgHeader);
@@ -830,11 +836,11 @@ public class ICIPStreamingServicesController {
 			// Check visibility
 			if (username != null && userProjectId != null && userOrganizationId != null && userRank != null) {
 				boolean isVisible = approvalWorkflowService.isResourceVisibleToUser(
-					service, username, userProjectId, userOrganizationId, userRank);
-				
+						service, username, userProjectId, userOrganizationId, userRank);
+
 				if (!isVisible) {
-					logger.warn("[Approval] Access denied - resource {}/{} not visible to user {} with projectId: {}, orgId: {}, rank: {}", 
-						name, org, username, userProjectId, userOrganizationId, userRank);
+					logger.warn("[Approval] Access denied - resource {}/{} not visible to user {} with projectId: {}, orgId: {}, rank: {}",
+							name, org, username, userProjectId, userOrganizationId, userRank);
 					return ResponseEntity.status(403).body(java.util.Map.of("error", "Access denied"));
 				}
 			}

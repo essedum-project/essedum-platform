@@ -187,6 +187,11 @@ public class ICIPStreamingServices extends BaseDomain implements Serializable {
 	@JsonProperty("approved_organization_id")
 	private Integer approvedOrganizationId;
 
+	/** Optional reason provided when a pipeline is rejected */
+	@Column(name = "rejection_reason", columnDefinition = "TEXT")
+	@JsonProperty("rejection_reason")
+	private String rejectionReason;
+
 	/**
 	 * Sync runner service status from json_content before INSERT and UPDATE.
 	 * runner_service_status: true  → "true"
