@@ -332,8 +332,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
       const params = this.buildHttpParams();
       const httpOptions = this.buildHttpOptions();
 
-      // Agent Designer API should NOT get approval workflow headers (separate MFE with its own auth)
-      const agentDesigner$ = this.pipelineMode === 'agent'
+      // Agent Designer API only on page 1; subsequent pages show Java pipeline results only
+      const agentDesigner$ = (this.pipelineMode === 'agent' && this.pageNumber === 1)
         ? this.http.get<any>(`${this.AGENT_DESIGNER_API}/pipelines?limit=200`).pipe(
             timeout(this.AGENT_DESIGNER_TIMEOUT),
             map((response: any) => {
