@@ -96,6 +96,8 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				|| ("POST".equals(dataMethod) && urlForValidation.contains("/datasets/add"))
 				|| ("DELETE".equals(dataMethod) && urlForValidation.contains("/datasets/delete"))
 				|| ("POST".equals(dataMethod) && urlForValidation.contains("/fileserver/uploadTemp"))
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/file/create/"))
+				|| ("PUT".equals(dataMethod) && urlForValidation.contains("/streamingServices/update"))
 				|| ("POST".equals(dataMethod) && urlForValidation.contains("/service/v1/models/upload"))
 				|| ("POST".equals(dataMethod) && urlForValidation.contains("/service/v1/models/register"))
 				|| urlForValidation.contains("/vibe-coding/")

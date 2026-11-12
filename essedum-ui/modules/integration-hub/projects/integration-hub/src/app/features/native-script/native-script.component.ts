@@ -210,7 +210,17 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
   getStreamService() {
     this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
       this.streamItem = res;
-      this.pipelineAlias = res.alias;
+      
+      // Set pipeline name/alias FIRST - with fallback to ensure it always displays
+      this.pipelineAlias = res.alias || res.name || this.cardName;
+      console.debug('[NativeScript] Pipeline loaded:', {
+        name: res.name,
+        alias: res.alias,
+        displayName: this.pipelineAlias,
+        cid: res.cid,
+        id: res.id,
+        created_by: res.created_by
+      });
       
       // Extract approval_status from response for approval workflow
       if (res.approval_status) {
@@ -232,13 +242,15 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
             this.containerDeployLogs = cd.buildLogs;
           }
         }
-      } catch {}
+      } catch (e) {
+        console.warn('[NativeScript] Could not parse containerDeployment state:', e);
+      }
 
       // Load files for code explorer
       // Files will be loaded after data is parsed in try block below
 
       if (this.router.url.includes('preview')) {
-        this.pipelineAlias = this.streamItem.alias;
+        this.pipelineAlias = res.alias || res.name || this.cardName;
       }
       this.uploader = new FileUploader({
         url:
@@ -1914,14 +1926,32 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    if (!this.streamItem || !this.streamItem.cid) {
-      this.service.message('Pipeline ID is missing', 'error');
+    // Comprehensive validation - streamItem must exist
+    if (!this.streamItem) {
+      console.error('[NativeScript] streamItem is null/undefined');
+      this.service.message('Pipeline data not loaded. Please refresh and try again.', 'error');
+      return;
+    }
+
+    // Try multiple ID field names
+    const resourceId = this.streamItem.cid || this.streamItem.id || this.streamItem.resourceId;
+    if (!resourceId) {
+      console.error('[NativeScript] No ID field found in streamItem:', {
+        fields: Object.keys(this.streamItem),
+        cid: this.streamItem.cid,
+        id: this.streamItem.id,
+        resourceId: this.streamItem.resourceId
+      });
+      this.service.message('Pipeline ID is missing. Please refresh the page.', 'error');
       return;
     }
 
     // Get current project from session or environment
     const projectId = this.currentProjectId;
     if (!projectId) {
+      console.error('[NativeScript] Project ID missing from context:', {
+        currentProjectId: this.currentProjectId
+      });
       this.service.message('Project ID is missing. Please ensure you are logged in to a project.', 'error');
       return;
     }
@@ -1930,14 +1960,16 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.submitError = '';
 
     console.debug('[NativeScript] Submitting for approval:', {
-      resourceId: this.streamItem.cid,
+      resourceId: resourceId,
       projectId: projectId,
-      resourceName: this.streamItem.name
+      resourceName: this.streamItem.name,
+      createdBy: this.streamItem.created_by,
+      currentUserLogin: this.currentUserLogin
     });
 
     // Call backend API to submit for approval
     this.http.post(`/api/aip/streamingServices/approval/submit`, {
-      resourceId: this.streamItem.cid,
+      resourceId: resourceId,
       projectId: projectId
     }).pipe(
       timeout(10000),

@@ -1278,8 +1278,9 @@ button[mat-button], button[mat-stroked-button] {
 // Approval Status and Actions - Compact inline style (matches agent-pipeline)
 .approval-actions-container {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
   gap: 12px;
 
   // Compact inline approval status badge
@@ -1352,7 +1353,7 @@ button[mat-button], button[mat-stroked-button] {
   // Submit for Approval Button
   .approval-button-container {
     display: inline-flex;
-    gap: 12px;
+    gap: 0;
     align-items: center;
 
     .send-approval-btn {
