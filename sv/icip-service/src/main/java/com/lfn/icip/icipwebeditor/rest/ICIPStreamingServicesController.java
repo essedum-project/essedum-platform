@@ -17,6 +17,7 @@ package com.lfn.icip.icipwebeditor.rest;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Map;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
@@ -225,24 +226,40 @@ public class ICIPStreamingServicesController {
 	}
 
 	/**
-	 * POST /approval/project/approve/{resourceId}?projectId=X&rank=2
+	 * POST /approval/project/approve/{resourceId}?rank=2
 	 * Project Admin approves resource (PENDING_PROJECT_APPROVAL -> PROJECT_APPROVED)
+	 * projectId extracted from query param or 'project' header for visibility filtering
 	 */
 	@PostMapping("/approval/project/approve/{resourceId}")
 	public ResponseEntity<?> approveProjectApproval(
 			@PathVariable Integer resourceId,
 			@RequestParam(required = false) Integer projectId,
-			@RequestParam(required = false) String rank) {
+			@RequestParam(required = false) String rank,
+			@RequestHeader Map<String, String> headers) {
 		try {
-			logger.info("[Approval] POST /approval/project/approve/{} - projectId: {} (type: {}), rank: {}",
-					resourceId, projectId, projectId != null ? projectId.getClass().getSimpleName() : "null", rank);
+			// Try query param first, then fall back to project header
+			Integer resolvedProjectId = projectId;
+			if (resolvedProjectId == null) {
+				String projectHeader = headers.getOrDefault("project", headers.getOrDefault("Project", ""));
+				if (!projectHeader.isEmpty()) {
+					try {
+						resolvedProjectId = Integer.parseInt(projectHeader);
+						logger.info("[Approval] ProjectId extracted from header: {}", resolvedProjectId);
+					} catch (NumberFormatException e) {
+						logger.warn("[Approval] Invalid projectId in header: {}", projectHeader);
+					}
+				}
+			}
+
+			logger.info("[Approval] POST /approval/project/approve/{} - projectId: {}, rank: {}",
+					resourceId, resolvedProjectId, rank);
 
 			if (rank == null || rank.isEmpty()) {
 				logger.warn("[Approval] Missing rank parameter for project approval");
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
 
-			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approveProjectApproval(resourceId, projectId, rank);
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approveProjectApproval(resourceId, resolvedProjectId, rank);
 			logger.info("[Approval] Resource {} approved at project level - Saved status: {}, projectId in DB: {}",
 					resourceId, result.getApprovalStatus(), result.getProjectId());
 			return ResponseEntity.ok(java.util.Map.of(
