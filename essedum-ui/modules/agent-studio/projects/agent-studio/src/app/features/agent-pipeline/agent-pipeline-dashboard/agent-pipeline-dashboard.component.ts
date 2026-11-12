@@ -1110,11 +1110,11 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
     // DRAFT / PENDING_PROJECT_APPROVAL: only the creator sees them.
     if (!this.currentUserLogin) return true;
 
-    const createdBy = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
-    if (!createdBy) return true; // unknown creator → show by default
+    const rawCreatedBy = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
+    if (!rawCreatedBy) return true; // unknown creator → show by default
+    // Normalise to email prefix — user_login may be stored as full email or bare name.
+    const createdBy = rawCreatedBy.includes('@') ? rawCreatedBy.split('@')[0] : rawCreatedBy;
 
-    // createdBy in the backend is always the email prefix (before @).
-    // currentUserLogin is already normalised to the prefix in resolveUserContext().
     return createdBy === this.currentUserLogin;
   }
 
@@ -1125,8 +1125,9 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
    *  4. Approved or draft pipelines submitted by this user.
    *  Handles both snake_case (created_by) and camelCase (createdBy) from the API. */
   private isCardVisibleToUser(card: any): boolean {
-    const createdBy = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
-    const lastModifiedBy = (card.target?.lastmodifiedby || card.lastmodifiedby || '').toLowerCase();
+    const normalise = (v: string) => { const s = v.toLowerCase(); return s.includes('@') ? s.split('@')[0] : s; };
+    const createdBy = normalise(card.target?.created_by || card.created_by || card.createdBy || '');
+    const lastModifiedBy = normalise(card.target?.lastmodifiedby || card.lastmodifiedby || '');
     const approvalStatus = card.approval_status || card.approvalStatus || '';
     
     // Rule 1: Admin-created pipelines visible to everyone
@@ -1154,8 +1155,9 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
 
   /** True when the card was created by admin or by the logged-in user — no approval needed. */
   isDirectlyVisible(card: any): boolean {
-    const createdBy = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
-    return createdBy === 'admin' || (!!this.currentUserLogin && createdBy === this.currentUserLogin);
+    const raw = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
+    const createdBy = raw.includes('@') ? raw.split('@')[0] : raw;
+   return createdBy === 'admin' || (!!this.currentUserLogin && createdBy === this.currentUserLogin);
   }
 
 
