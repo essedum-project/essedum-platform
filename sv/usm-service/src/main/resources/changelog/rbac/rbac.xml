@@ -767,12 +767,12 @@
 			INSERT INTO rbac_role_assignment (user_id, role_id, organization_id, project_id, granted_at)
 			SELECT u.id, r.id, NULL, NULL, NOW(6)
 			FROM usm_users u
-			JOIN rbac_role r ON r.name = 'Admin'
+					 JOIN rbac_role r ON r.name = 'Admin'
 			WHERE (u.user_login = 'admin' OR u.user_email = 'admin@lfn.com')
 			  AND NOT EXISTS (
-			    SELECT 1 FROM rbac_role_assignment ra
-			    WHERE ra.user_id = u.id AND ra.role_id = r.id AND ra.revoked_at IS NULL
-			  );
+				SELECT 1 FROM rbac_role_assignment ra
+				WHERE ra.user_id = u.id AND ra.role_id = r.id AND ra.revoked_at IS NULL
+			);
 		</sql>
 	</changeSet>
 
@@ -793,15 +793,15 @@
 			WHERE UPPER(pa.type) = 'POST'
 			  AND LOWER(pa.api) LIKE '%datasources%'
 			  AND NOT EXISTS (
-			      SELECT 1 FROM usm_permission_api pa2
-			      WHERE pa2.api = '/api/aip/datasources/approval/project/submit'
-			        AND UPPER(pa2.type) = 'POST'
-			  )
-			LIMIT 1;
+				SELECT 1 FROM usm_permission_api pa2
+				WHERE pa2.api = '/api/aip/datasources/approval/project/submit'
+				  AND UPPER(pa2.type) = 'POST'
+			)
+				LIMIT 1;
 		</sql>
 	</changeSet>
 
-	<!-- rbac-29: rbac-16 backfilled usm_project.organisation_id from portfolio_id
+	<!-- rbac-31: rbac-16 backfilled usm_project.organisation_id from portfolio_id
 	     only once, and no application code ever set it afterwards (fixed now in
 	     ProjectServiceImpl#save). Any project created/re-portfolio'd between
 	     rbac-16 and that fix — e.g. a project under an org whose role grants
@@ -810,7 +810,7 @@
 	     projectOrganizationId/Name — is stuck with organisation_id NULL forever.
 	     Re-run the same backfill (idempotent: only touches NULL rows) to catch
 	     everything created since. -->
-	<changeSet author="Essedum (rbac)" id="rbac-29">
+	<changeSet author="Essedum (rbac)" id="rbac-31">
 		<validCheckSum>8:e4562ee58bb4491f6720429684e7dab7</validCheckSum>
 		<validCheckSum>8:eacffab13e6c4048c4060ecfef62a229</validCheckSum>
 		<preConditions onFail="MARK_RAN">
@@ -824,13 +824,85 @@
 		     WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL</sql>
 	</changeSet>
 
-	<!-- rbac-32/33/34: add the model approval-workflow columns to mlfederatedmodels.
+	<!-- rbac-32: add creator_name to rbac_asset so My Drafts can show who created a pipeline. -->
+	<changeSet author="Essedum (rbac)" id="rbac-32">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="rbac_asset" columnName="creator_name"/></not>
+		</preConditions>
+		<addColumn tableName="rbac_asset">
+			<column name="creator_name" type="VARCHAR(255)"/>
+		</addColumn>
+	</changeSet>
+
+	<!-- rbac-33: normalize usm_users.user_login to the bare IdP username (OIDC
+	     preferred_username, e.g. "arumuga.a") instead of the full email address
+	     ("arumuga.a@infosys.com"). CustomAuthorizationManager resolves the caller
+	     via ICIPUtils.getUser(claim), which reads preferred_username directly, then
+	     joins against usm_users.user_login — an email-format login never matches,
+	     so every non-whitelisted write (pipeline delete/update, dataset edits, etc.)
+	     403s for affected users regardless of their role's permissions. user_login
+	     is purely an internal auth key, never an email (usm_users.user_email already
+	     owns that), so this is safe. Skips any row whose stripped value would collide
+	     with an existing login (the NOT IN subquery is wrapped in a derived table
+	     since MySQL rejects a self-referencing subquery on the table being updated —
+	     error 1093). Idempotent: only touches rows still containing '@'. -->
+	<changeSet author="Essedum (rbac)" id="rbac-33">
+		<sql>
+			UPDATE usm_users u
+			SET u.user_login = SUBSTRING_INDEX(u.user_login, '@', 1)
+			WHERE u.user_login LIKE '%@%'
+			  AND SUBSTRING_INDEX(u.user_login, '@', 1) NOT IN (
+				SELECT login FROM (SELECT user_login AS login FROM usm_users) AS existing_logins
+			);
+		</sql>
+	</changeSet>
+
+	<!-- rbac-34: rbac-28's source role was scoped to the SAME project's 'developer'
+	     row, but several project-scoped 'developer' rows never received the write/
+	     delete grants themselves (only the global 'Developer' row, project_id IS
+	     NULL, has them) — so rbac-28 silently copied nothing for those projects'
+	     'viewer'/'AI Client' roles. Broaden the source to also accept the global
+	     Developer role as a fallback whenever the project-scoped one lacks a given
+	     permission. Same target roles, same PUT/POST/DELETE + resource-pattern
+	     filter, same idempotent NOT EXISTS guard as rbac-28 — purely additive. -->
+	<changeSet author="Essedum (rbac)" id="rbac-34">
+		<sql>
+			INSERT INTO usm_role_permissions (permission, role)
+			SELECT DISTINCT p.id, client_role.id
+			FROM usm_role client_role
+					 JOIN usm_role dev_role
+						  ON LOWER(dev_role.name) = 'developer'
+							  AND (
+								 dev_role.project_id IS NULL
+									 OR dev_role.project_id = client_role.project_id
+								 )
+				     JOIN usm_role_permissions rp ON rp.role = dev_role.id
+				     JOIN usm_permissions p ON p.id = rp.permission
+				     JOIN usm_permission_api pa ON pa.permission_id = p.id
+			WHERE LOWER(client_role.name) IN ('viewer', 'ai client')
+			  AND UPPER(pa.type) IN ('PUT', 'POST', 'DELETE')
+			  AND (
+				LOWER(pa.api) LIKE '%pipeline%'
+					OR LOWER(pa.api) LIKE '%dataset%'
+					OR LOWER(pa.api) LIKE '%datasource%'
+					OR LOWER(pa.api) LIKE '%connection%'
+					OR LOWER(pa.api) LIKE '%streamingservices%'
+				)
+			  AND NOT EXISTS (
+				SELECT 1 FROM usm_role_permissions rp2
+				WHERE rp2.role = client_role.id AND rp2.permission = p.id
+			);
+		</sql>
+	</changeSet>
+
+	<!-- rbac-35/36/37: add the model approval-workflow columns to mlfederatedmodels.
 	     ICIPMLFederatedModel maps approval_status / project_id / approved_organization_id,
 	     but no migration ever created them and ddl-auto is none, so every query that
 	     hydrates that entity failed (HTTP 500) — including POST /service/v1/models/register
 	     and GET /service/v1/models/getAll/{org}. Mirrors changelog/rbac/model-approval-columns.sql.
-	     Each changeSet is guarded so it is a no-op where the column already exists. -->
-	<changeSet author="Essedum (rbac)" id="rbac-32">
+	     Each changeSet is guarded so it is a no-op where the column already exists.
+	     NOTE: IDs start at 35 — 32/33/34 are already taken above for rbac_asset/usm_users fixes. -->
+	<changeSet author="Essedum (rbac)" id="rbac-35">
 		<preConditions onFail="MARK_RAN">
 			<not><columnExists tableName="mlfederatedmodels" columnName="approval_status" /></not>
 		</preConditions>
@@ -839,7 +911,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Essedum (rbac)" id="rbac-33">
+	<changeSet author="Essedum (rbac)" id="rbac-36">
 		<preConditions onFail="MARK_RAN">
 			<not><columnExists tableName="mlfederatedmodels" columnName="project_id" /></not>
 		</preConditions>
@@ -848,7 +920,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Essedum (rbac)" id="rbac-34">
+	<changeSet author="Essedum (rbac)" id="rbac-37">
 		<preConditions onFail="MARK_RAN">
 			<not><columnExists tableName="mlfederatedmodels" columnName="approved_organization_id" /></not>
 		</preConditions>

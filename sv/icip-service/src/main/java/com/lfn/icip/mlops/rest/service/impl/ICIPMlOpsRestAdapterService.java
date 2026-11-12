@@ -430,6 +430,10 @@ public class ICIPMlOpsRestAdapterService {
             ICIPDataset datasetForModel = new ICIPDataset();
             ICIPDatasource datasource = new ICIPDatasource();
             List<ICIPMLFederatedModel> iCIPMLFederatedModels = fedModelRepo.getModelByModelNameAndOrganisation(modelName, org);
+            if (iCIPMLFederatedModels == null || iCIPMLFederatedModels.isEmpty()) {
+                logger.error("Model not found for modelName={}, org={}", modelName, org);
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
             ICIPMLFederatedModel iCIPMLFederatedModel = iCIPMLFederatedModels.getFirst();
             datasource = datasourceService.getDatasource(iCIPMLFederatedModel.getDatasource(), org);
             datasetForModel.setDatasource(datasource);
@@ -492,7 +496,7 @@ public class ICIPMlOpsRestAdapterService {
                 }
             }
 
-            if (!fileAttached || data.get(0) == null) {
+            if (!fileAttached || data.isEmpty() || data.get(0) == null) {
                 Boolean testSuccess = false;
                 try {
                     testSuccess = pluginService.getDataSetService(datasetForModel).testConnection(datasetForModel);

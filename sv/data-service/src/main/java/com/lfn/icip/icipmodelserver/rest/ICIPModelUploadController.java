@@ -80,7 +80,7 @@ public class ICIPModelUploadController {
                 }
             }
 
-            if (!fileAttached || data.get(0) == null) {
+            if (!fileAttached || data.isEmpty() || data.get(0) == null) {
                 Boolean testSuccess = false;
                 try {
                     testSuccess = pluginService.getDataSetService(datasetForModel).testConnection(datasetForModel);
