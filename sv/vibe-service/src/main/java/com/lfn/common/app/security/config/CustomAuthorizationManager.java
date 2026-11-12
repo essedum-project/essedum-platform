@@ -82,7 +82,10 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				AntPathRequestMatcher.antMatcher("/api/demo-usecase/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/adapter_workflow/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/interactiveWorkflow/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/RPAExternalTask/**").matcher(authorizationContext.getRequest()).isMatch())
+				AntPathRequestMatcher.antMatcher("/api/RPAExternalTask/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/aip/service/v1/vibe-coding/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/aip/service/v1/vibe-studio/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/aip/service/v1/vibe/**").matcher(authorizationContext.getRequest()).isMatch())
 			return new AuthorizationDecision(true);
 		
 		String urlForValidation=authorizationContext.getRequest().getRequestURI();
