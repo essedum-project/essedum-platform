@@ -727,12 +727,40 @@ public class ICIPDatasourceController {
 
 	@GetMapping("/approval/project-admin/list")
 	public ResponseEntity<?> getPendingApprovalList(
-			@RequestParam String projectId,
+			@RequestParam(value = "projectId", required = false) String projectId,
 			@RequestParam(required = false) String rank,
 			@RequestParam(required = false) Integer page,
 			@RequestParam(required = false) Integer size,
+			@RequestHeader(value = "roleId", required = false) String roleId,
 			jakarta.servlet.http.HttpServletRequest httpRequest) {
 		try {
+			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
+			if (userRank == null || userRank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+
+			// Prefer filtering by projectId (connections carry project_id regardless of creator org).
+			Integer projectIdValue = null;
+			if (projectId != null && !projectId.trim().isEmpty()) {
+				try {
+					projectIdValue = Integer.parseInt(projectId.trim());
+				} catch (NumberFormatException nfe) {
+					logger.warn("[Approval] Invalid projectId format: {}, falling back to org-based filter", projectId);
+				}
+			}
+
+			if (projectIdValue != null) {
+				java.util.List<ICIPDatasource> pendingByProject = approvalWorkflowService
+						.getProjectAdminApprovals(projectIdValue, userRank);
+				logger.info("[Approval] Found {} pending datasources for projectId={}", pendingByProject.size(),
+						projectIdValue);
+				java.util.List<ICIPDatasource> projectPageSlice = paginate(pendingByProject, page, size);
+				return ResponseEntity.ok(java.util.Map.of("success", true, "data", projectPageSlice,
+						"count", pendingByProject.size()));
+			}
+
+			// Backward compatibility: legacy callers pass the org via headers instead of projectId.
+			logger.warn("[Approval] No valid projectId provided, falling back to org-header-based filter");
 			String org = httpRequest.getHeader("organisation");
 			if (org == null || org.isEmpty()) {
 				org = httpRequest.getHeader("Organization");

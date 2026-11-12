@@ -375,10 +375,11 @@ public class ICIPStreamingServicesController {
 	@org.springframework.web.bind.annotation.GetMapping("/approval/project-admin/list")
 	public ResponseEntity<java.util.Map<String, Object>> getProjectAdminApprovals(
 			@org.springframework.web.bind.annotation.RequestParam Integer projectId,
+			@org.springframework.web.bind.annotation.RequestParam(value = "rank", required = false) String rank,
 			jakarta.servlet.http.HttpServletRequest httpRequest) {
 		try {
-			String userRank = httpRequest.getHeader("roleId");
-			if (userRank == null) {
+			String userRank = (rank != null && !rank.isEmpty()) ? rank : httpRequest.getHeader("roleId");
+			if (userRank == null || userRank.isEmpty()) {
 				userRank = "0";
 			}
 			userRank = userRank.trim();
@@ -403,10 +404,11 @@ public class ICIPStreamingServicesController {
 	@org.springframework.web.bind.annotation.GetMapping("/approval/org-admin/list")
 	public ResponseEntity<java.util.Map<String, Object>> getOrgAdminApprovals(
 			@org.springframework.web.bind.annotation.RequestParam Integer organizationId,
+			@org.springframework.web.bind.annotation.RequestParam(value = "rank", required = false) String rank,
 			jakarta.servlet.http.HttpServletRequest httpRequest) {
 		try {
-			String userRank = httpRequest.getHeader("roleId");
-			if (userRank == null) {
+			String userRank = (rank != null && !rank.isEmpty()) ? rank : httpRequest.getHeader("roleId");
+			if (userRank == null || userRank.isEmpty()) {
 				userRank = "0";
 			}
 			userRank = userRank.trim();
@@ -431,10 +433,11 @@ public class ICIPStreamingServicesController {
 	@org.springframework.web.bind.annotation.GetMapping("/approval/draft-resources")
 	public ResponseEntity<java.util.Map<String, Object>> getDraftResources(
 			@org.springframework.web.bind.annotation.RequestParam Integer projectId,
+			@org.springframework.web.bind.annotation.RequestParam(value = "rank", required = false) String rank,
 			jakarta.servlet.http.HttpServletRequest httpRequest) {
 		try {
-			String userRank = httpRequest.getHeader("roleId");
-			if (userRank == null) {
+			String userRank = (rank != null && !rank.isEmpty()) ? rank : httpRequest.getHeader("roleId");
+			if (userRank == null || userRank.isEmpty()) {
 				userRank = "0";
 			}
 			userRank = userRank.trim();
