@@ -443,21 +443,6 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
         });
       }
 
-      const adItems: any[] = agentDesigner?.items || [];
-      adItems.forEach((item: any) => {
-        const card = {
-          ...item,
-          alias: item.name || item.alias || item.id,
-          name: item.id || item.name,
-          isAgentDesigner: true,
-          cid: item.id
-        };
-        data.push(card);
-        if (item.id) {
-          this.agentDesignerCids.add(item.id);
-        }
-      });
-
       this.cards = data;
       this.filteredCards = data;
       this.loading = false;
