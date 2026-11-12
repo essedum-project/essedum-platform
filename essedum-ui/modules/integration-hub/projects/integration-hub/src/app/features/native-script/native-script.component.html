@@ -19,41 +19,43 @@
               </span>
             </div>
 
-            <!-- Approval Status and Submit Button -->
-            <div class="approval-actions-container">
-              <!-- Approval Status Badge -->
-              <div *ngIf="approvalStatus" class="approval-status-inline" [ngClass]="'status-' + approvalStatus?.toLowerCase()">
-                <mat-icon class="status-icon">
-                  {{ approvalStatus === 'DRAFT' ? 'edit' : 
-                     approvalStatus === 'PENDING_PROJECT_APPROVAL' ? 'hourglass_empty' :
-                     approvalStatus === 'PROJECT_APPROVED' ? 'check_circle' :
-                     approvalStatus === 'PENDING_ORG_APPROVAL' ? 'hourglass_empty' :
-                     approvalStatus === 'ORG_APPROVED' ? 'verified' :
-                     approvalStatus === 'PUBLISHED' ? 'publish' :
-                     approvalStatus === 'PROJECT_REJECTED' ? 'close' :
-                     approvalStatus === 'ORG_REJECTED' ? 'close' : 'help' }}
-                </mat-icon>
-                <span class="status-label">{{ approvalStatus }}</span>
+            <!-- Right side: Approval actions + Action buttons -->
+            <div class="d-flex align-items-center gap-2">
+              <!-- Approval Status and Submit Button -->
+              <div class="approval-actions-container">
+                <!-- Approval Status Badge -->
+                <div *ngIf="approvalStatus" class="approval-status-inline" [ngClass]="'status-' + approvalStatus?.toLowerCase()">
+                  <mat-icon class="status-icon">
+                    {{ approvalStatus === 'DRAFT' ? 'edit' : 
+                       approvalStatus === 'PENDING_PROJECT_APPROVAL' ? 'hourglass_empty' :
+                       approvalStatus === 'PROJECT_APPROVED' ? 'check_circle' :
+                       approvalStatus === 'PENDING_ORG_APPROVAL' ? 'hourglass_empty' :
+                       approvalStatus === 'ORG_APPROVED' ? 'verified' :
+                       approvalStatus === 'PUBLISHED' ? 'publish' :
+                       approvalStatus === 'PROJECT_REJECTED' ? 'close' :
+                       approvalStatus === 'ORG_REJECTED' ? 'close' : 'help' }}
+                  </mat-icon>
+                  <span class="status-label">{{ approvalStatus }}</span>
+                </div>
+
+                <!-- Submit for Approval Button -->
+                <div class="approval-button-container" *ngIf="isOwnPipeline()">
+                  <button *ngIf="canSubmitForApproval()"
+                    class="send-approval-btn"
+                    type="button"
+                    (click)="submitForApproval()"
+                    [disabled]="isSubmittingForApproval"
+                    matTooltip="Submit pipeline for project approval"
+                    matTooltipPosition="left">
+                    <mat-icon *ngIf="!isSubmittingForApproval">upload</mat-icon>
+                    <mat-spinner *ngIf="isSubmittingForApproval" diameter="16" class="btn-spinner"></mat-spinner>
+                    <span *ngIf="!isSubmittingForApproval">Submit for Approval</span>
+                    <span *ngIf="isSubmittingForApproval">Submitting...</span>
+                  </button>
+                </div>
               </div>
 
-              <!-- Submit for Approval Button -->
-              <div class="approval-button-container" *ngIf="isOwnPipeline()">
-                <button *ngIf="canSubmitForApproval()"
-                  class="send-approval-btn"
-                  type="button"
-                  (click)="submitForApproval()"
-                  [disabled]="isSubmittingForApproval"
-                  matTooltip="Submit pipeline for project approval"
-                  matTooltipPosition="left">
-                  <mat-icon *ngIf="!isSubmittingForApproval">upload</mat-icon>
-                  <mat-spinner *ngIf="isSubmittingForApproval" diameter="16" class="btn-spinner"></mat-spinner>
-                  <span *ngIf="!isSubmittingForApproval">Submit for Approval</span>
-                  <span *ngIf="isSubmittingForApproval">Submitting...</span>
-                </button>
-              </div>
-            </div>
-
-            <div class="selector-model-title-tail">
+              <div class="selector-model-title-tail">
               <ul
                 class="d-flex justify-content-between align-items-center py-2 px-4"
               >
@@ -224,6 +226,7 @@
                   </span>
                 </li>
               </ul>
+            </div>
             </div>
           </div>
           <!-- Code-change hint strip -->

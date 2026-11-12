@@ -253,13 +253,14 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
       if (this.router.url.includes('preview')) {
         this.pipelineAlias = res.alias || res.name || this.cardName;
       }
+      const org = this.streamItem.organization || this.organisation || 'unknown-org';
       this.uploader = new FileUploader({
         url:
           this.baseUrl +
           '/file/pipeline/native/upload/' +
           this.streamItem.name +
           '/' +
-          this.streamItem.organization,
+          org,
       });
       try {
         if (this.runtypesCheck == true) this.fetchRunTypes();
@@ -588,7 +589,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.service
       .readNativeFile(
         this.streamItem.name,
-        this.streamItem.organization,
+        this.streamItem.organization || this.organisation || 'unknown-org',
         encodedFilename
       )
       .subscribe({
@@ -686,7 +687,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.service
       .downloadNativeFile(
         this.streamItem.name,
-        this.streamItem.organization,
+        this.streamItem.organization || this.organisation || 'unknown-org',
         filename
       )
       .subscribe(
@@ -769,14 +770,24 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
       // which fails the backend equalsIgnoreCase check against the sanitized DB filename
       // ("LEONTVR17807_leo1311.py"), causing the blob update to be silently skipped.
       const sanitizedName = pname.replace(/[^a-zA-Z0-9_]/g, '');
-      const targetFileName = `${sanitizedName}_${this.streamItem.organization}.py`;
+      const org = this.streamItem.organization || this.organisation || 'unknown-org';
+      const targetFileName = `${sanitizedName}_${org}.py`;
 
       let scriptContent = this.script.join('\n');
+
+      console.debug('[NativeScript] Saving file with organization fallback:', {
+        pname,
+        sanitizedName,
+        organization: this.streamItem.organization,
+        fallbackOrganisation: this.organisation,
+        finalOrg: org,
+        targetFileName
+      });
 
       this.service
         .createNativeFile(
           pname,
-          this.streamItem.organization,
+          org,
           targetFileName,
           'Python3',
           scriptContent
@@ -1792,7 +1803,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
         
         this.service.readNativeFile(
           this.streamItem.name,
-          this.streamItem.organization,
+          this.streamItem.organization || this.organisation || 'unknown-org',
           oldFileName
         ).subscribe({
           next: (fileContent) => {
