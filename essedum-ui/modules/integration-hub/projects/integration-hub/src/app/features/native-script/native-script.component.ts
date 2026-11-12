@@ -27,7 +27,7 @@ import { DynamicParamsGrid, DynamicSecretsGrid } from './pipeline.models';
 import { NotebookDialogComponent, NotebookDialogData } from '../pipeline.description/notebook-dialog/notebook-dialog.component';
 import { io } from 'socket.io-client';
 import { Subject } from 'rxjs';
-import { takeUntil, timeout, catchError } from 'rxjs/operators';
+import { takeUntil, timeout, catchError, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 interface FileNode {
@@ -208,7 +208,29 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.authentications();
   }
   getStreamService() {
-    this.service.getStreamingServicesByName(this.cardName, this.organisation).subscribe((res) => {
+    const org1 = this.organisation;
+    const org2 = sessionStorage.getItem('organization') || '';
+    // Navigation state is set by agent-pipeline-dashboard using the pipeline's ACTUAL stored org.
+    // Use it as final fallback when both org lookups fail (pipeline org != URL/sessionStorage org).
+    const navState = ((window as any).history?.state || {}) as any;
+    const navStreamItem = navState?.streamItem;
+
+    this.service.getStreamingServicesByName(this.cardName, org1).pipe(
+      switchMap((res: any) => {
+        if ((!res || !res.cid) && org2 && org2 !== org1) {
+          console.debug('[NativeScript] Primary org lookup returned no cid, retrying with fallback org:', org2);
+          return this.service.getStreamingServicesByName(this.cardName, org2);
+        }
+        return of(res);
+      }),
+      switchMap((res: any) => {
+        if ((!res || !res.cid) && navStreamItem?.cid && navStreamItem?.name === this.cardName) {
+          console.debug('[NativeScript] API lookup failed, using navigation state streamItem:', navStreamItem.name, 'org:', navStreamItem.organization);
+          return of(navStreamItem);
+        }
+        return of(res);
+      })
+    ).subscribe((res) => {
       this.streamItem = res;
       
       // Set pipeline name/alias FIRST - with fallback to ensure it always displays
@@ -1707,7 +1729,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // Re-fetch the streaming service data to get updated file list
-    this.service.getStreamingServicesByName(this.streamItem.name).subscribe({
+    this.service.getStreamingServicesByName(this.streamItem.name, this.streamItem.organization || this.organisation).subscribe({
       next: (serviceData) => {
         if (serviceData && serviceData.json_content) {
           this.streamItem = serviceData;
