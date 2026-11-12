@@ -37,8 +37,8 @@
       <ng-container matColumnDef="type">
         <th mat-header-cell *matHeaderCellDef>Type</th>
         <td mat-cell *matCellDef="let row">
-          <span class="resource-type-badge" [ngClass]="'type-' + (row.resource_type | lowercase)">
-            {{ row.resource_type || 'Agent' }}
+          <span class="resource-type-badge" [ngClass]="'type-' + ((row.type === 'NativeScript' || row.type === 'nativeScript') ? 'native' : (row.resource_type | lowercase))">
+            {{ (row.type === 'NativeScript' || row.type === 'nativeScript') ? 'Native' : (row.resource_type || 'Agent') }}
           </span>
         </td>
       </ng-container>
@@ -113,8 +113,8 @@
       <ng-container matColumnDef="type">
         <th mat-header-cell *matHeaderCellDef>Type</th>
         <td mat-cell *matCellDef="let row">
-          <span class="resource-type-badge" [ngClass]="'type-' + (row.resource_type | lowercase)">
-            {{ row.resource_type || 'Agent' }}
+          <span class="resource-type-badge" [ngClass]="'type-' + ((row.type === 'NativeScript' || row.type === 'nativeScript') ? 'native' : (row.resource_type | lowercase))">
+            {{ (row.type === 'NativeScript' || row.type === 'nativeScript') ? 'Native' : (row.resource_type || 'Agent') }}
           </span>
         </td>
       </ng-container>

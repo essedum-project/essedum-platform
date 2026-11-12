@@ -1914,7 +1914,14 @@ public class ICIPMlopsController {
 									if (userProjectId.equals(resourceProjectId)) {
 										isVisible = true;
 									}
-									logger.debug("[Approval] PROJECT_APPROVED check for {}: resourceProject={}, userProject={}, visible={}", 
+									// Fallback for NativeScript pipelines: if projectId was never stored (null/0),
+									// the SQL org-filter already confirmed this pipeline is in scope — allow visibility.
+									if (!isVisible && ("NativeScript".equals(result.getType()) || "nativeScript".equals(result.getType()))
+											&& (resourceProjectId == null || resourceProjectId == 0)) {
+										isVisible = true;
+										logger.debug("[Approval] PROJECT_APPROVED NativeScript org-fallback for {}: projectId not set", result.getName());
+									}
+									logger.debug("[Approval] PROJECT_APPROVED check for {}: resourceProject={}, userProject={}, visible={}",
 										result.getName(), resourceProjectId, userProjectId, isVisible);
 								}
 								

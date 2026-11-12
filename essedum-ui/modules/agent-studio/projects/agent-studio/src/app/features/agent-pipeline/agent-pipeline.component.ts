@@ -4889,6 +4889,17 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
           // Trigger change detection
           this.cdr.detectChanges();
+          
+          // If files were just uploaded from Vibe Studio for this cname, refresh them
+          const uploadedCname = sessionStorage.getItem('lastUploadedPipelineCname');
+          if (uploadedCname === this.currentCname) {
+            sessionStorage.removeItem('lastUploadedPipelineCname');
+            console.debug('[AgentPipeline] Files detected from Vibe Studio upload, refreshing...', uploadedCname);
+            // Delay slightly to allow component state to settle before refresh
+            setTimeout(() => {
+              this.loadAgentFiles();
+            }, 500);
+          }
         } else {
           // No data from list API, show only script tab and continue with old flow
           this.showScriptTabOnly();

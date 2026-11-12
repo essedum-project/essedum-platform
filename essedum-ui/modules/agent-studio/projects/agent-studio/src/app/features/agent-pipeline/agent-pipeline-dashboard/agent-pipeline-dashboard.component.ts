@@ -1221,9 +1221,12 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
     if (this.currentUserLogin) { headers['user-login'] = this.currentUserLogin; }
     if (this.currentProjectId) { headers['project'] = String(this.currentProjectId); }
 
+    const body: any = { resourceId };
+    if (this.currentProjectId) { body.projectId = this.currentProjectId; }
+
     this.http.post<any>(
       '/api/aip/streamingServices/approval/submit',
-      { resourceId },
+      body,
       { headers }
     ).pipe(catchError(err => {
       this.service.message(err?.error?.message || 'Failed to submit for approval', 'error');
