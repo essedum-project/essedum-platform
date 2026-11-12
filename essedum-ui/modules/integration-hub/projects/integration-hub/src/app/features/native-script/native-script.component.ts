@@ -213,13 +213,14 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
       
       // Set pipeline name/alias FIRST - with fallback to ensure it always displays
       this.pipelineAlias = res.alias || res.name || this.cardName;
+      const resAny = res as any;
       console.debug('[NativeScript] Pipeline loaded:', {
         name: res.name,
         alias: res.alias,
         displayName: this.pipelineAlias,
         cid: res.cid,
-        id: res.id,
-        created_by: res.created_by
+        id: resAny.id,
+        created_by: resAny.created_by
       });
       
       // Extract approval_status from response for approval workflow
@@ -747,6 +748,16 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
   }
   saveJson(pname: string) {
     try {
+      // Validate pipeline name parameter - use fallbacks
+      if (!pname) {
+        console.warn('[NativeScript] saveJson called with undefined pname, using fallbacks:', {
+          pname: pname,
+          streamItemName: this.streamItem?.name,
+          dataName: this.data?.name
+        });
+        pname = this.streamItem?.name || this.data?.name || this.cardName || 'pipeline';
+      }
+
       if (!this.data.files) {
         this.data.files = [];
       }
@@ -1934,13 +1945,14 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // Try multiple ID field names
-    const resourceId = this.streamItem.cid || this.streamItem.id || this.streamItem.resourceId;
+    const streamItemAny = this.streamItem as any;
+    const resourceId = this.streamItem.cid || streamItemAny.id || streamItemAny.resourceId;
     if (!resourceId) {
       console.error('[NativeScript] No ID field found in streamItem:', {
         fields: Object.keys(this.streamItem),
         cid: this.streamItem.cid,
-        id: this.streamItem.id,
-        resourceId: this.streamItem.resourceId
+        id: streamItemAny.id,
+        resourceId: streamItemAny.resourceId
       });
       this.service.message('Pipeline ID is missing. Please refresh the page.', 'error');
       return;
