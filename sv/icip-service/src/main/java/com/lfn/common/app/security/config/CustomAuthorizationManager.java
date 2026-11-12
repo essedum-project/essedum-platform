@@ -131,12 +131,16 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasources/approval"))
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasets/test"))
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasets/add"))
+				|| ("DELETE".equals(pipelineMethod) && pipelineUri.contains("/datasets/delete"))
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/git-configs/save"))
 				|| pipelineUri.contains("/folder/upload/")
 				|| pipelineUri.contains("/folder/update/")
 				|| ("POST".equals(pipelineMethod) && pipelineUri.endsWith("/service/v1/models/register"))
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/service/v1/models/upload"))
-				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/models/approval"))) {
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/models/approval"))
+				|| pipelineUri.contains("/vibe-coding/")
+				|| pipelineUri.contains("/vibe-studio/")
+				|| pipelineUri.contains("/vibe/")) {
 			return new AuthorizationDecision(true);
 		}
 
