@@ -208,7 +208,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.authentications();
   }
   getStreamService() {
-    this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
+    this.service.getStreamingServicesByName(this.cardName, this.organisation).subscribe((res) => {
       this.streamItem = res;
       
       // Set pipeline name/alias FIRST - with fallback to ensure it always displays
