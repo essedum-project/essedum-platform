@@ -381,17 +381,24 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
    */
   private extractUserContext(): void {
     try {
-      // Extract user login
+      // Extract user login from sessionStorage - try multiple fields
       const userSession = sessionStorage.getItem('user');
       if (userSession) {
         const user = JSON.parse(userSession);
-        const rawLogin = (user.user_login || user.username || user.name || '').toLowerCase();
-        const email = (user.user_email || rawLogin).toLowerCase();
-        const emailPrefix = email.includes('@') ? email.split('@')[0] : email;
-        this.currentUserLogin = rawLogin.includes('@') ? rawLogin.split('@')[0] : (rawLogin || emailPrefix);
+        console.debug('[NativeScript] Raw user session:', user);
+        
+        // Try multiple possible fields for user login
+        let rawLogin = (user.user_login || user.username || user.name || user.preferred_username || user.email || '').toLowerCase();
+        
+        // Extract email prefix if full email was found
+        if (rawLogin.includes('@')) {
+          this.currentUserLogin = rawLogin.split('@')[0].toLowerCase();
+        } else {
+          this.currentUserLogin = rawLogin.toLowerCase();
+        }
       }
 
-      // Extract project ID
+      // Extract project ID from multiple sources
       const projectSession = sessionStorage.getItem('project');
       if (projectSession) {
         const project = JSON.parse(projectSession);
@@ -401,14 +408,14 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
       // Extract organization
       this.userOrganization = sessionStorage.getItem('organization') || '';
 
-      // Extract user rank
+      // Extract user rank from sessionStorage
       const roleSession = sessionStorage.getItem('role');
       if (roleSession) {
         const role = JSON.parse(roleSession);
         this.userRank = role?.rank != null ? Number(role.rank) : 0;
       }
 
-      console.debug('[NativeScript] User context resolved:', {
+      console.debug('[NativeScript] User context extracted:', {
         currentUserLogin: this.currentUserLogin,
         currentProjectId: this.currentProjectId,
         userOrganization: this.userOrganization,
@@ -416,6 +423,12 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
       });
     } catch (error) {
       console.error('[NativeScript] Error extracting user context:', error);
+      console.debug('[NativeScript] SessionStorage contents:', {
+        user: sessionStorage.getItem('user'),
+        project: sessionStorage.getItem('project'),
+        organization: sessionStorage.getItem('organization'),
+        role: sessionStorage.getItem('role')
+      });
     }
   }
 
@@ -1842,17 +1855,48 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
    */
   isOwnPipeline(): boolean {
     if (!this.streamItem || !this.currentUserLogin) {
+      console.debug('[NativeScript] isOwnPipeline check failed:', {
+        hasStreamItem: !!this.streamItem,
+        hasCurrentUserLogin: !!this.currentUserLogin,
+        currentUserLogin: this.currentUserLogin
+      });
       return false;
     }
+    
     const createdBy = (this.streamItem as any).created_by || '';
-    return createdBy.toLowerCase().includes(this.currentUserLogin.toLowerCase());
+    const createdByLower = createdBy.toLowerCase();
+    const currentUserLower = this.currentUserLogin.toLowerCase();
+    
+    const isOwn = createdByLower === currentUserLower || 
+                  createdByLower.includes(currentUserLower) || 
+                  currentUserLower.includes(createdByLower);
+    
+    console.debug('[NativeScript] isOwnPipeline comparison:', {
+      createdBy: createdBy,
+      createdByLower: createdByLower,
+      currentUserLogin: this.currentUserLogin,
+      currentUserLower: currentUserLower,
+      isOwn: isOwn
+    });
+    
+    return isOwn;
   }
 
   /**
    * Check if creator is allowed to submit for approval (must be in DRAFT status)
    */
   canSubmitForApproval(): boolean {
-    return this.isOwnPipeline() && this.approvalStatus === 'DRAFT';
+    const isOwn = this.isOwnPipeline();
+    const isDraft = this.approvalStatus === 'DRAFT';
+    
+    console.debug('[NativeScript] canSubmitForApproval check:', {
+      isOwnPipeline: isOwn,
+      approvalStatus: this.approvalStatus,
+      isDraft: isDraft,
+      canSubmit: isOwn && isDraft
+    });
+    
+    return isOwn && isDraft;
   }
 
   /**
