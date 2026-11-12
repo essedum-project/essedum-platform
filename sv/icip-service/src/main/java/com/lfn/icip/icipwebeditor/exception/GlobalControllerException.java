@@ -392,6 +392,30 @@ public class GlobalControllerException {
 	}
 
 	/**
+	 * Handle pipeline metadata validation exceptions (missing or invalid metadata.json in uploaded ZIP).
+	 *
+	 * @param ex the exception
+	 * @param request the web request
+	 * @return the error response
+	 */
+	@ExceptionHandler(PipelineMetadataValidationException.class)
+	public ResponseEntity<ErrorResponse> handlePipelineMetadataValidationException(PipelineMetadataValidationException ex, WebRequest request) {
+		logger.warn("Pipeline metadata validation failed: {}", ex.getMessage());
+
+		ErrorResponse errorResponse = new ErrorResponse(
+				HttpStatus.BAD_REQUEST.value(),
+				"Pipeline Metadata Validation Failed",
+				ex.getMessage(),
+				null,
+				request.getDescription(false).replace("uri=", "")
+		);
+		errorResponse.setException(ex.getClass().getSimpleName());
+		errorResponse.setSuggestedAction("Ensure your ZIP file contains a valid metadata.json file with the correct type, framework, and protocol fields for this pipeline type.");
+
+		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+	}
+
+	/**
 	 * Handle all other exceptions.
 	 *
 	 * @param ex the exception
