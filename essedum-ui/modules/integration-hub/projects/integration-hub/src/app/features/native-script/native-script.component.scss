@@ -1275,140 +1275,127 @@ button[mat-button], button[mat-stroked-button] {
   }
 }
 
-// Approval Status Styling
-.approval-status-section {
-  margin: 20px 0;
-  
-  .approval-card {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    border-left: 5px solid #2c3e50;
-    
-    mat-card-header {
-      padding-bottom: 8px;
-      
-      .approval-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-size: 16px;
-        font-weight: 600;
-        
-        .status-icon {
-          font-size: 24px;
-          width: 24px;
-          height: 24px;
-        }
-        
-        .status-badge {
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          
-          // Status-specific colors
-          &.status-draft {
-            background-color: #e3f2fd;
-            color: #1565c0;
-          }
-          
-          &.status-pending_project_approval {
-            background-color: #fff3e0;
-            color: #e65100;
-          }
-          
-          &.status-pending_org_approval {
-            background-color: #fff3e0;
-            color: #e65100;
-          }
-          
-          &.status-project_approved {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-          }
-          
-          &.status-org_approved {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-          }
-          
-          &.status-published {
-            background-color: #f3e5f5;
-            color: #6a1b9a;
-          }
-          
-          &.status-project_rejected {
-            background-color: #ffebee;
-            color: #c62828;
-          }
-          
-          &.status-org_rejected {
-            background-color: #ffebee;
-            color: #c62828;
-          }
-        }
+// Approval Status and Actions - Compact inline style (matches agent-pipeline)
+.approval-actions-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+
+  // Compact inline approval status badge
+  .approval-status-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+
+    .status-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-label {
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    // Status-specific colors
+    &.status-draft {
+      background-color: rgba(100, 116, 139, 0.2);
+      color: #94a3b8;
+    }
+
+    &.status-pending_project_approval {
+      background-color: rgba(217, 119, 6, 0.2);
+      color: #f59e0b;
+
+      .status-icon {
+        animation: pulse 2s ease-in-out infinite;
       }
     }
-    
-    mat-card-content {
-      padding-top: 16px;
-      
-      &.submit-section {
-        text-align: center;
-        
-        .status-description {
-          color: #555;
-          margin-bottom: 16px;
-          font-size: 14px;
-        }
-        
-        .submit-button {
-          min-width: 200px;
-          height: 40px;
-          font-size: 14px;
-          font-weight: 600;
-          text-transform: uppercase;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          
-          &:disabled {
-            opacity: 0.6;
-          }
-          
-          .spinner {
-            display: inline-block;
-          }
-        }
-        
-        .submit-error {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-top: 12px;
-          color: #c62828;
-          font-size: 12px;
-          
-          mat-icon {
-            font-size: 16px;
-            width: 16px;
-            height: 16px;
-          }
-        }
+
+    &.status-project_approved,
+    &.status-org_approved {
+      background-color: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+
+    &.status-pending_org_approval {
+      background-color: rgba(217, 119, 6, 0.2);
+      color: #f59e0b;
+
+      .status-icon {
+        animation: pulse 2s ease-in-out infinite;
       }
-      
-      &.status-info {
-        .status-description {
-          color: #666;
-          font-size: 14px;
-          line-height: 1.6;
-          margin: 0;
-          
-          strong {
-            color: #333;
-          }
-        }
+    }
+
+    &.status-published {
+      background-color: rgba(139, 92, 246, 0.2);
+      color: #c084fc;
+    }
+
+    &.status-project_rejected,
+    &.status-org_rejected {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+  }
+
+  // Submit for Approval Button
+  .approval-button-container {
+    display: inline-flex;
+    gap: 12px;
+    align-items: center;
+
+    .send-approval-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background-color: #4f8fe7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      white-space: nowrap;
+
+      &:hover:not(:disabled) {
+        background-color: #3a7cc7;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      &:disabled {
+        background-color: #a0b5d8;
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      .btn-spinner {
+        display: inline-flex;
       }
     }
   }

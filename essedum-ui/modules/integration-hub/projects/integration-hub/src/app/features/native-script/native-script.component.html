@@ -18,6 +18,41 @@
                 >{{ pipelineAlias | titlecase }}
               </span>
             </div>
+
+            <!-- Approval Status and Submit Button -->
+            <div class="approval-actions-container">
+              <!-- Approval Status Badge -->
+              <div *ngIf="approvalStatus" class="approval-status-inline" [ngClass]="'status-' + approvalStatus?.toLowerCase()">
+                <mat-icon class="status-icon">
+                  {{ approvalStatus === 'DRAFT' ? 'edit' : 
+                     approvalStatus === 'PENDING_PROJECT_APPROVAL' ? 'hourglass_empty' :
+                     approvalStatus === 'PROJECT_APPROVED' ? 'check_circle' :
+                     approvalStatus === 'PENDING_ORG_APPROVAL' ? 'hourglass_empty' :
+                     approvalStatus === 'ORG_APPROVED' ? 'verified' :
+                     approvalStatus === 'PUBLISHED' ? 'publish' :
+                     approvalStatus === 'PROJECT_REJECTED' ? 'close' :
+                     approvalStatus === 'ORG_REJECTED' ? 'close' : 'help' }}
+                </mat-icon>
+                <span class="status-label">{{ approvalStatus }}</span>
+              </div>
+
+              <!-- Submit for Approval Button -->
+              <div class="approval-button-container" *ngIf="isOwnPipeline()">
+                <button *ngIf="canSubmitForApproval()"
+                  class="send-approval-btn"
+                  type="button"
+                  (click)="submitForApproval()"
+                  [disabled]="isSubmittingForApproval"
+                  matTooltip="Submit pipeline for project approval"
+                  matTooltipPosition="left">
+                  <mat-icon *ngIf="!isSubmittingForApproval">upload</mat-icon>
+                  <mat-spinner *ngIf="isSubmittingForApproval" diameter="16" class="btn-spinner"></mat-spinner>
+                  <span *ngIf="!isSubmittingForApproval">Submit for Approval</span>
+                  <span *ngIf="isSubmittingForApproval">Submitting...</span>
+                </button>
+              </div>
+            </div>
+
             <div class="selector-model-title-tail">
               <ul
                 class="d-flex justify-content-between align-items-center py-2 px-4"
@@ -196,77 +231,6 @@
             <mat-icon>{{ savedAfterModify ? 'check_circle' : 'edit_note' }}</mat-icon>
             <span *ngIf="!savedAfterModify">Code changes detected — <strong>save the file</strong> to enable Redeploy</span>
             <span *ngIf="savedAfterModify">File saved — click <strong>Redeploy</strong> in the toolbar to apply your changes</span>
-          </div>
-
-          <!-- Approval Status Section -->
-          <div class="approval-status-section" *ngIf="streamItem">
-            <mat-card class="approval-card">
-              <mat-card-header>
-                <mat-card-title class="approval-title">
-                  <mat-icon class="status-icon">
-                    {{ approvalStatus === 'DRAFT' ? 'edit' : 
-                       approvalStatus === 'PENDING_PROJECT_APPROVAL' ? 'hourglass_empty' :
-                       approvalStatus === 'PROJECT_APPROVED' ? 'check_circle' :
-                       approvalStatus === 'PENDING_ORG_APPROVAL' ? 'hourglass_empty' :
-                       approvalStatus === 'ORG_APPROVED' ? 'verified' :
-                       approvalStatus === 'PUBLISHED' ? 'publish' :
-                       approvalStatus === 'PROJECT_REJECTED' ? 'close' :
-                       approvalStatus === 'ORG_REJECTED' ? 'close' : 'help' }}
-                  </mat-icon>
-                  Status:
-                  <span class="status-badge" [ngClass]="'status-' + approvalStatus?.toLowerCase()">
-                    {{ approvalStatus }}
-                  </span>
-                </mat-card-title>
-              </mat-card-header>
-
-              <!-- Submit for Approval Button (Creator only, DRAFT status) -->
-              <mat-card-content *ngIf="canSubmitForApproval()" class="submit-section">
-                <p class="status-description">
-                  This pipeline is in DRAFT status. Submit it for approval by your Project Administrator.
-                </p>
-                <button 
-                  mat-raised-button 
-                  color="primary"
-                  (click)="submitForApproval()"
-                  [disabled]="isSubmittingForApproval"
-                  class="submit-button">
-                  <mat-icon *ngIf="isSubmittingForApproval" class="spinner">
-                    <mat-spinner diameter="20"></mat-spinner>
-                  </mat-icon>
-                  <span *ngIf="!isSubmittingForApproval">Submit for Approval</span>
-                  <span *ngIf="isSubmittingForApproval">Submitting...</span>
-                </button>
-                <mat-error *ngIf="submitError" class="submit-error">
-                  <mat-icon>error</mat-icon> {{ submitError }}
-                </mat-error>
-              </mat-card-content>
-
-              <!-- Status Description for Non-Draft -->
-              <mat-card-content *ngIf="!canSubmitForApproval()" class="status-info">
-                <p class="status-description">
-                  <strong>Status:</strong>
-                  <span *ngIf="approvalStatus === 'PENDING_PROJECT_APPROVAL'">
-                    Waiting for Project Administrator approval
-                  </span>
-                  <span *ngIf="approvalStatus === 'PENDING_ORG_APPROVAL'">
-                    Approved by Project Admin. Waiting for Organization Administrator approval
-                  </span>
-                  <span *ngIf="approvalStatus === 'PROJECT_APPROVED' || approvalStatus === 'ORG_APPROVED'">
-                    Approved and ready for use
-                  </span>
-                  <span *ngIf="approvalStatus === 'PUBLISHED'">
-                    Published and available to all users
-                  </span>
-                  <span *ngIf="approvalStatus === 'PROJECT_REJECTED'">
-                    Rejected by Project Admin. Please revise and resubmit.
-                  </span>
-                  <span *ngIf="approvalStatus === 'ORG_REJECTED'">
-                    Rejected by Organization Admin. Please revise and resubmit.
-                  </span>
-                </p>
-              </mat-card-content>
-            </mat-card>
           </div>
 
           <div
