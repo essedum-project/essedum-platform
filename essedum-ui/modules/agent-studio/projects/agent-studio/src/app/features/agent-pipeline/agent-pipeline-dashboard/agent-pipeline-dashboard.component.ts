@@ -165,7 +165,6 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
     if (this.organization) {
       this.handleRouteState();
       this.setupQueryParamHandling();
-      this.getCountPipelines();
       this.getCards();
     }
 
@@ -329,11 +328,13 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
 
   private getCards(): void {
     try {
-      const params = this.buildHttpParams();
+      // Fetch all visible items at once; pagination is handled client-side so the
+      // page count is derived from actual visible items, not the total DB count.
+      const params = this.buildHttpParams().set('page', '1').set('size', '500');
       const httpOptions = this.buildHttpOptions();
 
-      // Agent Designer API only on page 1; subsequent pages show Java pipeline results only
-      const agentDesigner$ = (this.pipelineMode === 'agent' && this.pageNumber === 1)
+      // Agent Designer API called once per fetch (always on the first server page)
+      const agentDesigner$ = (this.pipelineMode === 'agent')
         ? this.http.get<any>(`${this.AGENT_DESIGNER_API}/pipelines?limit=200`).pipe(
             timeout(this.AGENT_DESIGNER_TIMEOUT),
             map((response: any) => {
@@ -389,8 +390,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
       this.agentDesignerCids.clear();
       this.users = []; // Reset users array
 
-      // Safely process agent-designer pipelines (only on page 1)
-      if (this.pageNumber === 1 && agentDesigner?.items && Array.isArray(agentDesigner.items) && agentDesigner.items.length > 0) {
+      // Safely process agent-designer pipelines
+      if (agentDesigner?.items && Array.isArray(agentDesigner.items) && agentDesigner.items.length > 0) {
         const sorted = [...agentDesigner.items]
           .filter((pipeline: any) => pipeline?.id && pipeline?.name && pipeline?.created_at) // Defensive filter
           .sort((a: any, b: any) => {
@@ -447,6 +448,16 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
       this.filteredCards = data;
       this.loading = false;
 
+      // Derive correct page count from actual visible items (client-side pagination)
+      this.noOfItems = data.length;
+      this.noOfPages = Math.ceil(Math.max(1, this.noOfItems) / this.pageSize);
+      this.pageArr = [...Array(this.noOfPages).keys()];
+      // Clamp current page in case it exceeds the new page count
+      if (this.pageNumber > this.noOfPages) {
+        this.pageNumber = 1;
+      }
+      this.initializePagination();
+
       this.updateQueryParam(
         this.pageNumber,
         this.filter,
@@ -496,7 +507,6 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
 
   private refresh(): void {
     this.getCards();
-    this.getCountPipelines();
   }
 
   /** Build HTTP options with user context headers for approval workflow filtering (Java backend only) */
@@ -631,11 +641,11 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
   }
 
   get paginatedCards(): any[] {
-    if (!this.cards || !this.pageSize) {
+    if (!this.filteredCards || !this.pageSize) {
       return [];
     }
-
-    return this.filteredCards;
+    const start = (this.pageNumber - 1) * this.pageSize;
+    return this.filteredCards.slice(start, start + this.pageSize);
   }
 
   get shouldShowEmptyState(): boolean {
@@ -919,7 +929,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
     if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
       this.pageChanged.emit(this.pageNumber);
       this.initializePagination();
-      this.getCards();
+      // No backend re-fetch — all visible items are already in memory (client-side pagination)
     }
   }
 
