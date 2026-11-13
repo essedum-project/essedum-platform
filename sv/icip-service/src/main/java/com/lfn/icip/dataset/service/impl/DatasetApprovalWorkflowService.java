@@ -377,10 +377,20 @@ public class DatasetApprovalWorkflowService {
 	 */
 	public List<ICIPDataset> getCatalog(Integer projectId, Integer orgId) {
 		if (projectId != null) {
-			return datasetRepository.findByApprovalStatusAndProjectId("PROJECT_APPROVED", projectId);
+			// Project members see resources at or beyond project approval (ORG_REJECTED means it passed project level)
+			List<ICIPDataset> results = new ArrayList<>();
+			for (String status : new String[]{"PROJECT_APPROVED", "PENDING_ORG_APPROVAL", "ORG_REJECTED"}) {
+				results.addAll(datasetRepository.findByApprovalStatusAndProjectId(status, projectId));
+			}
+			return results;
 		}
 		if (orgId != null) {
-			return datasetRepository.findByApprovalStatusAndApprovedOrganizationId("ORG_APPROVED", orgId);
+			// Org members see resources at or beyond org approval (PLATFORM_REJECTED means it passed org level)
+			List<ICIPDataset> results = new ArrayList<>();
+			for (String status : new String[]{"ORG_APPROVED", "PENDING_PLATFORM_APPROVAL", "PLATFORM_REJECTED"}) {
+				results.addAll(datasetRepository.findByApprovalStatusAndApprovedOrganizationId(status, orgId));
+			}
+			return results;
 		}
 		return datasetRepository.findByApprovalStatus("PUBLISHED").stream()
 				.filter(r -> r.getApprovedOrganizationId() == null)
