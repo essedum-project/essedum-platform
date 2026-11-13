@@ -441,7 +441,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // Streaming service (Pipeline/Agent/MCP) approval methods
-  approveStreamingService(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+  approveStreamingService(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
     let apiCall$;
 
     if (isPlatformLevel) {
@@ -465,14 +465,14 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     apiCall$.subscribe({
       next: () => {
-        this.notify.success('Resource approved successfully');
+        this.notify.success(`${name} approved successfully`);
         this.load();
       },
-      error: err => this.notify.error(err?.error?.message || 'Failed to approve'),
+      error: () => this.notify.error(`Failed to approve ${name}`),
     });
   }
 
-  rejectStreamingService(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+  rejectStreamingService(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
     const apiCall$ = isPlatformLevel
       ? this.api.rejectPlatformApproval(resourceId)
       : isOrgLevel
@@ -481,10 +481,10 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     apiCall$.subscribe({
       next: () => {
-        this.notify.success('Resource rejected successfully');
+        this.notify.success(`${name} rejected successfully`);
         this.load();
       },
-      error: err => this.notify.error(err?.error?.message || 'Failed to reject'),
+      error: () => this.notify.error(`Failed to reject ${name}`),
     });
   }
 
@@ -495,27 +495,27 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
     return item && item.hasOwnProperty('approval_status') && item.hasOwnProperty('cid');
   }
 
-  approveDataset(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+  approveDataset(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
     const apiCall$ = isPlatformLevel
       ? this.api.approveDatasetPlatformApproval(resourceId)
       : isOrgLevel
         ? this.api.approveDatasetOrgApproval(resourceId)
         : this.api.approveDatasetProjectApproval(resourceId, this.projectId || 0);
     apiCall$.subscribe({
-      next: () => { this.notify.success('Dataset approved successfully'); this.load(); },
-      error: err => this.notify.error(err?.error?.message || 'Failed to approve'),
+      next: () => { this.notify.success(`${name} approved successfully`); this.load(); },
+      error: () => this.notify.error(`Failed to approve ${name}`),
     });
   }
 
-  rejectDataset(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+  rejectDataset(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
     const apiCall$ = isPlatformLevel
       ? this.api.rejectDatasetPlatformApproval(resourceId)
       : isOrgLevel
         ? this.api.rejectDatasetOrgApproval(resourceId)
         : this.api.rejectDatasetProjectApproval(resourceId);
     apiCall$.subscribe({
-      next: () => { this.notify.success('Dataset rejected successfully'); this.load(); },
-      error: err => this.notify.error(err?.error?.message || 'Failed to reject'),
+      next: () => { this.notify.success(`${name} rejected successfully`); this.load(); },
+      error: () => this.notify.error(`Failed to reject ${name}`),
     });
   }
 

@@ -408,7 +408,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.api.submitForOrgApproval(resource.cid, this.orgId).subscribe({
       next: () => {
-        this.notify.success(`${resource.name} submitted to organization for approval`);
+        this.notify.success(`${resource.alias || resource.name} submitted to organization for approval`);
         
         // Remove submitted resource from the drafts list immediately
         const index = this.streamingServicesDrafts.findIndex(s => s.cid === resource.cid);
@@ -421,7 +421,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
         // Also refresh legacy version data if needed
         this.load();
       },
-      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+      error: () => this.notify.error(`Failed to submit ${resource.alias || resource.name}`),
     });
   }
 
@@ -437,7 +437,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.load();
       },
-      error: err => this.notify.error(err?.error?.message || 'Failed to submit for platform approval'),
+      error: () => this.notify.error(`Failed to submit ${resource.alias || resource.name}`),
     });
   }
 
@@ -457,7 +457,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.datasetDraftsDataSource.data = [...this.datasetDrafts];
         this.load();
       },
-      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+      error: () => this.notify.error(`Failed to submit ${resource.alias || resource.name}`),
     });
   }
 
@@ -469,7 +469,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.datasetOrgDraftsDataSource.data = [...this.datasetOrgDrafts];
         this.load();
       },
-      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+      error: () => this.notify.error(`Failed to submit ${resource.alias || resource.name}`),
     });
   }
 
