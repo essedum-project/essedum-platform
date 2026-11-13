@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -132,6 +133,7 @@ import com.lfn.icip.mlops.rest.service.impl.ICIPMlOpsRestAdapterService;
 
 import io.micrometer.core.annotation.Timed;
 //import liquibase.pro.license.keymgr.a;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 /**
@@ -248,6 +250,14 @@ public class ICIPMlopsController {
 	private IICIPPluginScriptService pluginScriptService;
 	@Autowired
 	private IICIPAppService appService;
+
+	/** Approval workflow service for visibility filtering */
+	@Autowired
+	private com.lfn.icip.icipwebeditor.service.impl.ApprovalWorkflowService approvalWorkflowService;
+
+	/** Model approval workflow service */
+	@Autowired
+	private com.lfn.icip.icipwebeditor.service.impl.ModelApprovalWorkflowService modelApprovalWorkflowService;
 
 	/** The claim. */
 	@Value("${security.claim:#{null}}")
@@ -1217,17 +1227,12 @@ public class ICIPMlopsController {
 	}
 	
 	/**
-	 * Gets the searched objects.
+	 * Gets the model file data as bytes.
 	 *
-	 * @param datasetName        the dataset name
-	 * @param projectName        the project name
-	 * @param size               the size
-	 * @param page               the page
-	 * @param sortEvent          the sort event
-	 * @param sortOrder          the sort order
-	 * @param searchParams       the search params
-	 * @param selectClauseParams the select clause params
-	 * @return the searched objects
+	 * @param modelName the model name
+	 * @param fileName  the file name
+	 * @param org       the organization
+	 * @return the file data
 	 */
 	@GetMapping(path = "models/fileData", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	public ResponseEntity<byte[]> getfileData(@RequestParam(required = true, name = "modelName") String modelName,
@@ -1248,12 +1253,384 @@ public class ICIPMlopsController {
 			@RequestParam(required = false, name = "fileUploaded") String fileUploaded){
 		ResponseEntity<?> resp;
 		try {
-			return iCIPMlOpsRestAdapterService.uploadModel(requestBody,fileUploaded);	
+			return iCIPMlOpsRestAdapterService.uploadModel(requestBody,fileUploaded);
 		} catch (Exception e) {
 			resp = new ResponseEntity<>("Request failed", HttpStatus.INTERNAL_SERVER_ERROR);
 			logger.error("EXCEPTION:", e.getMessage());
 		}
 		return resp;
+	}
+
+	// ==================== MODEL APPROVAL ENDPOINTS ====================
+
+	/** POST /models/approval/project/submit — Developer submits DRAFT/PROJECT_REJECTED model for Project Admin approval. */
+	@PostMapping("/models/approval/project/submit")
+	public ResponseEntity<?> submitModelForProjectApproval(
+			@RequestBody java.util.Map<String, Object> request,
+			@org.springframework.web.bind.annotation.RequestHeader(value = "user-login", required = false) String username,
+			@org.springframework.web.bind.annotation.RequestHeader(value = "project", required = false) String projectHeader) {
+		try {
+			Object ridObj = request.get("resourceId");
+			Integer resourceId = ridObj instanceof Number ? ((Number) ridObj).intValue() : null;
+			if (resourceId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId is required"));
+			}
+			Integer projectId = null;
+			if (projectHeader != null && !projectHeader.isEmpty()) {
+				try { projectId = Integer.parseInt(projectHeader); } catch (NumberFormatException ignored) {}
+			}
+			if (projectId == null) {
+				Object pid = request.get("projectId");
+				projectId = pid instanceof Number ? ((Number) pid).intValue() : null;
+			}
+			if (projectId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "projectId is required"));
+			}
+			if (username == null || username.isEmpty()) {
+				// Fall back to the authenticated principal so this endpoint does not depend on the
+				// client-supplied user-login header (mirrors createdBy resolution in registerModels).
+				username = ICIPUtils.getUser(claim);
+			}
+			if (username == null || username.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Authentication required"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.submitForProjectApproval(resourceId, projectId, username);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", resourceId, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error submitting model for approval", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /models/approval/catalog?projectId=X&orgId=Y — approved models visible to the caller's scope. */
+	@GetMapping("/models/approval/catalog")
+	public ResponseEntity<?> getModelCatalog(
+			@RequestParam(required = false) Integer projectId,
+			@RequestParam(required = false) Integer orgId) {
+		try {
+			return ResponseEntity.ok(modelApprovalWorkflowService.getCatalogResources(projectId, orgId));
+		} catch (Exception e) {
+			logger.error("[ModelCatalog] Error fetching catalog", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/clone/{resourceId} — clone an approved/published model into a new DRAFT. */
+	@PostMapping("/models/approval/clone/{resourceId}")
+	public ResponseEntity<?> cloneModel(
+			@PathVariable Integer resourceId,
+			@RequestBody(required = false) java.util.Map<String, Object> request,
+			@RequestParam(required = false) Integer projectId,
+			@RequestParam(required = false) String username,
+			@org.springframework.web.bind.annotation.RequestHeader(value = "user-login", required = false) String userLogin,
+			@org.springframework.web.bind.annotation.RequestHeader(value = "project", required = false) String projectHeader) {
+		try {
+			Integer effectiveProjectId = projectId;
+			if (effectiveProjectId == null && request != null && request.get("projectId") instanceof Number) {
+				effectiveProjectId = ((Number) request.get("projectId")).intValue();
+			}
+			if (effectiveProjectId == null && projectHeader != null && !projectHeader.isEmpty()) {
+				try { effectiveProjectId = Integer.parseInt(projectHeader); } catch (NumberFormatException ignored) {}
+			}
+			String currentUser = (username != null && !username.isEmpty()) ? username : userLogin;
+			if ((currentUser == null || currentUser.isEmpty()) && request != null) {
+				Object bodyUser = request.get("username");
+				currentUser = bodyUser != null ? bodyUser.toString() : null;
+			}
+			if (currentUser == null || currentUser.isEmpty()) {
+				currentUser = ICIPUtils.getUser(claim);
+			}
+			ICIPMLFederatedModel clone = modelApprovalWorkflowService.cloneResource(resourceId, effectiveProjectId, currentUser);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", clone));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(404).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(409).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelClone] Error cloning model {}", resourceId, e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/project/approve/{id}?projectId=X&rank=2 — Project Admin approves. */
+	@PostMapping("/models/approval/project/approve/{id}")
+	public ResponseEntity<?> approveModelProjectApproval(@PathVariable Integer id,
+			@RequestParam(required = false) Integer projectId, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.approveProjectApproval(id, projectId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error approving model at project level", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/project/reject/{id}?rank=2 — Project Admin rejects. */
+	@PostMapping("/models/approval/project/reject/{id}")
+	public ResponseEntity<?> rejectModelProjectApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.rejectProjectApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error rejecting model at project level", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/org/submit — Project Admin submits PROJECT_APPROVED model to Org Admin. */
+	@PostMapping("/models/approval/org/submit")
+	public ResponseEntity<?> submitModelForOrgApproval(@RequestBody java.util.Map<String, Object> request,
+			@RequestParam(required = false) String rank) {
+		try {
+			Object ridObj = request.get("resourceId");
+			Integer resourceId = ridObj instanceof Number ? ((Number) ridObj).intValue() : null;
+			Object orgObj = request.get("organizationId");
+			Integer organizationId = orgObj instanceof Number ? ((Number) orgObj).intValue() : null;
+			if (resourceId == null || organizationId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId and organizationId are required"));
+			}
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.submitForOrgApproval(resourceId, organizationId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", resourceId,
+					"organizationId", organizationId, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error submitting model to org", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/org/approve/{id}?rank=3 — Org Admin approves (-> ORG_APPROVED). */
+	@PostMapping("/models/approval/org/approve/{id}")
+	public ResponseEntity<?> approveModelOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.approveOrgApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error org-approving model", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/org/reject/{id}?rank=3 — Org Admin rejects. */
+	@PostMapping("/models/approval/org/reject/{id}")
+	public ResponseEntity<?> rejectModelOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.rejectOrgApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error org-rejecting model", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/platform/submit — Org Admin submits ORG_APPROVED model to Platform Admin. */
+	@PostMapping("/models/approval/platform/submit")
+	public ResponseEntity<?> submitModelForPlatformApproval(@RequestBody java.util.Map<String, Object> request,
+			@RequestParam(required = false) String rank) {
+		try {
+			Object ridObj = request.get("resourceId");
+			Integer resourceId = ridObj instanceof Number ? ((Number) ridObj).intValue() : null;
+			if (resourceId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId is required"));
+			}
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.submitForPlatformApproval(resourceId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", resourceId, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error submitting model to platform", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/platform/approve/{id}?rank=4 — Platform Admin approves (-> PUBLISHED). */
+	@PostMapping("/models/approval/platform/approve/{id}")
+	public ResponseEntity<?> approveModelPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.approvePlatformApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error platform-approving model", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /models/approval/platform/reject/{id}?rank=4 — Platform Admin rejects. */
+	@PostMapping("/models/approval/platform/reject/{id}")
+	public ResponseEntity<?> rejectModelPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.rejectPlatformApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error platform-rejecting model", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	private static final int MODEL_APPROVAL_DEFAULT_PAGE_SIZE = 5;
+
+	private <T> List<T> paginateModels(List<T> list, Integer page, Integer size) {
+		int safeSize = (size == null || size <= 0) ? MODEL_APPROVAL_DEFAULT_PAGE_SIZE : size;
+		int safePage = (page == null || page < 0) ? 0 : page;
+		int from = Math.min(safePage * safeSize, list.size());
+		int to = Math.min(from + safeSize, list.size());
+		return list.subList(from, to);
+	}
+
+	/** GET /models/approval/project-admin/list?projectId=X&rank=2 */
+	@GetMapping("/models/approval/project-admin/list")
+	public ResponseEntity<?> getModelProjectAdminApprovals(
+			@RequestParam Integer projectId,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPMLFederatedModel> result = modelApprovalWorkflowService.getProjectAdminApprovals(projectId, rank);
+			List<ICIPMLFederatedModel> pageSlice = paginateModels(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error getting project admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /models/approval/org-admin/list?organizationId=X&rank=3 */
+	@GetMapping("/models/approval/org-admin/list")
+	public ResponseEntity<?> getModelOrgAdminApprovals(
+			@RequestParam Integer organizationId,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPMLFederatedModel> result = modelApprovalWorkflowService.getOrgAdminApprovals(organizationId, rank);
+			List<ICIPMLFederatedModel> pageSlice = paginateModels(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error getting org admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /models/approval/platform-admin/list?rank=4 */
+	@GetMapping("/models/approval/platform-admin/list")
+	public ResponseEntity<?> getModelPlatformAdminApprovals(
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPMLFederatedModel> result = modelApprovalWorkflowService.getPlatformAdminApprovals(rank);
+			List<ICIPMLFederatedModel> pageSlice = paginateModels(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error getting platform admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /models/approval/draft-resources?projectId=X&rank=2 — PROJECT_APPROVED models ready to submit to org. */
+	@GetMapping("/models/approval/draft-resources")
+	public ResponseEntity<?> getModelDraftResources(
+			@RequestParam Integer projectId,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPMLFederatedModel> result = modelApprovalWorkflowService.getDraftResources(projectId, rank);
+			List<ICIPMLFederatedModel> pageSlice = paginateModels(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error getting model draft resources", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /models/approval/org-admin/draft-resources?organizationId=X&rank=3 — ORG_APPROVED models ready to submit to platform. */
+	@GetMapping("/models/approval/org-admin/draft-resources")
+	public ResponseEntity<?> getModelOrgAdminDraftResources(
+			@RequestParam Integer organizationId,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPMLFederatedModel> result = modelApprovalWorkflowService.getOrgAdminDraftResources(organizationId, rank);
+			List<ICIPMLFederatedModel> pageSlice = paginateModels(result, page, size);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", pageSlice, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[ModelApproval] Error getting model org admin draft resources", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
 	}
 
 	@GetMapping("endpoints/listAdapters")
@@ -1386,9 +1763,257 @@ public class ICIPMlopsController {
 				} else
 					tagList = null;
 
-				List<ICIPStreamingServices2DTO> results = streamingServicesService.getAllPipelinesByTypeAndOrg(project,
+				// Get pipelines by project name AND org name (handles pipelines stored under either value).
+				// Pipelines created before the project-name fix have organization=orgName;
+				// newer ones have organization=projectName. Both must be included.
+				String orgHeader = headers.getOrDefault("organisation", headers.getOrDefault("organization", ""));
+				String projectParam = project;
+				if (!orgHeader.isEmpty() && !orgHeader.equalsIgnoreCase(project)) {
+					projectParam = project + "," + orgHeader;
+					logger.info("[Approval] Querying pipelines for project='{}' and org='{}'", project, orgHeader);
+				}
+				List<ICIPStreamingServices2DTO> results = streamingServicesService.getAllPipelinesByTypeAndOrg(projectParam,
 						paginate, query, tagList, orderBy, type, interfacetype);
-				String response = new JSONArray(results).toString();
+				
+				// Fetch ORG_APPROVED / PENDING_PLATFORM_APPROVAL pipelines for the user's org so they appear
+				// cross-project within the same organization (org admin sets approvedOrganizationId when submitting).
+				// portfolioId header (from portfoliodata.id in session) is the numeric portfolio/org ID —
+				// always matches approvedOrganizationId which was set from the same portfoliodata.id.
+				List<ICIPStreamingServices2DTO> orgApprovedPipelines = new ArrayList<>();
+				Integer userPortfolioId = null;
+				try {
+					// Browsers send headers lowercase; "portfolioid" is the actual key received.
+				// Fall back to camelCase "portfolioId" for any server-to-server callers.
+				String portfolioIdStr = headers.getOrDefault("portfolioid", headers.getOrDefault("portfolioId", ""));
+					if (!portfolioIdStr.isEmpty()) {
+						userPortfolioId = Integer.parseInt(portfolioIdStr);
+						orgApprovedPipelines = streamingServicesService.getOrgApprovedPipelinesByOrgId(userPortfolioId);
+						logger.info("[Approval] Fetched {} org-approved pipelines for portfolioId={}", orgApprovedPipelines.size(), userPortfolioId);
+					}
+					// Fallback: if no portfolioId header, try org name string match (legacy)
+					if (orgApprovedPipelines.isEmpty()) {
+						String orgIdStr = headers.getOrDefault("organisation", headers.getOrDefault("organization", ""));
+						if (!orgIdStr.isEmpty()) {
+							orgApprovedPipelines = streamingServicesService.getOrgApprovedPipelines(orgIdStr);
+							logger.info("[Approval] Fallback: fetched {} org-approved pipelines for org={}", orgApprovedPipelines.size(), orgIdStr);
+						}
+					}
+				} catch (Exception e) {
+					logger.warn("[Approval] Error fetching org-approved pipelines: {}", e.getMessage());
+				}
+
+				// Fetch globally PUBLISHED pipelines (approvedOrganizationId=null, platform-approved) so they
+				// appear for all users regardless of project/org.
+				List<ICIPStreamingServices2DTO> globallyPublishedPipelines = new ArrayList<>();
+				try {
+					globallyPublishedPipelines = streamingServicesService.getGloballyPublishedPipelines();
+					logger.info("[Approval] Fetched {} globally-published pipelines", globallyPublishedPipelines.size());
+				} catch (Exception e) {
+					logger.warn("[Approval] Error fetching globally-published pipelines: {}", e.getMessage());
+				}
+
+				// getOrgApprovedPipelinesByOrgId/getOrgApprovedPipelines/getGloballyPublishedPipelines fetch
+				// across ALL pipeline types - without this filter, approved/published pipelines of other
+				// types (e.g. Agent) leak into every tab's results (mcp, app, pipeline, etc.).
+				List<String> requestedTypes = (type != null && !type.isEmpty() && !"undefined".equals(type))
+						? Arrays.asList(type.split(",")) : null;
+				orgApprovedPipelines = filterByTypeAndInterfacetype(orgApprovedPipelines, requestedTypes, interfacetype);
+				globallyPublishedPipelines = filterByTypeAndInterfacetype(globallyPublishedPipelines, requestedTypes, interfacetype);
+
+				// Combine project-scoped + org-approved + globally-published; deduplicate by id-name key.
+				Map<String, ICIPStreamingServices2DTO> combined = new LinkedHashMap<>();
+				for (ICIPStreamingServices2DTO result : results) {
+					combined.put(result.getCid() + "-" + result.getName(), result);
+				}
+				for (ICIPStreamingServices2DTO orgApproved : orgApprovedPipelines) {
+					combined.put(orgApproved.getCid() + "-" + orgApproved.getName(), orgApproved);
+				}
+				for (ICIPStreamingServices2DTO published : globallyPublishedPipelines) {
+					combined.put(published.getCid() + "-" + published.getName(), published);
+				}
+				List<ICIPStreamingServices2DTO> allResults = new ArrayList<>(combined.values());
+				
+				// Apply approval workflow visibility filtering
+				try {
+					String username = headers.getOrDefault("user-login", "");
+					String projectStr = headers.getOrDefault("project", headers.getOrDefault("Project", ""));
+					String orgStr = headers.getOrDefault("organisation", headers.getOrDefault("organization", ""));
+					// Prefer 'rank' (always numeric: 1-4) over 'roleId' (may be a non-numeric UUID from agent-studio)
+					String roleIdStr = headers.getOrDefault("rank", headers.getOrDefault("roleId", ""));
+					
+					logger.info("[Approval] Pipeline list filtering: user={}, project={}, org={}, role={}", 
+						username, projectStr, orgStr, roleIdStr);
+					
+					// orgStr is optional: numeric org check uses portfolioId header (effectiveOrgId), not orgStr.
+					// username is optional: when absent, creator-based rules skip gracefully.
+					if (!projectStr.isEmpty() && !roleIdStr.isEmpty()) {
+						try {
+							Integer userProjectId = Integer.parseInt(projectStr);
+							Integer userRoleId = Integer.parseInt(roleIdStr);
+							Integer userOrganizationId = null;
+
+							// Try to parse org as integer first
+							try {
+								userOrganizationId = Integer.parseInt(orgStr);
+							} catch (NumberFormatException e) {
+								// org header is a project/org name string — not a numeric ID
+								logger.debug("[Approval] org is not numeric: {}", orgStr);
+							}
+							// Prefer the portfolioId header (always numeric) for org-scoped checks.
+							// userPortfolioId was read earlier from the portfolioId request header.
+							final Integer effectiveOrgId = (userPortfolioId != null) ? userPortfolioId : userOrganizationId;
+							
+							// Filter results using approval workflow visibility rules
+							List<ICIPStreamingServices2DTO> filteredResults = new ArrayList<>();
+							for (ICIPStreamingServices2DTO result : allResults) {
+								String approvalStatus = result.getApprovalStatus();
+								
+								// If no approval status, include (legacy items)
+								if (approvalStatus == null || approvalStatus.isEmpty()) {
+									filteredResults.add(result);
+									logger.debug("[Approval] Including legacy pipeline without approval_status: {}", result.getName());
+									continue;
+								}
+								
+								boolean isVisible = false;
+
+								// Admin-created pipelines are visible to all users in the same org/scope
+								String createdByCheck = result.getCreatedBy();
+								if ("admin".equals(createdByCheck)) {
+									filteredResults.add(result);
+									logger.debug("[Approval] Admin-created pipeline {} included for all users", result.getName());
+									continue;
+								}
+
+								// Rule 1: DRAFT - only creator can see (if username unknown, include it —
+								// same-project DRAFTs were always returned unfiltered before this feature)
+								if ("DRAFT".equals(approvalStatus)) {
+									String createdBy = result.getCreatedBy();
+									if (username.isEmpty() || username.equals(createdBy)) {
+										isVisible = true;
+									}
+									logger.debug("[Approval] DRAFT check for {}: createdBy={}, user={}, visible={}",
+										result.getName(), createdBy, username, isVisible);
+								}
+
+								// Rule 2: PENDING_PROJECT_APPROVAL - creator + project admins of same project
+								else if ("PENDING_PROJECT_APPROVAL".equals(approvalStatus)) {
+									String createdBy = result.getCreatedBy();
+									Integer resourceProjectId = result.getProjectId();
+
+									if (username.isEmpty() || username.equals(createdBy) || (userRoleId >= 2 && userProjectId.equals(resourceProjectId))) {
+										isVisible = true;
+									}
+									logger.debug("[Approval] PENDING_PROJECT_APPROVAL check for {}: resourceProject={}, userProject={}, role={}, visible={}",
+										result.getName(), resourceProjectId, userProjectId, userRoleId, isVisible);
+								}
+								
+								// Rule 3: PROJECT_APPROVED - all users in same project
+								else if ("PROJECT_APPROVED".equals(approvalStatus)) {
+									Integer resourceProjectId = result.getProjectId();
+									if (userProjectId.equals(resourceProjectId)) {
+										isVisible = true;
+									}
+									// Fallback for NativeScript pipelines: SQL org-filter already confirmed
+									// this pipeline is in the user's project/org scope — allow visibility.
+									if (!isVisible && ("NativeScript".equals(result.getType()) || "nativeScript".equals(result.getType()))) {
+										isVisible = true;
+										logger.info("[Approval] PROJECT_APPROVED NativeScript org-scope fallback for {}: resourceProject={}, userProject={}", result.getName(), resourceProjectId, userProjectId);
+									}
+									logger.info("[Approval] PROJECT_APPROVED check for {}: resourceProject={}, userProject={}, visible={}",
+										result.getName(), resourceProjectId, userProjectId, isVisible);
+								}
+								
+								// Rule 4: PENDING_ORG_APPROVAL - same project users + org admins of same org
+								else if ("PENDING_ORG_APPROVAL".equals(approvalStatus)) {
+									Integer resourceProjectId = result.getProjectId();
+									Integer approvedOrgId = result.getApprovedOrganizationId();
+									if (userProjectId.equals(resourceProjectId)) {
+										isVisible = true;
+									} else if (approvedOrgId != null && userOrganizationId != null && approvedOrgId.equals(userOrganizationId) && userRoleId >= 3) {
+										isVisible = true;
+									}
+									logger.debug("[Approval] PENDING_ORG_APPROVAL check for {}: resourceProject={}, userProject={}, visible={}",
+										result.getName(), resourceProjectId, userProjectId, isVisible);
+								}
+
+								// Rule 4b: ORG_APPROVED - all users in the approved organization (cross-project within org)
+								// Primary: compare approvedOrganizationId with portfolioId header (both numeric, always reliable).
+								// Fallback: org name string match (for environments where portfolioId header isn't present).
+								else if ("ORG_APPROVED".equals(approvalStatus)) {
+									Integer approvedOrgId = result.getApprovedOrganizationId();
+									if (approvedOrgId != null && effectiveOrgId != null && approvedOrgId.equals(effectiveOrgId)) {
+										isVisible = true;
+									} else if (!isVisible) {
+										String resourceOrg = result.getOrganization();
+										if (resourceOrg != null && !orgStr.isEmpty() && resourceOrg.equals(orgStr)) {
+											isVisible = true;
+										}
+									}
+									logger.debug("[Approval] ORG_APPROVED check for {}: approvedOrgId={}, effectiveOrgId={}, visible={}",
+										result.getName(), approvedOrgId, effectiveOrgId, isVisible);
+								}
+
+								// Rule 4c: PENDING_PLATFORM_APPROVAL - same org users + platform admins
+								else if ("PENDING_PLATFORM_APPROVAL".equals(approvalStatus)) {
+									Integer approvedOrgId = result.getApprovedOrganizationId();
+									if (approvedOrgId != null && effectiveOrgId != null && approvedOrgId.equals(effectiveOrgId)) {
+										isVisible = true;
+									} else if (!isVisible) {
+										String resourceOrg = result.getOrganization();
+										if (resourceOrg != null && !orgStr.isEmpty() && resourceOrg.equals(orgStr)) {
+											isVisible = true;
+										}
+									}
+									if (!isVisible && userRoleId >= 4) {
+										isVisible = true;
+									}
+									logger.debug("[Approval] PENDING_PLATFORM_APPROVAL check for {}: approvedOrgId={}, effectiveOrgId={}, role={}, visible={}",
+										result.getName(), approvedOrgId, effectiveOrgId, userRoleId, isVisible);
+								}
+
+								// Rule 5: PUBLISHED - all users (globally published by platform admin)
+								else if ("PUBLISHED".equals(approvalStatus)) {
+									isVisible = true;
+									logger.info("[Approval] PUBLISHED pipeline {} included - globally visible", result.getName());
+								}
+								
+								// Rule 6: PROJECT_REJECTED / ORG_REJECTED - creator only or all users in same project respectively
+								else if ("PROJECT_REJECTED".equals(approvalStatus)) {
+									String createdBy = result.getCreatedBy();
+									if (username.isEmpty() || username.equals(createdBy)) {
+										isVisible = true;
+									}
+								} else if ("ORG_REJECTED".equals(approvalStatus)) {
+									Integer resourceProjectId = result.getProjectId();
+									if (userProjectId.equals(resourceProjectId)) {
+										isVisible = true;
+									}
+								}
+								
+								if (isVisible) {
+									filteredResults.add(result);
+								}
+							}
+							
+							logger.info("[Approval] Pipeline list returning {} results out of {} total ({} org-approved, {} globally-published)",
+								filteredResults.size(), allResults.size(), orgApprovedPipelines.size(), globallyPublishedPipelines.size());
+							String response = new JSONArray(filteredResults).toString();
+							return ResponseEntity.status(200).body(response);
+						} catch (NumberFormatException e) {
+							logger.warn("[Approval] Invalid numeric values in headers: {}", e.getMessage());
+						}
+					} else {
+						logger.info("[Approval] Missing project/role headers for filtering - returning combined results");
+					}
+				} catch (Exception e) {
+					logger.error("[Approval] Error applying visibility filtering: {}", e.getMessage(), e);
+					// Fall through to return combined results
+				}
+
+				// Return allResults (not just results): includes org-approved pipelines correctly scoped
+				// by portfolioId header, so cross-org pipelines are visible even when filter cannot run.
+				String response = new JSONArray(allResults).toString();
 				return ResponseEntity.status(200).body(response);
 			} else {
 				String results = pluginService.getDataSetService(getDatasource(adapterInstance, project))
@@ -1406,6 +2031,25 @@ public class ICIPMlopsController {
 				return ResponseEntity.status(500).body("{\"error\": \"An internal error occurred. Please try again later.\"}");
 			}
 		}
+	}
+
+	/**
+	 * Keeps only pipelines whose type (when requestedTypes is non-null) and interfacetype
+	 * (when non-null/empty) match the requested filters. Used to scope approval-derived
+	 * pipeline lists (which are fetched without a type filter) to the caller's requested tab.
+	 */
+	private List<ICIPStreamingServices2DTO> filterByTypeAndInterfacetype(
+			List<ICIPStreamingServices2DTO> pipelines, List<String> requestedTypes, String interfacetype) {
+		List<ICIPStreamingServices2DTO> filtered = new ArrayList<>();
+		for (ICIPStreamingServices2DTO pipeline : pipelines) {
+			boolean typeMatches = requestedTypes == null || requestedTypes.contains(pipeline.getType());
+			boolean interfaceMatches = interfacetype == null || interfacetype.isEmpty()
+					|| interfacetype.equalsIgnoreCase(pipeline.getInterfacetype());
+			if (typeMatches && interfaceMatches) {
+				filtered.add(pipeline);
+			}
+		}
+		return filtered;
 	}
 
 	@GetMapping("/pipelines/count")
@@ -1432,7 +2076,13 @@ public class ICIPMlopsController {
 		} else
 			tagList = null;
 
-		Long results = streamingServicesService.getPipelinesCountByTypeAndOrg(project, query, tagList, orderBy, type,
+		// Include both project name and org name (same as listTraining) so counts match.
+		String countOrgHeader = headers.getOrDefault("organisation", headers.getOrDefault("organization", ""));
+		String countProjectParam = project;
+		if (!countOrgHeader.isEmpty() && !countOrgHeader.equalsIgnoreCase(project)) {
+			countProjectParam = project + "," + countOrgHeader;
+		}
+		Long results = streamingServicesService.getPipelinesCountByTypeAndOrg(countProjectParam, query, tagList, orderBy, type,
 				interfacetype);
 //			String response = new JSONArray(results).toString();
 		return ResponseEntity.status(200).body(results);
@@ -1869,7 +2519,8 @@ public class ICIPMlopsController {
 	@PostMapping("/streamingServices/add")
 	@Transactional
 	public ResponseEntity<?> createStreamingServices(@RequestBody ICIPStreamingServicesDTO streamingServicesDTO,
-			@RequestAttribute(required = false, name = "organization") String org)
+			@RequestAttribute(required = false, name = "organization") String org,
+			HttpServletRequest httpRequest)
 			throws URISyntaxException, SQLException {
         // Sanitize alias by replacing all special characters with hyphen (-)
         String originalAlias = streamingServicesDTO.getAlias();
@@ -1899,8 +2550,9 @@ public class ICIPMlopsController {
 				.getPipelinesByAliasAndOrg(streamingServicesDTO.getAlias(), streamingServicesDTO.getOrganization());
 		if (existlist.isEmpty()) {
 			logger.info("Creating Streaming Service : {}", streamingServicesDTO.getName());
-			streamingServicesDTO.setCreatedBy(ICIPUtils.getUser(claim));
-			streamingServicesDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
+			String creatorName = resolveUserFromRequest(httpRequest, claim);
+			streamingServicesDTO.setCreatedBy(creatorName);
+			streamingServicesDTO.setLastmodifiedby(creatorName);
 			streamingServicesDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
 			ModelMapper modelmapper = new ModelMapper();
 			ICIPStreamingServices streamingServices = modelmapper.map(streamingServicesDTO,
@@ -1977,10 +2629,11 @@ public class ICIPMlopsController {
 	 */
 	@PutMapping("/streamingServices/update")
 	public ResponseEntity<?> updateStreamingServices(@RequestBody ICIPStreamingServicesDTO streamingServicesDTO,
-			@RequestAttribute(required = false, name = "organization") String org) throws URISyntaxException,
+			@RequestAttribute(required = false, name = "organization") String org,
+			HttpServletRequest httpRequest) throws URISyntaxException,
 			SQLException, InvalidRemoteException, TransportException, GitAPIException, IOException {
 		if (streamingServicesDTO.getCid() == null) {
-			return createStreamingServices(streamingServicesDTO, org);
+			return createStreamingServices(streamingServicesDTO, org, httpRequest);
 		}
 		streamingServicesDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
 		streamingServicesDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
@@ -2255,11 +2908,11 @@ public class ICIPMlopsController {
 	/**
 	 * Trigger post event.
 	 *
-	 * @param name    the name
-	 * @param org     the org
-	 * @param corelid the corelid
-	 * @param params  the params
-	 * @param payload the payload
+	 * @param name           the name
+	 * @param org            the org
+	 * @param corelid        the corelid
+	 * @param datasourceName the datasource name
+	 * @param payload        the payload
 	 * @return the response entity
 	 */
 	@PostMapping(value = "/event/trigger/{name}", produces = "application/json")
@@ -2755,6 +3408,28 @@ public class ICIPMlopsController {
 		return new ResponseEntity<>(message, HttpStatus.OK);
 	}
 
-
+	/**
+	 * Resolves the username from the Authorization Bearer JWT directly, bypassing
+	 * SecurityContextHolder, then falls back to ICIPUtils.getUser().
+	 */
+	private String resolveUserFromRequest(HttpServletRequest request, String claim) {
+		try {
+			String bearer = request.getHeader("Authorization");
+			if (bearer != null && bearer.startsWith("Bearer ")) {
+				String token = bearer.substring(7);
+				String[] parts = token.split("\\.");
+				if (parts.length >= 2) {
+					byte[] decoded = java.util.Base64.getUrlDecoder().decode(parts[1]);
+					JSONObject payload = new JSONObject(new String(decoded, java.nio.charset.StandardCharsets.UTF_8));
+					String claimName = (claim != null && claim.contains("||")) ? claim.split("\\|\\|")[0] : "preferred_username";
+					String user = payload.optString(claimName, null);
+					if (user != null && !user.isBlank()) return user;
+				}
+			}
+		} catch (Exception e) {
+			logger.debug("Could not resolve user from JWT directly: {}", e.getMessage());
+		}
+		return ICIPUtils.getUser(claim);
+	}
 
 }

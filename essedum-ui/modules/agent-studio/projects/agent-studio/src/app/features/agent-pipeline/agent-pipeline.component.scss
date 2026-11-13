@@ -2780,3 +2780,458 @@
   .secret-value-mask { color: #334155; }
   .secret-eye-icon { color: #94a3b8; &:hover { color: #4742dc; } }
 }
+
+// =============================================================================
+// APPROVAL WORKFLOW STYLES
+// =============================================================================
+.approval-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-right: 20px;
+
+  .approval-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      line-height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &.approved {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    &.pending {
+      background: rgba(251, 146, 60, 0.1);
+      color: #fb923c;
+      border: 1px solid rgba(251, 146, 60, 0.3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+  }
+
+  .approval-request-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 6px 16px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+    background: rgba(79, 142, 247, 0.12) !important;
+    color: #7eb8ff !important;
+    border: 1px solid rgba(79, 142, 247, 0.28) !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    white-space: nowrap !important;
+
+    mat-icon {
+      font-size: 18px !important;
+      width: 18px !important;
+      height: 18px !important;
+      line-height: 18px !important;
+    }
+
+    &:hover:not(:disabled) {
+      background: rgba(79, 142, 247, 0.22) !important;
+      box-shadow: 0 2px 8px rgba(79, 142, 247, 0.15) !important;
+    }
+
+    &:active:not(:disabled) {
+      background: rgba(79, 142, 247, 0.28) !important;
+      box-shadow: 0 1px 4px rgba(79, 142, 247, 0.2) !important;
+    }
+
+    &:disabled {
+      opacity: 0.65 !important;
+      cursor: not-allowed !important;
+      background: rgba(217, 119, 6, 0.12) !important;
+      color: #f59e0b !important;
+      border-color: rgba(217, 119, 6, 0.28) !important;
+    }
+
+    &.pending-btn {
+      background: rgba(217, 119, 6, 0.12) !important;
+      color: #f59e0b !important;
+      border-color: rgba(217, 119, 6, 0.28) !important;
+      opacity: 0.65 !important;
+      cursor: not-allowed !important;
+    }
+
+    &.send-approval {
+      background: rgba(79, 142, 247, 0.15) !important;
+      color: #7eb8ff !important;
+      border-color: rgba(79, 142, 247, 0.35) !important;
+      font-weight: 600 !important;
+
+      &:hover:not(:disabled) {
+        background: rgba(79, 142, 247, 0.25) !important;
+        box-shadow: 0 4px 12px rgba(79, 142, 247, 0.2) !important;
+      }
+    }
+  }
+}
+
+// Approval status card styles - matching admin console design
+.approval-actions-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+
+  // Compact inline approval status badge
+  .approval-status-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background-color: rgba(79, 142, 247, 0.15);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #7eb8ff;
+    white-space: nowrap;
+    animation: floatIn 0.4s ease-out;
+
+    .status-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-label {
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    // Status-specific colors
+    &.draft {
+      background-color: rgba(100, 116, 139, 0.2);
+      color: #94a3b8;
+    }
+
+    &.pending-project {
+      background-color: rgba(217, 119, 6, 0.2);
+      color: #f59e0b;
+
+      .status-icon {
+        animation: pulse 2s ease-in-out infinite;
+      }
+    }
+
+    &.approved {
+      background-color: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+
+    &.rejected {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+
+    &.pending-org {
+      background-color: rgba(79, 142, 247, 0.2);
+      color: #7eb8ff;
+
+      .status-icon {
+        animation: pulse 2s ease-in-out infinite;
+      }
+    }
+
+    &.org-approved {
+      background-color: rgba(124, 58, 237, 0.2);
+      color: #a78bfa;
+    }
+
+    &.published {
+      background-color: rgba(5, 150, 105, 0.2);
+      color: #10b981;
+    }
+  }
+
+  .approval-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+}
+
+// Light theme overrides for approval actions
+:host-context(body.header-light-theme) {
+  .approval-actions-container {
+    .approval-status-inline {
+      background-color: rgba(99, 102, 241, 0.12);
+      color: #4f46e5;
+
+      &.pending-project {
+        background-color: rgba(217, 119, 6, 0.15);
+        color: #d97706;
+      }
+
+      &.approved {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: #059669;
+      }
+
+      &.rejected {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: #dc2626;
+      }
+
+      &.pending-org {
+        background-color: rgba(79, 142, 247, 0.15);
+        color: #4f46e5;
+      }
+
+      &.published {
+        background-color: rgba(5, 150, 105, 0.15);
+        color: #047857;
+      }
+
+      // Status-specific light theme colors
+      &.approval-pending-project {
+        border-color: rgba(217, 119, 6, 0.18);
+        background: rgba(217, 119, 6, 0.08);
+
+        .status-icon {
+          color: #d97706;
+        }
+
+        .status-header {
+          color: #d97706;
+        }
+
+        .status-message {
+          color: #d97706;
+        }
+
+        .status-note {
+          border-left-color: rgba(217, 119, 6, 0.25);
+          background: rgba(217, 119, 6, 0.04);
+          color: #d97706;
+        }
+      }
+
+      &.approval-approved {
+        border-color: rgba(5, 150, 105, 0.18);
+        background: rgba(5, 150, 105, 0.08);
+
+        .status-icon {
+          color: #059669;
+        }
+
+        .status-header {
+          color: #059669;
+        }
+
+        .status-message {
+          color: #059669;
+        }
+
+        .status-note {
+          border-left-color: rgba(5, 150, 105, 0.25);
+          background: rgba(5, 150, 105, 0.04);
+          color: #059669;
+        }
+      }
+
+      &.approval-rejected {
+        border-color: rgba(220, 38, 38, 0.18);
+        background: rgba(220, 38, 38, 0.08);
+
+        .status-icon {
+          color: #dc2626;
+        }
+
+        .status-header {
+          color: #dc2626;
+        }
+
+        .status-message {
+          color: #dc2626;
+        }
+
+        .status-note {
+          border-left-color: rgba(220, 38, 38, 0.25);
+          background: rgba(220, 38, 38, 0.04);
+          color: #dc2626;
+        }
+      }
+
+      &.approval-pending-org {
+        border-color: rgba(99, 102, 241, 0.18);
+        background: rgba(99, 102, 241, 0.08);
+
+        .status-icon {
+          color: #4f46e5;
+        }
+
+        .status-header {
+          color: #4f46e5;
+        }
+
+        .status-message {
+          color: #4f46e5;
+        }
+
+        .status-note {
+          border-left-color: rgba(99, 102, 241, 0.25);
+          background: rgba(99, 102, 241, 0.04);
+          color: #4f46e5;
+        }
+      }
+
+      &.approval-published {
+        border-color: rgba(5, 150, 105, 0.18);
+        background: rgba(5, 150, 105, 0.08);
+
+        .status-icon {
+          color: #059669;
+        }
+
+        .status-header {
+          color: #059669;
+        }
+
+        .status-message {
+          color: #059669;
+        }
+
+        .status-note {
+          border-left-color: rgba(5, 150, 105, 0.25);
+          background: rgba(5, 150, 105, 0.04);
+          color: #059669;
+        }
+      }
+    }
+  }
+}
+
+// Light theme - approval buttons
+:host-context(body.header-light-theme) {
+  .approval-request-btn {
+    background: rgba(99, 102, 241, 0.08) !important;
+    color: #4f46e5 !important;
+    border-color: rgba(99, 102, 241, 0.18) !important;
+
+    &:hover:not(:disabled) {
+      background: rgba(99, 102, 241, 0.15) !important;
+    }
+
+    &:disabled,
+    &.pending-btn {
+      background: rgba(217, 119, 6, 0.08) !important;
+      color: #d97706 !important;
+      border-color: rgba(217, 119, 6, 0.18) !important;
+    }
+  }
+}
+
+// Animations
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+// Send for Approval Button - Clean Blue Style
+.approval-button-container {
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+
+  .send-approval-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #4f8fe7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+      background-color: #3a7cc7;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &:disabled {
+      background-color: #a0b5d8;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    // Resubmit variant — amber to signal a retry after rejection
+    &.resubmit-btn {
+      background-color: #d97706;
+
+      &:hover:not(:disabled) {
+        background-color: #b45309;
+      }
+    }
+  }
+}
+
+// Light theme overrides for approval buttons
+.light-theme {
+  .approval-button-container .send-approval-btn {
+    background-color: #4f8fe7;
+
+    &:hover:not(:disabled) {
+      background-color: #3a7cc7;
+    }
+  }
+}

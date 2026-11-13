@@ -35,17 +35,11 @@ import { UsmPermissionsService } from "./services/usm-permission.service";
 import { DashConstantService } from "./services/dash-constant.service";
 import { AuthService } from "./services/auth.service";
 
-import { SecretsComponent } from "./components/secrets/secrets.component";
-import { RoleListComponent } from "./components/role-list/role-list.component";
-import { RoleDetailComponent } from "./components/role-detail/role-detail.component";
 import { RoleRoleComponent } from "./components/Role-Role/role-role.component";
 import { UserProjectRoleListComponent } from "./components/user-project-role-list/user-project-role-list.component";
 import { RoleroleService } from "./services/role-role.service";
 import { OrgUnitService } from "./services/org-unit.service";
 import { UserUnitService } from "./services/user-unit.service";
-import { ProjectListViewComponent } from "./components/project/project-list-view.component";
-import { ProjectDetailComponent } from "./components/project-detail/project-detail.component";
-import { ManageUsersComponent } from "./components/manage-users/manage-users.component";
 import { AipFilterComponent } from "./components/aip-filter/aip-filter.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatTreeModule } from "@angular/material/tree";
@@ -65,11 +59,6 @@ import { MatSortModule } from "@angular/material/sort";
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatIconModule } from "@angular/material/icon";
 import { AipPaginationComponent } from "./shared-modules/aip-pagination/aip-pagination.component";
-import { PortfolioAddComponent } from "./components/portfolio/portfolio-add/portfolio-add.component";
-import { UsmRolePermissionComponent } from "./components/usm-role-permission/usm-role-permission.component";
-import { RolePermissionAddComponent } from "./components/usm-role-permission/role-permission-add/role-permission-add/role-permission-add.component";
-import { PortfolioListViewComponent } from "./components/portfolio/portfolio-list-view.component";
-import { DashConstantComponent } from "./entities/dash-constant/dash-constant.component";
 import { AipHeaderComponent } from "./shared-modules/aip-header/aip-header.component";
 import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component";
 
@@ -100,28 +89,17 @@ import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component
     MatPaginatorModule,
     MatSortModule,
     MatTabsModule,
-    PortfolioAddComponent,
     AipFilterComponent,
     MatIconModule,
   ],
   declarations: [
     IampUsmComponent,
-    SecretsComponent,
-    RoleListComponent,
-    RoleDetailComponent,
     RoleRoleComponent,
     UserProjectRoleListComponent,
     ConfirmDeleteDialogComponent,
     ConfirmProjectDeleteDialogComponent,
-    ProjectListViewComponent,
-    ProjectDetailComponent,
-    ManageUsersComponent,
     ConfirmRevokeDialogComponent,
     ConfirmRegenerateDialogComponent,
-    PortfolioListViewComponent,
-    UsmRolePermissionComponent,
-    RolePermissionAddComponent,
-    DashConstantComponent,
     AipHeaderComponent,
     ThemeMgmtComponent,
     AipPaginationComponent,
@@ -153,18 +131,10 @@ import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component
   ],
   exports: [
     IampUsmComponent,
-    SecretsComponent,
-    RoleListComponent,
-    RoleDetailComponent,
     RoleRoleComponent,
     UserProjectRoleListComponent,
-    ManageUsersComponent,
     AipPaginationComponent,
-    PortfolioAddComponent,
     AipFilterComponent,
-    PortfolioListViewComponent,
-    UsmRolePermissionComponent,
-    RolePermissionAddComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
 })

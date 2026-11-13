@@ -1,0 +1,778 @@
+<div class="admin-console-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div>
+        <h2>Approvals</h2>
+        <span class="page-subtitle">Review and decide on pending promotion requests</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <table mat-table [dataSource]="pending" class="admin-console-table" *ngIf="pending.data.length > 0">
+
+    <ng-container matColumnDef="assetName">
+      <th mat-header-cell *matHeaderCellDef>Asset</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="approval-asset-text">{{ row.assetName }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="versionNo">
+      <th mat-header-cell *matHeaderCellDef>Version</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="approval-version-badge">v{{ row.versionNo }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="gate">
+      <th mat-header-cell *matHeaderCellDef>Gate</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="gate-badge" [ngClass]="'gate-' + (row.gate | lowercase)">{{ gateLabel(row.gate) }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actorName">
+      <th mat-header-cell *matHeaderCellDef>Submitted by</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="approval-actor-text">{{ row.actorName }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="occurredAt">
+      <th mat-header-cell *matHeaderCellDef>Submitted</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="approval-date-text">{{ row.occurredAt | date: 'medium' }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let row">
+        <div class="approval-actions">
+          <button mat-button class="btn-approve" (click)="decide(row, 'approved')">Approve</button>
+          <button mat-button class="btn-reject"  (click)="decide(row, 'rejected')">Reject</button>
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+  </table>
+  <div class="table-footer" *ngIf="pending.data.length > 0">
+    <mat-paginator #legacyPaginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+  </div>
+
+  <mat-tab-group class="approvals-tab-group">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">hub</mat-icon>
+        <span>Pipelines &amp; Agents</span>
+        <span class="count-chip" *ngIf="(streamingApprovals.length + streamingOrgApprovals.length + streamingPlatformApprovals.length) > 0">{{ streamingApprovals.length + streamingOrgApprovals.length + streamingPlatformApprovals.length }}</span>
+      </ng-template>
+
+  <!-- STREAMING SERVICES - RANK 2 PROJECT-LEVEL APPROVALS -->
+  <div *ngIf="streamingApprovals.length > 0" class="streaming-approvals-section">
+    <div class="section-title">
+      <mat-icon>storage</mat-icon>
+      <span>Resources Pending Project Approval</span>
+    </div>
+
+    <table mat-table [dataSource]="streamingApprovalsDataSource" class="admin-console-table streaming-table">
+      
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Resource Name</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="resource-name">{{ row.alias || row.name }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Type Column -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="resource-type-badge" [ngClass]="'type-' + ((row.type === 'NativeScript' || row.type === 'nativeScript') ? 'native' : (row.resource_type | lowercase))">
+            {{ (row.type === 'NativeScript' || row.type === 'nativeScript') ? 'Native' : (row.resource_type || 'Agent') }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Created By Column -->
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="created-by-text">{{ row.created_by }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Date Column -->
+      <ng-container matColumnDef="createdDate">
+        <th mat-header-cell *matHeaderCellDef>Submitted Date</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="date-text">{{ row.created_date | date: 'medium' }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="status-badge status-pending">
+            <mat-icon>hourglass_empty</mat-icon> Pending Project Approval
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveStreamingService(row.alias || row.name, row.cid)">
+              <mat-icon>check</mat-icon> Approve
+            </button>
+            <button mat-button class="btn-reject" (click)="rejectStreamingService(row.alias || row.name, row.cid)">
+              <mat-icon>close</mat-icon> Reject
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="streamingColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="streamingApprovals.length > 0">
+      <mat-paginator #streamingPaginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+
+  <!-- STREAMING SERVICES - RANK 3 ORG-LEVEL APPROVALS -->
+  <div *ngIf="streamingOrgApprovals.length > 0" class="streaming-org-approvals-section">
+    <div class="section-title">
+      <mat-icon>corporate_fare</mat-icon>
+      <span>Resources Pending Organization Approval</span>
+    </div>
+
+    <table mat-table [dataSource]="streamingOrgApprovalsDataSource" class="admin-console-table streaming-org-table">
+      
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Resource Name</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="resource-name">{{ row.alias || row.name }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Type Column -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="resource-type-badge" [ngClass]="'type-' + ((row.type === 'NativeScript' || row.type === 'nativeScript') ? 'native' : (row.resource_type | lowercase))">
+            {{ (row.type === 'NativeScript' || row.type === 'nativeScript') ? 'Native' : (row.resource_type || 'Agent') }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Created By Column -->
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="created-by-text">{{ row.created_by }}</span>
+        </td>
+      </ng-container>
+
+
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="status-badge status-org-pending">
+            Pending Organization Approval
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveStreamingService(row.alias || row.name, row.cid, true)">
+              <mat-icon>check</mat-icon> Approve
+            </button>
+            <button mat-button class="btn-reject" (click)="rejectStreamingService(row.alias || row.name, row.cid, true)">
+              <mat-icon>close</mat-icon> Reject
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="streamingOrgColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingOrgColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="streamingOrgApprovals.length > 0">
+      <mat-paginator #orgStreamingPaginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+
+  <!-- STREAMING SERVICES - RANK 4 PLATFORM-LEVEL APPROVALS -->
+  <div *ngIf="streamingPlatformApprovals.length > 0" class="streaming-platform-approvals-section">
+    <!-- <div class="section-title">
+      <mat-icon>public</mat-icon>
+      <span>Resources Pending Platform Approval</span>
+    </div> -->
+
+    <table mat-table [dataSource]="streamingPlatformApprovalsDataSource" class="admin-console-table streaming-platform-table">
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Resource Name</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="resource-name">{{ row.alias || row.name }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Type Column -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="resource-type-badge" [ngClass]="'type-' + ((row.type === 'NativeScript' || row.type === 'nativeScript') ? 'native' : (row.resource_type | lowercase))">
+            {{ (row.type === 'NativeScript' || row.type === 'nativeScript') ? 'Native' : (row.resource_type || 'Agent') }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Created By Column -->
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="created-by-text">{{ row.created_by }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="status-badge status-platform-pending">
+            <mat-icon>hourglass_empty</mat-icon> Pending Platform Approval
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveStreamingService(row.alias || row.name, row.cid, false, true)">
+              <mat-icon>public</mat-icon> Publish Globally
+            </button>
+            <button mat-button class="btn-reject" (click)="rejectStreamingService(row.alias || row.name, row.cid, false, true)">
+              <mat-icon>close</mat-icon> Reject
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="streamingPlatformColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingPlatformColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="streamingPlatformApprovals.length > 0">
+      <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+
+      <div class="empty-state" *ngIf="streamingApprovals.length === 0 && streamingOrgApprovals.length === 0 && streamingPlatformApprovals.length === 0">
+        <mat-icon>hub</mat-icon>
+        <span>No pipeline or agent approvals pending at your gates.</span>
+      </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">storage</mat-icon>
+        <span>Datasets</span>
+        <span class="count-chip" *ngIf="(datasetApprovals.length + datasetOrgApprovals.length + datasetPlatformApprovals.length) > 0">{{ datasetApprovals.length + datasetOrgApprovals.length + datasetPlatformApprovals.length }}</span>
+      </ng-template>
+
+  <!-- DATASET - RANK 2 PROJECT-LEVEL APPROVALS -->
+  <div *ngIf="datasetApprovals.length > 0" class="streaming-approvals-section">
+    <div class="section-title">
+      <mat-icon>storage</mat-icon>
+      <span>Datasets Pending Project Approval</span>
+    </div>
+    <table mat-table [dataSource]="datasetApprovalsDataSource" class="admin-console-table streaming-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Dataset Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.alias || row.name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">Dataset</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.created_by || row.lastmodifiedby }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdDate">
+        <th mat-header-cell *matHeaderCellDef>Submitted Date</th>
+        <td mat-cell *matCellDef="let row"><span class="date-text">{{ row.lastmodifieddate | date: 'medium' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-pending"><mat-icon>hourglass_empty</mat-icon> Pending Project Approval</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveDataset(row.alias || row.name, row.id)"><mat-icon>check</mat-icon> Approve</button>
+            <button mat-button class="btn-reject" (click)="rejectDataset(row.alias || row.name, row.id)"><mat-icon>close</mat-icon> Reject</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingColumns"></tr>
+    </table>
+  </div>
+
+  <!-- DATASET - RANK 3 ORG-LEVEL APPROVALS -->
+  <div *ngIf="datasetOrgApprovals.length > 0" class="streaming-org-approvals-section">
+    <div class="section-title">
+      <mat-icon>storage</mat-icon>
+      <span>Datasets Pending Organization Approval</span>
+    </div>
+    <table mat-table [dataSource]="datasetOrgApprovalsDataSource" class="admin-console-table streaming-org-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Dataset Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.alias || row.name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">Dataset</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.created_by || row.lastmodifiedby }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-org-pending">Pending Organization Approval</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveDataset(row.alias || row.name, row.id, true)"><mat-icon>check</mat-icon> Approve</button>
+            <button mat-button class="btn-reject" (click)="rejectDataset(row.alias || row.name, row.id, true)"><mat-icon>close</mat-icon> Reject</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingOrgColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingOrgColumns"></tr>
+    </table>
+  </div>
+
+  <!-- DATASET - RANK 4 PLATFORM-LEVEL APPROVALS -->
+  <div *ngIf="datasetPlatformApprovals.length > 0" class="streaming-platform-approvals-section">
+    <!-- <div class="section-title">
+      <mat-icon>storage</mat-icon>
+      <span>Datasets Pending Platform Approval</span>
+    </div> -->
+    <table mat-table [dataSource]="datasetPlatformApprovalsDataSource" class="admin-console-table streaming-platform-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Dataset Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.alias || row.name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">Dataset</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.created_by || row.lastmodifiedby }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-platform-pending"><mat-icon>hourglass_empty</mat-icon> Pending Platform Approval</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveDataset(row.alias || row.name, row.id, false, true)"><mat-icon>public</mat-icon> Publish Globally</button>
+            <button mat-button class="btn-reject" (click)="rejectDataset(row.alias || row.name, row.id, false, true)"><mat-icon>close</mat-icon> Reject</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingPlatformColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingPlatformColumns"></tr>
+    </table>
+  </div>
+
+      <div class="empty-state" *ngIf="datasetApprovals.length === 0 && datasetOrgApprovals.length === 0 && datasetPlatformApprovals.length === 0">
+        <mat-icon>storage</mat-icon>
+        <span>No dataset approvals pending at your gates.</span>
+      </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">cable</mat-icon>
+        <span>Connections</span>
+        <span class="count-chip" *ngIf="(datasourceApprovalsTotal + datasourceOrgApprovalsTotal + datasourcePlatformApprovalsTotal) > 0">{{ datasourceApprovalsTotal + datasourceOrgApprovalsTotal + datasourcePlatformApprovalsTotal }}</span>
+      </ng-template>
+
+  <!-- DATASOURCE - RANK 2 PROJECT-LEVEL APPROVALS -->
+  <div *ngIf="datasourceApprovals.length > 0" class="streaming-approvals-section">
+    <div class="section-title">
+      <mat-icon>cable</mat-icon>
+      <span>Connections Pending Project Approval</span>
+    </div>
+    <table mat-table [dataSource]="datasourceApprovalsDataSource" class="admin-console-table streaming-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Connection Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.alias || row.name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">Connection</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.created_by || row.lastmodifiedby }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdDate">
+        <th mat-header-cell *matHeaderCellDef>Submitted Date</th>
+        <td mat-cell *matCellDef="let row"><span class="date-text">{{ row.lastmodifieddate | date: 'medium' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-pending"><mat-icon>hourglass_empty</mat-icon> Pending Project Approval</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveDatasource(row.alias || row.name, row.id)"><mat-icon>check</mat-icon> Approve</button>
+            <button mat-button class="btn-reject" (click)="rejectDatasource(row.alias || row.name, row.id)"><mat-icon>close</mat-icon> Reject</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="datasourceApprovalsTotal > 0">
+      <mat-paginator
+        [length]="datasourceApprovalsTotal"
+        [pageIndex]="datasourceApprovalsPageIndex"
+        [pageSize]="datasourceApprovalsPageSize"
+        [pageSizeOptions]="datasourcePageSizeOptions"
+        showFirstLastButtons
+        (page)="onDatasourceApprovalsPage($event)">
+      </mat-paginator>
+    </div>
+  </div>
+
+  <!-- DATASOURCE - RANK 3 ORG-LEVEL APPROVALS -->
+  <div *ngIf="datasourceOrgApprovals.length > 0" class="streaming-org-approvals-section">
+    <div class="section-title">
+      <mat-icon>cable</mat-icon>
+      <span>Connections Pending Organization Approval</span>
+    </div>
+    <table mat-table [dataSource]="datasourceOrgApprovalsDataSource" class="admin-console-table streaming-org-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Connection Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.alias || row.name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">Connection</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.created_by || row.lastmodifiedby }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-org-pending">Pending Organization Approval</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveDatasource(row.alias || row.name, row.id, true)"><mat-icon>check</mat-icon> Approve</button>
+            <button mat-button class="btn-reject" (click)="rejectDatasource(row.alias || row.name, row.id, true)"><mat-icon>close</mat-icon> Reject</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingOrgColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingOrgColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="datasourceOrgApprovalsTotal > 0">
+      <mat-paginator
+        [length]="datasourceOrgApprovalsTotal"
+        [pageIndex]="datasourceOrgApprovalsPageIndex"
+        [pageSize]="datasourceOrgApprovalsPageSize"
+        [pageSizeOptions]="datasourcePageSizeOptions"
+        showFirstLastButtons
+        (page)="onDatasourceOrgApprovalsPage($event)">
+      </mat-paginator>
+    </div>
+  </div>
+
+  <!-- DATASOURCE - RANK 4 PLATFORM-LEVEL APPROVALS -->
+  <div *ngIf="datasourcePlatformApprovals.length > 0" class="streaming-platform-approvals-section">
+     <!-- <div class="section-title">
+      <mat-icon>cable</mat-icon>
+      <span>Connections Pending Platform Approval</span>
+    </div> -->
+    <table mat-table [dataSource]="datasourcePlatformApprovalsDataSource" class="admin-console-table streaming-platform-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Connection Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.alias || row.name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">Connection</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.created_by || row.lastmodifiedby }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-platform-pending"><mat-icon>hourglass_empty</mat-icon> Pending Platform Approval</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveDatasource(row.alias || row.name, row.id, false, true)"><mat-icon>public</mat-icon> Publish Globally</button>
+            <button mat-button class="btn-reject" (click)="rejectDatasource(row.alias || row.name, row.id, false, true)"><mat-icon>close</mat-icon> Reject</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingPlatformColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingPlatformColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="datasourcePlatformApprovalsTotal > 0">
+      <mat-paginator
+        [length]="datasourcePlatformApprovalsTotal"
+        [pageIndex]="datasourcePlatformApprovalsPageIndex"
+        [pageSize]="datasourcePlatformApprovalsPageSize"
+        [pageSizeOptions]="datasourcePageSizeOptions"
+        showFirstLastButtons
+        (page)="onDatasourcePlatformApprovalsPage($event)">
+      </mat-paginator>
+    </div>
+  </div>
+
+      <div class="empty-state" *ngIf="datasourceApprovalsTotal === 0 && datasourceOrgApprovalsTotal === 0 && datasourcePlatformApprovalsTotal === 0">
+        <mat-icon>cable</mat-icon>
+        <span>No connection approvals pending at your gates.</span>
+      </div>
+    </mat-tab>
+
+    <!-- ========== MODELS TAB ========== -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">model_training</mat-icon>
+        <span>Models</span>
+        <span class="count-chip" *ngIf="(modelApprovalsTotal + modelOrgApprovalsTotal + modelPlatformApprovalsTotal) > 0">{{ modelApprovalsTotal + modelOrgApprovalsTotal + modelPlatformApprovalsTotal }}</span>
+      </ng-template>
+
+  <!-- MODEL - RANK 2 PROJECT-LEVEL APPROVALS -->
+  <div *ngIf="modelApprovals.length > 0" class="streaming-approvals-section">
+    <div class="section-title">
+      <mat-icon>model_training</mat-icon>
+      <span>Models Pending Project Approval</span>
+    </div>
+    <table mat-table [dataSource]="modelApprovalsDataSource" class="admin-console-table streaming-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Model Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.modelName || row.model_name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">{{ row.modelType || row.model_type || 'Model' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.createdBy || row.created_by }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdDate">
+        <th mat-header-cell *matHeaderCellDef>Submitted Date</th>
+        <td mat-cell *matCellDef="let row"><span class="date-text">{{ row.modifiedDate | date: 'medium' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-pending"><mat-icon>hourglass_empty</mat-icon> Pending Project Approval</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveModel(row.alias || row.modelName || row.model_name, row.id)"><mat-icon>check</mat-icon> Approve</button>
+            <button mat-button class="btn-reject" (click)="rejectModel(row.alias || row.modelName || row.model_name, row.id)"><mat-icon>close</mat-icon> Reject</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="modelApprovalsTotal > 0">
+      <mat-paginator
+        [length]="modelApprovalsTotal"
+        [pageIndex]="modelApprovalsPageIndex"
+        [pageSize]="modelApprovalsPageSize"
+        [pageSizeOptions]="modelPageSizeOptions"
+        showFirstLastButtons
+        (page)="onModelApprovalsPage($event)">
+      </mat-paginator>
+    </div>
+  </div>
+
+  <!-- MODEL - RANK 3 ORG-LEVEL APPROVALS -->
+  <div *ngIf="modelOrgApprovals.length > 0" class="streaming-org-approvals-section">
+    <div class="section-title">
+      <mat-icon>model_training</mat-icon>
+      <span>Models Pending Organization Approval</span>
+    </div>
+    <table mat-table [dataSource]="modelOrgApprovalsDataSource" class="admin-console-table streaming-org-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Model Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.modelName || row.model_name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">{{ row.modelType || row.model_type || 'Model' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.createdBy || row.created_by }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-org-pending"><mat-icon>hourglass_empty</mat-icon> Pending Org Approval</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveModel(row.alias || row.modelName || row.model_name, row.id, true)"><mat-icon>check</mat-icon> Approve</button>
+            <button mat-button class="btn-reject" (click)="rejectModel(row.alias || row.modelName || row.model_name, row.id, true)"><mat-icon>close</mat-icon> Reject</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingOrgColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingOrgColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="modelOrgApprovalsTotal > 0">
+      <mat-paginator
+        [length]="modelOrgApprovalsTotal"
+        [pageIndex]="modelOrgApprovalsPageIndex"
+        [pageSize]="modelOrgApprovalsPageSize"
+        [pageSizeOptions]="modelPageSizeOptions"
+        showFirstLastButtons
+        (page)="onModelOrgApprovalsPage($event)">
+      </mat-paginator>
+    </div>
+  </div>
+
+  <!-- MODEL - RANK 4 PLATFORM-LEVEL APPROVALS -->
+  <div *ngIf="modelPlatformApprovals.length > 0" class="streaming-platform-approvals-section">
+    <div class="section-title">
+      <mat-icon>model_training</mat-icon>
+      <span>Models Pending Platform Approval</span>
+    </div>
+    <table mat-table [dataSource]="modelPlatformApprovalsDataSource" class="admin-console-table streaming-platform-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Model Name</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-name">{{ row.modelName || row.model_name }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row"><span class="resource-type-badge">{{ row.modelType || row.model_type || 'Model' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row"><span class="created-by-text">{{ row.createdBy || row.created_by }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row"><span class="status-badge status-platform-pending"><mat-icon>hourglass_empty</mat-icon> Pending Platform Approval</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="approval-actions">
+            <button mat-button class="btn-approve" (click)="approveModel(row.alias || row.modelName || row.model_name, row.id, false, true)"><mat-icon>public</mat-icon> Publish Globally</button>
+            <button mat-button class="btn-reject" (click)="rejectModel(row.alias || row.modelName || row.model_name, row.id, false, true)"><mat-icon>close</mat-icon> Reject</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="streamingPlatformColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: streamingPlatformColumns"></tr>
+    </table>
+    <div class="table-footer" *ngIf="modelPlatformApprovalsTotal > 0">
+      <mat-paginator
+        [length]="modelPlatformApprovalsTotal"
+        [pageIndex]="modelPlatformApprovalsPageIndex"
+        [pageSize]="modelPlatformApprovalsPageSize"
+        [pageSizeOptions]="modelPageSizeOptions"
+        showFirstLastButtons
+        (page)="onModelPlatformApprovalsPage($event)">
+      </mat-paginator>
+    </div>
+  </div>
+
+      <div class="empty-state" *ngIf="modelApprovalsTotal === 0 && modelOrgApprovalsTotal === 0 && modelPlatformApprovalsTotal === 0">
+        <mat-icon>model_training</mat-icon>
+        <span>No model approvals pending at your gates.</span>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+
+  <!-- Org Escalation Panel — appears after Project Admin approves -->
+  <div *ngIf="readyForOrgEscalation.length > 0" class="org-escalation-panel">
+    <div class="org-escalation-header">
+      <mat-icon>corporate_fare</mat-icon>
+      <span>Approved at Project — Send for Organization Approval</span>
+    </div>
+    <table mat-table [dataSource]="readyForOrgEscalation" class="admin-console-table org-escalation-table">
+
+      <ng-container matColumnDef="assetName">
+        <th mat-header-cell *matHeaderCellDef>Asset</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="approval-asset-text">{{ row.assetName }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="versionNo">
+        <th mat-header-cell *matHeaderCellDef>Version</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="approval-version-badge">v{{ row.versionNo }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="orgAction">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-button class="btn-escalate-org" (click)="sendForOrgApproval(row)">
+            <mat-icon>upload</mat-icon> Send for Org Approval
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="escalationColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: escalationColumns;"></tr>
+    </table>
+  </div>
+</div>

@@ -56,7 +56,9 @@ import liquibase.integration.spring.SpringLiquibase;
 		"com.lfn.iamp.bjm.repository", "com.lfn.iamp.tad.repository",
 		"com.lfn.iamp.btm.repository", "com.lfn.iamp.grh.repository",
 		 "com.lfn.icip.wflw.repository","com.lfn.iamp.svy.repository",
-		 "com.lfn.icip.vibecoding.repository"})
+		 "com.lfn.icip.vibecoding.repository",
+		 "com.lfn.iamp.usm.access", "com.lfn.iamp.usm.publishing", "com.lfn.iamp.usm.menu",
+		 "com.lfn.iamp.usm.audit", "com.lfn.iamp.usm.tenancy", "com.lfn.iamp.usm.identity"})
 public class DashboardDbConfig {
 	
 	@Bean
@@ -127,7 +129,9 @@ public class DashboardDbConfig {
 						"com.lfn.iamp.bjm.domain","com.lfn.iamp.tad.domain",
 						"com.lfn.iamp.btm.domain", "com.lfn.iamp.grh.domain",
 						"com.lfn.icip.wflw.model", "com.lfn.iamp.svy.domain",
-						"com.lfn.icip.vibecoding.model")
+						"com.lfn.icip.vibecoding.model",
+						"com.lfn.iamp.usm.access", "com.lfn.iamp.usm.publishing", "com.lfn.iamp.usm.menu",
+						"com.lfn.iamp.usm.audit", "com.lfn.iamp.usm.tenancy", "com.lfn.iamp.usm.identity")
 				.persistenceUnit("Dashboard").properties(jpaProperties.getProperties()).build();
 	}
 

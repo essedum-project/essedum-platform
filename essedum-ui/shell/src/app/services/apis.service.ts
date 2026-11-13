@@ -177,14 +177,31 @@ export class ApisService {
       sessionStorage.setItem("user", JSON.stringify(userInfo.userId));
       localStorage.setItem("user", JSON.stringify(userInfo.userId));
 
-      if (currentProject) {
-        sessionStorage.setItem("organization", currentProject.name);
-        localStorage.setItem("organization", currentProject.name);
+      // Get organization from portfolio (NOT from project)
+      let organization;
+      try {
+        const portfolio = JSON.parse(sessionStorage.getItem("portfoliodata") || "");
+        organization = portfolio?.portfolioName || portfolio?.name;
+      } catch (e: any) {
+        console.error("JSON.parse error getting organization from portfolio - ", e.message);
       }
-      else {
-        sessionStorage.setItem("organization", userInfo.porfolios[0].projectWithRoles[index].projectId.name);
-        localStorage.setItem("organization", userInfo.porfolios[0].projectWithRoles[index].projectId.name);
+      
+      // Fallback to currentProject if available
+      if (!organization && currentProject) {
+        organization = currentProject.portfolioName || currentProject.name;
       }
+      
+      // Last resort fallback
+      if (!organization) {
+        try {
+          organization = userInfo.porfolios[0].projectWithRoles[index].projectId.name;
+        } catch (e: any) {
+          console.error("Could not extract organization - ", e.message);
+        }
+      }
+      
+      sessionStorage.setItem("organization", organization);
+      localStorage.setItem("organization", organization);
 
       if (flag == 0) {
         if (currentRole) {
@@ -291,6 +308,23 @@ export class ApisService {
     } catch (error) { return this.handleAPIError(error); }
   }
 
+  /**
+   * §7 data-driven navigation: MenuService.menuFor(userId), filtered server-side
+   * by role rank. Only covers this feature's own rbac_menu_item rows — doesn't
+   * replace the legacy DashConsts-driven sidebar.
+   */
+  getRbacMenu(userId: number): Observable<any[]> {
+    return this.http.get<any[]>("/api/usm/menu", { params: { userId } }).pipe(
+      catchError(() => of([])),
+    );
+  }
+
+  getRoleMenus(role: string, project: string, actorUserId: number): Observable<any[]> {
+    return this.http.get<any[]>('/api/usm/role-menus', { params: { role, project, actorUserId } }).pipe(
+      catchError(() => of([])),
+    );
+  }
+
   /* *************DST API *********** */
   DSTService(): Observable<any> {
     return this.https
@@ -308,7 +342,9 @@ export class ApisService {
   }
 
   callDashConstantApi(project: any) {
-    let portfolio = JSON.parse(sessionStorage.getItem("project") || "").portfolioId.id;
+    const _proj = JSON.parse(sessionStorage.getItem("project") || "null") || {};
+    const portfolio = _proj.portfolioId?.id ?? null;
+    if (!portfolio) return of([]); // RBAC projects don't have a portfolioId in legacy DashConsts
     return this.https
       .get("/api/get-dash-constants?projectId=" + project + "&portfolioId=" + portfolio, {
         observe: "response",
@@ -611,7 +647,7 @@ export class ApisService {
         errObj["message"] = msg;
       }
     } else {
-      // errObj = {};
+      errObj = {};
       errObj["code"] = error.status;
       errObj["message"] = msg;
       errObj["detailedMessage"] = error.detail ? error.detail : msg;

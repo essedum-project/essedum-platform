@@ -207,8 +207,12 @@ public class ICIPDatasetController {
 
 	@Autowired
 	private IICIPDatasetFormMappingService datasetFormService;
-	
-	
+
+	/** Dataset approval workflow service */
+	@Autowired
+	private com.lfn.icip.dataset.service.impl.DatasetApprovalWorkflowService datasetApprovalWorkflowService;
+
+
 	/**
 	 * Gets the datasetform.
 	 *
@@ -500,14 +504,16 @@ public class ICIPDatasetController {
 	 *                                            exception
 	 */
 	@PostMapping("/add")
-	public ResponseEntity<ICIPDataset2> createDataset(@RequestBody ICIPDatasetDTO datasetDTO)
+	public ResponseEntity<ICIPDataset2> createDataset(@RequestBody ICIPDatasetDTO datasetDTO,
+			@RequestHeader(name = "user-login", required = false) String userLogin)
 			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
 			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException,
 			UnsupportedOperationException {
-		
+
 		logger.info(String.format("creating dataset %s", datasetDTO.getAlias()));
-		datasetDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
+		String resolvedUser = (userLogin != null && !userLogin.isEmpty()) ? userLogin : ICIPUtils.getUser(claim);
+		datasetDTO.setLastmodifiedby(resolvedUser);
 		datasetDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
 		//datasetDTO.setName(datasetDTO.getName().trim());
 		ModelMapper modelmapper = new ModelMapper();
@@ -524,6 +530,9 @@ public class ICIPDatasetController {
 		modelmapper.addConverter(converter);
 
 		ICIPDataset dataset = modelmapper.map(datasetDTO, ICIPDataset.class);
+		// New datasets must start in the approval workflow as DRAFT (visible only to creator)
+		// — existing rows rely on the DB default (PUBLISHED) for backward compatibility.
+		dataset.setApprovalStatus("DRAFT");
 		ICIPDataset dataset2save = pluginService.getDataSetService(dataset).updateDataset(dataset);
 		dataset2save = dataset2save != null ? dataset2save : dataset;
 		ICIPDataset2 result = datasetService.save(null, dataset2save);
@@ -580,7 +589,342 @@ public class ICIPDatasetController {
 		.body(encryptedResult);
 
 	}
-	
+
+	// ==================== DATASET APPROVAL ENDPOINTS ====================
+
+	/** POST /approval/project/submit — Developer submits DRAFT/PROJECT_REJECTED dataset for Project Admin approval. */
+	@PostMapping("/approval/project/submit")
+	public ResponseEntity<?> submitForProjectApproval(
+			@RequestBody java.util.Map<String, Object> request,
+			@RequestHeader(value = "user-login", required = false) String username,
+			@RequestHeader(value = "project", required = false) String projectHeader) {
+		try {
+			Integer resourceId = (Integer) request.get("resourceId");
+			if (resourceId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId is required"));
+			}
+			Integer projectId = null;
+			if (projectHeader != null && !projectHeader.isEmpty()) {
+				try {
+					projectId = Integer.parseInt(projectHeader);
+				} catch (NumberFormatException e) {
+					logger.warn("[DatasetApproval] Invalid projectId format: {}", projectHeader);
+				}
+			}
+			if (projectId == null) {
+				Object pid = request.get("projectId");
+				projectId = pid instanceof Number ? ((Number) pid).intValue() : null;
+			}
+			if (projectId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "projectId is required"));
+			}
+			if (username == null || username.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Authentication required"));
+			}
+
+			ICIPDataset result = datasetApprovalWorkflowService.submitForProjectApproval(resourceId, projectId, username);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", resourceId,
+					"status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error submitting dataset for approval", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/project/approve/{id}?projectId=X&rank=2 — Project Admin approves. */
+	@PostMapping("/approval/project/approve/{id}")
+	public ResponseEntity<?> approveDatasetProjectApproval(@PathVariable Integer id,
+			@RequestParam(required = false) Integer projectId, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDataset result = datasetApprovalWorkflowService.approveProjectApproval(id, projectId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error approving dataset", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/project/reject/{id}?rank=2 — Project Admin rejects. */
+	@PostMapping("/approval/project/reject/{id}")
+	public ResponseEntity<?> rejectDatasetProjectApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDataset result = datasetApprovalWorkflowService.rejectProjectApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error rejecting dataset", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/org/submit — Project Admin submits PROJECT_APPROVED dataset to Org Admin. */
+	@PostMapping("/approval/org/submit")
+	public ResponseEntity<?> submitDatasetForOrgApproval(@RequestBody java.util.Map<String, Object> request,
+			@RequestParam(required = false) String rank) {
+		try {
+			Integer resourceId = (Integer) request.get("resourceId");
+			Object orgObj = request.get("organizationId");
+			Integer organizationId = orgObj instanceof Number ? ((Number) orgObj).intValue() : null;
+			if (resourceId == null || organizationId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId and organizationId are required"));
+			}
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDataset result = datasetApprovalWorkflowService.submitForOrgApproval(resourceId, organizationId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", resourceId,
+					"organizationId", organizationId, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error submitting dataset to org", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/org/approve/{id}?rank=3&organizationId=X — Org Admin approves (-> ORG_APPROVED). */
+	@PostMapping("/approval/org/approve/{id}")
+	public ResponseEntity<?> approveDatasetOrgApproval(@PathVariable Integer id,
+			@RequestParam(required = false) String rank,
+			@RequestParam(required = false) Integer organizationId) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDataset result = datasetApprovalWorkflowService.approveOrgApproval(id, rank, organizationId);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error org-approving dataset", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/org/reject/{id}?rank=3 — Org Admin rejects. */
+	@PostMapping("/approval/org/reject/{id}")
+	public ResponseEntity<?> rejectDatasetOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDataset result = datasetApprovalWorkflowService.rejectOrgApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error org-rejecting dataset", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/platform/submit — Org Admin submits ORG_APPROVED dataset to Platform Admin. */
+	@PostMapping("/approval/platform/submit")
+	public ResponseEntity<?> submitDatasetForPlatformApproval(@RequestBody java.util.Map<String, Object> request,
+			@RequestParam(required = false) String rank) {
+		try {
+			Integer resourceId = (Integer) request.get("resourceId");
+			if (resourceId == null) {
+				return ResponseEntity.status(400).body(java.util.Map.of("error", "resourceId is required"));
+			}
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDataset result = datasetApprovalWorkflowService.submitForPlatformApproval(resourceId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", resourceId, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error submitting dataset to platform", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/platform/approve/{id}?rank=4 — Platform Admin approves (-> PUBLISHED). */
+	@PostMapping("/approval/platform/approve/{id}")
+	public ResponseEntity<?> approveDatasetPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDataset result = datasetApprovalWorkflowService.approvePlatformApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error platform-approving dataset", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** POST /approval/platform/reject/{id}?rank=4 — Platform Admin rejects. */
+	@PostMapping("/approval/platform/reject/{id}")
+	public ResponseEntity<?> rejectDatasetPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			ICIPDataset result = datasetApprovalWorkflowService.rejectPlatformApproval(id, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+		} catch (IllegalAccessError e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error platform-rejecting dataset", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /approval/project-admin/list?projectId=X&rank=2 */
+	@GetMapping("/approval/project-admin/list")
+	public ResponseEntity<?> getDatasetProjectAdminApprovals(@RequestParam Integer projectId, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPDataset> result = datasetApprovalWorkflowService.getProjectAdminApprovals(projectId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error getting project admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /approval/org-admin/list?organizationId=X&rank=3 */
+	@GetMapping("/approval/org-admin/list")
+	public ResponseEntity<?> getDatasetOrgAdminApprovals(@RequestParam Integer organizationId, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPDataset> result = datasetApprovalWorkflowService.getOrgAdminApprovals(organizationId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error getting org admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /approval/platform-admin/list?rank=4 */
+	@GetMapping("/approval/platform-admin/list")
+	public ResponseEntity<?> getDatasetPlatformAdminApprovals(@RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPDataset> result = datasetApprovalWorkflowService.getPlatformAdminApprovals(rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error getting platform admin approvals", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /approval/draft-resources?projectId=X&rank=2 — PROJECT_APPROVED items ready to submit to org. */
+	@GetMapping("/approval/draft-resources")
+	public ResponseEntity<?> getDatasetDraftResources(@RequestParam Integer projectId, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPDataset> result = datasetApprovalWorkflowService.getDraftResources(projectId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error getting draft resources", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /approval/org-admin/draft-resources?organizationId=X&rank=3 — ORG_APPROVED items ready to submit to platform. */
+	@GetMapping("/approval/org-admin/draft-resources")
+	public ResponseEntity<?> getDatasetOrgAdminDraftResources(@RequestParam Integer organizationId, @RequestParam(required = false) String rank) {
+		try {
+			if (rank == null || rank.isEmpty()) {
+				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
+			}
+			List<ICIPDataset> result = datasetApprovalWorkflowService.getOrgAdminDraftResources(organizationId, rank);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", result, "count", result.size()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error getting org admin draft resources", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
+	/** GET /approval/catalog?projectId=X&orgId=Y — visible items based on scope (neither = globally published). */
+	@GetMapping("/approval/catalog")
+	public ResponseEntity<?> getDatasetCatalog(@RequestParam(required = false) Integer projectId, @RequestParam(required = false) Integer orgId) {
+		try {
+			List<ICIPDataset> result = datasetApprovalWorkflowService.getCatalog(projectId, orgId);
+			return ResponseEntity.ok(result);
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error fetching dataset catalog", e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));
+		}
+	}
+
+	/**
+	 * POST /approval/clone/{id}
+	 * Clone an approved/published dataset into a new DRAFT dataset named
+	 * {@code <base>-v<n>}. The original stays untouched; the clone must go
+	 * through the approval chain again.
+	 */
+	@PostMapping("/approval/clone/{id}")
+	public ResponseEntity<?> cloneDataset(
+			@PathVariable Integer id,
+			@RequestBody(required = false) java.util.Map<String, Object> request,
+			@RequestParam(required = false) Integer projectId,
+			@RequestParam(required = false) String username,
+			@RequestHeader(value = "user-login", required = false) String userLogin) {
+		try {
+			Integer effectiveProjectId = projectId;
+			if (effectiveProjectId == null && request != null && request.get("projectId") instanceof Number) {
+				effectiveProjectId = ((Number) request.get("projectId")).intValue();
+			}
+			String currentUser = (username != null && !username.isEmpty()) ? username : userLogin;
+			if ((currentUser == null || currentUser.isEmpty()) && request != null && request.get("username") != null) {
+				currentUser = request.get("username").toString();
+			}
+
+			ICIPDataset clone = datasetApprovalWorkflowService.cloneDataset(id, effectiveProjectId, currentUser);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "data", clone));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(404).body(java.util.Map.of("error", e.getMessage()));
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(409).body(java.util.Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[DatasetApproval] Error cloning dataset {}", id, e);
+			return ResponseEntity.status(500).body(java.util.Map.of("error", "Internal server error: " + e.getMessage()));
+		}
+	}
+
 	@PostMapping(path = "/set/corelid")
 	public ResponseEntity<ICIPDataset2> setCorelId(@RequestParam(name = "id") String id,
 			@RequestParam(name = "corelid") String corelId,@RequestParam(name = "event") String eventName) throws InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, UnsupportedEncodingException{
@@ -2607,11 +2951,28 @@ public class ICIPDatasetController {
 			@RequestParam(value = "aliasOrName", required = false) String aliasOrName,
 			@RequestParam(value = "types", required = false) List<String> types,
 			@RequestParam(value = "tags", required = false) List<String> tags,
-			@RequestParam(value = "knowledgeBases", required = false) List<String> knowledgeBases) {
+			@RequestParam(value = "knowledgeBases", required = false) List<String> knowledgeBases,
+			@RequestHeader(value = "user-login", required = false) String userLogin,
+			@RequestHeader(value = "project", required = false) String projectHeader,
+			@RequestHeader(value = "rank", required = false) String rankHeader,
+			@RequestHeader(value = "roleId", required = false) String roleIdHeader,
+			@RequestHeader(value = "portfolioId", required = false) String portfolioIdHeader,
+			@RequestHeader(value = "organisation", required = false) String orgHeader) {
 		logger.info("Advance Filter -Count called : {}", organization);
-		Long results = datasetService.getDatasetsCountForAdvancedFilter(organization, aliasOrName, types, tags,
-			knowledgeBases);
-		return ResponseEntity.status(200).body(results);
+		List<ICIPDataset> allDatasets = datasetService.getAllDatasetsForAdvancedFilter(organization, aliasOrName, types, knowledgeBases);
+		// Merge cross-project org-level datasets visible to this user's portfolio
+		Integer pId = null;
+		try { pId = Integer.parseInt(portfolioIdHeader != null ? portfolioIdHeader : ""); } catch (NumberFormatException ignored) {}
+		List<ICIPDataset> orgExtra = datasetService.getOrgLevelDatasetsForPortfolio(pId);
+		java.util.Set<Integer> seen = new java.util.HashSet<>();
+		allDatasets.forEach(d -> seen.add(d.getId()));
+		orgExtra.stream().filter(d -> !seen.contains(d.getId())).forEach(allDatasets::add);
+		if (tags != null && !tags.isEmpty()) {
+			allDatasets = ICIPDatasetService.filterDatasets(allDatasets, tags);
+		}
+		List<ICIPDataset> filtered = applyDatasetVisibilityFilter(allDatasets, userLogin, projectHeader,
+				rankHeader != null ? rankHeader : roleIdHeader, portfolioIdHeader, orgHeader, organization);
+		return ResponseEntity.status(200).body((long) filtered.size());
 	}
 
 	@GetMapping("/filter/advanced/list")
@@ -2621,12 +2982,115 @@ public class ICIPDatasetController {
 			@RequestParam(value = "types", required = false) List<String> types,
 			@RequestParam(value = "tags", required = false) List<String> tags,
 			@RequestParam(value = "knowledgeBases", required = false) List<String> knowledgeBases,
-			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
-			@RequestParam(name = "size", defaultValue = "8", required = false) String size) {
+			@RequestParam(name = "page", defaultValue = "1", required = false) String page,
+			@RequestParam(name = "size", defaultValue = "8", required = false) String size,
+			@RequestHeader(value = "user-login", required = false) String userLogin,
+			@RequestHeader(value = "project", required = false) String projectHeader,
+			@RequestHeader(value = "rank", required = false) String rankHeader,
+			@RequestHeader(value = "roleId", required = false) String roleIdHeader,
+			@RequestHeader(value = "portfolioId", required = false) String portfolioIdHeader,
+			@RequestHeader(value = "organisation", required = false) String orgHeader) {
 		logger.info("Advance Filter -List called : {}", organization);
-		List<ICIPDataset> results = datasetService.getDatasetsCountForAdvancedFilter(organization, aliasOrName, types,
-			tags, knowledgeBases, page, size);
-		return ResponseEntity.status(200).body(results);
+		List<ICIPDataset> allDatasets = datasetService.getAllDatasetsForAdvancedFilter(organization, aliasOrName, types, knowledgeBases);
+		// Merge cross-project org-level datasets visible to this user's portfolio
+		Integer pId = null;
+		try { pId = Integer.parseInt(portfolioIdHeader != null ? portfolioIdHeader : ""); } catch (NumberFormatException ignored) {}
+		List<ICIPDataset> orgExtra = datasetService.getOrgLevelDatasetsForPortfolio(pId);
+		java.util.Set<Integer> seen = new java.util.HashSet<>();
+		allDatasets.forEach(d -> seen.add(d.getId()));
+		orgExtra.stream().filter(d -> !seen.contains(d.getId())).forEach(allDatasets::add);
+		if (tags != null && !tags.isEmpty()) {
+			allDatasets = ICIPDatasetService.filterDatasets(allDatasets, tags);
+		}
+		List<ICIPDataset> filtered = applyDatasetVisibilityFilter(allDatasets, userLogin, projectHeader,
+				rankHeader != null ? rankHeader : roleIdHeader, portfolioIdHeader, orgHeader, organization);
+		int pageNum = Math.max(0, Integer.parseInt(page) - 1);
+		int pageSize = Integer.parseInt(size);
+		int start = pageNum * pageSize;
+		int end = Math.min(start + pageSize, filtered.size());
+		List<ICIPDataset> paged = (start >= filtered.size()) ? new ArrayList<>() : filtered.subList(start, end);
+		return ResponseEntity.status(200).body(paged);
+	}
+
+	private List<ICIPDataset> applyDatasetVisibilityFilter(List<ICIPDataset> datasets, String userLogin,
+			String projectHeader, String roleHeader, String portfolioIdHeader, String orgHeader, String queryOrg) {
+		String username = userLogin != null ? userLogin : "";
+		if (projectHeader == null || projectHeader.isEmpty() || roleHeader == null || roleHeader.isEmpty()) {
+			logger.info("[Approval] Dataset list - missing project/role headers, returning all results");
+			return datasets;
+		}
+		try {
+			Integer userProjectId = Integer.parseInt(projectHeader);
+			Integer userRoleId = Integer.parseInt(roleHeader);
+			Integer userPortfolioId = null;
+			try { userPortfolioId = Integer.parseInt(portfolioIdHeader != null ? portfolioIdHeader : ""); } catch (NumberFormatException ignored) {}
+			// effectiveOrg: prefer org header; fall back to the organization query param (always present)
+			String effectiveOrg = (orgHeader != null && !orgHeader.isEmpty()) ? orgHeader : (queryOrg != null ? queryOrg : "");
+
+			List<ICIPDataset> visible = new ArrayList<>();
+			for (ICIPDataset ds : datasets) {
+				String status = ds.getApprovalStatus();
+				if (status == null || status.isEmpty()) {
+					visible.add(ds);
+					continue;
+				}
+				String createdBy = ds.lastmodifiedby;
+				if ("admin".equals(createdBy)) {
+					visible.add(ds);
+					continue;
+				}
+				boolean isVisible = false;
+				if ("DRAFT".equals(status)) {
+					isVisible = username.isEmpty() || username.equals(createdBy);
+				} else if ("PENDING_PROJECT_APPROVAL".equals(status)) {
+					Integer resourceProject = ds.getProjectId();
+					isVisible = username.isEmpty() || username.equals(createdBy)
+							|| (userRoleId >= 2 && userProjectId.equals(resourceProject));
+				} else if ("PROJECT_APPROVED".equals(status)) {
+					isVisible = userProjectId.equals(ds.getProjectId());
+				} else if ("PENDING_ORG_APPROVAL".equals(status)) {
+					Integer resourceProject = ds.getProjectId();
+					Integer approvedOrgId = ds.getApprovedOrganizationId();
+					isVisible = userProjectId.equals(resourceProject);
+					if (!isVisible && approvedOrgId != null && userPortfolioId != null && approvedOrgId.equals(userPortfolioId) && userRoleId >= 3) {
+						isVisible = true;
+					}
+				} else if ("ORG_APPROVED".equals(status)) {
+					Integer approvedOrgId = ds.getApprovedOrganizationId();
+					if (approvedOrgId != null && userPortfolioId != null && approvedOrgId.equals(userPortfolioId)) {
+						isVisible = true;
+					} else {
+						String resourceOrg = ds.getOrganization();
+						isVisible = resourceOrg != null && !effectiveOrg.isEmpty() && resourceOrg.equals(effectiveOrg);
+					}
+				} else if ("PENDING_PLATFORM_APPROVAL".equals(status)) {
+					Integer approvedOrgId = ds.getApprovedOrganizationId();
+					if (approvedOrgId != null && userPortfolioId != null && approvedOrgId.equals(userPortfolioId)) {
+						isVisible = true;
+					} else {
+						String resourceOrg = ds.getOrganization();
+						if (resourceOrg != null && !effectiveOrg.isEmpty() && resourceOrg.equals(effectiveOrg)) {
+							isVisible = true;
+						}
+					}
+					if (!isVisible && userRoleId >= 4) isVisible = true;
+				} else if ("PUBLISHED".equals(status) || "GLOBALLY_PUBLISHED".equals(status)) {
+					isVisible = true;
+				} else if ("PROJECT_REJECTED".equals(status)) {
+					isVisible = username.isEmpty() || username.equals(createdBy);
+				} else if ("ORG_REJECTED".equals(status)) {
+					isVisible = userProjectId.equals(ds.getProjectId());
+				} else {
+					isVisible = true;
+				}
+				if (isVisible) visible.add(ds);
+			}
+			logger.info("[Approval] Dataset list returning {} of {} after visibility filter", visible.size(), datasets.size());
+			return visible;
+		} catch (NumberFormatException e) {
+			logger.warn("[Approval] Invalid numeric header values: {}", e.getMessage());
+			return datasets;
+		}
 	}
 	
 	@GetMapping("/filter/advanced/types")

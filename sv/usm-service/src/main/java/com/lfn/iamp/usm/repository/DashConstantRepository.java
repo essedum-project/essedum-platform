@@ -57,6 +57,14 @@ public interface DashConstantRepository extends JpaRepository<DashConstant, Inte
 	
 	@Query(value = "SELECT c from DashConstant c WHERE c.keys like CONCAT( ?1 ,'%') AND c.project_name= ?2 ")
 	public List<DashConstant> findAllDashConstantsbyItemAndProject(String item, String project_name);
+
+	// Distinct "<Role> Side" menu groups — drives the Menu Configuration role picker.
+	@Query(value = "SELECT DISTINCT c.keys from DashConstant c WHERE c.keys like '% Side'")
+	public List<String> findDistinctSideItems();
+
+	// Distinct projects a given "<Role> Side" group is configured for.
+	@Query(value = "SELECT DISTINCT c.project_name from DashConstant c WHERE c.keys = ?1")
+	public List<String> findDistinctProjectsForItem(String item);
 		
 	
 	@Query(value = "SELECT c from DashConstant c WHERE c.keys = ?1 AND (c.project_id.id = ?2 or c.project_name= 'Core')" )

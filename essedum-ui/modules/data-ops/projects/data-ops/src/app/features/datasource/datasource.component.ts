@@ -11,7 +11,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '@essedum/shared-lib';
 import { TagsService } from '@essedum/shared-lib';
-import { HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
 import { Location } from '@angular/common';
@@ -74,6 +74,7 @@ export class DatasourceComponent implements OnInit, OnChanges {
   finalDataList: any = [];
   filter: string = '';
   records: boolean = false;
+
   isExpanded = false;
   tooltip: string = 'above';
   filtbackup: any="";
@@ -87,8 +88,10 @@ export class DatasourceComponent implements OnInit, OnChanges {
     private changeDetectionRef: ChangeDetectorRef,
     public tagService: TagsService,
     private dialog: MatDialog,
-    private location: Location
+    private location: Location,
+    private http: HttpClient
   ) {}
+
   ngOnChanges(changes: SimpleChanges): void {}
 
   @HostListener('window:resize', ['$event'])

@@ -38,6 +38,12 @@ public class ICIPMLFederatedModelDTO {
 	String modifiedBy;
 	String organisation;
 	String type;
-	
+
+	@Nullable
+	String approvalStatus;
+	@Nullable
+	Integer projectId;
+	@Nullable
+	Integer approvedOrganizationId;
 
 }

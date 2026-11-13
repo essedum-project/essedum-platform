@@ -26,6 +26,7 @@ export class DefaultComponent {
   @Input() copyDataset:boolean;
   @Input('edit') edit;
   @Input('schemaVal') schemaVal;
+  @Input() model: boolean = false;
   @Output('action') action = new EventEmitter();
   @Output('cache') cache = new EventEmitter();
 
@@ -220,7 +221,11 @@ export class DefaultComponent {
       if(res.body){
         // this.dataset.attributes['object']=this.dataset.attributes['path'];
         this.dataset.attributes['object']=this.selectedFile.name;
-        this.dataset.attributes['uploadFile']=res.body.uploadFilePath;
+        let uploadPath: string = res.body.uploadFilePath || '';
+        if (uploadPath.endsWith('.xlsx') && !this.selectedFile.name.toLowerCase().endsWith('.xlsx')) {
+          uploadPath = uploadPath.slice(0, -5);
+        }
+        this.dataset.attributes['uploadFile'] = uploadPath;
         this.fileUploader=false
       }
     },

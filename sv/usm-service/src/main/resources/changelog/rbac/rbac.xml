@@ -1,0 +1,932 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<!-- Role & Access Management replatform — docs/RBAC_Admin_Replatform_Plan.md §3/§9.
+	     MySQL-only for now; mssql/postgresql changelogs to follow once this is verified. -->
+
+	<changeSet author="Essedum (rbac)" id="rbac-1">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_role" /></not>
+		</preConditions>
+		<createTable tableName="rbac_role">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(64)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="rank" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-1-seed">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT COUNT(*) FROM rbac_role</sqlCheck>
+		</preConditions>
+		<insert tableName="rbac_role">
+			<column name="name" value="viewer" />
+			<column name="rank" valueNumeric="0" />
+		</insert>
+		<insert tableName="rbac_role">
+			<column name="name" value="developer" />
+			<column name="rank" valueNumeric="1" />
+		</insert>
+		<insert tableName="rbac_role">
+			<column name="name" value="project_admin" />
+			<column name="rank" valueNumeric="2" />
+		</insert>
+		<insert tableName="rbac_role">
+			<column name="name" value="org_admin" />
+			<column name="rank" valueNumeric="3" />
+		</insert>
+		<insert tableName="rbac_role">
+			<column name="name" value="platform_admin" />
+			<column name="rank" valueNumeric="4" />
+		</insert>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-2">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_role_assignment" /></not>
+		</preConditions>
+		<createTable tableName="rbac_role_assignment">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="user_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="role_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="organization_id" type="INT" />
+			<column name="project_id" type="INT" />
+			<column name="granted_at" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="revoked_at" type="datetime(6)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-3">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_asset" /></not>
+		</preConditions>
+		<createTable tableName="rbac_asset">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="asset_type" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="scope" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="current_version_id" type="INT" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-4">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_asset_version" /></not>
+		</preConditions>
+		<createTable tableName="rbac_asset_version">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="asset_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="environment_id" type="INT" />
+			<column name="version_no" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="status" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="content_digest" type="VARCHAR(255)" />
+			<column name="payload_ref" type="VARCHAR(500)" />
+			<column name="updated_at" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-5">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_promotion_event" /></not>
+		</preConditions>
+		<createTable tableName="rbac_promotion_event">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="asset_version_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="gate" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="action" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="actor_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="actor_name" type="VARCHAR(255)" />
+			<column name="note" type="VARCHAR(1000)" />
+			<column name="occurred_at" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-6">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_menu_item" /></not>
+		</preConditions>
+		<createTable tableName="rbac_menu_item">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="parent_id" type="INT" />
+			<column name="label" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="route" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="min_role_rank" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="display_order" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<!-- Seed the admin-console's own menu tree so the Menu Configuration screen
+	     isn't empty on first run. No role_assignment seed here on purpose —
+	     granting platform_admin via migration would be a silent privilege
+	     escalation; the first platform_admin must be granted manually. -->
+	<changeSet author="Essedum (rbac)" id="rbac-6-seed">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT COUNT(*) FROM rbac_menu_item</sqlCheck>
+		</preConditions>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="1" />
+			<column name="label" value="Admin Console" />
+			<column name="route" value="/admin-console" />
+			<column name="min_role_rank" valueNumeric="0" />
+			<column name="display_order" valueNumeric="1" />
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="2" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Organizations &amp; Projects" />
+			<column name="route" value="/admin-console/tenancy" />
+			<column name="min_role_rank" valueNumeric="2" />
+			<column name="display_order" valueNumeric="1" />
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="3" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Members &amp; Roles" />
+			<column name="route" value="/admin-console/access" />
+			<column name="min_role_rank" valueNumeric="2" />
+			<column name="display_order" valueNumeric="2" />
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="4" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="My Drafts" />
+			<column name="route" value="/admin-console/publishing" />
+			<column name="min_role_rank" valueNumeric="1" />
+			<column name="display_order" valueNumeric="3" />
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="5" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Approvals" />
+			<column name="route" value="/admin-console/approvals" />
+			<column name="min_role_rank" valueNumeric="2" />
+			<column name="display_order" valueNumeric="4" />
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="6" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Audit Log" />
+			<column name="route" value="/admin-console/audit" />
+			<column name="min_role_rank" valueNumeric="3" />
+			<column name="display_order" valueNumeric="5" />
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="7" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Menu Configuration" />
+			<column name="route" value="/admin-console/menu-configuration" />
+			<column name="min_role_rank" valueNumeric="4" />
+			<column name="display_order" valueNumeric="6" />
+		</insert>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-7">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_audit_event" /></not>
+		</preConditions>
+		<createTable tableName="rbac_audit_event">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="correlation_id" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="entity" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="action" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="actor_id" type="INT" />
+			<column name="actor_name" type="VARCHAR(255)" />
+			<column name="occurred_at" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="details" type="VARCHAR(1000)" />
+		</createTable>
+	</changeSet>
+
+	<!-- §11 phase-2 migration, pulled forward: closes the Project<->Organisation
+	     FK gap (plan Appendix A) that was blocking org-scoped visibility (§4). -->
+	<changeSet author="Essedum (rbac)" id="rbac-8">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="usm_project" columnName="organisation_id" /></not>
+		</preConditions>
+		<addColumn tableName="usm_project">
+			<column name="organisation_id" type="INT" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-9">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_environment" /></not>
+		</preConditions>
+		<createTable tableName="rbac_environment">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="name" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="config_ref" type="VARCHAR(500)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-10">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="rbac_identity_projection_target" /></not>
+		</preConditions>
+		<createTable tableName="rbac_identity_projection_target">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="target_type" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="external_ref" type="VARCHAR(255)" />
+			<column name="sync_status" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_attempt_at" type="datetime(6)" />
+		</createTable>
+	</changeSet>
+
+	<!-- Configurable icon, per-role override (CSV of role names), and project
+	     scope for menu items. Drives the sidebar icon rail and the "rank-based
+	     + role override" visibility, and lets legacy per-role menus be migrated
+	     into rbac_menu_item. -->
+	<changeSet author="Essedum (rbac)" id="rbac-11">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="rbac_menu_item" columnName="icon" /></not>
+		</preConditions>
+		<addColumn tableName="rbac_menu_item">
+			<column name="icon" type="VARCHAR(64)" />
+			<column name="roles" type="VARCHAR(512)" />
+			<column name="project" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+
+	<!-- Admin overview landing entry (first item under Admin Console). -->
+	<changeSet author="Essedum (rbac)" id="rbac-12">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT COUNT(*) FROM rbac_menu_item WHERE route = '/admin-console/overview'</sqlCheck>
+		</preConditions>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="8" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Overview" />
+			<column name="route" value="/admin-console/overview" />
+			<column name="min_role_rank" valueNumeric="2" />
+			<column name="display_order" valueNumeric="0" />
+			<column name="icon" value="tachometer" />
+		</insert>
+	</changeSet>
+
+	<!-- Seed Font-Awesome icons for the admin-console menu items. -->
+	<changeSet author="Essedum (rbac)" id="rbac-13">
+		<preConditions onFail="MARK_RAN">
+			<columnExists tableName="rbac_menu_item" columnName="icon" />
+		</preConditions>
+		<update tableName="rbac_menu_item"><column name="icon" value="shield" /><where>route = '/admin-console'</where></update>
+		<update tableName="rbac_menu_item"><column name="icon" value="sitemap" /><where>route = '/admin-console/tenancy'</where></update>
+		<update tableName="rbac_menu_item"><column name="icon" value="users" /><where>route = '/admin-console/access'</where></update>
+		<update tableName="rbac_menu_item"><column name="icon" value="file-text-o" /><where>route = '/admin-console/publishing'</where></update>
+		<update tableName="rbac_menu_item"><column name="icon" value="check-square-o" /><where>route = '/admin-console/approvals'</where></update>
+		<update tableName="rbac_menu_item"><column name="icon" value="history" /><where>route = '/admin-console/audit'</where></update>
+		<update tableName="rbac_menu_item"><column name="icon" value="th-list" /><where>route = '/admin-console/menu-configuration'</where></update>
+	</changeSet>
+
+	<!-- Identity Sync Status screen (§8/§10). -->
+	<changeSet author="Essedum (rbac)" id="rbac-14">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT COUNT(*) FROM rbac_menu_item WHERE route = '/admin-console/identity-sync'</sqlCheck>
+		</preConditions>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="9" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Identity Sync" />
+			<column name="route" value="/admin-console/identity-sync" />
+			<column name="min_role_rank" valueNumeric="3" />
+			<column name="display_order" valueNumeric="7" />
+			<column name="icon" value="refresh" />
+		</insert>
+	</changeSet>
+
+	<!-- Asset Catalog / marketplace (§4 visibility query) — published assets within scope. -->
+	<changeSet author="Essedum (rbac)" id="rbac-15">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT COUNT(*) FROM rbac_menu_item WHERE route = '/admin-console/catalog'</sqlCheck>
+		</preConditions>
+		<insert tableName="rbac_menu_item">
+			<column name="id" valueNumeric="10" />
+			<column name="parent_id" valueNumeric="1" />
+			<column name="label" value="Asset Catalog" />
+			<column name="route" value="/admin-console/catalog" />
+			<column name="min_role_rank" valueNumeric="1" />
+			<column name="display_order" valueNumeric="8" />
+			<column name="icon" value="shopping-bag" />
+		</insert>
+	</changeSet>
+
+	<!-- Promote portfolios to first-class Organizations (roadmap §1 tenancy schema).
+	     Portfolio is dropped as a concept: each usm_portfolio becomes the
+	     organisation its projects belong to (1:1 by id), and usm_project.organisation_id
+	     is backfilled so org-scoped visibility (§4) resolves. usm_portfolio is left
+	     in place but dormant. Runs once; new projects set organisation_id at creation. -->
+	<changeSet author="Essedum (rbac)" id="rbac-16">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">
+				SELECT CASE WHEN EXISTS (
+					SELECT 1 FROM usm_project WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL
+				) THEN 1 ELSE 0 END
+			</sqlCheck>
+		</preConditions>
+		<sql>UPDATE usm_organisation o JOIN usm_portfolio p ON p.id = o.id SET o.name = p.portfolio_name</sql>
+		<sql>INSERT INTO usm_organisation (id, name, status)
+		     SELECT p.id, p.portfolio_name, 'active' FROM usm_portfolio p
+		     WHERE NOT EXISTS (SELECT 1 FROM usm_organisation o WHERE o.id = p.id)</sql>
+		<sql>UPDATE usm_project SET organisation_id = portfolio_id
+		     WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL</sql>
+	</changeSet>
+
+	<!-- rbac-17: rbac_role.name is user-visible, not just a key — the bridge names
+	     legacy usm_role rows after it, sidebars are keyed "<name> Side", and it
+	     shows in the shell header's Role switcher. Rename the seeded roles to
+	     display form so every dropdown reads properly. Legacy same-named roles
+	     are retired first by changelog/rbac/manual-apply.sql (rbac-20). -->
+	<changeSet author="Essedum (rbac)" id="rbac-17">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">
+				SELECT CASE WHEN EXISTS (
+					SELECT 1 FROM rbac_role WHERE name IN
+					                              ('platform_admin', 'org_admin', 'project_admin', 'developer', 'viewer')
+				) THEN 1 ELSE 0 END
+			</sqlCheck>
+		</preConditions>
+		<sql>UPDATE rbac_role SET name = 'Admin' WHERE name = 'platform_admin'</sql>
+		<sql>UPDATE rbac_role SET name = 'Organization Admin' WHERE name = 'org_admin'</sql>
+		<sql>UPDATE rbac_role SET name = 'Project Admin' WHERE name = 'project_admin'</sql>
+		<sql>UPDATE rbac_role SET name = 'Developer' WHERE name = 'developer'</sql>
+		<sql>UPDATE rbac_role SET name = 'Viewer' WHERE name = 'viewer'</sql>
+		<sql>UPDATE usm_constant SET item = 'Admin Side' WHERE item = 'platform_admin Side'</sql>
+		<sql>UPDATE usm_constant SET item = 'Organization Admin Side' WHERE item = 'org_admin Side'</sql>
+		<sql>UPDATE usm_constant SET item = 'Project Admin Side' WHERE item = 'project_admin Side'</sql>
+		<sql>UPDATE usm_constant SET item = 'Developer Side' WHERE item = 'developer Side'</sql>
+		<sql>UPDATE usm_constant SET item = 'Viewer Side' WHERE item = 'viewer Side'</sql>
+	</changeSet>
+
+	<!-- rbac-18: flatten the admin menu. The shell renders rbac_menu_item as a flat
+	     list (appendRbacMenu ignores parentId), so the "Admin Console" parent was
+	     only an extra row pointing at /admin-console — which redirects to overview
+	     and duplicated the Overview entry. It was also min_role_rank 0, showing an
+	     admin link to viewers. Drop it and null the now-meaningless parent links. -->
+	<changeSet author="Essedum (rbac)" id="rbac-18">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">
+				SELECT CASE WHEN EXISTS (
+					SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console'
+				) THEN 1 ELSE 0 END
+			</sqlCheck>
+		</preConditions>
+		<sql>DELETE FROM rbac_menu_item WHERE route = '/admin-console'</sql>
+		<sql>UPDATE rbac_menu_item SET parent_id = NULL WHERE parent_id IS NOT NULL</sql>
+		<sql>UPDATE rbac_menu_item SET display_order = 0 WHERE route = '/admin-console/overview'</sql>
+	</changeSet>
+
+	<!-- rbac-19: add max_role_rank so items can be bounded to a specific tier.
+     NULL = no upper bound. Filter becomes: min_role_rank <= userRank AND
+     (max_role_rank IS NULL OR userRank <= max_role_rank). -->
+	<changeSet author="Essedum (rbac)" id="rbac-19">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="rbac_menu_item" columnName="max_role_rank"/></not>
+		</preConditions>
+		<addColumn tableName="rbac_menu_item">
+			<column name="max_role_rank" type="INT"/>
+		</addColumn>
+	</changeSet>
+
+	<!-- rbac-20: all items are unbounded above — max_role_rank stays NULL for every
+         row (Admin sees everything). No UPDATE needed; new column defaults to NULL.
+         Placeholder to keep ID sequence intact. -->
+	<changeSet author="Essedum (rbac)" id="rbac-20">
+		<preConditions onFail="MARK_RAN">
+			<columnExists tableName="rbac_menu_item" columnName="max_role_rank"/>
+		</preConditions>
+		<sql>SELECT 1</sql>
+	</changeSet>
+
+	<!-- rbac-21: rename 'Viewer' → 'AI Client' in rbac_role and rename the matching
+         usm_constant sidebar key so DashConstant lookups continue to work. -->
+	<changeSet author="Essedum (rbac)" id="rbac-21">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">
+				SELECT CASE WHEN EXISTS (
+					SELECT 1 FROM rbac_role WHERE name = 'Viewer'
+				) THEN 1 ELSE 0 END
+			</sqlCheck>
+		</preConditions>
+		<sql>UPDATE rbac_role SET name = 'AI Client' WHERE name = 'Viewer'</sql>
+		<sql>UPDATE usm_constant SET item = 'AI Client Side' WHERE item = 'Viewer Side'</sql>
+	</changeSet>
+
+	<!-- rbac-22: seed AI Client (rank 0) product sidebar menu items.
+         All admin-console items have min_role_rank >= 1, so MenuService.menuFor()
+         returns ONLY these product entries for rank 0 — no admin console links leak.
+         appendRbacMenu() URL-dedup prevents duplicates for higher-rank users who
+         already received the same routes from DashConstant. -->
+	<changeSet author="Essedum (rbac)" id="rbac-22">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM rbac_menu_item WHERE min_role_rank = 0
+			</sqlCheck>
+		</preConditions>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Dashboard"/>
+			<column name="route"         value="/dashboard"/>
+			<column name="icon"          value="tachometer"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="1"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Pipelines"/>
+			<column name="route"         value="/agent/pipeline"/>
+			<column name="icon"          value="wpexplorer"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="2"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Datasets"/>
+			<column name="route"         value="/data/datasets"/>
+			<column name="icon"          value="table"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="3"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Models"/>
+			<column name="route"         value="/data/models"/>
+			<column name="icon"          value="superpowers"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="4"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Connections"/>
+			<column name="route"         value="/data/connections"/>
+			<column name="icon"          value="plug"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="5"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Adapters"/>
+			<column name="route"         value="/integration/implementations"/>
+			<column name="icon"          value="exchange"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="6"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Agent Directory"/>
+			<column name="route"         value="/agent/directory"/>
+			<column name="icon"          value="address-book"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="7"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Vibe Studio"/>
+			<column name="route"         value="/vibe/editor"/>
+			<column name="icon"          value="code"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="8"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Agent MCP Pipelines"/>
+			<column name="route"         value="/agent/pipeline"/>
+			<column name="icon"          value="share-alt"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="9"/>
+		</insert>
+		<insert tableName="rbac_menu_item">
+			<column name="label"         value="Skills"/>
+			<column name="route"         value="/agent/skills"/>
+			<column name="icon"          value="star"/>
+			<column name="min_role_rank" valueNumeric="0"/>
+			<column name="display_order" valueNumeric="10"/>
+		</insert>
+	</changeSet>
+
+
+	<!-- rbac-23: track the user who created each asset so that edit-ownership
+	     can be enforced server-side. Nullable to stay compatible with rows
+	     that predate this column. -->
+	<changeSet author="Essedum (rbac)" id="rbac-23">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="rbac_asset" columnName="created_by" /></not>
+		</preConditions>
+		<addColumn tableName="rbac_asset">
+			<column name="created_by" type="INT" />
+		</addColumn>
+	</changeSet>
+
+	<!-- rbac-24: re-seed any admin-console menu items that were accidentally deleted
+	     via the Menu Configuration UI. Uses NOT EXISTS so it is safe to run even
+	     when some or all rows still exist. parent_id is always NULL (rbac-18 flattened
+	     the hierarchy). max_role_rank stays NULL (no upper bound). -->
+	<changeSet author="Essedum (rbac)" id="rbac-24" runOnChange="false">
+		<sql>
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Overview', '/admin-console/overview', 2, 0, 'tachometer', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/overview');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Organizations &amp; Projects', '/admin-console/tenancy', 2, 1, 'sitemap', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/tenancy');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Members &amp; Roles', '/admin-console/access', 2, 2, 'users', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/access');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'My Drafts', '/admin-console/publishing', 1, 3, 'file-text-o', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/publishing');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Approvals', '/admin-console/approvals', 2, 4, 'check-square-o', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/approvals');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Audit Log', '/admin-console/audit', 3, 5, 'history', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/audit');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Asset Catalog', '/admin-console/catalog', 1, 8, 'shopping-bag', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/catalog');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Identity Sync', '/admin-console/identity-sync', 3, 7, 'refresh', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/identity-sync');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Menu Configuration', '/admin-console/menu-configuration', 4, 6, 'th-list', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/admin-console/menu-configuration');
+		</sql>
+	</changeSet>
+
+	<!-- rbac-25: re-seed product sidebar items (AI Client only — rank 0) that may have
+	     been deleted via Menu Configuration. Uses NOT EXISTS per label+route. -->
+	<changeSet author="Essedum (rbac)" id="rbac-25" runOnChange="false">
+		<sql>
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Dashboard', '/dashboard', 0, 1, 'tachometer', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/dashboard');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Pipelines', '/agent/pipeline', 0, 2, 'wpexplorer', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE label = 'Pipelines' AND route = '/agent/pipeline');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Datasets', '/data/datasets', 0, 3, 'table', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/data/datasets');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Models', '/data/models', 0, 4, 'superpowers', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/data/models');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Connections', '/data/connections', 0, 5, 'plug', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/data/connections');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Adapters', '/integration/implementations', 0, 6, 'exchange', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/integration/implementations');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Agent Directory', '/agent/directory', 0, 7, 'address-book', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/agent/directory');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Vibe Studio', '/vibe/editor', 0, 8, 'code', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/vibe/editor');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Agent MCP Pipelines', '/agent/pipeline', 0, 9, 'share-alt', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE label = 'Agent MCP Pipelines');
+
+			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
+			SELECT 'Skills', '/agent/skills', 0, 10, 'star', NULL, NULL
+				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/agent/skills');
+		</sql>
+	</changeSet>
+
+	<!-- rbac-26: fix per-role menu visibility rules.
+	     My Drafts (publishing) is non-monotonic: rank 1 (AI Engineer) and rank 3+
+	     (Org Admin, Admin) see it, but rank 2 (Project Admin) does not.
+	     Express this with a roles-override CSV; min_role_rank=99 disables the rank gate.
+	     Asset Catalog: min_role_rank corrected to 1 (AI Engineer and all admin tiers). -->
+	<changeSet author="Essedum (rbac)" id="rbac-26" runOnChange="false">
+		<sql>
+			UPDATE rbac_menu_item
+			SET min_role_rank = 99, roles = 'Developer,Organization Admin,Admin'
+			WHERE route = '/admin-console/publishing';
+
+			UPDATE rbac_menu_item
+			SET min_role_rank = 1, roles = NULL
+			WHERE route = '/admin-console/catalog';
+		</sql>
+	</changeSet>
+
+	<!-- rbac-27: fix two remaining admin-console menu visibility gaps.
+	     (1) Overview min_role_rank 2→1: the frontend sets isAdminTier = roleRank >= 1,
+	         so Developer (rank 1) lands on the admin-console sidebar but could not see
+	         Overview because min_role_rank was 2. Lowering it to 1 aligns the data with
+	         the frontend boundary without touching any other items.
+	     (2) My Drafts roles CSV: rbac-26 omitted 'Project Admin' from the override list,
+	         so Project Admin (rank 2) never received the item. All four admin-console tiers
+	         (Developer, Project Admin, Organization Admin, Admin) publish drafts and must
+	         see My Drafts. min_role_rank=99 stays — the roles column is the sole gate. -->
+	<changeSet author="Essedum (rbac)" id="rbac-27">
+		<sql>
+			UPDATE rbac_menu_item
+			SET min_role_rank = 1
+			WHERE route = '/admin-console/overview';
+
+			UPDATE rbac_menu_item
+			SET roles = 'Developer,Project Admin,Organization Admin,Admin'
+			WHERE route = '/admin-console/publishing';
+		</sql>
+	</changeSet>
+
+	<!-- rbac-28: AI Client (legacy usm_role 'Viewer') was seeded as a read-only role —
+	     usm_permission_api only ever granted it GET methods, so CustomAuthorizationManager
+	     returns 403 for every PUT/POST/DELETE against pipelines, datasets, connections and
+	     streaming services (rbac-21 only renamed the *new* rbac_role/menu row, it never
+	     touched the legacy usm_role/usm_role_permissions grants that actually gate each API
+	     call). AI Client is now required to perform data updates, so copy the write-method
+	     grants already proven for 'Developer' onto the matching 'Viewer'/'AI Client' usm_role
+	     row(s), correlating by project scope so project-specific role rows don't cross-pollinate
+	     with other projects' grants. Idempotent: only inserts (permission, role) pairs that
+	     don't already exist. -->
+	<changeSet author="Essedum (rbac)" id="rbac-28">
+		<sql>
+			INSERT INTO usm_role_permissions (permission, role)
+			SELECT DISTINCT p.id, client_role.id
+			FROM usm_role client_role
+					 JOIN usm_role dev_role
+						  ON (dev_role.project_id IS NULL AND client_role.project_id IS NULL)
+							  OR (dev_role.project_id = client_role.project_id)
+				     JOIN usm_role_permissions rp ON rp.role = dev_role.id
+				     JOIN usm_permissions p ON p.id = rp.permission
+				     JOIN usm_permission_api pa ON pa.permission_id = p.id
+			WHERE LOWER(client_role.name) IN ('viewer', 'ai client')
+			  AND LOWER(dev_role.name) = 'developer'
+			  AND UPPER(pa.type) IN ('PUT', 'POST', 'DELETE')
+			  AND (
+				LOWER(pa.api) LIKE '%pipeline%'
+					OR LOWER(pa.api) LIKE '%dataset%'
+					OR LOWER(pa.api) LIKE '%datasource%'
+					OR LOWER(pa.api) LIKE '%connection%'
+					OR LOWER(pa.api) LIKE '%streamingservices%'
+				)
+			  AND NOT EXISTS (
+				SELECT 1 FROM usm_role_permissions rp2
+				WHERE rp2.role = client_role.id AND rp2.permission = p.id
+			);
+		</sql>
+	</changeSet>
+
+	<!-- rbac-31: grant the seed 'admin' user the platform-wide Admin role.
+	     rbac-6-seed intentionally seeds NO rbac_role_assignment row (auto-granting
+	     platform_admin would be a silent privilege escalation), so out of the box every
+	     user — including admin — resolves to highestRank = 0. This grants only the known
+	     seed admin account (matched by login/email, not id), scoped organization_id/
+	     project_id = NULL = platform-wide. Safe to re-run. -->
+	<changeSet author="Essedum (rbac)" id="rbac-31">
+		<sql>
+			INSERT INTO rbac_role_assignment (user_id, role_id, organization_id, project_id, granted_at)
+			SELECT u.id, r.id, NULL, NULL, NOW(6)
+			FROM usm_users u
+					 JOIN rbac_role r ON r.name = 'Admin'
+			WHERE (u.user_login = 'admin' OR u.user_email = 'admin@lfn.com')
+			  AND NOT EXISTS (
+				SELECT 1 FROM rbac_role_assignment ra
+				WHERE ra.user_id = u.id AND ra.role_id = r.id AND ra.revoked_at IS NULL
+			);
+		</sql>
+	</changeSet>
+
+	<!-- rbac-30: register POST /api/aip/datasources/approval/project/submit in usm_permission_api.
+	     The endpoint was added to the backend after rbac-28 ran, so it was never recorded in
+	     usm_permission_api. CustomAuthorizationManager checks this table on every request and
+	     returns 403 for any method+path not present, regardless of role.
+	     Fix: map the new path to an existing POST datasources permission_id — both Developer
+	     and AI Client already hold that permission (Developer originally; AI Client via rbac-28),
+	     so no usm_role_permissions change is needed. Idempotent: skips if the row exists. -->
+	<changeSet author="Essedum (rbac)" id="rbac-30">
+		<sql>
+			INSERT INTO usm_permission_api (permission_id, api, type)
+			SELECT pa.permission_id,
+			       '/api/aip/datasources/approval/project/submit',
+			       'POST'
+			FROM usm_permission_api pa
+			WHERE UPPER(pa.type) = 'POST'
+			  AND LOWER(pa.api) LIKE '%datasources%'
+			  AND NOT EXISTS (
+				SELECT 1 FROM usm_permission_api pa2
+				WHERE pa2.api = '/api/aip/datasources/approval/project/submit'
+				  AND UPPER(pa2.type) = 'POST'
+			)
+				LIMIT 1;
+		</sql>
+	</changeSet>
+
+	<!-- rbac-31: rbac-16 backfilled usm_project.organisation_id from portfolio_id
+	     only once, and no application code ever set it afterwards (fixed now in
+	     ProjectServiceImpl#save). Any project created/re-portfolio'd between
+	     rbac-16 and that fix — e.g. a project under an org whose role grants
+	     stopped resolving via AccessContextService's org-expansion and whose
+	     /access/role-assignments/by-user-project response was missing
+	     projectOrganizationId/Name — is stuck with organisation_id NULL forever.
+	     Re-run the same backfill (idempotent: only touches NULL rows) to catch
+	     everything created since. -->
+	<changeSet author="Essedum (rbac)" id="rbac-31">
+		<validCheckSum>8:e4562ee58bb4491f6720429684e7dab7</validCheckSum>
+		<validCheckSum>8:eacffab13e6c4048c4060ecfef62a229</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">
+				SELECT CASE WHEN EXISTS (
+					SELECT 1 FROM usm_project WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL
+				) THEN 1 ELSE 0 END
+			</sqlCheck>
+		</preConditions>
+		<sql>UPDATE usm_project SET organisation_id = portfolio_id
+		     WHERE organisation_id IS NULL AND portfolio_id IS NOT NULL</sql>
+	</changeSet>
+
+	<!-- rbac-32: add creator_name to rbac_asset so My Drafts can show who created a pipeline. -->
+	<changeSet author="Essedum (rbac)" id="rbac-32">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="rbac_asset" columnName="creator_name"/></not>
+		</preConditions>
+		<addColumn tableName="rbac_asset">
+			<column name="creator_name" type="VARCHAR(255)"/>
+		</addColumn>
+	</changeSet>
+
+	<!-- rbac-33: normalize usm_users.user_login to the bare IdP username (OIDC
+	     preferred_username, e.g. "arumuga.a") instead of the full email address
+	     ("arumuga.a@infosys.com"). CustomAuthorizationManager resolves the caller
+	     via ICIPUtils.getUser(claim), which reads preferred_username directly, then
+	     joins against usm_users.user_login — an email-format login never matches,
+	     so every non-whitelisted write (pipeline delete/update, dataset edits, etc.)
+	     403s for affected users regardless of their role's permissions. user_login
+	     is purely an internal auth key, never an email (usm_users.user_email already
+	     owns that), so this is safe. Skips any row whose stripped value would collide
+	     with an existing login (the NOT IN subquery is wrapped in a derived table
+	     since MySQL rejects a self-referencing subquery on the table being updated —
+	     error 1093). Idempotent: only touches rows still containing '@'. -->
+	<changeSet author="Essedum (rbac)" id="rbac-33">
+		<sql>
+			UPDATE usm_users u
+			SET u.user_login = SUBSTRING_INDEX(u.user_login, '@', 1)
+			WHERE u.user_login LIKE '%@%'
+			  AND SUBSTRING_INDEX(u.user_login, '@', 1) NOT IN (
+				SELECT login FROM (SELECT user_login AS login FROM usm_users) AS existing_logins
+			);
+		</sql>
+	</changeSet>
+
+	<!-- rbac-34: rbac-28's source role was scoped to the SAME project's 'developer'
+	     row, but several project-scoped 'developer' rows never received the write/
+	     delete grants themselves (only the global 'Developer' row, project_id IS
+	     NULL, has them) — so rbac-28 silently copied nothing for those projects'
+	     'viewer'/'AI Client' roles. Broaden the source to also accept the global
+	     Developer role as a fallback whenever the project-scoped one lacks a given
+	     permission. Same target roles, same PUT/POST/DELETE + resource-pattern
+	     filter, same idempotent NOT EXISTS guard as rbac-28 — purely additive. -->
+	<changeSet author="Essedum (rbac)" id="rbac-34">
+		<sql>
+			INSERT INTO usm_role_permissions (permission, role)
+			SELECT DISTINCT p.id, client_role.id
+			FROM usm_role client_role
+					 JOIN usm_role dev_role
+						  ON LOWER(dev_role.name) = 'developer'
+							  AND (
+								 dev_role.project_id IS NULL
+									 OR dev_role.project_id = client_role.project_id
+								 )
+				     JOIN usm_role_permissions rp ON rp.role = dev_role.id
+				     JOIN usm_permissions p ON p.id = rp.permission
+				     JOIN usm_permission_api pa ON pa.permission_id = p.id
+			WHERE LOWER(client_role.name) IN ('viewer', 'ai client')
+			  AND UPPER(pa.type) IN ('PUT', 'POST', 'DELETE')
+			  AND (
+				LOWER(pa.api) LIKE '%pipeline%'
+					OR LOWER(pa.api) LIKE '%dataset%'
+					OR LOWER(pa.api) LIKE '%datasource%'
+					OR LOWER(pa.api) LIKE '%connection%'
+					OR LOWER(pa.api) LIKE '%streamingservices%'
+				)
+			  AND NOT EXISTS (
+				SELECT 1 FROM usm_role_permissions rp2
+				WHERE rp2.role = client_role.id AND rp2.permission = p.id
+			);
+		</sql>
+	</changeSet>
+
+	<!-- rbac-35/36/37: add the model approval-workflow columns to mlfederatedmodels.
+	     ICIPMLFederatedModel maps approval_status / project_id / approved_organization_id,
+	     but no migration ever created them and ddl-auto is none, so every query that
+	     hydrates that entity failed (HTTP 500) — including POST /service/v1/models/register
+	     and GET /service/v1/models/getAll/{org}. Mirrors changelog/rbac/model-approval-columns.sql.
+	     Each changeSet is guarded so it is a no-op where the column already exists.
+	     NOTE: IDs start at 35 — 32/33/34 are already taken above for rbac_asset/usm_users fixes. -->
+	<changeSet author="Essedum (rbac)" id="rbac-35">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="mlfederatedmodels" columnName="approval_status" /></not>
+		</preConditions>
+		<addColumn tableName="mlfederatedmodels">
+			<column name="approval_status" type="varchar(50)" defaultValue="DRAFT" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-36">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="mlfederatedmodels" columnName="project_id" /></not>
+		</preConditions>
+		<addColumn tableName="mlfederatedmodels">
+			<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-37">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="mlfederatedmodels" columnName="approved_organization_id" /></not>
+		</preConditions>
+		<addColumn tableName="mlfederatedmodels">
+			<column name="approved_organization_id" type="int" />
+		</addColumn>
+	</changeSet>
+
+</databaseChangeLog>

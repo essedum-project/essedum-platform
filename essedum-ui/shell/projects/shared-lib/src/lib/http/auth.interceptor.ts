@@ -43,32 +43,122 @@ export class AuthInterceptor implements HttpInterceptor {
       request = request.clone({ headers: request.headers.delete('Content-Type', 'application/json') });
     }
 
-    if (
-      localStorage.hasOwnProperty('jwtToken') &&
+    const isApiRequest =
       (request.url.includes('api') || request.url.includes('json')) &&
       !request.url.endsWith('/api/aip/getConfigDetails') &&
-      (!capBaseUrl || !request.url.includes(capBaseUrl))
-    ) {
+      (!capBaseUrl || !request.url.includes(capBaseUrl));
+
+    // Project and roleId headers are required by the backend's CustomAuthorizationManager
+    // for ALL authenticated modes (dbjwt and oauth2). Send them whenever they are available.
+    if (isApiRequest) {
+      if (project) {
+        try {
+          const p = JSON.parse(project);
+          if (p?.id?.toString()) {
+            request = request.clone({ headers: request.headers.set('Project', p.id.toString()) });
+          }
+          if (p?.name?.toString()) {
+            request = request.clone({ headers: request.headers.set('ProjectName', p.name.toString()) });
+          }
+        } catch { /* ignore parse errors */ }
+      }
+      if (role) {
+        try {
+          const r = JSON.parse(role);
+          // Send rank (approval level: 2=Project Admin, 3=Org Admin) not id
+          if (r?.rank?.toString()) {
+            const rankValue = r.rank.toString();
+            console.log('[AUTH-INTERCEPTOR] Sending rank header:', rankValue, 'for URL:', request.url);
+            request = request.clone({ headers: request.headers.set('rank', rankValue) });
+            // Also send as 'roleId' for compatibility with approval workflow endpoints
+            request = request.clone({ headers: request.headers.set('roleId', rankValue) });
+          }
+          if (r?.name?.toString()) {
+            request = request.clone({ headers: request.headers.set('roleName', r.name.toString()) });
+          }
+        } catch (e) { 
+          console.error('[AUTH-INTERCEPTOR] Error parsing role:', e);
+        }
+      }
+      
+      // Send organization header for approval workflow filtering
+      const org = sessionStorage.getItem('organization');
+      if (org) {
+        try {
+          const o = JSON.parse(org);
+          if (o?.id?.toString()) {
+            request = request.clone({ headers: request.headers.set('organisation', o.id.toString()) });
+          } else if (o?.name?.toString()) {
+            request = request.clone({ headers: request.headers.set('organisation', o.name.toString()) });
+          }
+        } catch {
+          // If not JSON, treat as string directly
+          request = request.clone({ headers: request.headers.set('organisation', org) });
+        }
+      }
+
+      // Send portfolioId header (numeric portfolio/org ID) for org-scoped approval visibility.
+      // portfoliodata stores the org/portfolio object with numeric id — always reliable.
+      const portfolioDataRaw = sessionStorage.getItem('portfoliodata');
+      if (portfolioDataRaw) {
+        try {
+          const pd = JSON.parse(portfolioDataRaw);
+          if (pd?.id?.toString()) {
+            request = request.clone({ headers: request.headers.set('portfolioId', pd.id.toString()) });
+          }
+        } catch { /* ignore */ }
+      }
+    }
+
+    // Authorization Bearer is only needed in dbjwt mode; oauth2 mode uses angular-oauth2-oidc.
+    if (localStorage.hasOwnProperty('jwtToken') && isApiRequest) {
       request = request.clone({
         setHeaders: { Authorization: 'Bearer ' + localStorage.getItem('jwtToken') },
       });
-      if (project) {
-        const p = JSON.parse(project);
-        if (p?.id?.toString()) {
-          request = request.clone({ headers: request.headers.set('Project', p.id.toString()) });
-        }
-        if (p?.name?.toString()) {
-          request = request.clone({ headers: request.headers.set('ProjectName', p.name.toString()) });
+    }
+
+    // Extract username from JWT token and send as user-login header
+    if (isApiRequest) {
+      let username = null;
+      
+      // Try to get username from sessionStorage first (if stored by auth service)
+      const storedUser = sessionStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const userObj = JSON.parse(storedUser);
+          username = userObj?.username || userObj?.preferred_username || userObj?.name;
+        } catch { /* ignore parse errors */ }
+      }
+      
+      // If not in sessionStorage, try to extract from JWT token
+      if (!username) {
+        const jwtToken = localStorage.getItem('jwtToken');
+        if (jwtToken) {
+          try {
+            const parts = jwtToken.split('.');
+            if (parts.length === 3) {
+              const decoded = JSON.parse(atob(parts[1]));
+              username = decoded?.preferred_username || decoded?.username || decoded?.name;
+            }
+          } catch { /* ignore JWT decode errors */ }
         }
       }
-      if (role) {
-        const r = JSON.parse(role);
-        if (r?.id?.toString()) {
-          request = request.clone({ headers: request.headers.set('roleId', r.id.toString()) });
-        }
-        if (r?.name?.toString()) {
-          request = request.clone({ headers: request.headers.set('roleName', r.name.toString()) });
-        }
+      
+      // Also try from OAuth2 access token (different format)
+      if (!username && localStorage.getItem('access_token')) {
+        try {
+          const token = localStorage.getItem('access_token') || '';
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const decoded = JSON.parse(atob(parts[1]));
+            username = decoded?.preferred_username || decoded?.username || decoded?.name;
+          }
+        } catch { /* ignore JWT decode errors */ }
+      }
+      
+      // Send user-login header if username found
+      if (username) {
+        request = request.clone({ headers: request.headers.set('user-login', username) });
       }
     }
 

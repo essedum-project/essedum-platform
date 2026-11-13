@@ -1,4 +1,12 @@
 <div class="selector-3-1">
+  <!-- RBAC init overlay: covers all intermediate role/nav transitions on fresh login.
+       Dismissed once the correct role + menu are confirmed ready. -->
+  <div *ngIf="pageInitializing"
+       style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;
+              background:var(--background-colour,#060c1a);
+              display:flex;align-items:center;justify-content:center;">
+    <div class="rbac-spinner"></div>
+  </div>
   <mat-drawer-container style="overflow: hidden" class="example-container bgcolor2 selector-3-2" autosize="">
     <mat-drawer #drawerLeft="" class="example-sidenav selector-3-3" [ngStyle]="{
         'background-color': bgColorType == 2 ? '#8626C3' : 'var(--header-color)'
@@ -161,12 +169,17 @@
 
               <div class="profile-menu-divider"></div>
 
-              <!-- Portfolio -->
-              <div *ngIf="portfoliodata?.length >= 1" (click)="$event.stopPropagation()" class="profile-menu-field-row">
-                <span class="profile-menu-field-label">Portfolio</span>
+              <!-- Organization (formerly Portfolio) — portfolios are promoted to
+                   first-class Organizations per the roadmap §1 tenancy schema. -->
+              <div *ngIf="portfoliodata?.length >= 1 || isOrgLoading" (click)="$event.stopPropagation()" class="profile-menu-field-row">
+                <span class="profile-menu-field-label">
+                  Organization
+                  <span *ngIf="isOrgLoading" class="dropdown-spinner" aria-label="Loading organizations"></span>
+                </span>
                 <mat-form-field class="profile-form-field" appearance="outline" subscriptSizing="dynamic">
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedportfolio"
-                    (ngModelChange)="onSelection($event)" name="Portfolio" panelClass="profile-select-panel">
+                    (ngModelChange)="onSelection($event)" name="Portfolio" panelClass="profile-select-panel"
+                    [disabled]="isOrgLoading">
                     <mat-option *ngFor="let item of portfoliodata; trackBy: trackByMethod" [value]="item">
                       {{ item.portfolioName }}
                     </mat-option>
@@ -175,11 +188,15 @@
               </div>
 
               <!-- Project / Customer -->
-              <div *ngIf="projectList.length >= 1" (click)="$event.stopPropagation()" class="profile-menu-field-row">
-                <span class="profile-menu-field-label">{{ role1 ? 'Customer' : 'Project' }}</span>
+              <div *ngIf="portfoliodata?.length >= 1 || isOrgLoading" (click)="$event.stopPropagation()" class="profile-menu-field-row">
+                <span class="profile-menu-field-label">
+                  {{ role1 ? 'Customer' : 'Project' }}
+                  <span *ngIf="isProjectLoading" class="dropdown-spinner" aria-label="Loading projects"></span>
+                </span>
                 <mat-form-field class="profile-form-field" appearance="outline" subscriptSizing="dynamic">
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedproject"
-                    (ngModelChange)="valuechangeproject1($event)" name="project" panelClass="profile-select-panel">
+                    (ngModelChange)="valuechangeproject1($event)" name="project" panelClass="profile-select-panel"
+                    [disabled]="isProjectLoading">
                     <mat-option *ngFor="let item of projectList; trackBy: trackByMethod" [value]="item">
                       {{ item.projectdisplayname }}
                     </mat-option>
@@ -188,14 +205,21 @@
               </div>
 
               <!-- Role -->
-              <div *ngIf="roleList?.length >= 1" (click)="$event.stopPropagation()" class="profile-menu-field-row">
-                <span class="profile-menu-field-label">Role</span>
+              <div *ngIf="projectList?.length >= 1 || isProjectLoading || selectedrole?.name || isRoleLoading" (click)="$event.stopPropagation()" class="profile-menu-field-row">
+                <span class="profile-menu-field-label">
+                  Role
+                  <span *ngIf="isRoleLoading" class="dropdown-spinner" aria-label="Loading roles"></span>
+                </span>
                 <mat-form-field class="profile-form-field" appearance="outline" subscriptSizing="dynamic">
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedrole"
                     (ngModelChange)="valuechangerole($event); clearsession()" name="role"
-                    panelClass="profile-select-panel matOptionPopup">
+                    panelClass="profile-select-panel matOptionPopup"
+                    [disabled]="isRoleLoading">
                     <mat-option *ngFor="let item of roleList; trackBy: trackByMethod" [value]="item" [id]="'role-' + item.name">
-                      {{ item.name }}
+                      {{ getDisplayRoleName(item.name) }} <span style="font-size:11px;opacity:0.55;">{{ getRoleTypeLabel(item) }}</span>
+                    </mat-option>
+                    <mat-option *ngIf="!isRoleLoading && (!roleList || roleList.length === 0)" [disabled]="true" style="opacity:0.6;font-size:13px;font-style:italic;">
+                      No roles available
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
@@ -749,6 +773,7 @@
                     </span>
                   </li>
                 </ol>
+
                 <router-outlet class="selector-3-65"></router-outlet>
                 <!-- </div> -->
               </div>

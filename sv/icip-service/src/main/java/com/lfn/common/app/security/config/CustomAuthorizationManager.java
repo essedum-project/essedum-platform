@@ -56,6 +56,7 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				AntPathRequestMatcher.antMatcher("/api/tad/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/automation/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/file/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/"+icipPathPrefix.trim()+"/file/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/batch/client/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/batch/generic/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/datasets/upload").matcher(authorizationContext.getRequest()).isMatch() ||
@@ -113,7 +114,37 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				return new AuthorizationDecision(false);
 			}
 		}
-		
+
+		// All GET requests and pipeline write endpoints are open to any authenticated
+		// non-anonymous user. Data isolation is enforced at the service/org layer.
+		String pipelineUri = authorizationContext.getRequest().getRequestURI();
+		String pipelineMethod = authorizationContext.getRequest().getMethod().toUpperCase();
+		if ("GET".equals(pipelineMethod)
+				|| (pipelineUri.contains("/service/v1/pipelines/") && pipelineUri.endsWith("/list"))
+				|| pipelineUri.contains("/service/v1/pipelines/count")
+				|| pipelineUri.contains("/service/v1/pipelines/training/")
+				|| ("PUT".equals(pipelineMethod) && pipelineUri.contains("/streamingServices/update"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/service/v1/streamingServices/add"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/file/create/"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasources/test"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasources/add"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasources/save"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasources/approval"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasets/test"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasets/add"))
+				|| ("DELETE".equals(pipelineMethod) && pipelineUri.contains("/datasets/delete"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/git-configs/save"))
+				|| pipelineUri.contains("/folder/upload/")
+				|| pipelineUri.contains("/folder/update/")
+				|| ("POST".equals(pipelineMethod) && pipelineUri.endsWith("/service/v1/models/register"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/service/v1/models/upload"))
+				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/models/approval"))
+				|| pipelineUri.contains("/vibe-coding/")
+				|| pipelineUri.contains("/vibe-studio/")
+				|| pipelineUri.contains("/vibe/")) {
+			return new AuthorizationDecision(true);
+		}
+
 		Integer projectId = null;
 		Integer roleId = null;
 		try {

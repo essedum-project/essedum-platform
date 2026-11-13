@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
@@ -33,7 +34,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.JsonObject;
-import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.repository.ICIPDatasourceRepository;
@@ -365,9 +365,9 @@ public class ICIPMLFederatedRuntimeService {
 
 		// Create request for updating Nginx configuration
 		Request requestUpdate = new Request.Builder().url(port_automation_app_url + "/update_route").post(body) // Change
-																												// method
-																												// to
-																												// POST
+				// method
+				// to
+				// POST
 				.build();
 
 		try (Response responseUpdate = client.newCall(requestUpdate).execute()) {
@@ -400,9 +400,9 @@ public class ICIPMLFederatedRuntimeService {
 
 		// Create request for updating Nginx configuration
 		Request requestUpdate = new Request.Builder().url(port_automation_app_url + "/update_nginx").post(body) // Change
-																												// method
-																												// to
-																												// POST
+				// method
+				// to
+				// POST
 				.build();
 
 		try (Response responseUpdate = client.newCall(requestUpdate).execute()) {
@@ -435,9 +435,9 @@ public class ICIPMLFederatedRuntimeService {
 
 		// Create request for updating Nginx configuration
 		Request requestUpdate = new Request.Builder().url(port_automation_app_url + "/available_ports").post(body) // Change
-																													// method
-																													// to
-																													// POST
+				// method
+				// to
+				// POST
 				.build();
 
 		try (Response responseUpdate = client.newCall(requestUpdate).execute()) {
@@ -470,7 +470,7 @@ public class ICIPMLFederatedRuntimeService {
 	}
 
 	public List<ICIPMLFederatedRuntime> findBySearch(Integer id, Integer connid, Integer connport, Boolean isEXIPorts,
-			Integer exiPorts, Integer pipelineid, Integer appid, Integer connendpoint, Boolean isAssigned) {
+	                                                 Integer exiPorts, Integer pipelineid, Integer appid, Integer connendpoint, Boolean isAssigned) {
 
 		List<ICIPMLFederatedRuntime> getSearchList = icipMlFederatedRuntimeRepository.findBySearch(id, connid, connport,
 				isEXIPorts, exiPorts, pipelineid, appid, connendpoint, isAssigned);
@@ -586,7 +586,7 @@ public class ICIPMLFederatedRuntimeService {
 		/*
 		 * ICIPApps icipApps = appsRepository.findByJobName(pipelineName)
 		 * .orElseThrow(() -> new ResourceNotFoundException("This App Does not Exist"));
-		 * 
+		 *
 		 * try { appsRepository.delete(icipApps); } catch (IllegalArgumentException |
 		 * EntityNotFoundException ex) { ex.getMessage(); }
 		 */
@@ -656,10 +656,14 @@ public class ICIPMLFederatedRuntimeService {
 		}
 
 		Map<String, Object> connections = new HashMap<>();
-		connections.put("connport-startrange", connport.get(0));
-		connections.put("connport-endrange", connport.get(connport.size() - 1));
-		connections.put("exiport-startrange", exiports.get(0));
-		connections.put("exiport-endrange", exiports.get(connport.size() - 1));
+		// No federated-runtime port range provisioned for this connection (listConnection
+		// was empty) — return nulls instead of throwing IndexOutOfBoundsException on
+		// connport.get(0)/exiports.get(0). The frontend (modal-config-rest-datasource)
+		// just assigns these straight into form fields, so null is handled gracefully.
+		connections.put("connport-startrange", connport.isEmpty() ? null : connport.get(0));
+		connections.put("connport-endrange", connport.isEmpty() ? null : connport.get(connport.size() - 1));
+		connections.put("exiport-startrange", exiports.isEmpty() ? null : exiports.get(0));
+		connections.put("exiport-endrange", exiports.isEmpty() ? null : exiports.get(exiports.size() - 1));
 		connections.put("isDefaultPorts", isDefaultports);
 		connections.put("isExiPorts", isExiports);
 		return connections;

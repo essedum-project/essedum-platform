@@ -32,6 +32,15 @@
                 <mat-icon class="date-icon">schedule</mat-icon>
                 {{ getDate() | date : "mediumDate" }}
             </p>
+
+            <!-- Approval-status pill (Connections and Models cards) -->
+            <span *ngIf="getApprovalStatus()"
+                class="card-approval-badge"
+                [ngClass]="'approval-' + getApprovalStatusClass()"
+                [matTooltip]="getApprovalStatusLabel()" matTooltipPosition="above">
+                <mat-icon class="approval-badge-icon">{{ getApprovalStatusIcon() }}</mat-icon>
+                {{ getApprovalStatusLabel() }}
+            </span>
         </div>
 
         <!-- Type badge (right side) -->
@@ -168,6 +177,12 @@
     <!-- ── Datasets bottom bar ── -->
     <mat-card-actions *ngIf="servicev1 === 'Datasets'"
         class="lfx-c-card__action-hover card-actions-hover">
+        <div class="aip-cursor" [matTooltip]="getAvatar()" matTooltipPosition="above">
+            <div class="lfx-c-avatar lfx-c-avatar--sm aip-hover-avatar"
+                [ngStyle]="{ '--avatar-bg-color': getAvatarBackgroundColor() }">
+                {{ getAvatar() | firstCharacter }}
+            </div>
+        </div>
         <button mat-icon-button [matTooltip]="'Copy'" matTooltipPosition="above" (click)="onCopy(card)">
             <mat-icon class="card-action-icon">content_copy</mat-icon>
         </button>

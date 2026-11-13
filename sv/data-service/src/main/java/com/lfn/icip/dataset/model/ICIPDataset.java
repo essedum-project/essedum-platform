@@ -210,6 +210,25 @@ public class ICIPDataset extends BaseDomain implements Serializable {
 
 	@Column(name = "event_details")
 	private String event_details;
+
+	/**
+	 * Approval workflow status: DRAFT, PENDING_PROJECT_APPROVAL, PROJECT_APPROVED,
+	 * PENDING_ORG_APPROVAL, ORG_APPROVED, PENDING_PLATFORM_APPROVAL, PUBLISHED,
+	 * PROJECT_REJECTED, ORG_REJECTED, PLATFORM_REJECTED.
+	 * No Java-level default here on purpose — existing rows rely on the DB column
+	 * default (PUBLISHED) for backward compatibility; new datasets must have
+	 * this explicitly set to DRAFT by the create (/add) endpoint.
+	 */
+	@Column(name = "approval_status")
+	private String approvalStatus;
+
+	/** Project ID for project-level approvals. */
+	@Column(name = "project_id")
+	private Integer projectId;
+
+	/** Organization ID for org-level / platform-level approvals. */
+	@Column(name = "approved_organization_id")
+	private Integer approvedOrganizationId;
 	/**
 	 * Equals.
 	 *

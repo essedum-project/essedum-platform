@@ -15,7 +15,7 @@ import { SemanticSearchContext } from '@essedum/shared-lib';
 import { SemanticService } from '../../services/semantic.services';
 import { SemanticSearchResult } from '@essedum/shared-lib';
 import { EventsService } from '../../services/event.service';
-import { Subscription } from 'rxjs';
+import { Subscription, of } from 'rxjs';
 import mammoth from 'mammoth';
 import { HttpClient } from '@angular/common/http';
 
@@ -145,7 +145,12 @@ export class DatasetDescriptionComponent implements OnInit {
   event_status : string = '';
   htmlstring: any;
   dataDoc: boolean = false;
-  
+
+  currentUserLogin: string = '';
+  userRank: number = 0;
+  datasetProjectId: number = null;
+  approvalSubmitting: boolean = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -163,7 +168,84 @@ export class DatasetDescriptionComponent implements OnInit {
   ) { }
 
 
+  resolveUserContext(): void {
+    try {
+      const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+      const role = JSON.parse(sessionStorage.getItem('role') || '{}');
+      const rawLogin = (user?.user_login || user?.username || user?.name || '').toLowerCase();
+      const email = (user?.user_email || rawLogin).toLowerCase();
+      const emailPrefix = email.includes('@') ? email.split('@')[0] : email;
+      const resolvedLogin = rawLogin.includes('@') ? rawLogin.split('@')[0] : (rawLogin || emailPrefix);
+      this.currentUserLogin = resolvedLogin;
+      this.userRank = isNaN(Number(role?.rank)) ? 0 : Number(role?.rank);
+      const projectStr = sessionStorage.getItem('project');
+      if (projectStr) {
+        try {
+          const projectObj = JSON.parse(projectStr);
+          this.datasetProjectId = projectObj?.id || projectObj?.projectId || Number(projectStr) || null;
+        } catch {
+          this.datasetProjectId = Number(projectStr) || null;
+        }
+      }
+      if (!this.datasetProjectId) {
+        const projIdStr = sessionStorage.getItem('projectId') || sessionStorage.getItem('CURRENTPRJID');
+        if (projIdStr) this.datasetProjectId = Number(projIdStr) || null;
+      }
+    } catch {}
+  }
+
+  isOwnDataset(): boolean {
+    if (!this.currentUserLogin || !this.card) return false;
+    const cb = (this.card.created_by || this.card.lastmodifiedby || '').toLowerCase();
+    return cb === this.currentUserLogin || cb.startsWith(this.currentUserLogin + '@');
+  }
+
+  getApprovalStatus(): string {
+    return (this.card?.approvalStatus || this.card?.approval_status || 'GLOBALLY_PUBLISHED');
+  }
+
+  getApprovalLabel(): string {
+    const labels: Record<string, string> = {
+      'DRAFT': 'Draft', 'PENDING_PROJECT_APPROVAL': 'Pending Project Approval',
+      'PROJECT_APPROVED': 'Project Approved', 'PROJECT_REJECTED': 'Project Rejected',
+      'PENDING_ORG_APPROVAL': 'Pending Org Approval', 'ORG_APPROVED': 'Org Approved',
+      'ORG_REJECTED': 'Org Rejected', 'PENDING_PLATFORM_APPROVAL': 'Pending Platform Approval',
+      'PLATFORM_REJECTED': 'Platform Rejected', 'GLOBALLY_PUBLISHED': 'Globally Published',
+    };
+    return labels[this.getApprovalStatus()] || this.getApprovalStatus();
+  }
+
+  getApprovalClass(): string {
+    const classes: Record<string, string> = {
+      'DRAFT': 'draft', 'PENDING_PROJECT_APPROVAL': 'pending', 'PROJECT_APPROVED': 'project-approved',
+      'PROJECT_REJECTED': 'rejected', 'PENDING_ORG_APPROVAL': 'pending', 'ORG_APPROVED': 'org-approved',
+      'ORG_REJECTED': 'rejected', 'PENDING_PLATFORM_APPROVAL': 'pending',
+      'PLATFORM_REJECTED': 'rejected', 'GLOBALLY_PUBLISHED': 'published',
+    };
+    return classes[this.getApprovalStatus()] || 'draft';
+  }
+
+  showSubmitButton(): boolean {
+    const s = this.getApprovalStatus();
+    return this.isOwnDataset() && (s === 'DRAFT' || s === 'PROJECT_REJECTED');
+  }
+
+  submitForApproval(): void {
+    if (!this.datasetProjectId) { this.service.message('No project selected', 'error'); return; }
+    this.approvalSubmitting = true;
+    this.datasetsService.submitDatasetForApproval(this.card.id, this.datasetProjectId).subscribe({
+      next: () => {
+        this.service.message('Dataset submitted for approval');
+        this.card.approvalStatus = 'PENDING_PROJECT_APPROVAL';
+        this.card.approval_status = 'PENDING_PROJECT_APPROVAL';
+        this.approvalSubmitting = false;
+      },
+      error: err => { this.service.message(err?.message || 'Failed to submit for approval', 'error'); this.approvalSubmitting = false; }
+    });
+  }
+
   ngOnInit(): void {
+    this.resolveUserContext();
     this.route.params.subscribe((params) => {
       this.datasetName = params['cname'];
     });
@@ -212,7 +294,13 @@ export class DatasetDescriptionComponent implements OnInit {
       this.getRelatedComponent();
     }
     else if (this.datasetName){
-      this.getDatasetByName();
+      // For cross-org published datasets the catalog passes the full card via
+      // navigation state. Use it directly so we don't fetch with the wrong org.
+      if (history.state?.card) {
+        this.initFromCard(history.state.card);
+      } else {
+        this.getDatasetByName();
+      }
     }
     else {
       this.chatUrl = this.injector.get('chatData');
@@ -269,6 +357,33 @@ export class DatasetDescriptionComponent implements OnInit {
         this.eventData = JSON.parse(this.card.event_details);
     });
   }
+  initFromCard(c: any) {
+    this.card = c;
+    this.tempDataset['attributes'] = c.attributes;
+    this.tempDataset['datasource'] = c.datasource;
+    try { this.metaData = JSON.parse(c.attributes); } catch { this.metaData = {}; }
+    this.metaDataKeys = Object.keys(this.metaData || {});
+    this.metaDataValues = Object.values(this.metaData || {});
+    this.datasetAlias = c.alias;
+    this.rowObj = c;
+    if (c?.tags == '[\"Doc Labelling\"]') { this.AnnotateFlag = true; this.cdRef.detectChanges(); }
+    this.description = c.description;
+    this.isGitUrl = c.datasource?.type === 'GIT';
+    if (c.indexname) this.index = c.indexname;
+    this.getActions();
+    this.getRelatedComponent();
+    this.metaDataDescKey = this.metaDataKeys[2];
+    this.metaDataUrlKey = this.metaDataKeys[4];
+    this.descValue = this.metaData?.description;
+    this.urlValue = this.metaData?.url;
+    this.path = this.metaData?.path;
+    this.fileName = this.path + '/' + this.metaData?.object;
+    this.datasetId = c.id;
+    this.viewType = c.views;
+    this.fileType(this.viewType);
+    if (c.event_details) { try { this.eventData = JSON.parse(c.event_details); } catch {} }
+  }
+
   getRelatedComponent(){
     this.component = [];
     this.service.getRelatedComponent(this.card.id, 'DATASET').subscribe((res) => {
@@ -335,13 +450,26 @@ export class DatasetDescriptionComponent implements OnInit {
   }
 
   checkTableSupport() {
-          this.appLoading = true;
+    this.appLoading = true;
+    // For cross-org published datasets the session org differs from the dataset org.
+    // Use the card object we already have instead of re-fetching with the wrong org.
+    const sessionOrg = sessionStorage.getItem('organization');
+    const isCrossOrg = !!(this.card?.organization && this.card.organization !== sessionOrg);
+    const datasetFetch = isCrossOrg
+      ? of(this.card)
+      : this.service.getDataset(this.selectedDatasetName);
 
-    this.service.checkVisualizeSupport(this.selectedDatasetName)
+    // checkVisualizeSupport uses session org in the URL → returns 400 for cross-org datasets.
+    // Use of([]) to skip the call; filter().length === 0 falls through to the data-loading branch.
+    const visualizeSupportFetch = isCrossOrg
+      ? of([])
+      : this.service.checkVisualizeSupport(this.selectedDatasetName);
+
+    visualizeSupportFetch
       .subscribe(res => {
         if (res && res.filter(ele => ele["Tabular View"]).length > 0) {
 
-          this.service.getDataset(this.selectedDatasetName).subscribe(resp => {
+          datasetFetch.subscribe(resp => {
             this.dataset = resp;
             try {
               try {
@@ -359,7 +487,12 @@ export class DatasetDescriptionComponent implements OnInit {
             }
 
             if (this.dataset.views) {
-              this.service.getDatasource(this.dataset.datasource).subscribe(resp => {
+              // If the datasource is already a full object (from catalog), skip re-fetching
+              // with the wrong session org — use it directly.
+              const dsFetch = (this.dataset.datasource && typeof this.dataset.datasource === 'object')
+                ? of(this.dataset.datasource)
+                : this.service.getDatasource(this.dataset.datasource);
+              dsFetch.subscribe(resp => {
                 this.dataset.datasource = resp;
                 let params = { page: 0, size: 50 }
                 this.service.getProxyDbDatasetDetails(
@@ -398,17 +531,17 @@ export class DatasetDescriptionComponent implements OnInit {
                   this.datasetDataErr = err;
                   this.appLoading=false;
                 });
-              }, err => { console.log(err) });
+              }, err => { console.log(err); this.appLoading = false; });
 
             }
             else {
               this.tableviewsupport = false
             }
-          }, err => { console.log(err) });
+          }, err => { console.log(err); this.appLoading = false; });
         }
         else {
 
-          this.service.getDataset(this.selectedDatasetName).subscribe(resp => {
+          datasetFetch.subscribe(resp => {
             this.dataset = resp;
             try {
               try {
@@ -427,7 +560,10 @@ export class DatasetDescriptionComponent implements OnInit {
             }
 
             if (this.dataset.views) {
-              this.service.getDatasource(this.dataset.datasource).subscribe(resp => {
+              const dsFetch = (this.dataset.datasource && typeof this.dataset.datasource === 'object')
+                ? of(this.dataset.datasource)
+                : this.service.getDatasource(this.dataset.datasource);
+              dsFetch.subscribe(resp => {
                 this.dataset.datasource = resp;
                 let params = { page: 0, size: 50 }
                 this.service.getProxyDbDatasetDetails(
@@ -456,16 +592,18 @@ export class DatasetDescriptionComponent implements OnInit {
                   this.datasetData = err.text;
                   this.appLoading=false;
                 });
-              }, err => { console.log(err) });
+              }, err => { console.log(err); this.appLoading = false; });
 
             }
             else {
-              this.tableviewsupport = false
+              this.tableviewsupport = false;
+              this.appLoading = false;
             }
-          }, err => { console.log(err) });
+          }, err => { console.log(err); this.appLoading = false; });
         }
       }, err => {
-        this.tableviews = 'no'
+        this.tableviews = 'no';
+        this.appLoading = false;
       })
     this.selectedDataset["name"] = this.selectedDatasetName;
   }
@@ -581,7 +719,11 @@ export class DatasetDescriptionComponent implements OnInit {
             if(count==Math.ceil(file1.size / chunkSize)){  
             this.uploadPercentage=100;
             this.tempDataset.attributes['object']=file.target.files[i].name;
-            this.tempDataset.attributes['uploadFile']=res.body.uploadFilePath;
+            let uploadPath: string = res.body.uploadFilePath || '';
+            if (uploadPath.endsWith('.xlsx') && !file.target.files[i].name.toLowerCase().endsWith('.xlsx')) {
+              uploadPath = uploadPath.slice(0, -5);
+            }
+            this.tempDataset.attributes['uploadFile'] = uploadPath;
             this.tempDatasetArray.push(JSON.parse(JSON.stringify(this.tempDataset)));  
             this.uploading=false;
             this.service.message('File Chunked Successfully!');

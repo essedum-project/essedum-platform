@@ -20,7 +20,19 @@
                 </div>
                 <span *ngIf="initiativeView">
                   <div class="selector-model-title-tail">
-                    <ul class="d-flex justify-content-between align-items-center py-2 px-4" id="aip-dataset-desc-icon">
+                    <ul class="d-flex justify-content-between align-items-center py-2 px-4" id="aip-dataset-desc-icon" style="background: transparent !important; border-bottom: none !important;">
+                      <li *ngIf="card && getApprovalStatus() !== 'GLOBALLY_PUBLISHED'" class="ds-approval-actions-container" style="list-style:none;">
+                        <div class="approval-status-inline ds-status-{{ getApprovalClass() }}">
+                          <span class="status-label">{{ getApprovalLabel() }}</span>
+                        </div>
+                        <div class="ds-approval-button-container" *ngIf="showSubmitButton()">
+                          <button [disabled]="approvalSubmitting"
+                                  (click)="submitForApproval()"
+                                  [class]="getApprovalStatus() === 'PROJECT_REJECTED' ? 'ds-send-approval-btn ds-resubmit-btn' : 'ds-send-approval-btn'">
+                            {{ getApprovalStatus() === 'PROJECT_REJECTED' ? 'Resubmit' : 'Submit for Approval' }}
+                          </button>
+                        </div>
+                      </li>
                       <li *ngIf="!isGitUrl">
                         <mat-menu #overflowMenu="matMenu">
 
@@ -238,8 +250,9 @@
                 </div>
                 <div *ngIf="datasetDataErr">
                   <mat-card>
-                    <div class="d-flex justify-content-center align-items-center flex-column">
-                      <b>There is an application error, please contact the application admin</b>
+                    <div class="d-flex justify-content-center align-items-center flex-column" style="padding: 24px; gap: 8px;">
+                      <mat-icon style="font-size: 36px; height: 36px; width: 36px; color: #64748b;">info_outline</mat-icon>
+                      <span style="color: #64748b; font-size: 14px;">No data preview available for this dataset.</span>
                     </div>
                   </mat-card>
                 </div>
@@ -287,7 +300,7 @@
                       <app-dataset-view [data]="selectedDataset" *ngIf="views == 'Json View'"></app-dataset-view>
                       <app-enl-code-editor *ngIf="views == 'Code View'" [dataset]="true" [script]="datasetData"
                         id="ele"></app-enl-code-editor>
-                      <app-dataset-table-view [datasetname]="selectedDatasetName" [datasetAlias]="datasetAlias"
+                      <app-dataset-table-view [datasetname]="selectedDatasetName" [datasetAlias]="datasetAlias" [data]="dataset"
                         *ngIf="views == 'Table View'"></app-dataset-table-view>
                       <pre *ngIf="views == 'Log View'" class="text-view">
                 {{ datasetData }} </pre>
@@ -376,7 +389,7 @@
                 <div *ngIf="!dataset.views">
                   <ng-container *ngIf="tableviews !== ''">
                     <app-dataset-view [data]="selectedDataset" *ngIf="tableviews === 'no'"></app-dataset-view>
-                    <app-dataset-table-view [datasetname]="selectedDatasetName"
+                    <app-dataset-table-view [datasetname]="selectedDatasetName" [data]="dataset"
                       *ngIf="tableviews === 'yes'"></app-dataset-table-view>
                   </ng-container>
                 </div>

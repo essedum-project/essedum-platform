@@ -68,7 +68,13 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				AntPathRequestMatcher.antMatcher("/api/email/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/event/trigger/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/sre-availability-cal/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/usm-notificationss/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/usm-notificationss").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/organisations/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/organisations").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/projects").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/usm-portfolios/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/usm-portfolios").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/registerUser").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/userss/resetPassword").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/userss/checkemail").matcher(authorizationContext.getRequest()).isMatch() ||
@@ -104,7 +110,18 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 			log.debug("Request assigned Anonymous User: ", authorizationContext.getRequest().toString());
 			return new AuthorizationDecision(false);
 		}
-		
+
+		// New RBAC admin-console APIs (/api/usm/** — access, provisioning, publishing,
+		// menu, identity, role-menus, audit) enforce their own authorization via
+		// AccessContext rank checks at the endpoint (e.g. AccessResource.grant/revoke
+		// require org_admin+, ProvisioningResource.require()). They are not registered
+		// in the legacy usm_permission_api table, which only accidentally allows
+		// GET/POST (broad "/.*" regexes) and 403s DELETE/PUT. Admit authenticated
+		// (non-anonymous) callers here and let the endpoints do the rank enforcement.
+		if (AntPathRequestMatcher.antMatcher("/api/usm/**").matcher(authorizationContext.getRequest()).isMatch()) {
+			return new AuthorizationDecision(true);
+		}
+
 		if (HeadersUtil.getAuthorizationToken(authorizationContext.getRequest())!= null) {
 			userProjectRoleService.deleteExpiredToken();
 			if (userProjectRoleService
@@ -149,7 +166,14 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 		}
 
 		for (Integer loop_roleid : roleIdList) {
-				for (Map.Entry<String, List<String>> apiMap : this.configurationApisService.getRoleMappedApis(loop_roleid).entrySet()) {
+				Map<String, List<String>> roleMappedApis = this.configurationApisService.getRoleMappedApis(loop_roleid);
+				// A role with no configured API permissions (e.g. newly created,
+				// not yet given any) must not crash the whole auth check — treat
+				// it as "no permissions" rather than NPE on a null map.
+				if (roleMappedApis == null) {
+					continue;
+				}
+				for (Map.Entry<String, List<String>> apiMap : roleMappedApis.entrySet()) {
 					if (RegularExpressionUtil.matchInputForRegex(urlForValidation,apiMap.getKey())
 							&& ((apiMap.getValue().contains(authorizationContext.getRequest().getMethod().toUpperCase())) || apiMap.getValue().contains("ALL"))) {
 						return new AuthorizationDecision(true);

@@ -145,7 +145,8 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
             String dshashcode, Timestamp activetime, String category, String interfacetype,
             Boolean fordataset, Boolean forruntime, Boolean foradapter, Boolean formodel,
             Boolean forpromptprovider, Boolean forendpoint, Boolean forapp,
-            String lastmodifiedby, Timestamp lastmodifieddate, String alias) {
+            String lastmodifiedby, Timestamp lastmodifieddate, String alias,
+            String approvalStatus, Integer projectId, Integer approvedOrganizationId) {
 		
         this.id = id;
 		this.name = name;
@@ -167,6 +168,9 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 		this.lastmodifiedby = lastmodifiedby;
 		this.lastmodifieddate = lastmodifieddate;
 		this.alias = alias;
+		this.approvalStatus = approvalStatus;
+		this.projectId = projectId;
+		this.approvedOrganizationId = approvedOrganizationId;
 }
 
 
@@ -232,6 +236,27 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 	private Boolean forapp;
 
 	/**
+	 * Approval workflow status: DRAFT, PENDING_PROJECT_APPROVAL, PROJECT_APPROVED,
+	 * PENDING_ORG_APPROVAL, ORG_APPROVED, PENDING_PLATFORM_APPROVAL, PUBLISHED,
+	 * PROJECT_REJECTED, ORG_REJECTED, PLATFORM_REJECTED.
+	 * New datasources default to DRAFT; pre-existing rows keep the DB column default
+	 * (PUBLISHED) for backward compatibility.
+	 */
+	@Column(name = "approval_status")
+	@com.fasterxml.jackson.annotation.JsonProperty("approval_status")
+	private String approvalStatus = "DRAFT";
+
+	/** The project the connection was submitted to for project level approval. */
+	@Column(name = "project_id")
+	@com.fasterxml.jackson.annotation.JsonProperty("project_id")
+	private Integer projectId;
+
+	/** The organization that approved the connection at org level / platform level. */
+	@Column(name = "approved_organization_id")
+	@com.fasterxml.jackson.annotation.JsonProperty("approved_organization_id")
+	private Integer approvedOrganizationId;
+
+	/**
 	 * Clone.
 	 *
 	 * @return the ICIP datasource
@@ -242,10 +267,14 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 	 * return ds*/
 	public ICIPDatasource clone() {
 		ICIPDatasource ds = new ICIPDatasource(id, name, description, type, connectionDetails, salt, organization,
-				dshashcode, activetime, category,extras, interfacetype,fordataset,forruntime,foradapter,formodel,forpromptprovider,forendpoint,forapp);
+				dshashcode, activetime, category,extras, interfacetype,fordataset,forruntime,foradapter,formodel,forpromptprovider,forendpoint,forapp,
+				approvalStatus, projectId, approvedOrganizationId);
 		ds.setAlias(alias);
 		ds.setLastmodifiedby(lastmodifiedby);
 		ds.setLastmodifieddate(lastmodifieddate);
+		ds.setApprovalStatus(approvalStatus);
+		ds.setProjectId(projectId);
+		ds.setApprovedOrganizationId(approvedOrganizationId);
 		return ds;
 	}
 

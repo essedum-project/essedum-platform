@@ -5,6 +5,7 @@ import { angularMaterialRenderers } from '@jsonforms/angular-material';
 import { LocationStrategy } from '@angular/common';
 import { Location } from '@angular/common';
 import { RaiservicesService } from '../../services/raiservices.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 
 @Component({
@@ -82,6 +83,10 @@ export class DatasourceConfigComponent implements OnInit {
   portPayload: any;
   showCustomIcon: boolean = true;
 
+  // Approval flow
+  currentUserLogin: string = '';
+  selectedProjectId: number | null = null;
+
   constructor(
     private Services: Services,
     private route: ActivatedRoute,
@@ -90,9 +95,11 @@ export class DatasourceConfigComponent implements OnInit {
     private _location: Location,
     private raiService: RaiservicesService,
     private eventBus: EventBusService,
+    private http: HttpClient,
   ) { }
 
   ngOnInit() {
+    this.resolveUserContext();
     this.initiativeCreate ? this.initiativeView = false : this.initiativeView = true
     this.router.url.includes('initiative') ? (this.initiativeView = false) : (this.initiativeView = true);
     if (this.router.url.includes('connections')) {
@@ -412,45 +419,33 @@ export class DatasourceConfigComponent implements OnInit {
   }
   getdatasourceTypes() {
     try {
-      let size = 0;
-      this.Services.getPluginsLength().
-        subscribe(
-          response => {
-            let s = new Number(response)
-            size = s.valueOf()
-            // size = response
-          }, err => { this.Services.message("Unable to fetch Connection types",'error' ) },
-          () => {
-            //console.log("Modal-config")
-            this.Services.getDatasourceJson(0, size)
-              .subscribe(res => {
-                this.datasourceTypes = res;
-                this.uischema = res[0].uischema;
-                this.attributes = res[0].attributes;
-                this.datasourceTypes.sort((a, b) => a.type.toLowerCase() < b.type.toLowerCase() ? -1 : 1);
-                this.datasourceTypes.forEach((opt) => {
-                  let val = { viewValue: opt.type, value: opt.type };
-                  this.typeOptions.push(val)
-                })
-                if (!this.data.id) {
-                  this.type = this.matData.group != 'NA' ? this.matData.group : 'SQL'
-                  this.sourceType = this.datasourceTypes.filter(row => row.type === this.type)[0];
-                  this.category = this.sourceType?.category;
-                } else {
-                  this.type = this.data.type;
-                  this.category = this.data.category;
-                  this.sourceType['category'] = this.data.category;
-                  this.sourceType['type'] = this.type;
-                  this.sourceType['attributes'] = JSON.parse(this.data.connectionDetails);
-                }
-                if (this.sourceType?.attributes)
-                  Object.keys(this.sourceType.attributes).forEach(keyValue => {
-                    this.keys.push(keyValue);
-                  });
-              }, error => {
-                this.Services.message("Unable to fetch Connection types ","error")
-              });
-          });
+      // The backend ignores page/size for connection types and returns the full plugin list,
+      // so fetch it directly rather than gating on the separate length call.
+      this.Services.getDatasourceJson(0, 100)
+        .subscribe(res => {
+          this.datasourceTypes = Array.isArray(res) ? res : [];
+          this.uischema = this.datasourceTypes[0]?.uischema;
+          this.attributes = this.datasourceTypes[0]?.attributes;
+          this.datasourceTypes.sort((a, b) => a.type.toLowerCase() < b.type.toLowerCase() ? -1 : 1);
+          this.typeOptions = this.datasourceTypes.map(opt => ({ viewValue: opt.type, value: opt.type }));
+          if (!this.data.id) {
+            this.type = this.matData.group != 'NA' ? this.matData.group : 'SQL'
+            this.sourceType = this.datasourceTypes.filter(row => row.type === this.type)[0];
+            this.category = this.sourceType?.category;
+          } else {
+            this.type = this.data.type;
+            this.category = this.data.category;
+            this.sourceType['category'] = this.data.category;
+            this.sourceType['type'] = this.type;
+            this.sourceType['attributes'] = JSON.parse(this.data.connectionDetails);
+          }
+          if (this.sourceType?.attributes)
+            Object.keys(this.sourceType.attributes).forEach(keyValue => {
+              this.keys.push(keyValue);
+            });
+        }, error => {
+          this.Services.message("Unable to fetch Connection types ", "error")
+        });
     }
     catch (Exception) {
       this.Services.message("Some error occured", "error")
@@ -608,7 +603,6 @@ shouldShowCustomIcon(): boolean {
 }
 
 ngAfterViewInit() {
-  // Check after view initialization
   setTimeout(() => {
     const selectElement = document.querySelector('.mat-mdc-select-trigger');
     if (selectElement) {
@@ -618,5 +612,95 @@ ngAfterViewInit() {
     }
   }, 100);
 }
+
+  // ── Approval flow ────────────────────────────────────────────────────────
+
+  private resolveUserContext(): void {
+    try {
+      const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+      const role = JSON.parse(sessionStorage.getItem('role') || '{}');
+      const rawLogin = (user?.user_login || user?.username || user?.name || '').toLowerCase();
+      const email = (user?.user_email || rawLogin).toLowerCase();
+      const emailPrefix = email.includes('@') ? email.split('@')[0] : email;
+      this.currentUserLogin = rawLogin.includes('@') ? rawLogin.split('@')[0] : (rawLogin || emailPrefix);
+      try {
+        const projectObj = JSON.parse(sessionStorage.getItem('project') || '{}');
+        this.selectedProjectId = projectObj?.id || Number(sessionStorage.getItem('projectId')) || null;
+      } catch { }
+    } catch { }
+  }
+
+  isOwnConnection(): boolean {
+    if (!this.currentUserLogin || !this.data) return false;
+    const cb = (this.data.created_by || this.data.lastmodifiedby || '').toLowerCase();
+    return cb === this.currentUserLogin || cb.startsWith(this.currentUserLogin + '@');
+  }
+
+  getApprovalStatus(): string {
+    // Empty until loaded, otherwise an unloaded connection renders as a false DRAFT.
+    if (!this.data?.id) return '';
+    // /service/v1/fetchDatasource serializes camelCase, the datasource APIs use snake_case.
+    return this.data.approval_status || this.data.approvalStatus || 'DRAFT';
+  }
+
+  hasApprovalStatus(): boolean {
+    return !!this.getApprovalStatus();
+  }
+
+  getApprovalStatusLabel(): string {
+    const labels: Record<string, string> = {
+      DRAFT: 'Draft',
+      PENDING_PROJECT_APPROVAL: 'Pending Project Approval',
+      PROJECT_APPROVED: 'Project Approved',
+      PROJECT_REJECTED: 'Project Rejected',
+      PENDING_ORG_APPROVAL: 'Pending Org Approval',
+      ORG_APPROVED: 'Org Approved',
+      ORG_REJECTED: 'Org Rejected',
+      PENDING_PLATFORM_APPROVAL: 'Pending Platform Approval',
+      PLATFORM_REJECTED: 'Platform Rejected',
+      PUBLISHED: 'Published',
+    };
+    return labels[this.getApprovalStatus()] || this.getApprovalStatus();
+  }
+
+  getApprovalStatusClass(): string {
+    const classes: Record<string, string> = {
+      DRAFT: 'draft',
+      PENDING_PROJECT_APPROVAL: 'pending',
+      PROJECT_APPROVED: 'project-approved',
+      PROJECT_REJECTED: 'rejected',
+      PENDING_ORG_APPROVAL: 'pending',
+      ORG_APPROVED: 'org-approved',
+      ORG_REJECTED: 'rejected',
+      PENDING_PLATFORM_APPROVAL: 'pending',
+      PLATFORM_REJECTED: 'rejected',
+      PUBLISHED: 'published',
+    };
+    return classes[this.getApprovalStatus()] || 'draft';
+  }
+
+  showSubmitButton(): boolean {
+    const status = this.getApprovalStatus();
+    return status === 'DRAFT' || status === 'PROJECT_REJECTED';
+  }
+
+  submitForApproval(): void {
+    if (!this.selectedProjectId) {
+      this.Services.message('No project selected', 'error');
+      return;
+    }
+    this.http.post(
+      `/api/aip/datasources/approval/project/submit`,
+      { resourceId: this.data.id, projectId: this.selectedProjectId },
+      { headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }), observe: 'response' }
+    ).subscribe({
+      next: () => {
+        this.Services.message('Connection submitted for approval');
+        this.data.approval_status = 'PENDING_PROJECT_APPROVAL';
+        this.data.approvalStatus = 'PENDING_PROJECT_APPROVAL';
+      },
+      error: err => this.Services.message(err?.error?.message || 'Failed to submit for approval', 'error'),
+    });
+  }
 
 }
