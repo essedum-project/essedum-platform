@@ -1206,7 +1206,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
   isDraftOwnedByUser(card: any): boolean {
     const status = this.getApprovalStatus(card);
     if (status !== 'DRAFT') return false;
-    const createdBy = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
+    const raw = (card.target?.created_by || card.created_by || card.createdBy || '').toLowerCase();
+    const createdBy = raw.includes('@') ? raw.split('@')[0] : raw;
     return !!this.currentUserLogin && createdBy === this.currentUserLogin;
   }
 
