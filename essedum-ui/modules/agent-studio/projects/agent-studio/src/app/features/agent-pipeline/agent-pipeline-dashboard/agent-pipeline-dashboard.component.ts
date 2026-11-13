@@ -228,6 +228,61 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
     });
   }
 
+  gitLogin(): void {
+    this.isGitLoading = true;
+    this.githubService.initiateOAuthFlow().subscribe({
+      next: (status) => {
+        this.isGitLoading = false;
+        this.isGitAuthenticated = true;
+        this.githubService.cacheClientAuth(status);
+        this.gitUsername = status.githubUsername || status.username || '';
+        this.service.message('Git login success', 'success');
+        this.changeDetectionRef.detectChanges();
+      },
+      error: () => {
+        this.isGitLoading = false;
+        this.changeDetectionRef.detectChanges();
+      }
+    });
+  }
+
+  gitLogout(): void {
+    this.showGitDropdown = false;
+    this.isGitLoading = true;
+    this.githubService.logout().subscribe({
+      next: () => {
+        this.isGitAuthenticated = false;
+        this.gitUsername = '';
+        this.isGitLoading = false;
+        this.clearGitSessionData();
+        this.service.message('Logout successful', 'success');
+        this.changeDetectionRef.detectChanges();
+      },
+      error: () => {
+        this.isGitLoading = false;
+        this.changeDetectionRef.detectChanges();
+      }
+    });
+  }
+
+  /**
+   * Remove all GitHub-related data cached in this browser session
+   * (username, session id, and any previously selected repo/branch).
+   */
+  private clearGitSessionData(): void {
+    this.githubService.clearClientGitSession();
+  }
+
+  toggleGitDropdown(event: Event): void {
+    event.stopPropagation();
+    this.showGitDropdown = !this.showGitDropdown;
+  }
+
+  @HostListener('document:click')
+  closeGitDropdown(): void {
+    this.showGitDropdown = false;
+  }
+
   private handleRouteState(): void {
     const state = this.location.getState() as any;
 
@@ -443,6 +498,21 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
           }
         });
       }
+
+      const adItems: any[] = agentDesigner?.items || [];
+      adItems.forEach((item: any) => {
+        const card = {
+          ...item,
+          alias: item.name || item.alias || item.id,
+          name: item.id || item.name,
+          isAgentDesigner: true,
+          cid: item.id
+        };
+        data.push(card);
+        if (item.id) {
+          this.agentDesignerCids.add(item.id);
+        }
+      });
 
       this.cards = data;
       this.filteredCards = data;
