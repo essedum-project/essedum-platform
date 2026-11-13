@@ -155,16 +155,12 @@ public class AccessContextService {
 		if (organizationId != null && projectId != null) {
 			throw new IllegalArgumentException("A role assignment scopes to at most one of organization/project");
 		}
-		// Idempotent: granting the exact same (user, role, scope) again just
-		// returns the existing active assignment instead of piling up duplicates.
-		for (RoleAssignment existing : roleAssignmentRepository.findByUserIdAndRevokedAtIsNull(userId)) {
-			if (existing.getRoleId().equals(roleId)
-					&& java.util.Objects.equals(existing.getOrganizationId(), organizationId)
-					&& java.util.Objects.equals(existing.getProjectId(), projectId)) {
-				// Already assigned — still ensure the legacy bridge exists (idempotent).
-				bridgeAssignment(userId, roleId, organizationId, projectId, isLegacy);
-				return existing;
-			}
+		// Reject duplicate active assignments with a clear 409 so the UI can surface a meaningful error.
+		if (roleAssignmentRepository.existsByUserIdAndRoleIdAndOrganizationIdAndProjectIdAndRevokedAtIsNull(
+				userId, roleId, organizationId, projectId)) {
+			throw new org.springframework.web.server.ResponseStatusException(
+					org.springframework.http.HttpStatus.CONFLICT,
+					"User already has this role for the selected scope. Please choose a different role or scope.");
 		}
 		RoleAssignment assignment = new RoleAssignment();
 		assignment.setUserId(userId);
@@ -208,8 +204,9 @@ public class AccessContextService {
 
 	/**
 	 * One-time backfill: re-mirrors every active role assignment into the legacy
-	 * table. Needed for grants made before org-scoped grants were bridged —
-	 * re-granting doesn't help, grant() is idempotent and returns early.
+	 * table. Needed for grants made before org-scoped grants were bridged.
+	 * Calls bridgeAssignment() directly — not grant() — to avoid the duplicate-check
+	 * 409 that grant() now raises for already-active assignments.
 	 *
 	 * @return number of active assignments processed
 	 */
