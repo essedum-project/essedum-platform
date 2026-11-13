@@ -128,7 +128,7 @@ public class AccessResource {
 	}
 
 	@PostMapping("/access/role-assignments")
-	public ResponseEntity<RoleAssignment> grant(@RequestBody GrantRoleRequest request) {
+	public ResponseEntity<?> grant(@RequestBody GrantRoleRequest request) {
 		// If the roleId carries the legacy offset, strip it back to the real usm_role id
 		// before storing. This prevents the collision between rbac_role and usm_role integer ids.
 		final int OFFSET = AccessContextService.LEGACY_ROLE_ID_OFFSET;
@@ -157,9 +157,17 @@ public class AccessResource {
 						"Cannot grant a role outside your own projects/organizations");
 			}
 		}
-		RoleAssignment saved = accessContextService.grant(request.getUserId(), request.getRoleId(),
-				request.getOrganizationId(), request.getProjectId(), isLegacyRole);
-		return ResponseEntity.ok(saved);
+		try {
+			RoleAssignment saved = accessContextService.grant(request.getUserId(), request.getRoleId(),
+					request.getOrganizationId(), request.getProjectId(), isLegacyRole);
+			return ResponseEntity.ok(saved);
+		} catch (ResponseStatusException ex) {
+			if (ex.getStatusCode() == HttpStatus.CONFLICT) {
+				return ResponseEntity.status(HttpStatus.CONFLICT)
+						.body(java.util.Map.of("message", ex.getReason() != null ? ex.getReason() : "Duplicate role assignment."));
+			}
+			throw ex;
+		}
 	}
 
 	/** Backfills the legacy Organization/Project/Role switcher from existing assignments (platform_admin only). */
