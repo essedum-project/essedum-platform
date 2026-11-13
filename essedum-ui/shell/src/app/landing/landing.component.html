@@ -181,7 +181,7 @@
                     (ngModelChange)="onSelection($event)" name="Portfolio" panelClass="profile-select-panel"
                     [disabled]="isOrgLoading">
                     <mat-option *ngFor="let item of portfoliodata; trackBy: trackByMethod" [value]="item">
-                      {{ item.portfolioName }} &nbsp;[#{{ item.id }}]
+                      {{ item.portfolioName }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
@@ -198,7 +198,7 @@
                     (ngModelChange)="valuechangeproject1($event)" name="project" panelClass="profile-select-panel"
                     [disabled]="isProjectLoading">
                     <mat-option *ngFor="let item of projectList; trackBy: trackByMethod" [value]="item">
-                      {{ item.projectdisplayname }} &nbsp;[#{{ item.id }}]
+                      {{ item.projectdisplayname }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
