@@ -65,6 +65,10 @@ public class ICIPModelUploadController {
             ICIPDataset datasetForModel = new ICIPDataset();
             ICIPDatasource datasource = datasourceService.getDatasource(
                     requestBody.getDatasource(), requestBody.getOrganisation());
+            if (datasource == null) {
+                logger.error("Datasource not found: name={}, org={}", requestBody.getDatasource(), requestBody.getOrganisation());
+                return new ResponseEntity<>("Datasource not found: " + requestBody.getDatasource(), HttpStatus.NOT_FOUND);
+            }
             datasetForModel.setDatasource(datasource);
             datasetForModel.setOrganization(requestBody.getOrganisation());
             datasetForModel.setAttributes(requestBody.getAttributes());
