@@ -6,7 +6,6 @@
     <mat-select [(ngModel)]="userId" name="userId">
       <mat-option *ngFor="let u of users" [value]="u.id">
         {{ u.name }}
-        <span style="font-size:11px;opacity:0.55;margin-left:4px;">[#{{ u.id }}]</span>
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -16,7 +15,6 @@
     <mat-select [(ngModel)]="roleId" name="roleId">
       <mat-option *ngFor="let role of roles" [value]="role.id">
         {{ getDisplayRoleName(role.name) }}
-        <span style="font-size:11px;opacity:0.55;margin-left:4px;">(rank {{ role.rank }})</span>
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -27,7 +25,6 @@
     <mat-select [(ngModel)]="selectedOrgGrantId" name="organizationId" (ngModelChange)="onOrganizationChange()">
       <mat-option *ngFor="let o of orgOptions" [value]="o.grantId">
         {{ o.name }}
-        <span style="font-size:11px;opacity:0.55;margin-left:4px;">[#{{ o.nativeId }} · {{ o.source }}]</span>
       </mat-option>
     </mat-select>
   </mat-form-field>
