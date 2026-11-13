@@ -60,16 +60,16 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadDashboardData(): void {
+    // Fetch pipeline lists with a large size so the visible-item count is derived from
+    // the same visibility-filtered list that the user actually sees, avoiding the
+    // backend count endpoint mismatch (count ignores visibility filter; list does not).
     forkJoin({
       connections:    this.getDatasources().pipe(catchError(() => of([]))),
-      datasets:       this.getDatasetsLen().pipe(catchError(() => of(0))),
+      datasets:       this.getDatasetsCount().pipe(catchError(() => of(0))),
       models:         this.getCountModels().pipe(catchError(() => of(0))),
-      agentCount:     this.getPipelinesCount('pipeline-agent').pipe(catchError(() => of(0))),
-      mcpCount:       this.getPipelinesCount('mcp-pipeline', 'mcpServer').pipe(catchError(() => of(0))),
-      appCount:       this.getPipelinesCount('app-pipeline', 'appPipeline').pipe(catchError(() => of(0))),
-      agentPipelines: this.getPipelinesByInterfaceType('pipeline-agent', null, 1, 3).pipe(catchError(() => of([]))),
-      mcpPipelines:   this.getPipelinesByInterfaceType('mcp-pipeline', 'mcpServer', 1, 3).pipe(catchError(() => of([]))),
-      appPipelines:   this.getPipelinesByInterfaceType('app-pipeline', 'appPipeline', 1, 3).pipe(catchError(() => of([]))),
+      agentPipelines: this.getPipelinesByInterfaceType('pipeline-agent', null, 1, 500).pipe(catchError(() => of([]))),
+      mcpPipelines:   this.getPipelinesByInterfaceType('mcp-pipeline', 'mcpServer', 1, 500).pipe(catchError(() => of([]))),
+      appPipelines:   this.getPipelinesByInterfaceType('app-pipeline', 'appPipeline', 1, 500).pipe(catchError(() => of([]))),
     }).subscribe(results => {
       const connCount = Array.isArray(results.connections) ? results.connections.length : 0;
       this.moduleStats[0].count = connCount;
@@ -83,21 +83,21 @@ export class DashboardComponent implements OnInit {
       this.moduleStats[2].count = mdlCount;
       this.moduleStats[2].sub   = `${mdlCount} total`;
 
-      const agentCount = Number(results.agentCount) || 0;
-      this.moduleStats[3].count = agentCount;
-      this.moduleStats[3].sub   = `${agentCount} total`;
+      // Count derived from the actual visible list (matches what the pipeline page shows)
+      const agentArr = Array.isArray(results.agentPipelines) ? results.agentPipelines : [];
+      const mcpArr   = Array.isArray(results.mcpPipelines)   ? results.mcpPipelines   : [];
+      const appArr   = Array.isArray(results.appPipelines)   ? results.appPipelines   : [];
 
-      const mcpCount = Number(results.mcpCount) || 0;
-      this.moduleStats[4].count = mcpCount;
-      this.moduleStats[4].sub   = `${mcpCount} total`;
+      this.moduleStats[3].count = agentArr.length;
+      this.moduleStats[3].sub   = `${agentArr.length} total`;
+      this.moduleStats[4].count = mcpArr.length;
+      this.moduleStats[4].sub   = `${mcpArr.length} total`;
+      this.moduleStats[5].count = appArr.length;
+      this.moduleStats[5].sub   = `${appArr.length} total`;
 
-      const appCount = Number(results.appCount) || 0;
-      this.moduleStats[5].count = appCount;
-      this.moduleStats[5].sub   = `${appCount} total`;
-
-      this.topAgentPipelines = this.mapToPipelineCards(results.agentPipelines, 'fa-code-fork');
-      this.topMcpPipelines   = this.mapToPipelineCards(results.mcpPipelines,   'fa-server');
-      this.topAppPipelines   = this.mapToPipelineCards(results.appPipelines,   'fa-window-restore');
+      this.topAgentPipelines = this.mapToPipelineCards(agentArr.slice(0, 3), 'fa-code-fork');
+      this.topMcpPipelines   = this.mapToPipelineCards(mcpArr.slice(0, 3),   'fa-server');
+      this.topAppPipelines   = this.mapToPipelineCards(appArr.slice(0, 3),   'fa-window-restore');
     });
   }
 
@@ -108,10 +108,11 @@ export class DashboardComponent implements OnInit {
       .pipe(map(r => r.body));
   }
 
-  private getDatasetsLen() {
+  private getDatasetsCount() {
     const org = sessionStorage.getItem('organization') || '';
+    const params = new HttpParams().set('project', org).set('isTemplate', 'false');
     return this.https
-      .get<any>(`${this.api}/datasets/len/${org}`, { observe: 'response', params: { search: '' } })
+      .get<any>(`${this.api}/service/v1/datasets/list/count`, { observe: 'response', params })
       .pipe(map(r => r.body));
   }
 
@@ -119,14 +120,6 @@ export class DashboardComponent implements OnInit {
     const org = sessionStorage.getItem('organization') || '';
     return this.https
       .get<any>(`${this.api}/service/v1/models/count/${org}`, { observe: 'response', params: new HttpParams() })
-      .pipe(map(r => r.body));
-  }
-
-  private getPipelinesCount(interfacetype: string, type?: string) {
-    let params = this.basePipelineParams(interfacetype);
-    if (type) params = params.set('type', type);
-    return this.https
-      .get<any>(`${this.api}/service/v1/pipelines/count`, { observe: 'response', params })
       .pipe(map(r => r.body));
   }
 
