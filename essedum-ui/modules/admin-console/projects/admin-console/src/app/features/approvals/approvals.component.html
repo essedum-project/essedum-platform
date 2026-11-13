@@ -131,10 +131,10 @@
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
           <div class="approval-actions">
-            <button mat-button class="btn-approve" (click)="approveStreamingService(row.cid)">
+            <button mat-button class="btn-approve" (click)="approveStreamingService(row.alias || row.name, row.cid)">
               <mat-icon>check</mat-icon> Approve
             </button>
-            <button mat-button class="btn-reject" (click)="rejectStreamingService(row.cid)">
+            <button mat-button class="btn-reject" (click)="rejectStreamingService(row.alias || row.name, row.cid)">
               <mat-icon>close</mat-icon> Reject
             </button>
           </div>
@@ -201,10 +201,10 @@
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
           <div class="approval-actions">
-            <button mat-button class="btn-approve" (click)="approveStreamingService(row.cid, true)">
+            <button mat-button class="btn-approve" (click)="approveStreamingService(row.alias || row.name, row.cid, true)">
               <mat-icon>check</mat-icon> Approve
             </button>
-            <button mat-button class="btn-reject" (click)="rejectStreamingService(row.cid, true)">
+            <button mat-button class="btn-reject" (click)="rejectStreamingService(row.alias || row.name, row.cid, true)">
               <mat-icon>close</mat-icon> Reject
             </button>
           </div>
@@ -269,10 +269,10 @@
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
           <div class="approval-actions">
-            <button mat-button class="btn-approve" (click)="approveStreamingService(row.cid, false, true)">
+            <button mat-button class="btn-approve" (click)="approveStreamingService(row.alias || row.name, row.cid, false, true)">
               <mat-icon>public</mat-icon> Publish Globally
             </button>
-            <button mat-button class="btn-reject" (click)="rejectStreamingService(row.cid, false, true)">
+            <button mat-button class="btn-reject" (click)="rejectStreamingService(row.alias || row.name, row.cid, false, true)">
               <mat-icon>close</mat-icon> Reject
             </button>
           </div>
@@ -331,8 +331,8 @@
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
           <div class="approval-actions">
-            <button mat-button class="btn-approve" (click)="approveDataset(row.id)"><mat-icon>check</mat-icon> Approve</button>
-            <button mat-button class="btn-reject" (click)="rejectDataset(row.id)"><mat-icon>close</mat-icon> Reject</button>
+            <button mat-button class="btn-approve" (click)="approveDataset(row.alias || row.name, row.id)"><mat-icon>check</mat-icon> Approve</button>
+            <button mat-button class="btn-reject" (click)="rejectDataset(row.alias || row.name, row.id)"><mat-icon>close</mat-icon> Reject</button>
           </div>
         </td>
       </ng-container>
@@ -368,8 +368,8 @@
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
           <div class="approval-actions">
-            <button mat-button class="btn-approve" (click)="approveDataset(row.id, true)"><mat-icon>check</mat-icon> Approve</button>
-            <button mat-button class="btn-reject" (click)="rejectDataset(row.id, true)"><mat-icon>close</mat-icon> Reject</button>
+            <button mat-button class="btn-approve" (click)="approveDataset(row.alias || row.name, row.id, true)"><mat-icon>check</mat-icon> Approve</button>
+            <button mat-button class="btn-reject" (click)="rejectDataset(row.alias || row.name, row.id, true)"><mat-icon>close</mat-icon> Reject</button>
           </div>
         </td>
       </ng-container>
@@ -405,8 +405,8 @@
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
           <div class="approval-actions">
-            <button mat-button class="btn-approve" (click)="approveDataset(row.id, false, true)"><mat-icon>public</mat-icon> Publish Globally</button>
-            <button mat-button class="btn-reject" (click)="rejectDataset(row.id, false, true)"><mat-icon>close</mat-icon> Reject</button>
+            <button mat-button class="btn-approve" (click)="approveDataset(row.alias || row.name, row.id, false, true)"><mat-icon>public</mat-icon> Publish Globally</button>
+            <button mat-button class="btn-reject" (click)="rejectDataset(row.alias || row.name, row.id, false, true)"><mat-icon>close</mat-icon> Reject</button>
           </div>
         </td>
       </ng-container>
