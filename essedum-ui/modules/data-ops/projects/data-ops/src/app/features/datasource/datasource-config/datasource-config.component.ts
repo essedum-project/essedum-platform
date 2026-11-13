@@ -419,45 +419,33 @@ export class DatasourceConfigComponent implements OnInit {
   }
   getdatasourceTypes() {
     try {
-      let size = 0;
-      this.Services.getPluginsLength().
-        subscribe(
-          response => {
-            let s = new Number(response)
-            size = s.valueOf()
-            // size = response
-          }, err => { this.Services.message("Unable to fetch Connection types",'error' ) },
-          () => {
-            //console.log("Modal-config")
-            this.Services.getDatasourceJson(0, size)
-              .subscribe(res => {
-                this.datasourceTypes = res;
-                this.uischema = res[0].uischema;
-                this.attributes = res[0].attributes;
-                this.datasourceTypes.sort((a, b) => a.type.toLowerCase() < b.type.toLowerCase() ? -1 : 1);
-                this.datasourceTypes.forEach((opt) => {
-                  let val = { viewValue: opt.type, value: opt.type };
-                  this.typeOptions.push(val)
-                })
-                if (!this.data.id) {
-                  this.type = this.matData.group != 'NA' ? this.matData.group : 'SQL'
-                  this.sourceType = this.datasourceTypes.filter(row => row.type === this.type)[0];
-                  this.category = this.sourceType?.category;
-                } else {
-                  this.type = this.data.type;
-                  this.category = this.data.category;
-                  this.sourceType['category'] = this.data.category;
-                  this.sourceType['type'] = this.type;
-                  this.sourceType['attributes'] = JSON.parse(this.data.connectionDetails);
-                }
-                if (this.sourceType?.attributes)
-                  Object.keys(this.sourceType.attributes).forEach(keyValue => {
-                    this.keys.push(keyValue);
-                  });
-              }, error => {
-                this.Services.message("Unable to fetch Connection types ","error")
-              });
-          });
+      // The backend ignores page/size for connection types and returns the full plugin list,
+      // so fetch it directly rather than gating on the separate length call.
+      this.Services.getDatasourceJson(0, 100)
+        .subscribe(res => {
+          this.datasourceTypes = Array.isArray(res) ? res : [];
+          this.uischema = this.datasourceTypes[0]?.uischema;
+          this.attributes = this.datasourceTypes[0]?.attributes;
+          this.datasourceTypes.sort((a, b) => a.type.toLowerCase() < b.type.toLowerCase() ? -1 : 1);
+          this.typeOptions = this.datasourceTypes.map(opt => ({ viewValue: opt.type, value: opt.type }));
+          if (!this.data.id) {
+            this.type = this.matData.group != 'NA' ? this.matData.group : 'SQL'
+            this.sourceType = this.datasourceTypes.filter(row => row.type === this.type)[0];
+            this.category = this.sourceType?.category;
+          } else {
+            this.type = this.data.type;
+            this.category = this.data.category;
+            this.sourceType['category'] = this.data.category;
+            this.sourceType['type'] = this.type;
+            this.sourceType['attributes'] = JSON.parse(this.data.connectionDetails);
+          }
+          if (this.sourceType?.attributes)
+            Object.keys(this.sourceType.attributes).forEach(keyValue => {
+              this.keys.push(keyValue);
+            });
+        }, error => {
+          this.Services.message("Unable to fetch Connection types ", "error")
+        });
     }
     catch (Exception) {
       this.Services.message("Some error occured", "error")

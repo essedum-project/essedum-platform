@@ -594,7 +594,7 @@ export class ConnectionViewComponent implements OnInit {
       { headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }), observe: 'response' }
     ).subscribe({
       next: () => {
-        this.Services.message('Connection submitted for approval');
+        this.Services.message(`Connection "${this.data.alias || this.data.name}" submitted for approval`);
         this.data.approval_status = 'PENDING_PROJECT_APPROVAL';
         this.data.approvalStatus = 'PENDING_PROJECT_APPROVAL';
         this.getDatasourceByName();
