@@ -519,27 +519,27 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  approveDatasource(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+  approveDatasource(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
     const apiCall$ = isPlatformLevel
       ? this.api.approveDatasourcePlatformApproval(resourceId)
       : isOrgLevel
         ? this.api.approveDatasourceOrgApproval(resourceId)
         : this.api.approveDatasourceProjectApproval(resourceId, this.projectId || 0);
     apiCall$.subscribe({
-      next: () => { this.notify.success('Connection approved successfully'); this.load(); },
-      error: err => this.notify.error(err?.error?.message || 'Failed to approve'),
+      next: () => { this.notify.success(`${name} approved successfully`); this.load(); },
+      error: () => this.notify.error(`Failed to approve ${name}`),
     });
   }
 
-  rejectDatasource(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+  rejectDatasource(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
     const apiCall$ = isPlatformLevel
       ? this.api.rejectDatasourcePlatformApproval(resourceId)
       : isOrgLevel
         ? this.api.rejectDatasourceOrgApproval(resourceId)
         : this.api.rejectDatasourceProjectApproval(resourceId);
     apiCall$.subscribe({
-      next: () => { this.notify.success('Connection rejected successfully'); this.load(); },
-      error: err => this.notify.error(err?.error?.message || 'Failed to reject'),
+      next: () => { this.notify.success(`${name} rejected successfully`); this.load(); },
+      error: () => this.notify.error(`Failed to reject ${name}`),
     });
   }
 
@@ -594,27 +594,27 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  approveModel(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+  approveModel(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
     const apiCall$ = isPlatformLevel
       ? this.api.approveModelPlatformApproval(resourceId)
       : isOrgLevel
         ? this.api.approveModelOrgApproval(resourceId)
         : this.api.approveModelProjectApproval(resourceId, this.projectId || 0);
     apiCall$.subscribe({
-      next: () => { this.notify.success('Model approved successfully'); this.load(); },
-      error: err => this.notify.error(err?.error?.message || 'Failed to approve'),
+      next: () => { this.notify.success(`${name} approved successfully`); this.load(); },
+      error: () => this.notify.error(`Failed to approve ${name}`),
     });
   }
 
-  rejectModel(resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+  rejectModel(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
     const apiCall$ = isPlatformLevel
       ? this.api.rejectModelPlatformApproval(resourceId)
       : isOrgLevel
         ? this.api.rejectModelOrgApproval(resourceId)
         : this.api.rejectModelProjectApproval(resourceId);
     apiCall$.subscribe({
-      next: () => { this.notify.success('Model rejected successfully'); this.load(); },
-      error: err => this.notify.error(err?.error?.message || 'Failed to reject'),
+      next: () => { this.notify.success(`${name} rejected successfully`); this.load(); },
+      error: () => this.notify.error(`Failed to reject ${name}`),
     });
   }
 
