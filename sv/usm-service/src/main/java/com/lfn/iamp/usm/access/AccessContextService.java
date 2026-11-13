@@ -156,8 +156,16 @@ public class AccessContextService {
 			throw new IllegalArgumentException("A role assignment scopes to at most one of organization/project");
 		}
 		// Reject duplicate active assignments with a clear 409 so the UI can surface a meaningful error.
-		if (roleAssignmentRepository.existsByUserIdAndRoleIdAndOrganizationIdAndProjectIdAndRevokedAtIsNull(
-				userId, roleId, organizationId, projectId)) {
+		// NOTE: Spring Data derived-query existsBy... passes null as "= null" in SQL (not "IS NULL"),
+		// so it always returns false for nullable columns. Use a Java-level check with Objects.equals()
+		// which correctly treats null == null as equal.
+		boolean isDuplicate = roleAssignmentRepository.findByUserIdAndRevokedAtIsNull(userId)
+				.stream()
+				.anyMatch(existing ->
+						existing.getRoleId().equals(roleId)
+						&& java.util.Objects.equals(existing.getOrganizationId(), organizationId)
+						&& java.util.Objects.equals(existing.getProjectId(), projectId));
+		if (isDuplicate) {
 			throw new org.springframework.web.server.ResponseStatusException(
 					org.springframework.http.HttpStatus.CONFLICT,
 					"User already has this role for the selected scope. Please choose a different role or scope.");

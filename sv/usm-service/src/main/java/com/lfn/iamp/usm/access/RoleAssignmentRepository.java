@@ -14,8 +14,4 @@ public interface RoleAssignmentRepository extends JpaRepository<RoleAssignment, 
 
 	/** Active assignments for a given user scoped to a specific project (direct grants only). */
 	List<RoleAssignment> findByUserIdAndProjectIdAndRevokedAtIsNull(Integer userId, Integer projectId);
-
-	/** Returns true when an active assignment with the exact same scope already exists. */
-	boolean existsByUserIdAndRoleIdAndOrganizationIdAndProjectIdAndRevokedAtIsNull(
-			Integer userId, Integer roleId, Integer organizationId, Integer projectId);
 }
