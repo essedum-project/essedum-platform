@@ -21,6 +21,12 @@
                                 <span class="lfx-u-mar-l-16 lfx-c-badge float-end"
                                     [ngClass]="[card.status=='Registered'?'lfx-c-badge--blue ':'lfx-c-badge--active',card.status=='Undeployed' || card.status == 'Failed' ?'lfx-c-badge--warning ':'lfx-c-badge--active']">{{card.status}}</span>
                             </div>
+                            <div class="d-flex align-items-center" *ngIf="card">
+                                <span *ngIf="hasApprovalStatus()"
+                                    class="model-approval-badge model-approval-badge--{{ getApprovalStatusClass() }}">{{ getApprovalStatusLabel() }}</span>
+                                <button *ngIf="showSubmitButton()" class="btn-submit-approval" [disabled]="approvalSubmitting"
+                                    (click)="submitForApproval()">Submit for Approval</button>
+                            </div>
 
                         </div>
                         <div
