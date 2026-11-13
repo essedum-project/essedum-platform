@@ -1001,9 +1001,9 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       scopedRoles.push({ name: roleName, rank: rank, id: a.roleId });
     }
     scopedRoles.sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
-    if (scopedRoles.length > 0) {
-      this.roleList = scopedRoles;
-    }
+    // Always overwrite roleList — even when empty — so stale roles from a
+    // previous context don't persist when the current project/org has no grants.
+    this.roleList = scopedRoles;
   }
 
   /**
@@ -1114,9 +1114,11 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
 
         this.isRoleLoading = false;
 
+        // Always update roleList (even when empty) so stale roles from a previous
+        // project don't persist when the new project has no granted roles.
+        this.roleList = scopedRoles;
+        sessionStorage.setItem('_rbac_role_list', JSON.stringify(scopedRoles));
         if (scopedRoles.length > 0) {
-          this.roleList = scopedRoles;
-          sessionStorage.setItem('_rbac_role_list', JSON.stringify(scopedRoles));
           this._lastManualRoleSwitch = 0;
           this.valuechangerole(scopedRoles[0]);
         }
