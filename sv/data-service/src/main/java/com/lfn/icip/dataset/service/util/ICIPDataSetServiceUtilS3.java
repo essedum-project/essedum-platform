@@ -184,12 +184,17 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
             String uploadFile = attributes.optString(UPLOAD_FILE_KEY);
             String url = connectionDetails.optString("url");
             if (uploadFile != null && !uploadFile.isBlank()) {
-                if (url.contains("aws")) {
-                    uploadFileToS3(dataset, uploadFile, buildS3Client(dataset));
-                } else if (url.contains("storage.googleapis.com") || url.contains("google")) {
-                    uploadFileToGCP(dataset,uploadFile, buildGcsClient(dataset));
-                } else {
-                    upload(dataset, uploadFile);
+                try {
+                    if (url.contains("aws")) {
+                        uploadFileToS3(dataset, uploadFile, buildS3Client(dataset));
+                    } else if (url.contains("storage.googleapis.com") || url.contains("google")) {
+                        uploadFileToGCP(dataset, uploadFile, buildGcsClient(dataset));
+                    } else {
+                        upload(dataset, uploadFile);
+                    }
+                } catch (Exception uploadEx) {
+                    // Upload failure (e.g. SSRF block, missing file) must not abort the connection test.
+                    logger.warn("Pre-upload during connection test failed (connection test will still run): {}", uploadEx.getMessage());
                 }
             }
 
@@ -295,7 +300,10 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
             logger.info("AWS S3 connection successful. Buckets found: {}", bucketsResponse.buckets().size());
             String uploadFile = new JSONObject(dataset.getAttributes()).optString(UPLOAD_FILE_KEY);
             if (uploadFile != null && !uploadFile.isBlank()) {
-                return uploadFileToS3(dataset, uploadFile, s3Client);
+                boolean uploaded = uploadFileToS3(dataset, uploadFile, s3Client);
+                if (!uploaded) {
+                    logger.warn("File upload to S3 failed for '{}', but connection is valid.", uploadFile);
+                }
             }
             return true;
         } catch (Exception e) {
