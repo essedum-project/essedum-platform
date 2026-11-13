@@ -5099,7 +5099,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       return false;
     }
 
-    const createdBy = (this.streamItem.created_by || '').toLowerCase();
+    const rawCreatedBy = (this.streamItem.created_by || '').toLowerCase();
+    const createdBy = rawCreatedBy.includes('@') ? rawCreatedBy.split('@')[0] : rawCreatedBy;
     const userLogin = this.currentUserLogin.toLowerCase();
     const isOwned = createdBy === userLogin;
 
