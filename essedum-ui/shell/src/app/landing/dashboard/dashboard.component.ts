@@ -142,8 +142,13 @@ export class DashboardComponent implements OnInit {
 
   private basePipelineParams(interfacetype: string): HttpParams {
     const org = sessionStorage.getItem('organization') || '';
+    let projectName = org;
+    try {
+      const proj = JSON.parse(sessionStorage.getItem('project') || '{}');
+      if (proj?.name) projectName = proj.name;
+    } catch {}
     return new HttpParams()
-      .set('project', org)
+      .set('project', projectName)
       .set('isCached', 'true')
       .set('adapter_instance', 'internal')
       .set('interfacetype', interfacetype)
