@@ -482,7 +482,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.datasourceDraftsDataSource.data = [...this.datasourceDrafts];
         this.load();
       },
-      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+      error: () => this.notify.error(`Failed to submit ${resource.alias || resource.name}`),
     });
   }
 
@@ -494,7 +494,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.datasourceOrgDraftsDataSource.data = [...this.datasourceOrgDrafts];
         this.load();
       },
-      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+      error: () => this.notify.error(`Failed to submit ${resource.alias || resource.name}`),
     });
   }
 
@@ -541,7 +541,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.modelDraftsDataSource.data = [...this.modelDrafts];
         this.load();
       },
-      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+      error: () => this.notify.error(`Failed to submit ${resource.modelName || resource.model_name}`),
     });
   }
 
@@ -553,7 +553,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.modelOrgDraftsDataSource.data = [...this.modelOrgDrafts];
         this.load();
       },
-      error: err => this.notify.error(err?.error?.message || 'Failed to submit'),
+      error: () => this.notify.error(`Failed to submit ${resource.modelName || resource.model_name}`),
     });
   }
 
