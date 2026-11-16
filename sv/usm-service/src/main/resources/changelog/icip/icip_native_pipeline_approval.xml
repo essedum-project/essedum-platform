@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <!-- ================================================================
+         Native Pipeline Approval Status — Data Migration
+         Author  : Essedum (generated)
+         Date    : 2026-11-10
+         Table   : mlpipeline
+         Purpose : Default all existing NativeScript pipelines without an
+                   approval_status to DRAFT, and add indexes to support
+                   approval-status filtering queries.
+         ================================================================ -->
+
+    <!-- Step 1: Set DRAFT as default approval_status for unset NativeScript pipelines -->
+    <changeSet author="Essedum (generated)" id="2026111001-native-pipeline-approval-draft-default">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="mlpipeline"/>
+        </preConditions>
+        <sql splitStatements="true" stripComments="true">
+            UPDATE mlpipeline
+            SET approval_status = 'DRAFT'
+            WHERE type = 'NativeScript'
+              AND (approval_status IS NULL OR approval_status = '');
+        </sql>
+    </changeSet>
+
+    <!-- Step 2: Index on (approval_status, type) for fast status+type filtering -->
+    <changeSet author="Essedum (generated)" id="2026111002-native-pipeline-approval-idx-status-type">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="mlpipeline" indexName="idx_approval_status_type"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="mlpipeline" indexName="idx_approval_status_type">
+            <column name="approval_status"/>
+            <column name="type"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Step 3: Index on (project_id, approval_status) for project-scoped approval queries -->
+    <changeSet author="Essedum (generated)" id="2026111003-native-pipeline-approval-idx-project-approval">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="mlpipeline" indexName="idx_project_id_approval"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="mlpipeline" indexName="idx_project_id_approval">
+            <column name="project_id"/>
+            <column name="approval_status"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Step 4: Add rejection_reason column for storing admin rejection notes -->
+    <changeSet author="Essedum (generated)" id="2026111004-native-pipeline-approval-rejection-reason">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="mlpipeline" columnName="rejection_reason"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="mlpipeline">
+            <column name="rejection_reason" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

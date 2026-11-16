@@ -1,0 +1,37 @@
+{
+  "name": "@essedum/admin-console",
+  "version": "0.1.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "node --max_old_space_size=10240 ./node_modules/@angular/cli/bin/ng serve --port 8090 --proxy-config proxy.config.js",
+    "build": "node --max_old_space_size=10240 ./node_modules/@angular/cli/bin/ng build --watch --configuration development",
+    "build-prod": "npm run build:prod",
+    "build:prod": "node --max_old_space_size=10240 ./node_modules/@angular/cli/bin/ng build admin-console --configuration production --aot=true",
+    "test": "ng test"
+  },
+  "dependencies": {
+    "@angular-architects/module-federation": "^20.0.0",
+    "@angular/animations": "^20.0.0",
+    "@angular/cdk": "^20.0.0",
+    "@angular/common": "^20.0.0",
+    "@angular/compiler": "^20.0.0",
+    "@angular/core": "^20.0.0",
+    "@angular/forms": "^20.0.0",
+    "@angular/material": "^20.0.0",
+    "@angular/platform-browser": "^20.0.0",
+    "@angular/platform-browser-dynamic": "^20.0.0",
+    "@angular/router": "^20.0.0",
+    "rxjs": "^7.8.1",
+    "tslib": "^2.3.0",
+    "zone.js": "0.15.1"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^20.0.0",
+    "@angular/build": "^20.0.0",
+    "@angular/cli": "^20.0.0",
+    "@angular/compiler-cli": "^20.0.0",
+    "ngx-build-plus": "^20.0.0",
+    "sass": "^1.71.0",
+    "typescript": "~5.8.3"
+  }
+}

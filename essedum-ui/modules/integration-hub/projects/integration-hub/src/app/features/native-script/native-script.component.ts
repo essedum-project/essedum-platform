@@ -22,10 +22,13 @@ import { NativeScriptDialogComponent } from './native-script-dialog/native-scrip
 import { PipelineCreateComponent } from '../pipeline/pipeline-create/pipeline-create.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { HttpParams } from '@angular/common/http';
+import { HttpParams, HttpHeaders, HttpClient } from '@angular/common/http';
 import { DynamicParamsGrid, DynamicSecretsGrid } from './pipeline.models';
 import { NotebookDialogComponent, NotebookDialogData } from '../pipeline.description/notebook-dialog/notebook-dialog.component';
 import { io } from 'socket.io-client';
+import { Subject } from 'rxjs';
+import { takeUntil, timeout, catchError, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 interface FileNode {
   name: string;
@@ -146,6 +149,17 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     secretsEditMode: boolean = false;
     secretsShowValue: boolean[] = [];
     private _saveDebounceTimer: any = null;
+
+    // Approval workflow properties
+    approvalStatus: string = 'DRAFT';
+    isSubmittingForApproval: boolean = false;
+    submitError: string = '';
+    private currentUserLogin: string = '';
+    private currentProjectId: number | null = null;
+    private userOrganization: string = '';
+    private userRank: number = 0;
+    private destroy$ = new Subject<void>();
+
   constructor(
     @Inject('envi') private baseUrl: string,
     private service: Services,
@@ -153,7 +167,8 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     private _location: Location,
     private router: Router,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef 
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
   ) 
  
   {
@@ -167,6 +182,8 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
+    this.extractUserContext();
+    
     this.route.params.subscribe((params) => {
       if (params['cname']) {
         this.cardName = params['cname'];
@@ -191,9 +208,49 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.authentications();
   }
   getStreamService() {
-    this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
+    const org1 = this.organisation;
+    const org2 = sessionStorage.getItem('organization') || '';
+    // Navigation state is set by agent-pipeline-dashboard using the pipeline's ACTUAL stored org.
+    // Use it as final fallback when both org lookups fail (pipeline org != URL/sessionStorage org).
+    const navState = ((window as any).history?.state || {}) as any;
+    const navStreamItem = navState?.streamItem;
+
+    this.service.getStreamingServicesByName(this.cardName, org1).pipe(
+      switchMap((res: any) => {
+        if ((!res || !res.cid) && org2 && org2 !== org1) {
+          console.debug('[NativeScript] Primary org lookup returned no cid, retrying with fallback org:', org2);
+          return this.service.getStreamingServicesByName(this.cardName, org2);
+        }
+        return of(res);
+      }),
+      switchMap((res: any) => {
+        if ((!res || !res.cid) && navStreamItem?.cid && navStreamItem?.name === this.cardName) {
+          console.debug('[NativeScript] API lookup failed, using navigation state streamItem:', navStreamItem.name, 'org:', navStreamItem.organization);
+          return of(navStreamItem);
+        }
+        return of(res);
+      })
+    ).subscribe((res) => {
       this.streamItem = res;
-      this.pipelineAlias = res.alias;
+      
+      // Set pipeline name/alias FIRST - with fallback to ensure it always displays
+      this.pipelineAlias = res.alias || res.name || this.cardName;
+      const resAny = res as any;
+      console.debug('[NativeScript] Pipeline loaded:', {
+        name: res.name,
+        alias: res.alias,
+        displayName: this.pipelineAlias,
+        cid: res.cid,
+        id: resAny.id,
+        created_by: resAny.created_by
+      });
+      
+      // Extract approval_status from response for approval workflow
+      if (res.approval_status) {
+        this.approvalStatus = res.approval_status;
+        console.debug('[NativeScript] Pipeline approval status:', this.approvalStatus);
+      }
+      
       // Restore persistent container deployment state
       try {
         const parsed = JSON.parse(res.json_content || '{}');
@@ -208,21 +265,24 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
             this.containerDeployLogs = cd.buildLogs;
           }
         }
-      } catch {}
+      } catch (e) {
+        console.warn('[NativeScript] Could not parse containerDeployment state:', e);
+      }
 
       // Load files for code explorer
       // Files will be loaded after data is parsed in try block below
 
       if (this.router.url.includes('preview')) {
-        this.pipelineAlias = this.streamItem.alias;
+        this.pipelineAlias = res.alias || res.name || this.cardName;
       }
+      const org = this.streamItem.organization || this.organisation || 'unknown-org';
       this.uploader = new FileUploader({
         url:
           this.baseUrl +
           '/file/pipeline/native/upload/' +
           this.streamItem.name +
           '/' +
-          this.streamItem.organization,
+          org,
       });
       try {
         if (this.runtypesCheck == true) this.fetchRunTypes();
@@ -351,6 +411,94 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
+  /**
+   * Extract user context from sessionStorage for approval workflow
+   * Used to build HTTP headers for API calls with user context
+   */
+  private extractUserContext(): void {
+    try {
+      // Extract user login from sessionStorage - try multiple fields
+      const userSession = sessionStorage.getItem('user');
+      if (userSession) {
+        const user = JSON.parse(userSession);
+        console.debug('[NativeScript] Raw user session:', user);
+        
+        // Try multiple possible fields for user login
+        let rawLogin = (user.user_login || user.username || user.name || user.preferred_username || user.email || '').toLowerCase();
+        
+        // Extract email prefix if full email was found
+        if (rawLogin.includes('@')) {
+          this.currentUserLogin = rawLogin.split('@')[0].toLowerCase();
+        } else {
+          this.currentUserLogin = rawLogin.toLowerCase();
+        }
+      }
+
+      // Extract project ID from multiple sources
+      const projectSession = sessionStorage.getItem('project');
+      if (projectSession) {
+        const project = JSON.parse(projectSession);
+        this.currentProjectId = project?.id ? Number(project.id) : null;
+      }
+
+      // Extract organization
+      this.userOrganization = sessionStorage.getItem('organization') || '';
+
+      // Extract user rank from sessionStorage
+      const roleSession = sessionStorage.getItem('role');
+      if (roleSession) {
+        const role = JSON.parse(roleSession);
+        this.userRank = role?.rank != null ? Number(role.rank) : 0;
+      }
+
+      console.debug('[NativeScript] User context extracted:', {
+        currentUserLogin: this.currentUserLogin,
+        currentProjectId: this.currentProjectId,
+        userOrganization: this.userOrganization,
+        userRank: this.userRank
+      });
+    } catch (error) {
+      console.error('[NativeScript] Error extracting user context:', error);
+      console.debug('[NativeScript] SessionStorage contents:', {
+        user: sessionStorage.getItem('user'),
+        project: sessionStorage.getItem('project'),
+        organization: sessionStorage.getItem('organization'),
+        role: sessionStorage.getItem('role')
+      });
+    }
+  }
+
+  /**
+   * Build HTTP headers with user context for approval workflow filtering
+   */
+  private buildHttpOptions(): any {
+    try {
+      let headers = new HttpHeaders();
+      let hasHeaders = false;
+
+      if (this.currentUserLogin) {
+        headers = headers.set('user-login', this.currentUserLogin);
+        hasHeaders = true;
+      }
+      if (this.currentProjectId !== null && this.currentProjectId !== undefined) {
+        headers = headers.set('project', String(this.currentProjectId));
+        hasHeaders = true;
+      }
+      if (this.userOrganization) {
+        headers = headers.set('organisation', this.userOrganization);
+        hasHeaders = true;
+      }
+      if (this.userRank >= 0) {
+        headers = headers.set('roleId', String(this.userRank));
+        hasHeaders = true;
+      }
+
+      return hasHeaders ? { headers } : {};
+    } catch (error) {
+      console.warn('[NativeScript] Error building HTTP options:', error);
+      return {};
+    }
+  }
 
   ngOnChanges() {
     this.ngOnInit();
@@ -463,7 +611,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.service
       .readNativeFile(
         this.streamItem.name,
-        this.streamItem.organization,
+        this.streamItem.organization || this.organisation || 'unknown-org',
         encodedFilename
       )
       .subscribe({
@@ -561,7 +709,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.service
       .downloadNativeFile(
         this.streamItem.name,
-        this.streamItem.organization,
+        this.streamItem.organization || this.organisation || 'unknown-org',
         filename
       )
       .subscribe(
@@ -623,6 +771,16 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
   }
   saveJson(pname: string) {
     try {
+      // Validate pipeline name parameter - use fallbacks
+      if (!pname) {
+        console.warn('[NativeScript] saveJson called with undefined pname, using fallbacks:', {
+          pname: pname,
+          streamItemName: this.streamItem?.name,
+          dataName: this.data?.name
+        });
+        pname = this.streamItem?.name || this.data?.name || this.cardName || 'pipeline';
+      }
+
       if (!this.data.files) {
         this.data.files = [];
       }
@@ -634,14 +792,24 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
       // which fails the backend equalsIgnoreCase check against the sanitized DB filename
       // ("LEONTVR17807_leo1311.py"), causing the blob update to be silently skipped.
       const sanitizedName = pname.replace(/[^a-zA-Z0-9_]/g, '');
-      const targetFileName = `${sanitizedName}_${this.streamItem.organization}.py`;
+      const org = this.streamItem.organization || this.organisation || 'unknown-org';
+      const targetFileName = `${sanitizedName}_${org}.py`;
 
       let scriptContent = this.script.join('\n');
+
+      console.debug('[NativeScript] Saving file with organization fallback:', {
+        pname,
+        sanitizedName,
+        organization: this.streamItem.organization,
+        fallbackOrganisation: this.organisation,
+        finalOrg: org,
+        targetFileName
+      });
 
       this.service
         .createNativeFile(
           pname,
-          this.streamItem.organization,
+          org,
           targetFileName,
           'Python3',
           scriptContent
@@ -1078,6 +1246,9 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.disconnectContainerSocket();
+    // Cleanup approval workflow subscriptions
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   copyPipeline() {
@@ -1558,7 +1729,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // Re-fetch the streaming service data to get updated file list
-    this.service.getStreamingServicesByName(this.streamItem.name).subscribe({
+    this.service.getStreamingServicesByName(this.streamItem.name, this.streamItem.organization || this.organisation).subscribe({
       next: (serviceData) => {
         if (serviceData && serviceData.json_content) {
           this.streamItem = serviceData;
@@ -1654,7 +1825,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
         
         this.service.readNativeFile(
           this.streamItem.name,
-          this.streamItem.organization,
+          this.streamItem.organization || this.organisation || 'unknown-org',
           oldFileName
         ).subscribe({
           next: (fileContent) => {
@@ -1734,4 +1905,162 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   hasChild = (_: number, node: FileNode) => !!node.children && node.children.length > 0;
+
+  /**
+   * Check if current user is the creator of this native pipeline
+   */
+  isOwnPipeline(): boolean {
+    if (!this.streamItem || !this.currentUserLogin) {
+      console.debug('[NativeScript] isOwnPipeline check failed:', {
+        hasStreamItem: !!this.streamItem,
+        hasCurrentUserLogin: !!this.currentUserLogin,
+        currentUserLogin: this.currentUserLogin
+      });
+      return false;
+    }
+    
+    const createdBy = (this.streamItem as any).created_by || '';
+    const createdByLower = createdBy.toLowerCase();
+    const currentUserLower = this.currentUserLogin.toLowerCase();
+    
+    const isOwn = createdByLower === currentUserLower || 
+                  createdByLower.includes(currentUserLower) || 
+                  currentUserLower.includes(createdByLower);
+    
+    console.debug('[NativeScript] isOwnPipeline comparison:', {
+      createdBy: createdBy,
+      createdByLower: createdByLower,
+      currentUserLogin: this.currentUserLogin,
+      currentUserLower: currentUserLower,
+      isOwn: isOwn
+    });
+    
+    return isOwn;
+  }
+
+  /**
+   * Check if creator is allowed to submit for approval (must be in DRAFT status)
+   */
+  canSubmitForApproval(): boolean {
+    const isOwn = this.isOwnPipeline();
+    const isDraft = this.approvalStatus === 'DRAFT';
+    
+    console.debug('[NativeScript] canSubmitForApproval check:', {
+      isOwnPipeline: isOwn,
+      approvalStatus: this.approvalStatus,
+      isDraft: isDraft,
+      canSubmit: isOwn && isDraft
+    });
+    
+    return isOwn && isDraft;
+  }
+
+  /**
+   * Submit native pipeline for approval to Project Admin
+   * Only available for creator when pipeline is in DRAFT status
+   */
+  submitForApproval(): void {
+    if (!this.isOwnPipeline()) {
+      this.service.message('You can only submit your own pipelines for approval', 'warning');
+      return;
+    }
+
+    if (this.approvalStatus !== 'DRAFT') {
+      this.service.message('Only pipelines in DRAFT status can be submitted for approval', 'warning');
+      return;
+    }
+
+    // Comprehensive validation - streamItem must exist
+    if (!this.streamItem) {
+      console.error('[NativeScript] streamItem is null/undefined');
+      this.service.message('Pipeline data not loaded. Please refresh and try again.', 'error');
+      return;
+    }
+
+    // Try multiple ID field names
+    const streamItemAny = this.streamItem as any;
+    const resourceId = this.streamItem.cid || streamItemAny.id || streamItemAny.resourceId;
+    if (!resourceId) {
+      console.error('[NativeScript] No ID field found in streamItem:', {
+        fields: Object.keys(this.streamItem),
+        cid: this.streamItem.cid,
+        id: streamItemAny.id,
+        resourceId: streamItemAny.resourceId
+      });
+      this.service.message('Pipeline ID is missing. Please refresh the page.', 'error');
+      return;
+    }
+
+    // Get current project from session or environment
+    const projectId = this.currentProjectId;
+    if (!projectId) {
+      console.error('[NativeScript] Project ID missing from context:', {
+        currentProjectId: this.currentProjectId
+      });
+      this.service.message('Project ID is missing. Please ensure you are logged in to a project.', 'error');
+      return;
+    }
+
+    this.isSubmittingForApproval = true;
+    this.submitError = '';
+
+    console.debug('[NativeScript] Submitting for approval:', {
+      resourceId: resourceId,
+      projectId: projectId,
+      resourceName: this.streamItem.name,
+      createdBy: this.streamItem.created_by,
+      currentUserLogin: this.currentUserLogin
+    });
+
+    // Call backend API to submit for approval
+    this.http.post(`/api/aip/streamingServices/approval/submit`, {
+      resourceId: resourceId,
+      projectId: projectId
+    }).pipe(
+      timeout(10000),
+      takeUntil(this.destroy$),
+      catchError((error) => {
+        console.error('[NativeScript] Error submitting for approval:', error);
+        this.submitError = error?.error?.message || 'Failed to submit for approval';
+        this.isSubmittingForApproval = false;
+        this.cdr.detectChanges();
+        return of(null);
+      })
+    ).subscribe(
+      (response: any) => {
+        console.debug('[NativeScript] Approval request submitted:', response);
+        this.service.message('Pipeline submitted for project approval', 'success');
+        
+        // Reload pipeline data to get updated approval_status
+        if (this.streamItem?.name && this.streamItem?.organization) {
+          this.http.get<any>(`/api/aip/streamingServices/${this.streamItem.name}/${this.streamItem.organization}`).pipe(
+            timeout(5000),
+            takeUntil(this.destroy$),
+            catchError((reloadErr) => {
+              console.warn('[NativeScript] Could not reload pipeline data:', reloadErr);
+              // Fallback: assume status changed
+              this.approvalStatus = 'PENDING_PROJECT_APPROVAL';
+              this.isSubmittingForApproval = false;
+              this.cdr.detectChanges();
+              return of(null);
+            })
+          ).subscribe((updatedPipeline: any) => {
+            if (updatedPipeline?.approval_status) {
+              console.debug('[NativeScript] Pipeline reloaded with new status:', updatedPipeline.approval_status);
+              this.streamItem.approval_status = updatedPipeline.approval_status;
+              this.approvalStatus = updatedPipeline.approval_status;
+            } else {
+              this.approvalStatus = 'PENDING_PROJECT_APPROVAL';
+            }
+            this.isSubmittingForApproval = false;
+            this.cdr.detectChanges();
+          });
+        } else {
+          this.approvalStatus = 'PENDING_PROJECT_APPROVAL';
+          this.isSubmittingForApproval = false;
+          this.cdr.detectChanges();
+        }
+      }
+    );
+  }
 }

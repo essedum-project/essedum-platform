@@ -60,10 +60,16 @@ public class ICIPDataSourceServiceUtilMySQL extends ICIPDataSourceServiceUtil {
 	 * @param datasource the datasource
 	 * @return true, if successful
 	 */
+	private String normalizeJdbcUrl(String url) {
+		if (url == null || url.startsWith("jdbc:")) return url;
+		String stripped = url.replaceFirst("^https?://", "");
+		return "jdbc:mysql://" + stripped;
+	}
+
 	@Override
 	public boolean testConnection(ICIPDatasource datasource) {
 		JSONObject connectionDetails = new JSONObject(datasource.getConnectionDetails());
-		String url = connectionDetails.optString("url");
+		String url = normalizeJdbcUrl(connectionDetails.optString("url"));
 		String user = connectionDetails.optString("userName");
 		String pstr = connectionDetails.optString(PSTR);
 		if(pstr==null)

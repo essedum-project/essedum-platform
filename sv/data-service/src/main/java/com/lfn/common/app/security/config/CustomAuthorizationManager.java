@@ -83,6 +83,29 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 			return new AuthorizationDecision(false);
 		}
 
+		// All GET requests and dataset/datasource write endpoints are open to any
+		// authenticated non-anonymous user. Data isolation is enforced at the service/org layer.
+		String dataMethod = request.getMethod().toUpperCase();
+		if ("GET".equals(dataMethod)
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/datasources/test"))
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/datasources/add"))
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/datasources/save"))
+				|| urlForValidation.contains("/datasources/approval")
+				|| urlForValidation.contains("/datasets/approval")
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/datasets/test"))
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/datasets/add"))
+				|| ("DELETE".equals(dataMethod) && urlForValidation.contains("/datasets/delete"))
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/fileserver/uploadTemp"))
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/file/create/"))
+				|| ("PUT".equals(dataMethod) && urlForValidation.contains("/streamingServices/update"))
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/service/v1/models/upload"))
+				|| ("POST".equals(dataMethod) && urlForValidation.contains("/service/v1/models/register"))
+				|| urlForValidation.contains("/vibe-coding/")
+				|| urlForValidation.contains("/vibe-studio/")
+				|| urlForValidation.contains("/vibe/")) {
+			return new AuthorizationDecision(true);
+		}
+
 		Integer projectId = resolveProjectId(request);
 		if (projectId == null) {
 			log.debug("Request does not have project ID: {}", urlForValidation);

@@ -66,5 +66,11 @@ public interface ICIPMLFederatedModelsRepository extends JpaRepository<ICIPMLFed
 		    @Param("modelTypes") List<String> modelTypes
 		);
 
+	// Approval workflow queries — derived by Spring Data JPA from field names
+	List<ICIPMLFederatedModel> findByApprovalStatusAndProjectId(String approvalStatus, Integer projectId);
+
+	List<ICIPMLFederatedModel> findByApprovalStatusAndApprovedOrganizationId(String approvalStatus, Integer approvedOrganizationId);
+
+	List<ICIPMLFederatedModel> findByApprovalStatus(String approvalStatus);
 
 }

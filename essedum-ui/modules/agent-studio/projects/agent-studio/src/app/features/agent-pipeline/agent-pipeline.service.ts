@@ -53,6 +53,10 @@ export class AgentPipelineService {
    * Get organization from localStorage with fallback
    */
   private getOrganization(): string {
+    try {
+      const project = JSON.parse(sessionStorage.getItem('project') || '{}');
+      if (project?.organization) return project.organization;
+    } catch {}
     return localStorage.getItem('organisation') || 'leo1311';
   }
 

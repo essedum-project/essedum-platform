@@ -497,6 +497,15 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
       this.proposedCode = savedCode;
     }
 
+    // Auto-initialize agent and model from pipeline metadata if available
+    const attrs = this.model?.pipelineAttrs || {};
+    if (attrs.selectedAgent && attrs.selectedModel) {
+      this.selectedAgent = attrs.selectedAgent;
+      this.selectedModel = attrs.selectedModel;
+      this.vibe.setAgentProvider(attrs.selectedAgent);
+      this.vibe.setModel(attrs.selectedModel);
+    }
+
     this.vibe.messages$.pipe(takeUntil(this.destroy$)).subscribe(msgs => {
       this.messages = msgs.map(m => ({ role: m.role, content: m.content }));
       this.scrollToBottom();

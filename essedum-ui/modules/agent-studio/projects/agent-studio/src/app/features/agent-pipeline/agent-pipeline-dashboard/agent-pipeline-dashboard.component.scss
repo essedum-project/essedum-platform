@@ -552,3 +552,52 @@
     .gh-dropdown-icon { color: #f87171; }
   }
 }
+
+// ── Approval bar (badge + submit button above each pipeline card) ─────────
+.card-approval-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  margin-bottom: 4px;
+  border-radius: 6px 6px 0 0;
+  background: rgba(255,255,255,0.03);
+  flex-wrap: wrap;
+}
+
+.approval-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 20px;
+
+  .approval-badge-icon { font-size: 14px; width: 14px; height: 14px; }
+
+  &.badge-draft               { background: rgba(100,116,139,0.18); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+  &.badge-pending             { background: rgba(234,179,8,0.15);   color: #fbbf24; border: 1px solid rgba(234,179,8,0.3); }
+  &.badge-project-approved    { background: rgba(59,130,246,0.15);  color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+  &.badge-org-approved        { background: rgba(168,85,247,0.15);  color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
+  &.badge-global              { background: rgba(34,197,94,0.15);   color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+}
+
+.submit-approval-btn {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 10px;
+  height: 26px;
+  line-height: 26px;
+  border-radius: 13px;
+  color: #60a5fa;
+  border: 1px solid rgba(96,165,250,0.4);
+  background: rgba(59,130,246,0.08);
+
+  mat-icon { font-size: 14px; width: 14px; height: 14px; margin-right: 4px; vertical-align: middle; }
+
+  &:hover { background: rgba(59,130,246,0.18); border-color: #60a5fa; }
+}

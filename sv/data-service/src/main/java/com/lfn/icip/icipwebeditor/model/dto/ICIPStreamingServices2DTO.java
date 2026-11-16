@@ -85,4 +85,39 @@ public interface ICIPStreamingServices2DTO {
 	 */
 	Timestamp getCreatedDate();
 
+	/**
+	 * The user who created this pipeline.
+	 *
+	 * @return the created by
+	 */
+	String getCreatedBy();
+
+	/**
+	 * The user who last modified this pipeline.
+	 *
+	 * @return the lastmodifiedby
+	 */
+	String getLastmodifiedby();
+
+	/**
+	 * The approval status of the pipeline (DRAFT, PENDING_PROJECT_APPROVAL, PROJECT_APPROVED, etc.)
+	 *
+	 * @return the approval status
+	 */
+	String getApprovalStatus();
+
+	/**
+	 * The project ID this pipeline belongs to.
+	 *
+	 * @return the project id
+	 */
+	Integer getProjectId();
+
+	/**
+	 * The organization ID this pipeline was approved for (when status is PUBLISHED).
+	 *
+	 * @return the approved organization id
+	 */
+	Integer getApprovedOrganizationId();
+
 }

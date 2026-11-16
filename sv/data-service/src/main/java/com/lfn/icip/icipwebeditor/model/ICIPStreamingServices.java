@@ -160,6 +160,21 @@ public class ICIPStreamingServices extends BaseDomain implements Serializable {
 	@Column(name="is_app")
 	@JsonProperty("is_app")
 	private boolean isApp;
+	
+	// ==================== APPROVAL WORKFLOW FIELDS ====================
+	
+	@Column(name = "approval_status", nullable = false)
+	@JsonProperty("approval_status")
+	private String approvalStatus = "DRAFT"; // DRAFT, PENDING_PROJECT_APPROVAL, PROJECT_APPROVED, PROJECT_REJECTED, PENDING_ORG_APPROVAL, ORG_REJECTED, PUBLISHED
+	
+	@Column(name = "project_id")
+	@JsonProperty("project_id")
+	private Integer projectId;
+	
+	@Column(name = "approved_organization_id")
+	@JsonProperty("approved_organization_id")
+	private Integer approvedOrganizationId;
+	
 	/**
 	 * Equals.
 	 *

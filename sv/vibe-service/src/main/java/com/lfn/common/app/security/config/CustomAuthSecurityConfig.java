@@ -169,10 +169,12 @@ class CustomAuthSecurityConfig {
 			csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 			csrf.csrfTokenRequestHandler(requestHandler);
 			csrf.ignoringRequestMatchers(antMatchers(ignoreCsrfUrls));
-			// Ignore CSRF for actuator and WebSocket endpoints
+			// Ignore CSRF for actuator, WebSocket, and vibe-coding endpoints
 			csrf.ignoringRequestMatchers(
 					AntPathRequestMatcher.antMatcher("/actuator/**"),
-					AntPathRequestMatcher.antMatcher("/ws/**")
+					AntPathRequestMatcher.antMatcher("/ws/**"),
+					AntPathRequestMatcher.antMatcher("/api/aip/service/v1/vibe-coding/**"),
+					AntPathRequestMatcher.antMatcher("/api/aip/folder/**")
 			);
 		});
 		FilterChainProxy filterChainProxy = new FilterChainProxy(new SecurityFilterChain() {

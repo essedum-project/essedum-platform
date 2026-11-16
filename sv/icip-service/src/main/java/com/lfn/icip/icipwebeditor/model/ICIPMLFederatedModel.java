@@ -6,6 +6,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.lfn.ai.comm.lib.util.listener.AuditListener;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -62,7 +63,17 @@ public class ICIPMLFederatedModel {
     
     @Column(name="app_modified_by")
 	String modifiedBy;
-    
-    
-	
+
+	@Column(name = "approval_status")
+	@JsonProperty("approval_status")
+	private String approvalStatus = "DRAFT";
+
+	@Column(name = "project_id")
+	@JsonProperty("project_id")
+	private Integer projectId;
+
+	@Column(name = "approved_organization_id")
+	@JsonProperty("approved_organization_id")
+	private Integer approvedOrganizationId;
+
 }

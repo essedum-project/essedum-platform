@@ -23,6 +23,9 @@ export class StreamingServices {
   is_app: boolean;
   interfacetype: string;
   is_template: boolean;
+  approval_status: string; // Approval workflow status: DRAFT, PENDING_PROJECT_APPROVAL, etc.
+  project_id: number; // Project ID for approval workflow
+  approved_organization_id: number; // Org ID for org-level approvals
   constructor(json?: any) {
     if (json != null) {
       this.cid = json.cid;
@@ -51,6 +54,9 @@ export class StreamingServices {
       this.interfacetype = json.interfacetype;
       this.is_template = json.is_template;
       this.is_app = json.is_app;
+      this.approval_status = json.approval_status || 'DRAFT';
+      this.project_id = json.project_id;
+      this.approved_organization_id = json.approved_organization_id;
     }
   }
 

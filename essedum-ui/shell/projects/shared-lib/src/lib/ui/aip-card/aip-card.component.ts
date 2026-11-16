@@ -176,10 +176,12 @@ export class AipCardComponent {
       [SERVICE_TYPES.CONNECTIONS]:
         this.card?.lastmodifiedby || 'Name Not Available',
       [SERVICE_TYPES.MODEL]: this.card?.createdBy || 'Name Not Available',
+      [SERVICE_TYPES.DATASETS]:
+        this.card?.created_by || this.card?.lastmodifiedby || this.card?.createdby || 'Name Not Available',
       [SERVICE_TYPES.PIPELINE]:
-        this.card?.target?.created_by || 'Name Not Available',
+        this.card?.target?.created_by || this.card?.createdBy || this.card?.createdby || 'Name Not Available',
       [SERVICE_TYPES.PIPELINEAGENT]:
-        this.card?.target?.created_by || 'Name Not Available',
+        this.card?.target?.created_by || this.card?.createdBy || this.card?.createdby || 'Name Not Available',
       [SERVICE_TYPES.AGENT]: this.card?.name || 'Agent',
       [SERVICE_TYPES.AGENT_DIRECTORY]: this.card?.lastmodifiedby || 'Name Not Available',
     };
@@ -212,5 +214,72 @@ export class AipCardComponent {
       return this.card.prompts.length;
     }
     return 0;
+  }
+
+  // ── Approval-status badge (Connections and Models cards) ──────────────────
+  // Mirrors the status machine used on the connection detail page:
+  // DRAFT -> PENDING_PROJECT_APPROVAL -> PROJECT_APPROVED -> PENDING_ORG_APPROVAL
+  // -> ORG_APPROVED -> PENDING_PLATFORM_APPROVAL -> PUBLISHED (+ *_REJECTED states)
+
+  private static readonly APPROVAL_LABELS: Record<string, string> = {
+    DRAFT: 'Draft',
+    PENDING_PROJECT_APPROVAL: 'Pending Project Approval',
+    PROJECT_APPROVED: 'Project Approved',
+    PROJECT_REJECTED: 'Project Rejected',
+    PENDING_ORG_APPROVAL: 'Pending Org Approval',
+    ORG_APPROVED: 'Org Approved',
+    ORG_REJECTED: 'Org Rejected',
+    PENDING_PLATFORM_APPROVAL: 'Pending Platform Approval',
+    PLATFORM_REJECTED: 'Platform Rejected',
+    PUBLISHED: 'Published',
+  };
+
+  private static readonly APPROVAL_CLASSES: Record<string, string> = {
+    DRAFT: 'draft',
+    PENDING_PROJECT_APPROVAL: 'pending',
+    PROJECT_APPROVED: 'project-approved',
+    PROJECT_REJECTED: 'rejected',
+    PENDING_ORG_APPROVAL: 'pending',
+    ORG_APPROVED: 'org-approved',
+    ORG_REJECTED: 'rejected',
+    PENDING_PLATFORM_APPROVAL: 'pending',
+    PLATFORM_REJECTED: 'rejected',
+    PUBLISHED: 'published',
+  };
+
+  private static readonly APPROVAL_ICONS: Record<string, string> = {
+    DRAFT: 'edit_note',
+    PENDING_PROJECT_APPROVAL: 'hourglass_empty',
+    PROJECT_APPROVED: 'folder_open',
+    PROJECT_REJECTED: 'cancel',
+    PENDING_ORG_APPROVAL: 'hourglass_empty',
+    ORG_APPROVED: 'business',
+    ORG_REJECTED: 'cancel',
+    PENDING_PLATFORM_APPROVAL: 'hourglass_empty',
+    PLATFORM_REJECTED: 'cancel',
+    PUBLISHED: 'public',
+  };
+
+  /** Raw approval status for cards that carry one (Connections and Models). Empty string hides the badge. */
+  getApprovalStatus(): string {
+    if (this.servicev1 !== SERVICE_TYPES.CONNECTIONS && this.servicev1 !== SERVICE_TYPES.MODEL) {
+      return '';
+    }
+    return this.card?.approval_status || this.card?.approvalStatus || '';
+  }
+
+  getApprovalStatusLabel(): string {
+    const status = this.getApprovalStatus();
+    return AipCardComponent.APPROVAL_LABELS[status] || status;
+  }
+
+  getApprovalStatusClass(): string {
+    const status = this.getApprovalStatus();
+    return AipCardComponent.APPROVAL_CLASSES[status] || 'draft';
+  }
+
+  getApprovalStatusIcon(): string {
+    const status = this.getApprovalStatus();
+    return AipCardComponent.APPROVAL_ICONS[status] || 'info';
   }
 }

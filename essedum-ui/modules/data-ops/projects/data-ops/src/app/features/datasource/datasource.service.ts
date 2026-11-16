@@ -526,6 +526,17 @@ export class DatasourceService {
             return this.handleError(err);
           }));
       }
+
+  submitDatasourceForApproval(id: number, projectId: number): Observable<any> {
+    return this.https.post(
+      this.dataUrl + '/datasources/approval/project/submit',
+      { resourceId: id, projectId },
+      { headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }), observe: 'response' }
+    ).pipe(
+      map(response => response.body),
+      catchError(err => this.handleError(err))
+    );
+  }
 }
  
  
