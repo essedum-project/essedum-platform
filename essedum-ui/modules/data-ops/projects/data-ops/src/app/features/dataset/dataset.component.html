@@ -69,6 +69,16 @@
       <!-- Description -->
       <div class="ds-card-desc" *ngIf="card.description">{{ card.description }}</div>
 
+      <!-- Approval bar -->
+      <div class="ds-card-approval-bar" *ngIf="card.approval_status && card.approval_status !== 'GLOBALLY_PUBLISHED'">
+        <span class="ds-approval-badge ds-approval-badge--{{ getDatasetApprovalClass(card) }}">
+          {{ getDatasetApprovalLabel(card) }}
+        </span>
+        <button *ngIf="showDatasetSubmitButton(card)" class="ds-submit-approval-btn" (click)="submitDatasetForApproval(card)">
+          Submit for Approval
+        </button>
+      </div>
+
       <!-- Action bar -->
       <div class="ds-card-actions">
         <button class="ds-view-btn" *ngIf="card.hover" (click)="desc(card)" [@fadeInOut]="'in'">
@@ -218,6 +228,16 @@
       <div class="ds-card-title" [title]="card.alias">{{ card.alias | titlecase }}</div>
       <div class="ds-card-date">{{ card.lastmodifieddate | date:'mediumDate' }}</div>
       <div class="ds-card-desc" *ngIf="card.description">{{ card.description }}</div>
+
+      <!-- Approval bar -->
+      <div class="ds-card-approval-bar" *ngIf="card.approval_status && card.approval_status !== 'GLOBALLY_PUBLISHED'">
+        <span class="ds-approval-badge ds-approval-badge--{{ getDatasetApprovalClass(card) }}">
+          {{ getDatasetApprovalLabel(card) }}
+        </span>
+        <button *ngIf="showDatasetSubmitButton(card)" class="ds-submit-approval-btn" (click)="submitDatasetForApproval(card)">
+          Submit for Approval
+        </button>
+      </div>
 
       <div class="ds-card-actions">
         <button class="ds-view-btn" *ngIf="card.hover" (click)="desc(card)" [@fadeInOut]="'in'">View Details</button>

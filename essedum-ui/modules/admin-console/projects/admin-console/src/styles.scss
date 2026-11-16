@@ -1,0 +1,843 @@
+@use '@angular/material' as mat;
+
+/* =====================================================================
+   Admin Console theme — P1 VERSION
+   Adapts to host shell's Light/Dark toggle via ThemeService
+   Uses CSS custom properties so tables/cards/dialogs flip automatically.
+   ===================================================================== */
+
+/* ---- theme tokens (dark default) ---- */
+.admin-console-shell,
+.admin-console-shell.dark-theme,
+.mat-mdc-dialog-surface,
+.cdk-overlay-container {
+  --ac-accent: #4f8ef7;
+  --ac-surface: #1e293b;
+  --ac-surface-2: #243044;
+  --ac-surface-3: #2b3a52;
+  --ac-border: rgba(148, 163, 184, 0.18);
+  --ac-text: #e2e8f0;
+  --ac-text-muted: #94a3b8;
+  --ac-row-hover: rgba(148, 163, 184, 0.10);
+  --ac-radius: 12px;
+
+  /* Override Angular Material MDC table tokens for dark theme */
+  --mat-table-background-color: #1e293b;
+  --mat-table-header-headline-color: #94a3b8;
+  --mat-table-row-item-label-text-color: #e2e8f0;
+  --mat-table-footer-supporting-text-color: #e2e8f0;
+  --mat-table-row-item-outline-color: rgba(148, 163, 184, 0.18);
+
+  /* Paginator tokens — cascade to all mat-paginator inside the shell */
+  --mat-paginator-container-background-color: #1e293b;
+  --mat-paginator-container-text-color: #94a3b8;
+  --mat-paginator-select-trigger-text-color: #e2e8f0;
+  --mdc-icon-button-icon-color: #94a3b8;
+}
+
+/* ---- light overrides (P1: now using local class, not body class) ---- */
+.admin-console-shell.light-theme,
+.admin-console-shell.light-theme ~ .mat-mdc-dialog-surface,
+.admin-console-shell.light-theme ~ .cdk-overlay-container {
+  --ac-surface: #ffffff;
+  --ac-surface-2: #f8fafc;
+  --ac-surface-3: #f1f5f9;
+  --ac-border: rgba(15, 23, 42, 0.12);
+  --ac-text: #1e293b;
+  --ac-text-muted: #64748b;
+  --ac-row-hover: rgba(15, 23, 42, 0.04);
+
+  /* Override Angular Material MDC table tokens for light theme */
+  --mat-table-background-color: #ffffff;
+  --mat-table-header-headline-color: #64748b;
+  --mat-table-row-item-label-text-color: #1e293b;
+  --mat-table-footer-supporting-text-color: #1e293b;
+  --mat-table-row-item-outline-color: rgba(15, 23, 42, 0.12);
+
+  /* Paginator tokens — light override */
+  --mat-paginator-container-background-color: #f1f5f9;
+  --mat-paginator-container-text-color: #64748b;
+  --mat-paginator-select-trigger-text-color: #1e293b;
+  --mdc-icon-button-icon-color: #64748b;
+}
+
+/* Fallback: also support body classes for compatibility */
+body.header-light-theme .admin-console-shell,
+body.header-light-theme .mat-mdc-dialog-surface,
+body.header-light-theme .cdk-overlay-container {
+  --ac-surface: #ffffff;
+  --ac-surface-2: #f8fafc;
+  --ac-surface-3: #f1f5f9;
+  --ac-border: rgba(15, 23, 42, 0.12);
+  --ac-text: #1e293b;
+  --ac-text-muted: #64748b;
+  --ac-row-hover: rgba(15, 23, 42, 0.04);
+  --mat-table-background-color: #ffffff;
+  --mat-table-header-headline-color: #64748b;
+  --mat-table-row-item-label-text-color: #1e293b;
+  --mat-table-footer-supporting-text-color: #1e293b;
+  --mat-table-row-item-outline-color: rgba(15, 23, 42, 0.12);
+  --mat-paginator-container-background-color: #f1f5f9;
+  --mat-paginator-container-text-color: #64748b;
+  --mat-paginator-select-trigger-text-color: #1e293b;
+  --mdc-icon-button-icon-color: #64748b;
+}
+
+.admin-console-shell { 
+  color: var(--ac-text); 
+  font-size: 14px; 
+  min-height: 100%;
+}
+
+/* ---- page scaffold ---- */
+.admin-console-page,
+.overview {
+  padding: 14px 24px;
+  color: var(--ac-text);
+}
+
+.admin-console-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  h2 { margin: 0; font-size: 1.35rem; font-weight: 600; margin-right: auto; }
+}
+
+.overview-title, .section-title, .overview h2, .overview h3 { color: var(--ac-text); }
+.muted-hint, .empty { color: var(--ac-text-muted); font-size: 0.85rem; }
+
+/* ---- form field width (was undefined → caused the overlapping dialog) ---- */
+.full-width { width: 100%; display: block; }
+
+/* ---- cards / panels / stat tiles ---- */
+.mat-mdc-card,
+.stat-card {
+  background: var(--ac-surface) !important;
+  color: var(--ac-text) !important;
+  border: 1px solid var(--ac-border);
+  border-radius: var(--ac-radius) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18) !important;
+}
+.stat-card {
+  padding: 18px 20px;
+  border-top-width: 3px; border-top-style: solid;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  &:hover { background: var(--ac-surface-2) !important; transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28) !important; }
+}
+.stat-count { font-size: 2rem; font-weight: 700; line-height: 1.1; }
+.stat-label { margin-top: 4px; font-size: 0.82rem; color: var(--ac-text-muted); }
+.stat-grid  { gap: 18px; }
+
+/* ---- tables (dark default — fully authoritative) ---- */
+.admin-console-table {
+  width: 100% !important;
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+
+  .mat-mdc-header-row { background: #2b3a52 !important; min-height: 48px !important; }
+  .mat-mdc-header-cell {
+    color: #94a3b8 !important;
+    font-weight: 600 !important; font-size: 0.82rem !important;
+    letter-spacing: 0.6px !important; text-transform: uppercase !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+    padding: 16px 20px !important;
+  }
+  .mat-mdc-cell {
+    color: #e2e8f0 !important;
+    font-size: 0.97rem !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+    padding: 16px 20px !important;
+  }
+  .mat-mdc-row { background: transparent !important; transition: background 0.1s ease !important; }
+  .mat-mdc-row:hover { background: rgba(148, 163, 184, 0.10) !important; }
+  .mat-mdc-row:last-child .mat-mdc-cell { border-bottom: none !important; }
+}
+
+/* light theme table overrides */
+body.header-light-theme .admin-console-table,
+.admin-console-shell.light-theme .admin-console-table {
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+
+  .mat-mdc-header-row { background: #f1f5f9 !important; }
+  .mat-mdc-header-cell {
+    color: #64748b !important;
+    border-bottom-color: rgba(15, 23, 42, 0.12) !important;
+  }
+  .mat-mdc-cell {
+    color: #1e293b !important;
+    border-bottom-color: rgba(15, 23, 42, 0.12) !important;
+  }
+  .mat-mdc-row:hover { background: rgba(15, 23, 42, 0.04) !important; }
+}
+
+.mat-mdc-no-data-row td { color: var(--ac-text-muted) !important; padding: 18px; }
+
+/* ---- buttons ---- */
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-raised-button[color='primary'] {
+  background: linear-gradient(135deg, #4f8ef7, #2563eb) !important;
+  color: #fff !important; border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+}
+.mat-mdc-stroked-button.mat-primary, .mat-mdc-button.mat-primary { color: var(--ac-accent) !important; }
+.mat-mdc-button.mat-warn, .mat-mdc-button[color='warn'], .mat-mdc-stroked-button[color='warn'] { color: #ef4444 !important; }
+
+/* ---- in-table action buttons (plain — no mat-button) ---- */
+.tbl-btn {
+  /* full browser reset */
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  margin: 0;
+
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  color: #4f8ef7;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: inherit;
+  letter-spacing: 0.2px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: background 0.12s ease, color 0.12s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(79, 142, 247, 0.12);
+    color: #7aadfb;
+  }
+
+  &:disabled {
+    color: #475569;
+    cursor: default;
+    pointer-events: none;
+  }
+}
+
+.tbl-btn--warn {
+  color: #f87171;
+
+  &:hover:not(:disabled) {
+    background: rgba(248, 113, 113, 0.12);
+    color: #fca5a5;
+  }
+}
+
+/* light theme */
+.admin-console-shell.light-theme .tbl-btn {
+  color: #2563eb;
+  &:hover:not(:disabled) { background: rgba(37, 99, 235, 0.08); color: #1d4ed8; }
+  &:disabled { color: #94a3b8; }
+}
+
+.admin-console-shell.light-theme .tbl-btn--warn {
+  color: #dc2626;
+  &:hover:not(:disabled) { background: rgba(220, 38, 38, 0.08); color: #b91c1c; }
+}
+
+/* ---- filters / toolbars ---- */
+.menu-filters { align-items: center; flex-wrap: wrap; }
+
+/* ---- Material form fields (general) ---- */
+.mat-mdc-form-field { width: 100%; }
+
+/* ---- dialogs ---- */
+.mat-mdc-dialog-surface {
+  background: var(--ac-surface) !important;
+  color: var(--ac-text) !important;
+  border: 1px solid var(--ac-border) !important;
+  border-radius: var(--ac-radius) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden !important;
+  min-width: 460px !important;
+}
+
+.mat-mdc-dialog-title {
+  color: var(--ac-text) !important;
+  margin: 0 !important;
+  padding: 22px 24px 16px !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  border-bottom: 1px solid var(--ac-border) !important;
+}
+
+.mat-mdc-dialog-content {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  padding: 20px 24px !important;
+  color: var(--ac-text) !important;
+  overflow-y: auto !important;
+}
+
+.mat-mdc-dialog-actions {
+  padding: 12px 24px 20px !important;
+  border-top: 1px solid var(--ac-border) !important;
+  gap: 10px !important;
+}
+
+/* ---- fill-style form fields inside dialogs ---- */
+.mat-mdc-dialog-surface {
+  /* wrapper background — no outline, rounded bottom only */
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    background: var(--ac-surface-2) !important;
+    border-radius: 8px !important;
+    border: none !important;
+
+    /* remove the ripple underline line */
+    .mdc-line-ripple::before,
+    .mdc-line-ripple::after {
+      display: none !important;
+      border-bottom: none !important;
+    }
+  }
+
+  /* input and select text */
+  .mat-mdc-form-field-infix input,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-min-line {
+    color: var(--ac-text) !important;
+    caret-color: var(--ac-accent) !important;
+  }
+
+  /* floating label */
+  .mdc-floating-label,
+  .mat-mdc-floating-label {
+    color: var(--ac-text-muted) !important;
+  }
+
+  /* select arrow */
+  .mat-mdc-select-arrow svg { fill: var(--ac-text-muted) !important; }
+
+  /* hint / error */
+  .mat-mdc-form-field-hint { color: var(--ac-text-muted) !important; }
+}
+
+/* ---- select dropdown panel ---- */
+.cdk-overlay-container .mat-mdc-select-panel {
+  background: var(--ac-surface-2) !important;
+  border: 1px solid var(--ac-border) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35) !important;
+  padding: 4px !important;
+}
+
+.cdk-overlay-container .mat-mdc-option {
+  color: var(--ac-text) !important;
+  font-size: 12px !important;
+  min-height: 30px !important;
+  border-radius: 6px !important;
+  margin: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+
+  &:hover:not(.mdc-list-item--disabled),
+  &.mat-mdc-option-active {
+    background: rgba(79, 142, 247, 0.12) !important;
+  }
+
+  &.mdc-list-item--selected:not(.mat-mdc-option-multiple) {
+    color: var(--ac-accent) !important;
+    background: rgba(79, 142, 247, 0.16) !important;
+    font-weight: 600 !important;
+  }
+
+  /* hide the leading checkmark gutter — selection is shown by accent fill */
+  .mat-pseudo-checkbox-minimal { display: none !important; }
+  
+  /* hide duplicate checkmark by hiding mdc checkbox and showing only single selection highlight */
+  .mdc-checkbox { display: none !important; }
+  .mat-mdc-option[aria-selected="true"]::before { display: none !important; }
+}
+
+
+/* ---- tabs ---- */
+.mat-mdc-tab .mdc-tab__text-label { color: var(--ac-text-muted); }
+.mat-mdc-tab.mdc-tab--active .mdc-tab__text-label { color: var(--ac-text); }
+.mdc-tab-indicator__content--underline { border-color: var(--ac-accent) !important; }
+
+/* ---- status badges (not buttons — no border, no elevation) ---- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: default;
+  user-select: none;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+}
+
+.status-badge-active, .status-badge-synced, .status-badge-published, .status-badge-approved {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+.status-badge-pending, .status-badge-in_review, .status-badge-submitted, .status-badge-draft {
+  background-color: rgba(251, 146, 60, 0.15);
+  color: #f59e0b;
+}
+.status-badge-failed, .status-badge-rejected, .status-badge-archived, .status-badge-suspended {
+  background-color: rgba(248, 113, 113, 0.15);
+  color: #ef4444;
+}
+
+/* Legacy mat-chip status classes — override chip's button appearance */
+.status-chip-active, .status-chip-synced, .status-chip-published, .status-chip-approved {
+  background-color: rgba(34, 197, 94, 0.15) !important; color: #22c55e !important;
+  border: none !important; box-shadow: none !important;
+}
+.status-chip-pending, .status-chip-in_review, .status-chip-submitted, .status-chip-draft {
+  background-color: rgba(251, 146, 60, 0.15) !important; color: #f59e0b !important;
+  border: none !important; box-shadow: none !important;
+}
+.status-chip-failed, .status-chip-rejected, .status-chip-archived, .status-chip-suspended {
+  background-color: rgba(248, 113, 113, 0.15) !important; color: #ef4444 !important;
+  border: none !important; box-shadow: none !important;
+}
+
+/* Strip all button-like MDC chip styles when used as a status badge */
+.admin-console-shell mat-chip.status-chip-active,
+.admin-console-shell mat-chip.status-chip-synced,
+.admin-console-shell mat-chip.status-chip-published,
+.admin-console-shell mat-chip.status-chip-approved,
+.admin-console-shell mat-chip.status-chip-pending,
+.admin-console-shell mat-chip.status-chip-in_review,
+.admin-console-shell mat-chip.status-chip-submitted,
+.admin-console-shell mat-chip.status-chip-draft,
+.admin-console-shell mat-chip.status-chip-failed,
+.admin-console-shell mat-chip.status-chip-rejected,
+.admin-console-shell mat-chip.status-chip-archived,
+.admin-console-shell mat-chip.status-chip-suspended {
+  --mdc-chip-outline-width: 0 !important;
+  --mdc-chip-container-shape-radius: 99px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  cursor: default !important;
+  pointer-events: none !important;
+  height: auto !important;
+  min-height: unset !important;
+  padding: 3px 10px !important;
+}
+
+.tab-actions { display: flex; align-items: center; gap: 12px; }
+
+/* ---- dialog backdrop: darken the page behind so the surface reads clearly ---- */
+.cdk-overlay-dark-backdrop { background: rgba(2, 6, 23, 0.55); }
+
+/* ---- confirm/generic dialog: ensure message text and buttons are fully readable ---- */
+/* Override MDC's own dialog content color token — this controls the <p> inside mat-dialog-content */
+.mat-mdc-dialog-surface {
+  --mdc-dialog-supporting-text-color: #e2e8f0 !important;
+  --mdc-dialog-subhead-color: #e2e8f0 !important;
+}
+body.header-light-theme .mat-mdc-dialog-surface {
+  --mdc-dialog-supporting-text-color: #1e293b !important;
+  --mdc-dialog-subhead-color: #1e293b !important;
+}
+/* Belt-and-suspenders: also set color directly on the p element */
+.mat-mdc-dialog-content p { color: #e2e8f0 !important; }
+body.header-light-theme .mat-mdc-dialog-content p { color: #1e293b !important; }
+
+/* Cancel button (plain mat-button without color attribute) in dialog actions */
+.mat-mdc-dialog-actions .mat-mdc-button:not([color]),
+.mat-mdc-dialog-actions button[mat-button]:not([color]) {
+  color: #e2e8f0 !important;
+  --mdc-text-button-label-text-color: #e2e8f0 !important;
+}
+body.header-light-theme .mat-mdc-dialog-actions .mat-mdc-button:not([color]),
+body.header-light-theme .mat-mdc-dialog-actions button[mat-button]:not([color]) {
+  color: #1e293b !important;
+  --mdc-text-button-label-text-color: #1e293b !important;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Paginator — scoped under .admin-console-shell for definitive specificity.
+   The token block above (on .admin-console-shell) already sets
+   --mat-paginator-container-background-color so the var() cascade is correct.
+   These rules add direct background/color overrides as a failsafe.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Dark default (scoped + direct) ── */
+.admin-console-shell mat-paginator,
+.admin-console-shell .mat-mdc-paginator {
+  --mat-paginator-container-background-color: #1e293b;
+  --mat-paginator-container-text-color: #94a3b8;
+  --mat-paginator-select-trigger-text-color: #e2e8f0;
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #94a3b8 !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.18) !important;
+  border-radius: 0 0 12px 12px !important;
+}
+.admin-console-shell mat-paginator .mat-mdc-paginator-outer-container,
+.admin-console-shell mat-paginator .mat-mdc-paginator-container,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-outer-container,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-container { background: #1e293b !important; }
+
+.admin-console-shell mat-paginator .mat-mdc-paginator-range-label,
+.admin-console-shell mat-paginator .mat-mdc-paginator-page-size-label,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-range-label,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #94a3b8 !important; font-size: 12px !important; }
+
+.admin-console-shell mat-paginator .mat-mdc-select-value,
+.admin-console-shell mat-paginator .mat-mdc-select-value-text,
+.admin-console-shell mat-paginator .mat-mdc-select-min-line,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-select-value,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-select-value-text,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-select-min-line { color: #e2e8f0 !important; font-size: 12px !important; }
+
+.admin-console-shell mat-paginator .mat-mdc-form-field .mat-mdc-text-field-wrapper,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-form-field .mat-mdc-text-field-wrapper { background: transparent !important; }
+
+.admin-console-shell mat-paginator .mat-mdc-icon-button,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button { color: #94a3b8 !important; --mdc-icon-button-icon-color: #94a3b8 !important; }
+.admin-console-shell mat-paginator .mat-mdc-icon-button svg,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button svg,
+.admin-console-shell mat-paginator .mat-mdc-icon-button .mat-icon,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #94a3b8 !important; fill: #94a3b8 !important; }
+.admin-console-shell mat-paginator .mat-mdc-icon-button:not([disabled]):hover,
+.admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button:not([disabled]):hover { color: #4f8ef7 !important; background: rgba(79,142,247,0.10) !important; }
+.admin-console-shell mat-paginator .mat-mdc-icon-button[disabled],
+.admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button[disabled] { color: #334155 !important; opacity: 0.4; }
+
+.admin-console-shell mat-paginator .mdc-notched-outline__leading,
+.admin-console-shell mat-paginator .mdc-notched-outline__notch,
+.admin-console-shell mat-paginator .mdc-notched-outline__trailing,
+.admin-console-shell .mat-mdc-paginator .mdc-notched-outline__leading,
+.admin-console-shell .mat-mdc-paginator .mdc-notched-outline__notch,
+.admin-console-shell .mat-mdc-paginator .mdc-notched-outline__trailing { border-color: rgba(148,163,184,0.20) !important; }
+
+/* ── Light theme override ── */
+body.header-light-theme .admin-console-shell mat-paginator,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator,
+.admin-console-shell.light-theme mat-paginator,
+.admin-console-shell.light-theme .mat-mdc-paginator {
+  --mat-paginator-container-background-color: #f1f5f9;
+  --mat-paginator-container-text-color: #64748b;
+  --mat-paginator-select-trigger-text-color: #1e293b;
+  background: #f1f5f9 !important;
+  background-color: #f1f5f9 !important;
+  color: #64748b !important;
+  border-top: 1px solid rgba(15,23,42,0.12) !important;
+}
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-paginator-outer-container,
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-paginator-container,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-outer-container,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-container,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-paginator-outer-container,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-paginator-container,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-paginator-outer-container,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-paginator-container { background: #f1f5f9 !important; }
+
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-paginator-range-label,
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-paginator-page-size-label,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-range-label,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-paginator-page-size-label,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-paginator-range-label,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-paginator-range-label { color: #64748b !important; }
+
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-select-value,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-select-value,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-select-value,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-select-value { color: #1e293b !important; }
+
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-icon-button,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-icon-button,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b !important; }
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-icon-button svg,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button svg,
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-icon-button .mat-icon,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button .mat-icon,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-icon-button svg,
+.admin-console-shell.light-theme .mat-mdc-paginator .mat-mdc-icon-button svg { color: #64748b !important; fill: #64748b !important; }
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-icon-button:not([disabled]):hover,
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button:not([disabled]):hover,
+.admin-console-shell.light-theme mat-paginator .mat-mdc-icon-button:not([disabled]):hover { color: #2563eb !important; background: rgba(37,99,235,0.08) !important; }
+body.header-light-theme .admin-console-shell mat-paginator .mat-mdc-icon-button[disabled],
+body.header-light-theme .admin-console-shell .mat-mdc-paginator .mat-mdc-icon-button[disabled],
+.admin-console-shell.light-theme mat-paginator .mat-mdc-icon-button[disabled] { color: #cbd5e1 !important; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Form fields — borderless outline style for all filter bars across every
+   admin-console page. Removes the outline border, keeps label + input readable.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Remove outline border from all mat-form-field outline fields */
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline__leading,
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline__notch,
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline__trailing,
+.mdc-text-field--outlined .mdc-notched-outline__leading,
+.mdc-text-field--outlined .mdc-notched-outline__notch,
+.mdc-text-field--outlined .mdc-notched-outline__trailing { border-color: transparent !important; }
+
+/* Subtle bottom border only — gives a clean underline feel without a full box */
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline__trailing,
+.mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-bottom-color: rgba(148,163,184,0.25) !important;
+}
+
+/* Slight background tint so the field region is still distinct */
+.admin-console-shell .mdc-text-field--outlined .mat-mdc-text-field-wrapper,
+.admin-console-shell .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+  background: rgba(148,163,184,0.06) !important;
+  border-radius: 8px !important;
+}
+
+/* On hover/focus, show a faint accent border */
+.admin-console-shell .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__leading,
+.admin-console-shell .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__notch,
+.admin-console-shell .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__trailing,
+.admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__leading,
+.admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__notch,
+.admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__trailing { border-color: rgba(79,142,247,0.5) !important; }
+
+/* Light theme field overrides */
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined .mat-mdc-text-field-wrapper,
+body.header-light-theme .admin-console-shell .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+  background: rgba(15,23,42,0.04) !important;
+}
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__leading,
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__notch,
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__trailing,
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__leading,
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__notch,
+body.header-light-theme .admin-console-shell .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__trailing { border-color: rgba(37,99,235,0.5) !important; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Configure Sidebar Menu dialog — light theme
+   The dialog renders in a CDK overlay outside the MFE root, so it must be
+   targeted via the body class that the shell applies on theme switch.
+   ════════════════════════════════════════════════════════════════════════════ */
+body.header-light-theme .cdk-overlay-container .picker-dialog,
+body.header-light-theme .mat-mdc-dialog-container .picker-dialog {
+  background: #ffffff;
+  color: #1e293b;
+}
+body.header-light-theme .cdk-overlay-container .picker-header,
+body.header-light-theme .mat-mdc-dialog-container .picker-header {
+  background: #f1f5f9;
+  border-bottom: 1px solid rgba(15,23,42,0.10);
+  color: #1e293b;
+}
+body.header-light-theme .cdk-overlay-container .picker-header button,
+body.header-light-theme .mat-mdc-dialog-container .picker-header button { color: #64748b; }
+
+body.header-light-theme .cdk-overlay-container .picker-context,
+body.header-light-theme .mat-mdc-dialog-container .picker-context { background: #f8fafc; border-bottom: 1px solid rgba(15,23,42,0.08); }
+body.header-light-theme .cdk-overlay-container .ctx-chip,
+body.header-light-theme .mat-mdc-dialog-container .ctx-chip { background: rgba(79,142,247,0.10); color: #1e40af; border-color: rgba(79,142,247,0.25); }
+body.header-light-theme .cdk-overlay-container .ctx-arrow,
+body.header-light-theme .mat-mdc-dialog-container .ctx-arrow { color: #94a3b8; }
+
+body.header-light-theme .cdk-overlay-container .global-notice,
+body.header-light-theme .mat-mdc-dialog-container .global-notice { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.3); color: #92400e; }
+body.header-light-theme .cdk-overlay-container .global-notice mat-icon,
+body.header-light-theme .mat-mdc-dialog-container .global-notice mat-icon { color: #d97706; }
+
+body.header-light-theme .cdk-overlay-container .picker-list,
+body.header-light-theme .mat-mdc-dialog-container .picker-list { background: #ffffff; }
+body.header-light-theme .cdk-overlay-container .picker-row,
+body.header-light-theme .mat-mdc-dialog-container .picker-row { border-bottom-color: rgba(15,23,42,0.08); color: #1e293b; }
+body.header-light-theme .cdk-overlay-container .picker-row:hover,
+body.header-light-theme .mat-mdc-dialog-container .picker-row:hover { background: rgba(15,23,42,0.04); }
+body.header-light-theme .cdk-overlay-container .picker-row.active-row,
+body.header-light-theme .mat-mdc-dialog-container .picker-row.active-row { background: rgba(79,142,247,0.08); }
+body.header-light-theme .cdk-overlay-container .picker-row .row-label,
+body.header-light-theme .mat-mdc-dialog-container .picker-row .row-label { color: #1e293b; }
+body.header-light-theme .cdk-overlay-container .picker-row .row-url,
+body.header-light-theme .mat-mdc-dialog-container .picker-row .row-url { color: #64748b; }
+body.header-light-theme .cdk-overlay-container .category-row,
+body.header-light-theme .mat-mdc-dialog-container .category-row { background: #f1f5f9; color: #64748b; border-bottom-color: rgba(15,23,42,0.08); }
+
+body.header-light-theme .cdk-overlay-container .picker-footer,
+body.header-light-theme .mat-mdc-dialog-container .picker-footer { background: #f8fafc; border-top-color: rgba(15,23,42,0.10); color: #64748b; }
+body.header-light-theme .cdk-overlay-container .footer-note,
+body.header-light-theme .mat-mdc-dialog-container .footer-note { color: #059669; }
+
+/* Material dialog container background in light theme */
+body.header-light-theme .cdk-overlay-container .mat-mdc-dialog-surface,
+body.header-light-theme .mat-mdc-dialog-surface { background: #ffffff !important; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Paginator — universal dark-default override (no ancestor scope needed).
+   These rules sit at the bottom of the sheet so they load last and win over
+   Angular Material's default light theme.
+   ════════════════════════════════════════════════════════════════════════════ */
+mat-paginator,
+.mat-mdc-paginator {
+  --mat-paginator-container-background-color: #1e293b;
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #94a3b8 !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+mat-paginator .mat-mdc-paginator-outer-container,
+mat-paginator .mat-mdc-paginator-container,
+.mat-mdc-paginator .mat-mdc-paginator-outer-container,
+.mat-mdc-paginator .mat-mdc-paginator-container { background: #1e293b !important; }
+
+mat-paginator .mat-mdc-paginator-range-label,
+mat-paginator .mat-mdc-paginator-page-size-label,
+.mat-mdc-paginator .mat-mdc-paginator-range-label,
+.mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #94a3b8 !important; }
+
+mat-paginator .mat-mdc-select-value,
+mat-paginator .mat-mdc-select-value-text,
+.mat-mdc-paginator .mat-mdc-select-value,
+.mat-mdc-paginator .mat-mdc-select-value-text { color: #e2e8f0 !important; }
+
+mat-paginator .mat-mdc-icon-button,
+.mat-mdc-paginator .mat-mdc-icon-button {
+  color: #94a3b8 !important;
+  --mdc-icon-button-icon-color: #94a3b8 !important;
+}
+mat-paginator .mat-mdc-icon-button svg,
+mat-paginator .mat-mdc-icon-button .mat-icon,
+.mat-mdc-paginator .mat-mdc-icon-button svg,
+.mat-mdc-paginator .mat-mdc-icon-button .mat-icon {
+  color: #94a3b8 !important;
+  fill: #94a3b8 !important;
+}
+mat-paginator .mat-mdc-icon-button[disabled],
+.mat-mdc-paginator .mat-mdc-icon-button[disabled] { opacity: 0.35; }
+
+body.header-light-theme mat-paginator,
+body.header-light-theme .mat-mdc-paginator {
+  --mat-paginator-container-background-color: #f1f5f9;
+  background: #f1f5f9 !important;
+  background-color: #f1f5f9 !important;
+  color: #64748b !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+}
+body.header-light-theme mat-paginator .mat-mdc-paginator-outer-container,
+body.header-light-theme mat-paginator .mat-mdc-paginator-container,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-outer-container,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-container { background: #f1f5f9 !important; }
+
+body.header-light-theme mat-paginator .mat-mdc-paginator-range-label,
+body.header-light-theme mat-paginator .mat-mdc-paginator-page-size-label,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-range-label,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #64748b !important; }
+
+body.header-light-theme mat-paginator .mat-mdc-select-value,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-select-value { color: #1e293b !important; }
+
+body.header-light-theme mat-paginator .mat-mdc-icon-button,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button {
+  color: #64748b !important;
+  --mdc-icon-button-icon-color: #64748b !important;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ac-snackbar — MDC container reset only.
+   All visual styling lives in AcSnackbarComponent (ViewEncapsulation.None).
+   ════════════════════════════════════════════════════════════════════════════ */
+.mat-mdc-snack-bar-container.ac-snackbar {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.ac-snackbar .mdc-snackbar__surface {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+}
+.ac-snackbar .mdc-snackbar__label { padding: 0 !important; }
+
+/* ── Approve / Reject dialog ─────────────────────────────────────────────── */
+.approve-reject-dialog .mat-mdc-dialog-surface {
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  border-radius: 12px !important;
+  padding: 0 !important;
+}
+
+.approve-reject-dialog {
+  h2[mat-dialog-title],
+  .mat-mdc-dialog-title {
+    color: #e2e8f0 !important;
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+    padding: 20px 24px 4px !important;
+  }
+
+  .mat-mdc-dialog-content {
+    padding: 12px 24px !important;
+    overflow: visible !important;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 8px 24px 20px !important;
+    gap: 10px;
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+    margin-top: 4px;
+  }
+
+  /* form-field: transparent fill, subtle border */
+  .mat-mdc-form-field {
+    width: 100% !important;
+  }
+
+  .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+    background: #111827 !important;
+    border-radius: 8px !important;
+  }
+
+  .mat-mdc-form-field .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+    background-color: #111827 !important;
+  }
+
+  .mat-mdc-form-field .mdc-floating-label,
+  .mat-mdc-form-field .mat-mdc-floating-label {
+    color: #94a3b8 !important;
+  }
+
+  .mat-mdc-form-field textarea {
+    color: #e2e8f0 !important;
+    resize: none !important;
+    min-height: 100px !important;
+    caret-color: #7eb8ff !important;
+    line-height: 1.5 !important;
+  }
+
+  .mat-mdc-form-field .mdc-line-ripple::before {
+    border-bottom-color: rgba(148, 163, 184, 0.25) !important;
+  }
+
+  .mat-mdc-form-field .mdc-line-ripple::after {
+    border-bottom-color: #7eb8ff !important;
+  }
+}
+
+
+

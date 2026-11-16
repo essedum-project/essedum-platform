@@ -1,0 +1,69 @@
+import { Component, Inject, OnInit, Optional } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ApiService } from '../../../core/api.service';
+import { UserContextService } from '../../../core/user-context.service';
+import type { MenuItem } from '../../../core/api-models';
+
+@Component({
+  selector: 'app-menu-item-dialog',
+  templateUrl: './menu-item-dialog.component.html',
+  styleUrls: ['./menu-item-dialog.component.scss'],
+  standalone: false,
+})
+export class MenuItemDialogComponent implements OnInit {
+  label = this.existing?.label ?? '';
+  route = this.existing?.route ?? '';
+  parentId: number | null = this.existing?.parentId ?? null;
+  minRoleRank = this.existing?.minRoleRank ?? 0;
+  displayOrder = this.existing?.displayOrder ?? 1;
+  icon = this.existing?.icon ?? '';
+  // Role-override held as an array for the multi-select; serialized to CSV on save.
+  selectedRoles: string[] = (this.existing?.roles ?? '')
+    .split(',')
+    .map(r => r.trim())
+    .filter(r => r);
+  roleOptions: string[] = [];
+  project = this.existing?.project ?? '';
+
+  candidateParents: MenuItem[] = [];
+
+  constructor(
+    private readonly ref: MatDialogRef<MenuItemDialogComponent>,
+    private readonly api: ApiService,
+    private readonly userContext: UserContextService,
+    @Optional() @Inject(MAT_DIALOG_DATA) private readonly existing: MenuItem | null,
+  ) {}
+
+  ngOnInit(): void {
+    this.api.getMenuItems(this.userContext.userId$.value).subscribe(items => {
+      this.candidateParents = items.filter(item => item.id !== this.existing?.id);
+    });
+    // Only the 5 RBAC roles (rank defined), sorted by rank for a consistent order.
+    this.api.getRoles().subscribe(roles => {
+      this.roleOptions = roles
+        .filter(r => r.rank != null)
+        .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
+        .map(r => r.name);
+    });
+  }
+
+  save(): void {
+    if (!this.label || !this.route) {
+      return;
+    }
+    this.ref.close({
+      label: this.label,
+      route: this.route,
+      parentId: this.parentId,
+      minRoleRank: this.minRoleRank,
+      displayOrder: this.displayOrder,
+      icon: this.icon?.trim() || null,
+      roles: this.selectedRoles.length ? this.selectedRoles.join(',') : null,
+      project: this.project?.trim() || null,
+    });
+  }
+
+  cancel(): void {
+    this.ref.close();
+  }
+}

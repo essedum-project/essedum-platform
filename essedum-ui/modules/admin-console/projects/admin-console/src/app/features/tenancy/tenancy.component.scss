@@ -1,0 +1,287 @@
+﻿:host {
+  display: block !important;
+  width: 100% !important;
+
+  /* Dark theme (default) */
+  --ac-accent: #4f8ef7;
+  --ac-surface: #1e293b;
+  --ac-surface-2: #243044;
+  --ac-surface-3: #2b3a52;
+  --ac-border: rgba(148, 163, 184, 0.18);
+  --ac-text: #e2e8f0;
+  --ac-text-muted: #94a3b8;
+  --ac-row-hover: rgba(148, 163, 184, 0.10);
+  --mat-table-background-color: #1e293b;
+  --mat-table-header-headline-color: #94a3b8;
+  --mat-table-row-item-label-text-color: #e2e8f0;
+  --mat-table-footer-supporting-text-color: #e2e8f0;
+  --mat-table-row-item-outline-color: rgba(148, 163, 184, 0.18);
+}
+
+.admin-console-page { padding: 14px 24px; }
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(79, 142, 247, 0.08);
+
+  .page-header-left { display: flex; align-items: center; gap: 12px; }
+
+  h2 {
+    margin: 0;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.3px;
+    color: #e2e8f0 !important;
+    line-height: 1.2;
+  }
+
+  .page-subtitle { display: block; font-size: 12px; color: #6e8ea8; margin-top: 2px; }
+
+  .page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+:host-context(body.header-light-theme) .page-header h2 { color: #0f172a !important; }
+:host-context(body.header-light-theme) .page-header .page-subtitle { color: #64748b; }
+
+mat-tab-group {
+  display: block !important;
+  margin-top: 20px !important;
+}
+
+mat-tab-group .mat-mdc-tab-list {
+  border-bottom: 2px solid rgba(148, 163, 184, 0.18) !important;
+  background: transparent !important;
+}
+body.header-light-theme mat-tab-group .mat-mdc-tab-list {
+  border-bottom: 2px solid rgba(15, 23, 42, 0.12) !important;
+}
+
+// Tabs hug their own content and sit at the start of the row instead of
+// stretching to fill the full width of the page.
+// NOTE: no ::ng-deep — this component uses ViewEncapsulation.None, so Angular never
+// strips ::ng-deep from the compiled CSS, leaving it as literal (invalid) text that
+// browsers discard the whole rule for. Plain selectors already reach Material's
+// internal DOM under None.
+mat-tab-group .mat-mdc-tab-label-container {
+  flex-grow: 0 !important;
+}
+mat-tab-group .mat-mdc-tab-labels {
+  justify-content: flex-start !important;
+  gap: 8px !important;
+}
+mat-tab-group .mat-mdc-tab {
+  flex: none !important;
+  min-width: auto !important;
+  max-width: fit-content !important;
+  padding: 0 24px !important;
+}
+
+mat-tab-group .mdc-tab {
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+}
+
+mat-tab-group .mdc-tab__text-label {
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+}
+
+mat-tab-group .mdc-tab--active {
+  color: #4f8ef7 !important;
+}
+
+body.header-light-theme mat-tab-group .mdc-tab { color: #64748b !important; }
+body.header-light-theme mat-tab-group .mdc-tab--active { color: #2563eb !important; }
+
+.tab-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 16px !important;
+  padding: 16px 0 20px !important;
+
+  button[mat-raised-button] {
+    background: linear-gradient(135deg, #4f8ef7, #2563eb) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    letter-spacing: 0.3px !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+    border: none !important;
+    padding: 0 24px !important;
+    height: 42px !important;
+    line-height: 42px !important;
+    min-width: 160px !important;
+    transition: box-shadow 0.15s ease, transform 0.1s ease !important;
+
+    &:hover {
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.5) !important;
+      transform: translateY(-1px) !important;
+    }
+  }
+}
+
+/* ── Table: plain selectors (ViewEncapsulation.None = already global, ::ng-deep not needed) ── */
+.admin-console-table {
+  --mat-table-background-color: #1e293b;
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+.admin-console-table .mat-mdc-header-row { background: #2b3a52 !important; min-height: 48px !important; }
+.admin-console-table .mat-mdc-header-cell {
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.6px !important;
+  text-transform: uppercase !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+  padding: 16px 20px !important;
+}
+.admin-console-table .mat-mdc-cell {
+  color: #e2e8f0 !important;
+  font-size: 0.97rem !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+  padding: 16px 20px !important;
+}
+.admin-console-table .mat-mdc-row { background: transparent !important; transition: background 0.1s ease !important; }
+.admin-console-table .mat-mdc-row:hover { background: rgba(148, 163, 184, 0.10) !important; }
+.admin-console-table .mat-mdc-row:last-child .mat-mdc-cell { border-bottom: none !important; }
+
+body.header-light-theme .admin-console-table {
+  --mat-table-background-color: #ffffff;
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+body.header-light-theme .admin-console-table .mat-mdc-header-row { background: #f1f5f9 !important; }
+body.header-light-theme .admin-console-table .mat-mdc-header-cell { color: #64748b !important; border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important; }
+body.header-light-theme .admin-console-table .mat-mdc-cell { color: #1e293b !important; border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important; }
+body.header-light-theme .admin-console-table .mat-mdc-row:hover { background: rgba(15, 23, 42, 0.04) !important; }
+
+/* ---- Status badges (rectangular, matching audit style) ---- */
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  border: none;
+  white-space: nowrap;
+}
+
+.status-badge-active      { background: rgba(34, 197, 94, 0.15);  color: #22c55e; }
+.status-badge-suspended   { background: rgba(239, 68, 68, 0.15);  color: #ef4444; }
+.status-badge-inactive    { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+.status-badge-pending     { background: rgba(251, 191, 36, 0.15);  color: #f59e0b; }
+
+/* Light theme overrides */
+:host-context(body.header-light-theme) .status-badge-active    { background: rgba(22, 163, 74, 0.10);   color: #16a34a; }
+:host-context(body.header-light-theme) .status-badge-suspended { background: rgba(220, 38, 38, 0.10);   color: #dc2626; }
+:host-context(body.header-light-theme) .status-badge-inactive  { background: rgba(100, 116, 139, 0.10); color: #64748b; }
+:host-context(body.header-light-theme) .status-badge-pending   { background: rgba(217, 119, 6, 0.10);   color: #d97706; }
+
+.muted-hint {
+  color: var(--ac-text-muted);
+  font-size: 0.875rem;
+}
+
+.source-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  padding: 2px 7px;
+  &.source-badge-rbac {
+    background: rgba(79, 142, 247, 0.12);
+    color: #4f8ef7;
+    border: 1px solid rgba(79, 142, 247, 0.25);
+  }
+  &.source-badge-legacy {
+    background: rgba(167, 139, 250, 0.12);
+    color: #a78bfa;
+    border: 1px solid rgba(167, 139, 250, 0.25);
+  }
+}
+
+.id-chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: monospace;
+  color: var(--ac-accent, #4f8ef7);
+  background: rgba(79, 142, 247, 0.1);
+  border: 1px solid rgba(79, 142, 247, 0.2);
+  border-radius: 4px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+
+/* ── Paginator theme ─────────────────────────────────────────────────────── */
+mat-paginator,
+.mat-mdc-paginator {
+  --mat-paginator-container-background-color: #1e293b;
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #94a3b8 !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+mat-paginator .mat-mdc-paginator-outer-container,
+mat-paginator .mat-mdc-paginator-container,
+.mat-mdc-paginator .mat-mdc-paginator-outer-container,
+.mat-mdc-paginator .mat-mdc-paginator-container { background: #1e293b !important; }
+mat-paginator .mat-mdc-paginator-range-label,
+mat-paginator .mat-mdc-paginator-page-size-label,
+.mat-mdc-paginator .mat-mdc-paginator-range-label,
+.mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #94a3b8 !important; }
+mat-paginator .mat-mdc-select-value,
+.mat-mdc-paginator .mat-mdc-select-value { color: #e2e8f0 !important; }
+mat-paginator .mat-mdc-icon-button,
+.mat-mdc-paginator .mat-mdc-icon-button { color: #94a3b8 !important; --mdc-icon-button-icon-color: #94a3b8 !important; }
+mat-paginator .mat-mdc-icon-button svg,
+mat-paginator .mat-mdc-icon-button .mat-icon,
+.mat-mdc-paginator .mat-mdc-icon-button svg,
+.mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #94a3b8 !important; fill: #94a3b8 !important; }
+mat-paginator .mat-mdc-icon-button[disabled],
+.mat-mdc-paginator .mat-mdc-icon-button[disabled] { opacity: 0.35; }
+
+body.header-light-theme mat-paginator,
+body.header-light-theme .mat-mdc-paginator {
+  --mat-paginator-container-background-color: #f1f5f9;
+  background: #f1f5f9 !important;
+  background-color: #f1f5f9 !important;
+  color: #64748b !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+}
+body.header-light-theme mat-paginator .mat-mdc-paginator-outer-container,
+body.header-light-theme mat-paginator .mat-mdc-paginator-container,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-outer-container,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-container { background: #f1f5f9 !important; }
+body.header-light-theme mat-paginator .mat-mdc-paginator-range-label,
+body.header-light-theme mat-paginator .mat-mdc-paginator-page-size-label,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-range-label,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #64748b !important; }
+body.header-light-theme mat-paginator .mat-mdc-select-value,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-select-value { color: #1e293b !important; }
+body.header-light-theme mat-paginator .mat-mdc-icon-button,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b !important; }
+body.header-light-theme mat-paginator .mat-mdc-icon-button svg,
+body.header-light-theme mat-paginator .mat-mdc-icon-button .mat-icon,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button svg,
+body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #64748b !important; fill: #64748b !important; }

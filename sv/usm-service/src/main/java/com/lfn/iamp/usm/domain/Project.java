@@ -216,6 +216,10 @@ public class Project implements Serializable {
 	@Size(max = 256)
 	private String description;
 
+	/** Closes the Project<->Organisation FK gap (RBAC plan Appendix A / §11 phase 2). Nullable: legacy rows are unassigned until migrated. */
+	@Column(name = "organisation_id")
+	private Integer organisationId;
+
 	/** The last updated. */
 	@Column(name = "last_updated")
 	private Date lastUpdated;

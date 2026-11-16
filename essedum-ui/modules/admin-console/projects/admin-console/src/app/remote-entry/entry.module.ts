@@ -1,0 +1,99 @@
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+
+// Angular Material
+import { MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+
+// Routing
+import { EntryRoutingModule } from './entry-routing.module';
+
+// Core
+import { AcSnackbarComponent } from '../core/ac-snackbar/ac-snackbar.component';
+
+// Shell
+import { ShellComponent } from '../shell/shell.component';
+
+// Features
+import { OverviewComponent } from '../features/overview/overview.component';
+import { TenancyComponent } from '../features/tenancy/tenancy.component';
+import { ProvisionDialogComponent } from '../features/tenancy/provision-dialog/provision-dialog.component';
+import { AccessComponent } from '../features/access/access.component';
+import { GrantRoleDialogComponent } from '../features/access/grant-role-dialog/grant-role-dialog.component';
+import { PublishingComponent } from '../features/publishing/publishing.component';
+import { DraftDialogComponent } from '../features/publishing/draft-dialog/draft-dialog.component';
+import { CatalogComponent } from '../features/catalog/catalog.component';
+import { ApprovalsComponent } from '../features/approvals/approvals.component';
+import { ApproveRejectDialogComponent } from '../features/approvals/approve-reject-dialog/approve-reject-dialog.component';
+import { AuditComponent } from '../features/audit/audit.component';
+import { IdentitySyncComponent } from '../features/identity-sync/identity-sync.component';
+import { MenuConfigurationComponent } from '../features/menu-configuration/menu-configuration.component';
+import { MenuItemDialogComponent } from '../features/menu-configuration/menu-item-dialog/menu-item-dialog.component';
+import { RoleMenuDialogComponent } from '../features/menu-configuration/role-menu-dialog/role-menu-dialog.component';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
+import { MyDetailsComponent } from '../features/my-details/my-details.component';
+import { MenuPickerDialogComponent } from '../features/my-details/menu-picker-dialog/menu-picker-dialog.component';
+
+@NgModule({
+  declarations: [
+    AcSnackbarComponent,
+    ShellComponent,
+    OverviewComponent,
+    TenancyComponent,
+    ProvisionDialogComponent,
+    AccessComponent,
+    GrantRoleDialogComponent,
+    PublishingComponent,
+    DraftDialogComponent,
+    CatalogComponent,
+    ApprovalsComponent,
+    ApproveRejectDialogComponent,
+    AuditComponent,
+    IdentitySyncComponent,
+    MenuConfigurationComponent,
+    MenuItemDialogComponent,
+    RoleMenuDialogComponent,
+    ConfirmDialogComponent,
+    MyDetailsComponent,
+    MenuPickerDialogComponent,
+  ],
+  imports: [
+    CommonModule,
+    HttpClientModule,
+    FormsModule,
+    MatTableModule,
+    MatTabsModule,
+    MatChipsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatRadioModule,
+    MatTooltipModule,
+    MatDialogModule,
+    MatCheckboxModule,
+    MatPaginatorModule,
+    MatSnackBarModule,
+    EntryRoutingModule,
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  providers: [DatePipe],
+})
+export class EntryModule {}

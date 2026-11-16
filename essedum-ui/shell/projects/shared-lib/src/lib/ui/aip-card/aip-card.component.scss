@@ -203,6 +203,41 @@
 .badge-schema      { background: linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(37,99,235,0.08) 100%);  color: #2563eb; border: 1px solid rgba(59,130,246,0.3); box-shadow: 0 2px 4px rgba(59,130,246,0.1);  }
 .badge-dataset     { background: linear-gradient(135deg, rgba(34,197,94,0.12) 0%, rgba(22,163,74,0.08) 100%);   color: #16a34a; border: 1px solid rgba(34,197,94,0.3); box-shadow: 0 2px 4px rgba(34,197,94,0.1);   }
 
+// ── Connection approval-status pill (Connections cards only) ─────────────────
+.card-approval-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  margin-top: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  white-space: nowrap;
+  font-family: "Inter", "Roboto", sans-serif;
+  text-transform: none;
+}
+
+.approval-badge-icon {
+  font-size: 12px !important;
+  width: 12px !important;
+  height: 12px !important;
+  line-height: 1;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+// Light theme approval-status colors
+.approval-draft             { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+.approval-pending           { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
+.approval-project-approved  { background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
+.approval-org-approved      { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+.approval-published         { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.approval-rejected          { background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
+
 // ── Action icon (top-right: download, open_in_new, etc.) ─────────────────────
 .card-action-icon {
   font-size: 17px !important;
@@ -427,6 +462,14 @@
   .badge-adapter     { background: rgba(37,99,235,0.25) !important;   color: #93c5fd !important;  border: 1px solid rgba(59,130,246,0.4) !important; box-shadow: 0 2px 6px rgba(37,99,235,0.15) !important; }
   .badge-instance    { background: rgba(13,148,136,0.25) !important;  color: #5eead4 !important;  border: 1px solid rgba(20,184,166,0.4) !important; box-shadow: 0 2px 6px rgba(13,148,136,0.15) !important; }
   .badge-dataset     { background: rgba(22,163,74,0.25) !important;   color: #86efac !important;  border: 1px solid rgba(34,197,94,0.4) !important; box-shadow: 0 2px 6px rgba(22,163,74,0.15) !important; }
+
+  // Connection approval-status pill — dark theme
+  .approval-draft             { background: rgba(100,116,139,0.22) !important; color: #cbd5e1 !important; border: 1px solid rgba(148,163,184,0.4) !important; }
+  .approval-pending           { background: rgba(217,119,6,0.22) !important;   color: #fcd34d !important; border: 1px solid rgba(245,158,11,0.4) !important; }
+  .approval-project-approved  { background: rgba(124,58,237,0.25) !important;  color: #ddd6fe !important; border: 1px solid rgba(167,139,250,0.4) !important; }
+  .approval-org-approved      { background: rgba(5,150,105,0.22) !important;   color: #6ee7b7 !important; border: 1px solid rgba(16,185,129,0.4) !important; }
+  .approval-published         { background: rgba(22,163,74,0.22) !important;   color: #86efac !important; border: 1px solid rgba(34,197,94,0.4) !important; }
+  .approval-rejected          { background: rgba(225,29,72,0.22) !important;   color: #fda4af !important; border: 1px solid rgba(244,63,94,0.4) !important; }
 
   .card-action-icon {
     color: #60a5fa !important;

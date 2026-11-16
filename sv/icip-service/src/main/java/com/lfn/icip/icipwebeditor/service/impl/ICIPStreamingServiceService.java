@@ -845,6 +845,26 @@ public class ICIPStreamingServiceService implements IICIPStreamingServiceService
 	}
 
 	@Override
+	public List<ICIPStreamingServices2DTO> getOrgApprovedPipelines(String orgName) {
+		if (orgName == null || orgName.isEmpty()) return new ArrayList<>();
+		return streamingServicesRepository.findByOrganizationAndApprovalStatusIn(
+			orgName, java.util.Arrays.asList("ORG_APPROVED", "PENDING_PLATFORM_APPROVAL"));
+	}
+
+	@Override
+	public List<ICIPStreamingServices2DTO> getOrgApprovedPipelinesByOrgId(Integer orgId) {
+		if (orgId == null) return new ArrayList<>();
+		// Include "PUBLISHED" for backward compat: old org-approval flow set status=PUBLISHED with non-null approvedOrganizationId.
+		// The approvedOrganizationId filter ensures only org-scoped PUBLISHED (not globally published, which have null approvedOrganizationId) are returned.
+		return streamingServicesRepository.findByApprovedOrganizationIdAndApprovalStatusIn(
+			orgId, java.util.Arrays.asList("ORG_APPROVED", "PENDING_PLATFORM_APPROVAL", "PUBLISHED"));
+	}
+
+	@Override
+	public List<ICIPStreamingServices2DTO> getGloballyPublishedPipelines() {
+		return streamingServicesRepository.findByApprovalStatusAndApprovedOrganizationIdIsNull("PUBLISHED");
+	}
+
 	public List<ICIPStreamingServices2DTO> getAllPipelinesByTypeAndOrg(String project, Pageable paginate, String query,
 			List<Integer> tags, String orderBy, String type, String interfacetype) {
 		// TODO Auto-generated method stub
@@ -866,7 +886,8 @@ public class ICIPStreamingServiceService implements IICIPStreamingServiceService
 //			type = typeliststring.substring(0, typeliststring.length() - 1)+")";
 //		}
 		List<String> projectList = new ArrayList();
-		if (project.contains("Core,")) {
+		if (project.contains(",")) {
+			// Split comma-separated org/project names (handles "Core,X" and "PROJ,ORG" patterns)
 			projectList = Arrays.asList(project.split(","));
 		} else {
 			projectList.add(project);
@@ -935,7 +956,8 @@ public class ICIPStreamingServiceService implements IICIPStreamingServiceService
 			type = "notRequired";
 		}
 		List<String> projectList = new ArrayList();
-		if (project.contains("Core,")) {
+		if (project.contains(",")) {
+			// Split comma-separated org/project names (handles "Core,X" and "PROJ,ORG" patterns)
 			projectList = Arrays.asList(project.split(","));
 		} else {
 			projectList.add(project);

@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Inject, Injectable, NgZone } from '@angular/core';
-import { Observable, Subject, from, throwError } from 'rxjs';
+import { Observable, Subject, from, throwError, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -72,11 +72,17 @@ export class DatasetServices {
 
   createDataset(dataset: Dataset): Observable<any> {
     dataset.organization = String(sessionStorage.getItem('organization'));
+    try {
+      const storedUser = sessionStorage.getItem('user');
+      if (storedUser && !(dataset as any).createdby) {
+        const userObj = JSON.parse(storedUser);
+        const username = userObj?.username || userObj?.preferred_username || userObj?.name;
+        if (username) (dataset as any).createdby = username;
+      }
+    } catch {}
 
-
-    return this.https.post(this.dataUrl + '/datasets/add', dataset, { observe: 'response' })
+    const save$ = this.https.post(this.dataUrl + '/datasets/add', dataset, { observe: 'response' })
       .pipe(switchMap(async (response) => {
-   
         let result = response.body;
         let salt = this.encKey.getSalt()
         if (!salt)
@@ -87,6 +93,15 @@ export class DatasetServices {
       .pipe(catchError(err => {
         return this.handleError(err);
       }));
+
+    const attrs = dataset.attributes as any;
+    if (attrs && attrs.uploadFile) {
+      return this.https.post(this.dataUrl + '/datasets/test', dataset, { observe: 'response', responseType: 'text' as 'json' }).pipe(
+        catchError(() => of(null)),
+        switchMap(() => save$)
+      );
+    }
+    return save$;
   }
 
   createDatasetApprovalForExperiment(datasetId, user, requestedDate, status): Observable<any> {
@@ -1570,5 +1585,17 @@ export class DatasetServices {
     })
       .pipe(catchError(this.handleError));
   }
+
+  submitDatasetForApproval(id: number, projectId: number): Observable<any> {
+    return this.https.post(
+      this.dataUrl + '/datasets/approval/project/submit',
+      { resourceId: id, projectId },
+      { headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }), observe: 'response' }
+    ).pipe(
+      map(response => response.body),
+      catchError(err => this.handleError(err))
+    );
+  }
+
 
 }

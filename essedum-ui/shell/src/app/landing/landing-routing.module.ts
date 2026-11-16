@@ -15,6 +15,14 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 // proper router redirects catches every caller without us having to find them.
 // Remove once DashConsts and downstream libs are fully migrated to the new paths.
 const LEGACY_REDIRECTS: Routes = [
+  // Legacy cc/OCC and cc/BCC dashboard routes — MFE no longer deployed;
+  // redirect to the host-owned dashboard so users always land on a working page.
+  { path: 'cc/OCC/:id',  redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'cc/BCC/:id',  redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'cc/OCC',      redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'cc/BCC',      redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'dynamicDashboard/mapbcc', redirectTo: 'dashboard', pathMatch: 'full' },
+
   // Data Ops
   { path: 'aip/datasets',         redirectTo: 'data/datasets',     pathMatch: 'full' },
   { path: 'aip/datasources',      redirectTo: 'data/connections',  pathMatch: 'full' },

@@ -1274,3 +1274,130 @@ button[mat-button], button[mat-stroked-button] {
     &.ct-applogs-ok   { background: #0d2818; color: #86efac; mat-icon { color: #4ade80; } }
   }
 }
+
+// Approval Status and Actions - Compact inline style (matches agent-pipeline)
+.approval-actions-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+
+  // Compact inline approval status badge
+  .approval-status-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+
+    .status-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-label {
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    // Status-specific colors
+    &.status-draft {
+      background-color: rgba(100, 116, 139, 0.2);
+      color: #94a3b8;
+    }
+
+    &.status-pending_project_approval {
+      background-color: rgba(217, 119, 6, 0.2);
+      color: #f59e0b;
+
+      .status-icon {
+        animation: pulse 2s ease-in-out infinite;
+      }
+    }
+
+    &.status-project_approved,
+    &.status-org_approved {
+      background-color: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+
+    &.status-pending_org_approval {
+      background-color: rgba(217, 119, 6, 0.2);
+      color: #f59e0b;
+
+      .status-icon {
+        animation: pulse 2s ease-in-out infinite;
+      }
+    }
+
+    &.status-published {
+      background-color: rgba(139, 92, 246, 0.2);
+      color: #c084fc;
+    }
+
+    &.status-project_rejected,
+    &.status-org_rejected {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+  }
+
+  // Submit for Approval Button
+  .approval-button-container {
+    display: inline-flex;
+    gap: 0;
+    align-items: center;
+
+    .send-approval-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background-color: #4f8fe7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      white-space: nowrap;
+
+      &:hover:not(:disabled) {
+        background-color: #3a7cc7;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      &:disabled {
+        background-color: #a0b5d8;
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      .btn-spinner {
+        display: inline-flex;
+      }
+    }
+  }
+}

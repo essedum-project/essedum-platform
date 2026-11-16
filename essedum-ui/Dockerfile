@@ -38,6 +38,11 @@ RUN rm -f package-lock.json yarn.lock
 RUN npm install --legacy-peer-deps --force
 RUN npm run build-prod
 
+WORKDIR /workspace/modules/admin-console
+RUN rm -f package-lock.json yarn.lock
+RUN npm install --legacy-peer-deps --force
+RUN npm run build-prod
+
 
 # ---- Runtime ---------------------------------------------------------------
 FROM nginx:alpine
@@ -57,13 +62,15 @@ RUN mkdir -p /app/ui/shell \
              /app/ui/agent \
              /app/ui/data-ops \
              /app/ui/integration \
-             /app/ui/vibe-studio
+             /app/ui/vibe-studio \
+             /app/ui/admin-console
 
 COPY --from=build /workspace/shell/dist/shell                            /app/ui/shell/
 COPY --from=build /workspace/modules/agent-studio/dist/agent-studio       /app/ui/agent/
 COPY --from=build /workspace/modules/data-ops/dist/data-ops               /app/ui/data-ops/
 COPY --from=build /workspace/modules/integration-hub/dist/integration-hub /app/ui/integration/
 COPY --from=build /workspace/modules/vibe-studio/dist/vibe-studio         /app/ui/vibe-studio/
+COPY --from=build /workspace/modules/admin-console/dist/admin-console    /app/ui/admin-console/
 
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

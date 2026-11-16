@@ -35,6 +35,13 @@
 		"ngModuleName": "EntryModule",
 		"title": "ESSEDUM"
 	},
+	"admin-console": {
+		"remoteEntry": "/mfe/admin-console/remoteEntry.js",
+		"exposedModule": "./Module",
+		"routePath": "admin-console",
+		"ngModuleName": "EntryModule",
+		"title": "ESSEDUM"
+	},
 	"mfe14": {
 		"remoteEntry": "http://localhost:5002/remoteEntry.js",
 		"exposedModule": "./FeatureModule",

@@ -46,6 +46,9 @@ public static List<ICIPMLFederatedModelDTO> MapModelListToDTOList(List<ICIPMLFed
 		dtoObject.setModifiedDate(m.getModifiedDate());
 		dtoObject.setCreatedBy(m.getCreatedBy());
 		dtoObject.setType(m.getModelType());
+		dtoObject.setApprovalStatus(m.getApprovalStatus());
+		dtoObject.setProjectId(m.getProjectId());
+		dtoObject.setApprovedOrganizationId(m.getApprovedOrganizationId());
 		dtoList.add(dtoObject);
 	});
 	
@@ -70,6 +73,9 @@ public static ICIPMLFederatedModelDTO MapModelToDTO(ICIPMLFederatedModel m) {
 	dtoObject.setCreatedOn(m.getCreatedOn());
 	dtoObject.setCreatedBy(m.getCreatedBy());
 	dtoObject.setType(m.getModelType());
+	dtoObject.setApprovalStatus(m.getApprovalStatus());
+	dtoObject.setProjectId(m.getProjectId());
+	dtoObject.setApprovedOrganizationId(m.getApprovedOrganizationId());
 	return dtoObject;
 }
 

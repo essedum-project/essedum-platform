@@ -45,10 +45,11 @@ export class CommonAppInterceptorService implements HttpInterceptor {
           request = request.clone({ headers: request.headers.set("ProjectName", JSON.parse(sessionStorage.getItem('project')).name.toString()   )});
       }
       if(sessionStorage.hasOwnProperty("role") && sessionStorage.getItem("role")!=""){
-        if(JSON.parse(sessionStorage.getItem('role')).id.toString() !="")
-          request = request.clone({ headers: request.headers.set("roleId", JSON.parse(sessionStorage.getItem('role')).id.toString()   )});
-        if(JSON.parse(sessionStorage.getItem('role')).name.toString() !="")
-          request = request.clone({ headers: request.headers.set("roleName", JSON.parse(sessionStorage.getItem('role')).name.toString()   )});
+        const roleObj = JSON.parse(sessionStorage.getItem('role'));
+        if(roleObj?.id?.toString() !="")
+          request = request.clone({ headers: request.headers.set("roleId", roleObj.id.toString())});
+        if(roleObj?.name?.toString() !="")
+          request = request.clone({ headers: request.headers.set("roleName", roleObj.name.toString())});
       }
     }
     

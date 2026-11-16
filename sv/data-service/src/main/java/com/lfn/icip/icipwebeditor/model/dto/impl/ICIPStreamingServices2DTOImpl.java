@@ -105,5 +105,41 @@ public class ICIPStreamingServices2DTOImpl implements ICIPStreamingServices2DTO 
         }
         return null;
     }
+
+    @Override
+    public String getCreatedBy() {
+        Object val = data.get("created_by");
+        return val != null ? val.toString() : null;
+    }
+
+    @Override
+    public String getLastmodifiedby() {
+        Object val = data.get("lastmodifiedby");
+        return val != null ? val.toString() : null;
+    }
+
+    @Override
+    public String getApprovalStatus() {
+        Object val = data.get("approval_status");
+        return val != null ? val.toString() : null;
+    }
+
+    @Override
+    public Integer getProjectId() {
+        Object val = data.get("project_id");
+        if (val instanceof Number) {
+            return ((Number) val).intValue();
+        }
+        return null;
+    }
+
+    @Override
+    public Integer getApprovedOrganizationId() {
+        Object val = data.get("approved_organization_id");
+        if (val instanceof Number) {
+            return ((Number) val).intValue();
+        }
+        return null;
+    }
 }
 

@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 
 import org.hibernate.annotations.Cascade;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 
 import jakarta.persistence.Column;
@@ -62,5 +63,16 @@ public class ICIPMLFederatedModelDS {
     @Column(name="app_modified_by")
 	String modifiedBy;
     
-	
+	@Column(name = "approval_status")
+	@JsonProperty("approval_status")
+	private String approvalStatus = "DRAFT";
+
+	@Column(name = "project_id")
+	@JsonProperty("project_id")
+	private Integer projectId;
+
+	@Column(name = "approved_organization_id")
+	@JsonProperty("approved_organization_id")
+	private Integer approvedOrganizationId;
+
 }

@@ -1017,6 +1017,8 @@ export class VibeStudioService implements OnDestroy {
         .subscribe({
           next: () => {
             this.fileUploadSuccess$.next();
+            // Store uploaded cname in sessionStorage so agent-pipeline can detect and reload files
+            sessionStorage.setItem('lastUploadedPipelineCname', cname);
             if (sessionId) this.triggerPreview(sessionId);
           },
           error: () => { this.deploymentStatus$.next('error'); },

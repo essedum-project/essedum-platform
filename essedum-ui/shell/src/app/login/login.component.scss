@@ -1,0 +1,32 @@
+// ══════════════════════════════════════════════════════════════════════════════
+// LOGIN COMPONENT STYLES
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Password visibility toggle button styling
+.login-password-field {
+  .password-toggle-btn {
+    color: rgba(148, 163, 184, 0.7) !important;
+    transition: color 0.25s ease !important;
+
+    &:hover {
+      color: rgba(226, 232, 240, 0.9) !important;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+// Light theme password button
+:host-context(.login-light) .login-password-field {
+  .password-toggle-btn {
+    color: rgba(64, 80, 110, 0.6) !important;
+
+    &:hover {
+      color: rgba(13, 20, 40, 0.85) !important;
+    }
+  }
+}

@@ -25,14 +25,14 @@ export class ModalConfigComponent implements OnInit, OnDestroy {
     private _location: Location,
   ) { }
 
-  datasourcesOpt = [];
+  datasourcesOpt: any[] = [];
   edit: boolean = false;
   data_type: OptionsDTO;
   data_datasource: OptionsDTO;
   data_schema: OptionsDTO;
   data_views: any;
   selectedTags: string[] = [];
-  datasourceAllOpt = [];
+  datasourceAllOpt: any[] = [];
   data: any = {
     modelName: '',
     description: '',
@@ -50,6 +50,10 @@ export class ModalConfigComponent implements OnInit, OnDestroy {
   protected onDestroy = new Subject<void>();
   busy: Subscription
   isInEdit: boolean = false;
+  schemaBol: any;
+  contentVal: boolean = false;
+  isCacheable: any = false;
+  approvalSubmitting: boolean = false;
 
   ngOnInit() {
     this.route.params.subscribe(params => {
@@ -85,9 +89,23 @@ export class ModalConfigComponent implements OnInit, OnDestroy {
 
   authentications() {
     this.service.getPermission("cip").subscribe(
-      (cipAuthority) => {
-        if (cipAuthority.includes("model-edit")) this.isAuth = false;
-      }
+      (value: any) => {
+        let permissions: any = null;
+        if (typeof value === 'string') {
+          try {
+            permissions = JSON.parse(value);
+          } catch (e) {
+            permissions = null;
+          }
+        } else {
+          permissions = value;
+        }
+        if (Array.isArray(permissions)) {
+          this.isAuth = !permissions.some((item: any) => item && item.permission === "model-edit");
+        } else {
+          this.isAuth = !String(value).includes("model-edit");
+        }
+      }, () => { }
     );
   }
 
@@ -181,41 +199,91 @@ export class ModalConfigComponent implements OnInit, OnDestroy {
   }
 
   findalldatasources() {
-    this.service.getDatasources()
-      .subscribe(res => {
-        this.originalDataSources = res.filter(datasource => datasource.category === 'S3');
-        this.originalDataSources.sort((a, b) => a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1);
-        this.originalDataSources.forEach(element => {
-          this.datasources.push(element.alias);
-        });
-        this.filteredDataSources.next(this.datasources.slice());
-        this.originalDataSources.forEach((opt) => {
-          let val = { viewValue: opt.alias, value: opt.name };
-          this.datasourcesOpt.push(opt.alias)
-          this.datasourceAllOpt.push(val)
-        })
+    const org = sessionStorage.getItem('organization');
+    // Use the same (uncached) source as the Connections list so this dropdown
+    // always reflects the current connections for the org. `getDatasources()`
+    // memoises + shareReplays with resetOnComplete:false, so a result cached
+    // before connections existed would replay an empty list forever.
+    this.service.getDatasourceCards(org).subscribe(
+      (res) => {
+        if (!this.applyDatasources(res)) {
+          this.loadDatasourcesFallback();
+        }
+      },
+      () => this.loadDatasourcesFallback()
+    );
+  }
 
+  private loadDatasourcesFallback() {
+    this.service.getDatasources().subscribe(
+      (res) => { this.applyDatasources(res); },
+      () => { }
+    );
+  }
 
-        setTimeout(() => {
+  private applyDatasources(res: any): boolean {
+    let parsed: any = res;
+    if (typeof parsed === 'string') {
+      try {
+        parsed = JSON.parse(parsed);
+      } catch (e) {
+        parsed = null;
+      }
+    }
+    let list: any = Array.isArray(parsed) ? parsed : null;
+    if (!list && parsed && typeof parsed === 'object') {
+      const keys = ['content', 'data', 'datasources', 'items', 'results'];
+      for (const key of keys) {
+        if (Array.isArray(parsed[key])) {
+          list = parsed[key];
+          break;
+        }
+      }
+    }
+    list = Array.isArray(list) ? list : [];
 
-          // Handle edit mode - set datasource value if model was fetched
-          if (this.isInEdit && this.data && this.data.datasource) {
-            // Find the datasource alias that matches the datasource name
-            const matchingDatasource = this.datasourceAllOpt.find(opt =>
-              opt.value === this.data.datasource ||
-              opt.viewValue === this.data.datasource
-            );
-            if (matchingDatasource) {
-              this.data_datasource = matchingDatasource.viewValue;
-              this.onChanginDatasource(matchingDatasource.viewValue);
-            }
-          }
-        }, 500);
+    this.datasources = [];
+    this.datasourcesOpt = [];
+    this.datasourceAllOpt = [];
+    if (!list.length) {
+      return false;
+    }
 
-      }, err => { },
-        () => {
+    const modelCapable = list.filter(d => d && d.formodel === true);
+    const chosen = modelCapable.length ? modelCapable : list;
+    this.originalDataSources = chosen;
+    this.originalDataSources.sort((a, b) => {
+      const aVal = (a.alias || a.name || '').toLowerCase();
+      const bVal = (b.alias || b.name || '').toLowerCase();
+      return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+    });
+    this.originalDataSources.forEach(element => {
+      this.datasources.push(element.alias);
+    });
+    this.filteredDataSources.next(this.datasources.slice());
+    this.originalDataSources.forEach((opt) => {
+      let val = { viewValue: opt.alias, value: opt.name };
+      this.datasourcesOpt.push(opt.alias)
+      this.datasourceAllOpt.push(val)
+    })
 
-        });
+    setTimeout(() => {
+
+      // Handle edit mode - set datasource value if model was fetched
+      if (this.isInEdit && this.data && this.data.datasource) {
+        // Find the datasource alias that matches the datasource name
+        const matchingDatasource = this.datasourceAllOpt.find(opt =>
+          opt.value === this.data.datasource ||
+          opt.viewValue === this.data.datasource
+        );
+        if (matchingDatasource) {
+          this.data_datasource = matchingDatasource.viewValue;
+          this.onChanginDatasource(matchingDatasource.viewValue);
+        }
+      }
+    }, 500);
+
+    return true;
   }
 
   eventHandler($event) {
@@ -244,6 +312,75 @@ export class ModalConfigComponent implements OnInit, OnDestroy {
     catch (Exception) {
       this.datasetsService.message("Some error occured", 'error')
     }
+  }
+
+  getCache($event) {
+    this.isCacheable = $event;
+  }
+
+  getApprovalStatus(): string {
+    return this.data?.approvalStatus || this.data?.approval_status || 'DRAFT';
+  }
+
+  hasApprovalStatus(): boolean {
+    return this.isInEdit && !!this.getApprovalStatus();
+  }
+
+  getApprovalStatusLabel(): string {
+    const statusMap: Record<string, string> = {
+      DRAFT: 'Draft',
+      PENDING_PROJECT_APPROVAL: 'Pending Project Approval',
+      PROJECT_APPROVED: 'Project Approved',
+      PROJECT_REJECTED: 'Project Rejected',
+      PENDING_ORG_APPROVAL: 'Pending Org Approval',
+      ORG_APPROVED: 'Org Approved',
+      ORG_REJECTED: 'Org Rejected',
+      PENDING_PLATFORM_APPROVAL: 'Pending Platform Approval',
+      PLATFORM_REJECTED: 'Platform Rejected',
+      PUBLISHED: 'Published',
+    };
+    return statusMap[this.getApprovalStatus()] || this.getApprovalStatus();
+  }
+
+  getApprovalStatusClass(): string {
+    const classMap: Record<string, string> = {
+      DRAFT: 'draft',
+      PENDING_PROJECT_APPROVAL: 'pending',
+      PROJECT_APPROVED: 'project-approved',
+      PROJECT_REJECTED: 'rejected',
+      PENDING_ORG_APPROVAL: 'pending',
+      ORG_APPROVED: 'org-approved',
+      ORG_REJECTED: 'rejected',
+      PENDING_PLATFORM_APPROVAL: 'pending',
+      PLATFORM_REJECTED: 'rejected',
+      PUBLISHED: 'published',
+    };
+    return classMap[this.getApprovalStatus()] || 'draft';
+  }
+
+  showSubmitButton(): boolean {
+    const status = this.getApprovalStatus();
+    return this.isInEdit && (status === 'DRAFT' || status === 'PROJECT_REJECTED');
+  }
+
+  submitForApproval(): void {
+    const projectId = JSON.parse(sessionStorage.getItem('project') || '{}')?.id;
+    if (!projectId) {
+      this.service.message('Project not set. Cannot submit for approval.', 'error');
+      return;
+    }
+    this.approvalSubmitting = true;
+    this.service.submitModelForApproval(this.data.id, projectId).subscribe({
+      next: () => {
+        this.approvalSubmitting = false;
+        this.service.message('Model submitted for project approval');
+        this.fetchModelDetails(this.data.id);
+      },
+      error: (err: any) => {
+        this.approvalSubmitting = false;
+        this.service.message(err?.error?.error || 'Failed to submit for approval', 'error');
+      },
+    });
   }
 
 }

@@ -1,0 +1,65 @@
+.full-width {
+  width: 100%;
+}
+
+::ng-deep .approve-reject-dialog {
+  .mat-mdc-dialog-surface {
+    background: #1e293b !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  }
+
+  .mat-mdc-dialog-title {
+    color: #e2e8f0 !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    padding: 20px 24px 8px !important;
+  }
+
+  .mat-mdc-dialog-content {
+    padding: 8px 24px 16px !important;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 8px 24px 20px !important;
+    gap: 10px;
+  }
+
+  .mat-mdc-form-field {
+    width: 100%;
+
+    .mat-mdc-text-field-wrapper {
+      background: #111827 !important;
+      border-radius: 8px !important;
+      border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    }
+
+    .mat-mdc-floating-label {
+      color: #94a3b8 !important;
+    }
+
+    textarea {
+      color: #e2e8f0 !important;
+      resize: none !important;
+      min-height: 100px;
+      caret-color: #7eb8ff;
+    }
+
+    .mdc-line-ripple::before,
+    .mdc-line-ripple::after {
+      border-bottom-color: rgba(148, 163, 184, 0.3) !important;
+    }
+  }
+
+  button[mat-raised-button][color="primary"] {
+    background: #4f46e5 !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+  }
+
+  button[mat-button] {
+    color: #94a3b8 !important;
+    border-radius: 8px !important;
+  }
+}

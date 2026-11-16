@@ -301,8 +301,8 @@ public class ICIPDatasourceService implements IICIPDatasourceService, IICIPSearc
 			}
 		});
 		connDetails = connection.toString();
+		ICIPDatasource fetched = null;
 		try {
-			ICIPDatasource fetched = null;
 			logger.debug("fetching datasource");
 			try {
 				fetched = getDatasource(Integer.parseInt(idOrName));
@@ -350,6 +350,13 @@ public class ICIPDatasourceService implements IICIPDatasourceService, IICIPSearc
 		iCIPDatasource.setForpromptprovider(iCIPDatasource2Save.getForpromptprovider());
 		iCIPDatasource.setForendpoint(iCIPDatasource2Save.getForendpoint());
 		iCIPDatasource.setForapp(iCIPDatasource2Save.getForapp());
+
+		// Approval state is owned by the approval endpoints, never by a connection edit.
+		if (fetched != null) {
+			iCIPDatasource.setApprovalStatus(fetched.getApprovalStatus());
+			iCIPDatasource.setProjectId(fetched.getProjectId());
+			iCIPDatasource.setApprovedOrganizationId(fetched.getApprovedOrganizationId());
+		}
 
 		logger.info("saving datasource ");
 		iCIPDatasource = datasourceRepository.save(iCIPDatasource);

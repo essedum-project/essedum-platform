@@ -222,6 +222,7 @@ public interface ICIPStreamingServicesRepositoryMYSQL extends ICIPStreamingServi
             + "  (:query1 IS NULL OR LOWER(p1.alias) like LOWER(CONCAT('%', :query1, '%')) OR LOWER(p1.name) like LOWER(CONCAT('%', :query1, '%')) "
             + "  OR LOWER(p1.type) like  LOWER(CONCAT('%', :query1, '%')) OR LOWER(p1.description) like  LOWER(CONCAT('%', :query1, '%'))) ORDER BY p1.created_date DESC",nativeQuery = true)
 	List<ICIPStreamingServices2DTO> getAllPipelinesByTypeandOrg(@Param("project")List<String> project, Pageable paginate,@Param("query1") String query,@Param("type") String type,@Param("interfacetype") String interfacetype);
+
 	
 	@Query(value="SELECT * FROM mlpipeline p1 WHERE "
 	+"p1.name IN (SELECT p2.name FROM mlapps p2 WHERE (concat('',:type,'')='notRequired' OR FIND_IN_SET(p2.scope, :type))) AND p1.organization IN (:project) AND p1.interfacetype = :interfacetype AND p1.is_template IS FALSE AND"

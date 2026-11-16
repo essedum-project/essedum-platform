@@ -1,6 +1,7 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   ViewChild,
   HostListener,
   AfterViewInit,
@@ -22,6 +23,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatMenuTrigger } from "@angular/material/menu";
 import { Subscription, interval } from "rxjs";
 import { MenuService } from "../services/menu.service";
+import { RoleMenuService } from "../services/role-menu.service";
+import { RoleNameUtil } from "../services/role-name.util";
 import { HttpClient } from "@angular/common/http";
 import { Title } from "@angular/platform-browser";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
@@ -37,7 +40,7 @@ import { MyProfileComponent } from "./my-profile/my-profile.component";
     styleUrls: ["./landing.component.scss"],
     standalone: false
 })
-export class LandingComponent implements OnInit, AfterViewInit {
+export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild("drawerLeft", { static: true }) drawerLeft: any;
   @ViewChild("drawerRight", { static: true }) drawerRight: any;
   @ViewChild("tabsBox") tabsBox: any;
@@ -369,14 +372,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
   sidebarMenuToggle: boolean = false;
   sidebarMenuPopupWidth = "130px";
 
-  sidebarMenu: any = [
-    { label: "Dashboard", icon: "tachometer", url: "./" },
-    {
-      label: "Configuration",
-      icon: "map-signs",
-      url: "./iamp-usm/dashconstant",
-    },
-  ];
+  sidebarMenu: any = [];
   location = "";
   clickeditem: any;
   res: any;
@@ -397,6 +393,54 @@ export class LandingComponent implements OnInit, AfterViewInit {
   filterData: any;
   mfeRouteTitle: any;
   isSidebarLoading = false;
+  /** True from fresh login until the correct RBAC role+menu fully loads.
+   *  A full-screen overlay hides intermediate navigations so only the final settled state is visible.
+   *  Backed by sessionStorage so it persists across component recreations during the nav chain. */
+  pageInitializing = false;
+  /** Listener registered when pageInitializing=true. Removed in ngOnDestroy or when event fires. */
+  private _initCompleteHandler: (() => void) | null = null;
+  /** True while supplementRbacData() hasn't yet confirmed the correct RBAC role.
+   *  Prevents newsidebar() from fetching a menu for a stale sessionStorage role. */
+  private _rbacCheckPending = true;
+  /** Guard: true while a supplementRbacData() call is in flight.
+   *  Prevents concurrent HTTP chains from racing each other (setProjectTheme and getrolepage
+   *  both call getDashConsts which both trigger supplementRbacData in the same component). */
+  private _rbacDataLoading = false;
+  /** Timestamp (Date.now()) of the last deliberate role switch by the user.
+   *  Prevents supplementRbacData() from auto-switching after a manual selection. */
+  private _lastManualRoleSwitch = 0;
+  /** Cached assignments from the last supplementRbacData() call (for scope filtering). */
+  private _rbacAssignmentsCache: any[] = [];
+  /** Cached roleId→name map from the last supplementRbacData() call. */
+  private _rbacRoleNameByIdCache = new Map<number, string>();
+  /** All projects fetched from /api/projects (unfiltered). */
+  private _allRbacProjects: any[] = [];
+  /** Set to true once supplementRbacData confirms the user has RBAC role assignments.
+   *  Stops legacy checkDefaultRole* functions from overriding the RBAC-selected role. */
+  private _rbacUser = false;
+  /** Set to true in ngOnDestroy so zombie HTTP callbacks don't navigate after the component is gone. */
+  private _destroyed = false;
+  /** Role name whose menu is currently loaded in sidebarMenu. Used to skip
+   *  redundant HTTP calls when newsidebar() is called during in-app navigation. */
+  private _loadedMenuRole = '';
+  /** Snapshot of the last successfully loaded sidebarMenu for this role.
+   *  newsidebar() restores this instantly when called mid-navigation so the
+   *  sidebar never flashes empty while a re-fetch is in progress. */
+  private _menuSnapshot: any[] = [];
+  /** Set by the first-login auto-switch when _allRbacProjects hasn't loaded yet.
+   *  The projects callback completes the project switch once it arrives. */
+  private _pendingAutoSwitchProjectId: number | null = null;
+  /** Set by the first-login auto-switch when portfoliodata hasn't loaded yet.
+   *  The orgs callback completes the org switch once it arrives. */
+  private _pendingAutoSwitchOrgId: number | null = null;
+  /** Org selected by the user while supplementRbacData() was still in flight.
+   *  Processed when supplementRbacData() completes so the cascade fires correctly. */
+  private _pendingOrgClick: any = null;
+
+  /** Loading states for the three profile-menu dropdowns. */
+  isOrgLoading = false;
+  isProjectLoading = false;
+  isRoleLoading = false;
 
   constructor(
     private router: Router,
@@ -409,7 +453,8 @@ export class LandingComponent implements OnInit, AfterViewInit {
     private dialog: MatDialog,
     private sanitizer: DomSanitizer,
     private appOAuthService: AppOAuthService,
-    private mfeappConfigSvc: AppConfigService // private messageService: MessageService
+    private mfeappConfigSvc: AppConfigService, // private messageService: MessageService
+    private roleMenuSvc: RoleMenuService
   ) {
     this.router.routeReuseStrategy.shouldReuseRoute = function () {
       return false;
@@ -475,7 +520,654 @@ export class LandingComponent implements OnInit, AfterViewInit {
     }
   }
 
+  // Refresh role data when admin-console grants or revokes a role assignment.
+  // The event is dispatched by AccessComponent and MyDetailsComponent after any
+  // successful grant/revoke so the shell's role dropdown stays in sync without a page reload.
+  private readonly onAssignmentsChanged = () => {
+    this.setportfolio();
+    // Refresh RBAC role list so newly granted roles appear without logout.
+    setTimeout(() => {
+      this.supplementRbacData();
+      // Also refresh sidebar in case the current role's menu changed.
+      const role = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return ''; } })();
+      if (this.roleMenuSvc.isRbacRole(role)) this.newsidebar();
+    }, 800);
+  };
+
+  // When the admin-console menu-picker adds/removes a role-menu item, refresh
+  // the sidebar immediately WITHOUT navigating (the user stays on the same page).
+  private readonly onRoleMenuChanged = () => {
+    console.log('[MENU] onRoleMenuChanged event fired → refreshing sidebar without navigation');
+    this._loadRoleMenus(false, /* navigate= */ false);
+  };
+
+  // Refresh org+project thumbnail dropdowns when admin-console creates/deletes an org or project.
+  // Does NOT clear _rbac_session_initialized — that would break the sidebar's sessionStorage
+  // fast-path and cause a visible menu refresh on every subsequent navigation.
+  // Instead, re-fetches org and project lists directly and updates the in-memory + cached state.
+  private readonly onTenancyChanged = () => {
+    // Re-fetch org list: removes deleted orgs, adds new ones
+    this.isOrgLoading = true;
+    this.http.get<any[]>('/api/organisations', { params: { size: '1000' } }).subscribe({
+      next: (orgs: any[]) => {
+        const freshOrgNames = new Set((orgs || []).map((o: any) => (o.name || '').toLowerCase()));
+        const freshOrgIds = new Set((orgs || []).map((o: any) => String(o.id)));
+        // Keep truly-legacy entries (not covered by any current RBAC org) + rebuild RBAC portion fresh
+        const legacyOnly = this.portfoliodata.filter((p: any) =>
+          !freshOrgNames.has((p.portfolioName || '').toLowerCase()) && !freshOrgIds.has(String(p.id))
+        );
+        const rbacEntries = (orgs || []).map((o: any) => ({ id: o.id, portfolioName: o.name }));
+        this.portfoliodata = [...legacyOnly, ...rbacEntries].sort((a: any, b: any) =>
+          (a.portfolioName || '').toLowerCase() > (b.portfolioName || '').toLowerCase() ? 1 : -1
+        );
+        sessionStorage.setItem('_rbac_portfolio_list', JSON.stringify(this.portfoliodata));
+        this.isOrgLoading = false;
+      },
+      error: () => { this.isOrgLoading = false; }
+    });
+
+    // Re-fetch project list: removes deleted projects, adds new ones
+    this.isProjectLoading = true;
+    this.http.get<any[]>('/api/projects', { params: { size: '1000' } }).subscribe({
+      next: (projects: any[]) => {
+        this._allRbacProjects = (projects || []).map((p: any) => ({
+          id: p.id, name: p.name, projectdisplayname: p.projectdisplayname || p.name,
+          organisationId: p.organisationId ?? null,
+        }));
+        if (this._rbacAssignmentsCache.length) {
+          this._applyRbacScope();
+          sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+        }
+        this.isProjectLoading = false;
+      },
+      error: () => { this.isProjectLoading = false; }
+    });
+  };
+
+  /**
+   * Supplements the legacy processdata-driven org/project lists with entries from the
+   * RBAC tables so that both old and new data appear in the thumbnail dropdowns.
+   * Called at the end of getrolepage() when both portfoliodata and projectList are ready.
+   * Fully idempotent — deduplicates by name/id so repeated calls add nothing.
+   */
+  /** Map from role name (lowercase) → rank for RBAC roles, built in supplementRbacData(). */
+  rbacRoleRankMap = new Map<string, number>();
+
+  /** Returns display name for a role (e.g., 'developer' → 'AI Engineer'). */
+  getDisplayRoleName(roleName: string): string {
+    return RoleNameUtil.getDisplayNameByRoleName(roleName);
+  }
+
+  /** Returns a short label to show next to a role name in the dropdown. */
+  getRoleTypeLabel(role: any): string {
+    if (this.roleMenuSvc.isRbacRole(role?.name)) return ''; // clean label for our 5 RBAC roles
+    const rank = this.rbacRoleRankMap.get((role?.name || '').toLowerCase());
+    if (rank != null) return `[RBAC · rank ${rank}]`;
+    return '[Legacy]';
+  }
+
+  /**
+   * Re-sorts the legacy roleList with RBAC roles first.
+   * Used as fallback when no RBAC assignments are found.
+   */
+  private _sortLegacyRoleList(): void {
+    this.roleList = [
+      ...this.roleList
+        .filter((r: any) => this.rbacRoleRankMap.has((r.name || '').toLowerCase()))
+        .sort((a: any, b: any) =>
+          (this.rbacRoleRankMap.get(a.name.toLowerCase()) ?? 99) -
+          (this.rbacRoleRankMap.get(b.name.toLowerCase()) ?? 99)
+        ),
+      ...this.roleList
+        .filter((r: any) => !this.rbacRoleRankMap.has((r.name || '').toLowerCase()))
+        .sort((a: any, b: any) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1),
+    ];
+  }
+
+  private supplementRbacData(): void {
+    if (this._rbacDataLoading) return; // concurrent call already in flight — skip
+    this._rbacDataLoading = true;
+    const userId = (() => {
+      try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id; } catch { return null; }
+    })();
+
+    // Orgs: merge usm_organisation entries into portfoliodata (dedup by name)
+    this.isOrgLoading = true;
+    this.http.get<any[]>('/api/organisations', { params: { size: '1000' } }).subscribe({
+      next: (orgs: any[]) => {
+        const existing = new Set<string>(
+          this.portfoliodata.map((p: any) => (p.portfolioName || '').toLowerCase())
+        );
+        let changed = false;
+        (orgs || []).forEach((org: any) => {
+          if (org.name && !existing.has(org.name.toLowerCase())) {
+            this.portfoliodata.push({ id: org.id, portfolioName: org.name });
+            existing.add(org.name.toLowerCase());
+            changed = true;
+          }
+        });
+        if (changed) {
+          this.portfoliodata = this.portfoliodata.sort((a: any, b: any) =>
+            (a.portfolioName || '').toLowerCase() > (b.portfolioName || '').toLowerCase() ? 1 : -1
+          );
+        }
+        // Complete deferred auto-switch org if assignments arrived before orgs did (parallel fetch race)
+        if (this._pendingAutoSwitchOrgId != null) {
+          const pendingOrg = this.portfoliodata.find((p: any) => Number(p.id) === this._pendingAutoSwitchOrgId);
+          if (pendingOrg) {
+            this.selectedportfolio = pendingOrg;
+            sessionStorage.setItem('portfoliodata', JSON.stringify(pendingOrg));
+            sessionStorage.setItem('tempdata', JSON.stringify(pendingOrg));
+            // Apply the role switch that was deferred because the org wasn't in sessionStorage yet.
+            // Now that the correct org is saved, valuechangerole() navigates with the right context —
+            // the recreated component reads the correct org from sessionStorage and won't re-trigger auto-switch.
+            const _pendingRoleRaw = sessionStorage.getItem('_rbac_pending_switch_role');
+            if (_pendingRoleRaw) {
+              sessionStorage.removeItem('_rbac_pending_switch_role');
+              if (!this._destroyed) {
+                try {
+                  // If projects are already loaded, apply scope filter and cache before navigating
+                  // so the new component's fast-path restore gets the correctly filtered project list.
+                  if (this._allRbacProjects.length > 0 && this._rbacAssignmentsCache.length > 0) {
+                    this._applyRbacScope();
+                    sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+                  }
+                  this.valuechangerole(JSON.parse(_pendingRoleRaw));
+                } catch {}
+              }
+            }
+          }
+          this._pendingAutoSwitchOrgId = null;
+        }
+        this.isOrgLoading = false;
+        },
+      error: () => { this.isOrgLoading = false; }
+    });
+
+    // Projects: fetch all projects and filter into projectList by selected org.
+    // No dependency on RBAC assignments — projects are org-scoped, not role-scoped.
+    this.isProjectLoading = true;
+    this.http.get<any[]>('/api/projects', { params: { size: '1000' } }).subscribe({
+      next: (projects: any[]) => {
+        // Build _allRbacProjects — preserve portfolioId so downstream code (callDashConstantApi) doesn't crash
+        this._allRbacProjects = (projects || []).map((p: any) => ({
+          id: p.id, name: p.name, projectdisplayname: p.projectdisplayname || p.name,
+          organisationId: p.organisationId ?? p.organizationId ?? null,
+          portfolioId: p.portfolioId ?? null,
+          theme: p.theme ?? null,
+        }));
+        try { sessionStorage.setItem('_rbac_all_projects', JSON.stringify(this._allRbacProjects)); } catch {}
+        console.log('[RBAC] projects loaded —', this._allRbacProjects.length, 'total:', this._allRbacProjects.map((p: any) => `${p.name}[#${p.id}](org:${p.organisationId})`));
+
+        // Always populate projectList from the currently selected org.
+        // Projects are org-scoped — no dependency on RBAC assignments or role type.
+        const _projOrgId = (() => {
+          const id = this.selectedportfolio?.id ?? null;
+          if (id != null) return Number(id);
+          try { const ss = JSON.parse(sessionStorage.getItem('portfoliodata') || 'null'); return ss?.id != null ? Number(ss.id) : null; } catch { return null; }
+        })();
+        if (_projOrgId != null) {
+          const _byOrg = this._allRbacProjects.filter((p: any) =>
+            (p.organisationId != null && Number(p.organisationId) === _projOrgId) ||
+            (p.portfolioId?.id != null && Number(p.portfolioId.id) === _projOrgId)
+          );
+          this.projectList = _byOrg.length > 0 ? _byOrg : [];
+          sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+          console.log(`[RBAC] projects callback: org #${_projOrgId} → projectList:`, this.projectList.map((p: any) => `${p.name}[#${p.id}]`));
+        }
+        // Deferred org-click: _cascadeOrgChange was skipped because _allRbacProjects was empty.
+        // Now that it's populated, run the cascade.
+        if (this._pendingOrgClick && !this._destroyed) {
+          const _pendingOrg = this._pendingOrgClick;
+          this._pendingOrgClick = null;
+          this._cascadeOrgChange(_pendingOrg);
+        }
+        this.isProjectLoading = false;
+      },
+      error: () => { this.isProjectLoading = false; }
+    });
+
+    // Step 1: fetch all RBAC roles to build the rank map + id→name lookup
+    this.isRoleLoading = true;
+    this.http.get<any[]>('/api/usm/roles').subscribe({
+      next: (rbacRoles: any[]) => {
+        this.rbacRoleRankMap.clear();
+        const roleNameById = new Map<number, string>();
+        (rbacRoles || []).forEach((r: any) => {
+          if (r.name && r.rank != null) {
+            this.rbacRoleRankMap.set(r.name.toLowerCase(), r.rank);
+          }
+          if (r.id != null) roleNameById.set(r.id, r.name);
+        });
+
+        try { sessionStorage.setItem('_rbac_role_rank_map', JSON.stringify([...this.rbacRoleRankMap.entries()])); } catch {}
+        if (!userId) { this._sortLegacyRoleList(); this.isRoleLoading = false; return; }
+
+        // Step 2: fetch this user's RBAC assignments and build a clean role list
+        // The endpoint scopes results to the actor; platform admins get all — filter by userId.
+        this.http.get<any[]>(`/api/usm/access/role-assignments?actorUserId=${userId}`).subscribe({
+          next: (assignments: any[]) => {
+            // Use Number() coercion so string "4" and numeric 4 compare equal.
+            const numUserId = userId != null ? Number(userId) : null;
+            const active = (assignments || [])
+              .filter((a: any) => !a.revokedAt && (a.userId == null || Number(a.userId) === numUserId));
+            // Cache for org/project/role cascade filtering
+            this._rbacAssignmentsCache = active;
+            this._rbacRoleNameByIdCache = roleNameById;
+            // Persist caches so fast-path component recreations can restore them without HTTP round-trips
+            try {
+              sessionStorage.setItem('_rbac_assignments_cache', JSON.stringify(active));
+              sessionStorage.setItem('_rbac_role_name_map', JSON.stringify([...roleNameById.entries()]));
+            } catch {}
+
+            const seen = new Set<string>();
+            const rbacList: any[] = [];
+
+            for (const a of active) {
+              const roleName = roleNameById.get(a.roleId);
+              if (!roleName) continue;
+              const key = roleName.toLowerCase();
+              if (seen.has(key)) continue;
+              if (!this.roleMenuSvc.isRbacRole(roleName)) continue;
+              const rank = this.rbacRoleRankMap.get(key) ?? 0;
+              if (rank === 1) continue; // Hide AI Engineer (rank 1) from dropdowns
+              seen.add(key);
+              rbacList.push({ name: roleName, rank: rank, id: a.roleId });
+            }
+
+            // Highest rank (most privileged) first
+            rbacList.sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
+
+            if (rbacList.length > 0) {
+              this._rbacUser = true; // block legacy checkDefaultRole* from overriding
+              // Clear legacy default sidebarMenu so Dashboard/Configuration don't flash
+              // while the RBAC menu HTTP call is in progress.
+              if (this.sidebarMenu.length <= 2 &&
+                  this.sidebarMenu.every((i: any) => i.label === 'Dashboard' || i.label === 'Configuration')) {
+                this.sidebarMenu = [];
+              }
+
+              // Evaluate whether the current role is still valid and whether a manual
+              // switch just happened — both guards are needed for the auto-select below.
+              const cur = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null'); } catch { return null; } })();
+              const curStillValid = cur?.name && rbacList.some(r => r.name.toLowerCase() === cur.name.toLowerCase());
+              const recentManualSwitch = Date.now() - this._lastManualRoleSwitch < 8000;
+
+              // Auto-switch: fire when no valid role saved (first/fresh login) OR when the current
+              // org has no RBAC assignments for this user (e.g. a "dummy" org showing even though
+              // the user has a valid role from a previous session on a different org).
+              //
+              // IMPORTANT: this.selectedportfolio / this.selectedproject may be undefined when
+              // supplementRbacData() fires (from getDashConsts callback) before getUserInfoData()'s
+              // callback has completed. Both HTTP calls start in parallel — getDashConsts typically
+              // resolves faster, so selectedportfolio is still undefined at this point.
+              // Without the sessionStorage fallback: curOrgId = null → currentOrgHasAssignments = false
+              // → valuechangerole() fires on every navigation, creating an infinite navigation loop.
+              // sessionStorage portfoliodata/tempdata always reflect the last confirmed org context
+              // (written by valuechangerole() and the org switch logic).
+              const _ssPortfolio = (() => { try { return JSON.parse(sessionStorage.getItem('portfoliodata') || 'null') || JSON.parse(sessionStorage.getItem('tempdata') || 'null'); } catch { return null; } })();
+              const _ssProject   = (() => { try { return JSON.parse(sessionStorage.getItem('project') || 'null'); } catch { return null; } })();
+              const curOrgId     = this.selectedportfolio?.id != null ? Number(this.selectedportfolio.id)
+                                 : (_ssPortfolio?.id != null ? Number(_ssPortfolio.id) : null);
+              const curProjectId = this.selectedproject?.id != null ? Number(this.selectedproject.id)
+                                 : (_ssProject?.id != null ? Number(_ssProject.id) : null);
+              // Sync in-memory fields from sessionStorage so downstream code has a consistent reference.
+              if (this.selectedportfolio == null && _ssPortfolio != null) this.selectedportfolio = _ssPortfolio;
+              if ((this.selectedproject == null || Object.keys(this.selectedproject).length === 0) && _ssProject != null) this.selectedproject = _ssProject;
+              const currentOrgHasAssignments = curOrgId != null &&
+                active.some(a => a.organizationId != null && Number(a.organizationId) === curOrgId);
+              if ((!curStillValid || !currentOrgHasAssignments) && !recentManualSwitch) {
+                if (!currentOrgHasAssignments) {
+                  // Best assignment = highest-rank role that is scoped to a specific org+project
+                  const topAssignment = [...active]
+                    .filter(a => a.organizationId != null && a.projectId != null)
+                    .sort((a, b) => {
+                      const rankA = this.rbacRoleRankMap.get((roleNameById.get(a.roleId) || '').toLowerCase()) ?? -1;
+                      const rankB = this.rbacRoleRankMap.get((roleNameById.get(b.roleId) || '').toLowerCase()) ?? -1;
+                      return rankB - rankA;
+                    })[0];
+                  console.log('[RBAC] auto-switch: current org #' + curOrgId + ' has no assignments → selecting topAssignment:', topAssignment ? `org #${topAssignment.organizationId} project #${topAssignment.projectId} role "${roleNameById.get(topAssignment.roleId)}"` : 'none found');
+                  if (topAssignment) {
+                    const targetOrg = (this.portfoliodata || []).find((p: any) =>
+                      Number(p.id) === Number(topAssignment.organizationId)
+                    );
+                    console.log('[RBAC] auto-switch: targetOrg from portfoliodata:', targetOrg ? `"${targetOrg.portfolioName||targetOrg.name}"[#${targetOrg.id}]` : `not yet loaded (pending, id=${topAssignment.organizationId})`);
+                    if (targetOrg) {
+                      this.selectedportfolio = targetOrg;
+                      sessionStorage.setItem('portfoliodata', JSON.stringify(targetOrg));
+                      sessionStorage.setItem('tempdata', JSON.stringify(targetOrg));
+                      this._pendingAutoSwitchOrgId = null;
+                    } else {
+                      // Orgs not loaded yet (parallel fetch) — the orgs callback
+                      // will complete the switch when portfoliodata has RBAC entries.
+                      this._pendingAutoSwitchOrgId = Number(topAssignment.organizationId);
+                    }
+                    const _targetProjId = Number(topAssignment.projectId);
+                    const targetProject = this._allRbacProjects.find((p: any) =>
+                      Number(p.id) === _targetProjId
+                    );
+                    if (targetProject) {
+                      this.selectedproject = targetProject;
+                      sessionStorage.setItem('project', JSON.stringify(targetProject));
+                      this._pendingAutoSwitchProjectId = null;
+                    } else {
+                      // Projects not loaded yet (parallel fetch) — the projects callback
+                      // will complete the switch when _allRbacProjects arrives.
+                      this._pendingAutoSwitchProjectId = _targetProjId;
+                    }
+                  }
+                }
+              }
+
+              this.roleList = rbacList;
+              // Apply org/project scope filter so dropdown shows only contextually relevant roles.
+              this._applyRbacScope();
+              this.isRoleLoading = false;
+              this._rbacCheckPending = false;
+              this._rbacDataLoading = false;
+              // Persist dropdown lists so fast-path component recreations (shouldReuseRoute=false)
+              // can restore org/project/role dropdowns without calling supplementRbacData again.
+              sessionStorage.setItem('_rbac_role_list', JSON.stringify(this.roleList));
+              sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+              sessionStorage.setItem('_rbac_portfolio_list', JSON.stringify(this.portfoliodata));
+              // User changed org while RBAC data was still loading — cascade from their selection.
+              if (this._pendingOrgClick) {
+                this._rbacUser = true;
+                sessionStorage.setItem('_rbac_session_initialized', '1');
+                if (this._allRbacProjects.length > 0) {
+                  // Projects already loaded — cascade immediately.
+                  const _pendingOrg = this._pendingOrgClick;
+                  this._pendingOrgClick = null;
+                  this._cascadeOrgChange(_pendingOrg);
+                }
+                // else: _allRbacProjects not yet loaded (projects HTTP still in flight).
+                // _pendingOrgClick stays set; the projects callback will cascade once ready.
+                return;
+              }
+              // First-load detection: '_rbac_session_initialized' is cleared on logout.
+              // When NOT set we ALWAYS switch to the highest-rank role regardless of what
+              // sessionStorage currently holds — this prevents a stale Developer (or other
+              // lower-rank) role from persisting into a new login session.
+              const _sessionInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
+              // Guard: prevent double auto-switch when the component is recreated before
+              // _rbac_session_initialized is written (getDashConsts race on fast re-render).
+              const _recentAutoSwitch = (() => {
+                try { const t = sessionStorage.getItem('_rbac_last_auto_switch'); return !!t && (Date.now() - parseInt(t)) < 10000; } catch { return false; }
+              })();
+              if ((!curStillValid || !currentOrgHasAssignments || !_sessionInit) && !recentManualSwitch && !_recentAutoSwitch) {
+                if (this._destroyed) { this._rbacDataLoading = false; return; } // zombie guard
+                // Mark session initialized BEFORE navigating so the recreated component
+                // skips the auto-switch and restores the menu from sessionStorage cache.
+                sessionStorage.setItem('_rbac_session_initialized', '1');
+                // Timestamp the auto-switch so concurrent component recreations don't re-fire it.
+                sessionStorage.setItem('_rbac_last_auto_switch', Date.now().toString());
+                // Use the scoped role list (filtered to current org+project) so the
+                // auto-selected role matches what appears in the dropdown. rbacList[0]
+                // is the global highest-rank role which may not be assigned for the
+                // current project — that would leave the dropdown field blank.
+                const _autoSwitchRole = this.roleList.length > 0 ? this.roleList[0] : rbacList[0];
+                if (this._pendingAutoSwitchOrgId != null) {
+                  // Org not yet in sessionStorage (parallel fetch — assignments arrived before orgs).
+                  // Store the target role; the orgs callback will call valuechangerole() AFTER
+                  // saving the correct org so the next component reads the right org from sessionStorage.
+                  sessionStorage.setItem('_rbac_pending_switch_role', JSON.stringify(_autoSwitchRole));
+                } else {
+                  // Org is already in sessionStorage — safe to switch immediately.
+                  this.valuechangerole(_autoSwitchRole);
+                }
+              } else {
+                // Role is valid, session already initialized, and user didn't just manually switch.
+                sessionStorage.setItem('_rbac_session_initialized', '1');
+                this.newsidebar();
+              }
+            } else {
+              this._sortLegacyRoleList(); // no RBAC role assignments — keep legacy list
+              this._rbacCheckPending = false;
+              this.isRoleLoading = false;
+              this._rbacDataLoading = false;
+              this.newsidebar();
+            }
+          },
+          error: () => { this._sortLegacyRoleList(); this._rbacCheckPending = false; this.isRoleLoading = false; this._rbacDataLoading = false; this.newsidebar(); }
+        });
+      },
+      error: () => { this.isRoleLoading = false; this._rbacDataLoading = false; }
+    });
+
+  }
+
+  /**
+   * Filters projectList and roleList based on the currently selected org and project.
+   * Called after supplementRbacData() fetches assignments and after org/project changes.
+   * No-ops when there are no cached assignments (first load not yet complete).
+   */
+  private _applyRbacScope(): void {
+    if (!this._rbacAssignmentsCache.length) return;
+
+    const selOrgId = this.selectedportfolio?.id != null ? Number(this.selectedportfolio.id) : null;
+    const selProjectId = this.selectedproject?.id != null ? Number(this.selectedproject.id) : null;
+
+    // 1. Filter projectList: when an RBAC org is selected, show only its projects.
+    //    An org is "RBAC" if any assignment references it as organizationId.
+    const isRbacOrg = selOrgId != null &&
+      this._rbacAssignmentsCache.some(a => a.organizationId != null && Number(a.organizationId) === selOrgId);
+
+    const _orgName = this.selectedportfolio?.portfolioName || this.selectedportfolio?.name || '?';
+    console.log(`[RBAC] _applyRbacScope: org="${_orgName}"[#${selOrgId}] isRbacOrg=${isRbacOrg} allProjects=${this._allRbacProjects.length}`);
+
+    // Filter projects by organisationId OR portfolioId.id — show only projects belonging to the selected org.
+    if (isRbacOrg && selOrgId != null && this._allRbacProjects.length > 0) {
+      const byOrg = this._allRbacProjects.filter((p: any) =>
+        (p.organisationId != null && Number(p.organisationId) === selOrgId) ||
+        (p.portfolioId?.id != null && Number(p.portfolioId.id) === selOrgId)
+      );
+      console.log(`[RBAC] _applyRbacScope: projects for org #${selOrgId}:`, byOrg.map((p: any) => `${p.name}[#${p.id}]`));
+      if (byOrg.length > 0) this.projectList = byOrg;
+    } else if (!isRbacOrg && selOrgId != null) {
+      console.log(`[RBAC] _applyRbacScope: org #${selOrgId} not found in any assignment — skipping project filter (legacy org or no assignment for this org)`);
+    } else if (this._allRbacProjects.length === 0) {
+      console.log('[RBAC] _applyRbacScope: _allRbacProjects empty — projects HTTP not yet complete, filter deferred');
+    }
+
+    // 2. Build roleList scoped to the current org + project.
+    //    When a project is selected, use the same filter as _cascadeProjectChange so
+    //    only roles assigned for that org+project context (including global/unscoped
+    //    assignments) appear in the dropdown. This prevents ALL of the user's roles
+    //    across all orgs/projects from showing on first login when only a subset
+    //    applies to the currently selected context.
+    //    Fall back to ALL assignments only when no project is selected yet.
+    const selProjId = this.selectedproject?.id != null ? Number(this.selectedproject.id) : null;
+    const assignmentsForRoles = selProjId != null
+      ? this._rbacAssignmentsCache.filter(a => {
+          const orgMatch = a.organizationId == null ||
+            (selOrgId != null && Number(a.organizationId) === selOrgId);
+          const projMatch = a.projectId == null ||
+            (selProjId != null && Number(a.projectId) === selProjId);
+          return orgMatch && projMatch;
+        })
+      : this._rbacAssignmentsCache;
+
+    const seen = new Set<string>();
+    const scopedRoles: any[] = [];
+    for (const a of assignmentsForRoles) {
+      const roleName = this._rbacRoleNameByIdCache.get(a.roleId);
+      if (!roleName) continue;
+      const key = roleName.toLowerCase();
+      if (seen.has(key)) continue;
+      if (!this.roleMenuSvc.isRbacRole(roleName)) continue;
+      const rank = this.rbacRoleRankMap.get(key) ?? 0;
+      if (rank === 1) continue; // Hide AI Engineer (rank 1) from dropdowns
+      seen.add(key);
+      scopedRoles.push({ name: roleName, rank: rank, id: a.roleId });
+    }
+    scopedRoles.sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
+    // Always overwrite roleList — even when empty — so stale roles from a
+    // previous context don't persist when the current project/org has no grants.
+    this.roleList = scopedRoles;
+  }
+
+  /**
+   * Simple RBAC cascade for org change:
+   *   org selected → filter projects for that org → auto-select first project → cascade to project.
+   * Only called for RBAC users (when _rbacAssignmentsCache is populated).
+   */
+  private _cascadeOrgChange(org: any): void {
+    const orgId = org?.id != null ? Number(org.id) : null;
+    this.isProjectLoading = true;
+    this.projectList = [];
+    this.roleList = [];
+    this.selectedproject = {};
+
+    const applyOrgProjects = (filteredProjects: any[]) => {
+      if (this._destroyed) { this.isProjectLoading = false; return; }
+      this.projectList = filteredProjects;
+      this.isProjectLoading = false;
+      sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+      if (this.projectList.length > 0) {
+        // Prefer a project the user has an explicit assignment for; fall back to first.
+        const preferredProject = this.projectList.find((proj: any) =>
+          this._rbacAssignmentsCache.some(a =>
+            a.projectId != null && Number(a.projectId) === Number(proj.id)
+          )
+        );
+        this.selectedproject = preferredProject || this.projectList[0];
+        sessionStorage.setItem('project', JSON.stringify(this.selectedproject));
+        this._cascadeProjectChange(this.selectedproject, orgId);
+      }
+    };
+
+    if (orgId == null) {
+      applyOrgProjects([...this._allRbacProjects]);
+      return;
+    }
+    if (this._allRbacProjects.length === 0) {
+      // Projects not yet loaded — keep spinners, defer cascade when they arrive
+      this._pendingOrgClick = org;
+      return;
+    }
+
+    // Match by organisationId OR portfolioId.id (some projects store org as portfolioId).
+    const byOrg = this._allRbacProjects.filter((p: any) =>
+      (p.organisationId != null && Number(p.organisationId) === orgId) ||
+      (p.portfolioId?.id != null && Number(p.portfolioId.id) === orgId)
+    );
+    if (byOrg.length > 0) {
+      applyOrgProjects(byOrg);
+      return;
+    }
+
+    // Fallback: neither field matched — ask the backend directly
+    // which project IDs belong to it, then cross-reference _allRbacProjects.
+    this.http.get<number[]>(`/api/getPortfolioProjects/${orgId}`).subscribe({
+      next: (ids: number[]) => {
+        const idSet = new Set((ids || []).map(Number));
+        const filtered = idSet.size > 0
+          ? this._allRbacProjects.filter((p: any) => idSet.has(Number(p.id)))
+          : [...this._allRbacProjects];
+        applyOrgProjects(filtered);
+      },
+      error: () => { applyOrgProjects([...this._allRbacProjects]); }
+    });
+  }
+
+  /**
+   * RBAC cascade for project change: fetches roles the logged-in user holds on
+   * the selected project via /api/usm/access/role-assignments/by-user-project,
+   * filters to ranked RBAC roles only (revokedAt=null, roleRank!=null), and
+   * auto-selects the highest-ranked one to load its menu.
+   */
+  private _cascadeProjectChange(project: any, orgId: number | null = null): void {
+    const projId = project?.id != null ? Number(project.id) : null;
+
+    this.isRoleLoading = true;
+    this.roleList = [];
+
+    const userId = (() => {
+      try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id ?? null; }
+      catch { return null; }
+    })();
+
+    if (!userId || !projId) {
+      this.isRoleLoading = false;
+      return;
+    }
+
+    this.http.get<any[]>(
+      `/api/usm/access/role-assignments/by-user-project?userId=${userId}&projectId=${projId}`
+    ).subscribe({
+      next: (assignments: any[]) => {
+        const seen = new Set<string>();
+        const scopedRoles: any[] = [];
+        for (const a of (assignments || [])) {
+          if (a.revokedAt) continue;
+          if (a.roleRank == null) continue; // skip legacy roles with no rank
+          if (a.roleRank === 1) continue;   // hide Developer/AI Engineer from thumbnail
+          const roleName: string = a.roleName;
+          if (!roleName) continue;
+          const key = roleName.toLowerCase();
+          if (seen.has(key)) continue;
+          if (!this.roleMenuSvc.isRbacRole(roleName)) continue;
+          seen.add(key);
+          scopedRoles.push({ name: roleName, rank: a.roleRank, id: a.roleId });
+        }
+        scopedRoles.sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
+
+        this.isRoleLoading = false;
+
+        // Always update roleList (even when empty) so stale roles from a previous
+        // project don't persist when the new project has no granted roles.
+        this.roleList = scopedRoles;
+        sessionStorage.setItem('_rbac_role_list', JSON.stringify(scopedRoles));
+        if (scopedRoles.length > 0) {
+          this._lastManualRoleSwitch = 0;
+          this.valuechangerole(scopedRoles[0]);
+        }
+      },
+      error: () => { this.isRoleLoading = false; }
+    });
+  }
+
   ngOnInit() {
+    // ── RBAC init overlay ────────────────────────────────────────────────────
+    // Persist overlay across component recreations (shouldReuseRoute=false destroys on every nav).
+    this.pageInitializing = sessionStorage.getItem('_rbac_page_initializing') === '1';
+
+    
+    // Also detect stale re-login at startup (before any async calls):
+    // _rbac_session_initialized is still '1' from the previous session, but the login API
+    // reset 'role' to a default (e.g. Developer) so _rbac_sidebar_role and role don't match.
+    if (!this.pageInitializing) {
+      const _niRole = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return null; } })();
+      if (_niRole && this.roleMenuSvc.isRbacRole(_niRole)) {
+        const _niSessionInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
+        const _niSidebarRole = sessionStorage.getItem('_rbac_sidebar_role') || '';
+        const _freshLogin  = !_niSessionInit;
+        const _staleRelogin = _niSessionInit && !!_niSidebarRole && _niSidebarRole.toLowerCase() !== _niRole.toLowerCase();
+        if (_freshLogin || _staleRelogin) {
+          sessionStorage.setItem('_rbac_page_initializing', '1');
+          this.pageInitializing = true;
+        }
+      }
+    }
+    // When overlay is active, listen for the 'rbac-init-complete' event dispatched once the
+    // correct role+menu are fully loaded. Works across component instances via sessionStorage + events.
+    if (this.pageInitializing) {
+      const _niRoleForLog = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return '?'; } })();
+      console.log('[OVERLAY] pageInitializing=true — role:', _niRoleForLog, '_rbac_sidebar_role:', sessionStorage.getItem('_rbac_sidebar_role'));
+      this._initCompleteHandler = () => {
+        console.log('[OVERLAY] rbac-init-complete received → hiding overlay');
+        this.pageInitializing = false;
+        if (this._initCompleteHandler) {
+          window.removeEventListener('rbac-init-complete', this._initCompleteHandler);
+          this._initCompleteHandler = null;
+        }
+      };
+      window.addEventListener('rbac-init-complete', this._initCompleteHandler);
+    }
+    // ────────────────────────────────────────────────────────────────────────
+    window.addEventListener('essedum:assignments-changed', this.onAssignmentsChanged);
+    window.addEventListener('essedum:tenancy-changed', this.onTenancyChanged);
+    window.addEventListener('essedum:role-menu-changed', this.onRoleMenuChanged);
     // Detect if login page already set a theme class on body before localStorage was written
     const bodyHasLight = document.body.classList.contains('header-light-theme');
     const bodyHasDark  = document.body.classList.contains('header-dark-theme');
@@ -603,6 +1295,17 @@ export class LandingComponent implements OnInit, AfterViewInit {
       );
     }
     this.sidebariconcolor = false;
+    // Sync selectedportfolio from sessionStorage immediately so the org thumbnail dropdown
+    // shows the correct org right away. getUserInfoData() sets it later (async HTTP), but
+    // the thumbnail needs it on first render. Without this, the org dropdown shows blank
+    // until the HTTP callback fires (visually jarring and causes supplementRbacData to
+    // read curOrgId=null and false-trigger auto-switch before the callback arrives).
+    if (this.selectedportfolio == null) {
+      try {
+        this.selectedportfolio = JSON.parse(sessionStorage.getItem('portfoliodata') || 'null') ||
+                                  JSON.parse(sessionStorage.getItem('tempdata') || 'null');
+      } catch {}
+    }
     this.newsidebar();
     this.openedLeft = false;
     let activeProfiles;
@@ -642,6 +1345,25 @@ export class LandingComponent implements OnInit, AfterViewInit {
     if (this.fetchCredentials()) {
       this.router.navigate(["../login"], { relativeTo: this.route });
     } else {
+      // On a brand-new login (_rbac_session_initialized not yet set), start everything
+      // from empty so no stale "Developer" role or sidebar menus flash before the
+      // RBAC auto-switch fires. Clear sidebar cache, blank the role dropdown, show spinners.
+      if (sessionStorage.getItem('_rbac_session_initialized') !== '1' &&
+          this.selectedrole?.name && this.roleMenuSvc.isRbacRole(this.selectedrole.name)) {
+        // Activate the full-screen overlay so all intermediate navigations are hidden.
+        sessionStorage.setItem('_rbac_page_initializing', '1');
+        this.pageInitializing = true;
+        this.selectedrole = {};
+        this.isRoleLoading = true;
+        this.isProjectLoading = true;
+        this.projectList = [];
+        this.roleList = [];
+        // Purge stale sidebar cache so newsidebar() can't restore a previous session's menus.
+        sessionStorage.removeItem('_rbac_sidebar_role');
+        sessionStorage.removeItem('_rbac_sidebar_menu');
+        sessionStorage.removeItem('_rbac_role_list');
+        sessionStorage.removeItem('_rbac_project_list');
+      }
       this.setportfolio();
       this.setHeaders();
       this.setSidebarToHeaders();
@@ -779,22 +1501,12 @@ export class LandingComponent implements OnInit, AfterViewInit {
                     item.project_name == dashconstant.project_name &&
                     item.keys == dashconstant.keys
                 );
-                if (res.length > 0 && res[0].value == "Black") {
-                  flag = 1;
-                  this.router.navigate(["./cc/BCC/" + landing.id], {
-                    relativeTo: this.route,
-                  });
-                }
-                if (flag == 0) {
-                  this.router.navigate(["./cc/OCC/" + landing.id], {
-                    relativeTo: this.route,
-                  });
-                }
+                // cc/OCC and cc/BCC are legacy dashboard MFEs — navigate to the
+                // host-owned dashboard which always works regardless of MFE state.
+                this.router.navigate(["/landing/dashboard"]);
               });
             } else {
-              this.router.navigate(["./dynamicDashboard/mapbcc"], {
-                relativeTo: this.route,
-              });
+              this.router.navigate(["/landing/dashboard"]);
             }
           }
         );
@@ -912,9 +1624,17 @@ export class LandingComponent implements OnInit, AfterViewInit {
       (this.user.user_l_name ? this.user.user_l_name.charAt(0) : "");
     let organization;
     try {
-      organization = JSON.parse(sessionStorage.getItem("project") || "").name;
+      const pd = JSON.parse(sessionStorage.getItem("portfoliodata") || "{}");
+      organization = pd?.portfolioName || pd?.name;
     } catch (e: any) {
-      console.error("JSON.parse error - ", e.message);
+      console.error("JSON.parse error getting org from portfoliodata - ", e.message);
+    }
+    if (!organization) {
+      try {
+        organization = JSON.parse(sessionStorage.getItem("project") || "{}").name;
+      } catch (e: any) {
+        console.error("JSON.parse error - ", e.message);
+      }
     }
     localStorage.setItem("organization", organization);
     sessionStorage.setItem("organization", organization);
@@ -1077,7 +1797,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
     sessionStorage.removeItem("sidebarbreadcrumb");    
     sessionStorage.removeItem("highlightedLabel");
     sessionStorage.removeItem("sidebarConfig");
-    
+
     // Set portfolio change flag with timestamp to ensure it's recognized as a new change
     sessionStorage.setItem("selectionChange", "portfolio-" + new Date().getTime());
     this.portfolioflag = 1;
@@ -1089,6 +1809,58 @@ export class LandingComponent implements OnInit, AfterViewInit {
         "portfoliodata",
         JSON.stringify(this.selectedportfolio)
       );
+      // Clear project/role selection when org changes
+      this.selectedproject = {};
+      this.roleList = [];
+
+      const _selOrgNum = data?.id != null ? Number(data.id) : null;
+
+      if (this._allRbacProjects.length > 0 && _selOrgNum != null) {
+        // Filter projects for the selected org — no dependency on roles or assignments
+        const _byOrg = this._allRbacProjects.filter((p: any) =>
+          (p.organisationId != null && Number(p.organisationId) === _selOrgNum) ||
+          (p.portfolioId?.id != null && Number(p.portfolioId.id) === _selOrgNum)
+        );
+        this.projectList = _byOrg;
+        sessionStorage.setItem('_rbac_project_list', JSON.stringify(this.projectList));
+
+        if (_byOrg.length > 0) {
+          // This org has RBAC projects — do NOT call fetchRolesforUser() (it uses processdata
+          // which doesn't contain RBAC-only projects and would reset projectList to empty).
+          // Auto-select the first project the user has an assignment for, or the first overall.
+          const preferredProject = _byOrg.find((proj: any) =>
+            this._rbacAssignmentsCache.some(a => a.projectId != null && Number(a.projectId) === Number(proj.id))
+          ) || _byOrg[0];
+          this.selectedproject = preferredProject;
+          sessionStorage.setItem('project', JSON.stringify(preferredProject));
+
+          if (this._rbacAssignmentsCache.length) {
+            // Assignments already loaded — cascade roles immediately
+            this._cascadeProjectChange(preferredProject, _selOrgNum);
+          } else {
+            // Assignments not cached yet — supplementRbacData will cascade when done
+            this.isRoleLoading = true;
+            if (!this._rbacDataLoading) this.supplementRbacData();
+          }
+          return;
+        }
+      } else if (this._allRbacProjects.length === 0) {
+        // Projects not loaded yet — defer cascade until they arrive
+        this._pendingOrgClick = data;
+        this.projectList = [];
+        this.isProjectLoading = true;
+        if (!this._rbacDataLoading) this.supplementRbacData();
+        return;
+      }
+
+      // For RBAC role in sessionStorage (early click before assignments loaded)
+      const _earlyClickRole = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null'); } catch { return null; } })();
+      if (_earlyClickRole?.name && this.roleMenuSvc.isRbacRole(_earlyClickRole.name)) {
+        this.isRoleLoading = true;
+        if (!this._rbacDataLoading) this.supplementRbacData();
+        return;
+      }
+      // Legacy path: org has no RBAC projects, use processdata
       this.fetchRolesforUser();
     } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
@@ -1100,7 +1872,15 @@ export class LandingComponent implements OnInit, AfterViewInit {
     try {
       this.user = JSON.parse(sessionStorage.getItem("user") || "");
       this.role = JSON.parse(sessionStorage.getItem("role") || "");
-      this.selectedrole = this.role;
+      // On a fresh RBAC login (_rbac_session_initialized not yet set) suppress the role
+      // from the thumbnail immediately — the auto-switch will set the correct role shortly.
+      // This prevents a single-frame flash of the default role (e.g. "developer") in the UI.
+      const _fcSessionInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
+      if (!_fcSessionInit && this.role?.name && this.roleMenuSvc.isRbacRole(this.role.name)) {
+        this.selectedrole = {};
+      } else {
+        this.selectedrole = this.role;
+      }
       this.selectedproject = JSON.parse(
         sessionStorage.getItem("project") || ""
       );
@@ -1139,6 +1919,20 @@ export class LandingComponent implements OnInit, AfterViewInit {
     localStorage.removeItem("organization");
     sessionStorage.removeItem("tempdata");
     sessionStorage.removeItem("sidebarbreadcrumb");
+    // Clear RBAC session flags so the next login always auto-selects the highest-rank role
+    sessionStorage.removeItem('_rbac_session_initialized');
+    sessionStorage.removeItem('_rbac_pending_switch_role');
+    sessionStorage.removeItem('_rbac_sidebar_role');
+    sessionStorage.removeItem('_rbac_sidebar_menu');
+    sessionStorage.removeItem('_rbac_last_auto_switch');
+    sessionStorage.removeItem('_rbac_portfolio_list');
+    sessionStorage.removeItem('_rbac_project_list');
+    sessionStorage.removeItem('_rbac_role_list');
+    sessionStorage.removeItem('_rbac_page_initializing');
+    sessionStorage.removeItem('_rbac_assignments_cache');
+    sessionStorage.removeItem('_rbac_role_name_map');
+    sessionStorage.removeItem('_rbac_role_rank_map');
+    sessionStorage.removeItem('_rbac_all_projects');
     this.router.navigate(["../logout"]);
   }
   setHighlightedLabel(item: any) {
@@ -1305,6 +2099,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
     } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
+    console.log('[MENU] valuechangerole → role changed to:', this.selectedrole?.name);
+    this._lastManualRoleSwitch = Date.now(); // prevent supplementRbacData from overriding this switch
+    this._loadedMenuRole = ''; // invalidate menu cache so the new role's menu is fetched
     this.apisService.getPermission("cip").subscribe(
       (resp) => {
         sessionStorage.setItem(
@@ -1314,15 +2111,85 @@ export class LandingComponent implements OnInit, AfterViewInit {
       },
       (err) => {},
       () => {
+        if (this._destroyed) return; // zombie guard: component was destroyed mid-flight
         let nav = this.route.snapshot["_routerState"].url.toString();
         let navUrl = nav.slice(0, nav.indexOf("pfolio"));
 
 
-        // Check if user is admin and direct to portfoliolist
+        // ── RBAC role navigation ──────────────────────────────────────────────
+        // Menu is fetched FIRST (before navigation) so the sidebar never shows
+        // stale items. Navigation happens inside the subscribe callback once
+        // items arrive, targeting items[0].url for a smooth handoff.
+        if (this.roleMenuSvc.isRbacRole(this.selectedrole.name)) {
+          // Clear stale menu immediately so old items don't flash during load.
+          this.sidebarMenu = [];
+          this._menuSnapshot = [];
+          this._loadedMenuRole = '';
+          this.isSidebarLoading = true;
+          this._rbacCheckPending = false;
+          // Invalidate sessionStorage sidebar cache for the old role — the new role
+          // will write its own entry once the API call resolves below.
+          sessionStorage.removeItem('_rbac_sidebar_role');
+          sessionStorage.removeItem('_rbac_sidebar_menu');
+
+          const _switchRoleName = this.selectedrole.name;
+          const _switchRoleRank: number = (this.selectedrole as any).rank ?? 0;
+          const _switchUserId = (() => {
+            try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id; } catch { return null; }
+          })();
+
+          this.roleMenuSvc.getMenuForRole(_switchRoleName, _switchUserId, _switchRoleRank).subscribe(items => {
+            this.sidebarMenu = items;
+            this._menuSnapshot = [...items];
+            this._loadedMenuRole = _switchRoleName;
+            this.isSidebarLoading = false;
+            // Cache menu in sessionStorage: LandingComponent is recreated on every navigation
+            // (shouldReuseRoute=false) — cache lets newsidebar() restore instantly without a
+            // fresh API call, preventing sidebar blank-flash on each in-app navigation.
+            sessionStorage.setItem('_rbac_sidebar_role', _switchRoleName);
+            sessionStorage.setItem('_rbac_sidebar_menu', JSON.stringify(items));
+
+            // Navigate to the first menu item, or fall back to a safe default.
+            // A user has real RBAC assignments when either:
+            //   (a) _rbacAssignmentsCache holds a ranked-role entry (fetched on login), OR
+            //   (b) roleList was populated from the project-specific API (by-user-project).
+            // Without either, the user won't pass admin-console's RankGuard → send to dashboard.
+            const _hasRealRbacAssignments =
+              this._rbacAssignmentsCache.some(a => {
+                const rName = this._rbacRoleNameByIdCache.get(a.roleId);
+                return rName && this.roleMenuSvc.isRbacRole(rName);
+              }) || this.roleList.some(r => this.roleMenuSvc.isRbacRole(r.name));
+            let dest: string;
+            if (items.length > 0 && items[0].url && _hasRealRbacAssignments) {
+              const rawUrl = items[0].url.startsWith('./') ? items[0].url.slice(1) : items[0].url;
+              dest = '/landing' + rawUrl;
+            } else if (this.roleMenuSvc.isRbacAdminRole(_switchRoleName) && _hasRealRbacAssignments) {
+              dest = '/landing/admin-console/overview';
+            } else {
+              dest = '/landing/dashboard';
+            }
+            this.router.navigate([dest]);
+            // Dismiss init overlay after navigate + delay so intermediate navigations and
+            // MFE initialization complete before the overlay lifts. 2000ms covers:
+            //   - any zombie callbacks that trigger a 2nd navigation (~200ms)
+            //   - MFE lazy-load + first render (~500-1000ms)
+            console.log('[OVERLAY] valuechangerole→getMenuForRole: navigate to', dest, '— overlay dismisses in 2000ms');
+            setTimeout(() => {
+              console.log('[OVERLAY] 2000ms timer fired from valuechangerole path → dispatching rbac-init-complete');
+              sessionStorage.removeItem('_rbac_page_initializing');
+              window.dispatchEvent(new Event('rbac-init-complete'));
+            }, 2000);
+          });
+          return;
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
+        // Admin lands on the new admin-console overview (replaces the legacy
+        // iamp-usm/portfoliolist landing — plan §7/§10 cutover).
         if (this.selectedrole.name === "admin" || this.selectedrole.name === "Admin") {
           this.router
             .navigate(["../"], { relativeTo: this.route })
-            .then(() => this.router.navigate(["landing/iamp-usm/portfoliolist"]));
+            .then(() => this.router.navigate(["landing/admin-console/overview"]));
         } else if (nav.toString().indexOf("pfolio") != -1) {
           this.router
             .navigate(["../"], { relativeTo: this.route })
@@ -1425,12 +2292,23 @@ export class LandingComponent implements OnInit, AfterViewInit {
       );
     else sessionStorage.setItem("theme", theme);
 
+    // If assignments are cached, use RBAC cascade for roles (works for all users with assignments)
+    if (this._rbacAssignmentsCache.length) {
+      const currentOrgId = this.selectedportfolio?.id != null ? Number(this.selectedportfolio.id) : null;
+      this._cascadeProjectChange(event, currentOrgId);
+      return;
+    }
+    // Legacy path: no assignments cached yet
     this.checkRole();
     this.apisService.getDashConsts().subscribe(() => this.fetchRolesforUser());
   }
 
   compareObjects(o1: any, o2: any): boolean {
     return o1.id === o2.id;
+  }
+
+  trackByMethod(index: number, item: any): any {
+    return item?.id ?? index;
   }
 
   checkDefaultRole() {
@@ -1441,6 +2319,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
       console.error("JSON.parse error - ", e.message);
     }
     this.apisService.getDashConsts().subscribe((response) => {
+      // _rbacUser resets on component recreation (shouldReuseRoute=false) — also check sessionStorage.
+      const _cdrName = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return ''; } })();
+      if (this._rbacUser || this.roleMenuSvc.isRbacRole(_cdrName)) return;
       let name = this.selectedportfolio.portfolioName + "default";
       response = response.filter((item) => item.keys && item.keys == name);
       let value: any = this.defaultprojectroles.filter(
@@ -1471,6 +2352,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
     });
   }
   chkdefrol() {
+    if (this._rbacUser) return; // RBAC user — supplementRbacData handles role selection
     let project: any;
     try {
       project = JSON.parse(sessionStorage.getItem("project") || "");
@@ -1513,6 +2395,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
     }
     let pname = project.name;
     this.apisService.getDashConsts().subscribe((response) => {
+      // _rbacUser resets on component recreation — also check sessionStorage.
+      const _cdr1Name = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return ''; } })();
+      if (this._rbacUser || this.roleMenuSvc.isRbacRole(_cdr1Name)) return;
       response = response.filter(
         (item) => item.keys && item.keys == pname + "prodefaultrole"
       );
@@ -1728,6 +2613,47 @@ export class LandingComponent implements OnInit, AfterViewInit {
     else sessionStorage.setItem("theme", theme);
     this.setTheme();
     this.checkRole();
+    // Early RBAC guard: getDashConsts() returns 403 for RBAC users. The 403 fires
+    // handleAPIError — not the next() callback — so a guard inside subscribe() is too late.
+    // Bail out here to prevent the TypeError crash and restore dropdowns from sessionStorage.
+    const _grpRoleName = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
+    if (this.roleMenuSvc.isRbacRole(_grpRoleName)) {
+      const _grpSessionInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
+      if (_grpSessionInit && !this._pendingAutoSwitchOrgId) {
+        // Detect re-login without logout: login API may have reset role to a default (e.g. "developer")
+        // while _rbac_session_initialized is stale from the previous session.
+        // If the cached sidebar role doesn't match the current role, re-validate via supplementRbacData.
+        const _ssSidebarRole = sessionStorage.getItem('_rbac_sidebar_role');
+        if (_ssSidebarRole && _ssSidebarRole.toLowerCase() !== (_grpRoleName || '').toLowerCase()) {
+          sessionStorage.removeItem('_rbac_session_initialized');
+          this.supplementRbacData();
+          return;
+        }
+        this._rbacCheckPending = false;
+        try {
+          const _ssOrgList = sessionStorage.getItem('_rbac_portfolio_list');
+          if (_ssOrgList) { const _o = JSON.parse(_ssOrgList); if (Array.isArray(_o) && _o.length) this.portfoliodata = _o; }
+          const _ssProjList = sessionStorage.getItem('_rbac_project_list');
+          if (_ssProjList) { const _p = JSON.parse(_ssProjList); if (Array.isArray(_p) && _p.length) this.projectList = _p; }
+          const _ssRoleList = sessionStorage.getItem('_rbac_role_list');
+          if (_ssRoleList) { const _r = JSON.parse(_ssRoleList); if (Array.isArray(_r) && _r.length) { this.roleList = _r; this.isRoleLoading = false; } }
+          // Restore in-memory RBAC caches so manual org/project changes cascade correctly
+          const _ssAss = sessionStorage.getItem('_rbac_assignments_cache');
+          if (_ssAss) { this._rbacAssignmentsCache = JSON.parse(_ssAss); }
+          const _ssRnMap = sessionStorage.getItem('_rbac_role_name_map');
+          if (_ssRnMap) { this._rbacRoleNameByIdCache = new Map(JSON.parse(_ssRnMap)); }
+          const _ssRkMap = sessionStorage.getItem('_rbac_role_rank_map');
+          if (_ssRkMap) { this.rbacRoleRankMap = new Map(JSON.parse(_ssRkMap)); }
+          const _ssAllProj = sessionStorage.getItem('_rbac_all_projects');
+          if (_ssAllProj) { this._allRbacProjects = JSON.parse(_ssAllProj); }
+          if (this._rbacAssignmentsCache.length > 0) { this._rbacUser = true; }
+        } catch {}
+        this.newsidebar();
+      } else {
+        this.supplementRbacData();
+      }
+      return; // Never call getDashConsts() for RBAC users
+    }
     this.apisService.getDashConsts().subscribe((response) => {
       //  this.getNotifications();
       response = response.filter(
@@ -1800,6 +2726,32 @@ export class LandingComponent implements OnInit, AfterViewInit {
           });
         }
       });
+      // Collect roles from other projects in the same portfolio that are not yet in the list,
+      // so the role dropdown shows every role the user holds across all projects.
+      const existingRoleIds = new Set<number>(this.roleList.map((r: any) => r.id));
+      this.processdata.forEach((element: any) => {
+        let portfoliodata2: any;
+        try {
+          portfoliodata2 = JSON.parse(sessionStorage.getItem('portfoliodata') || '').id;
+        } catch (e: any) {}
+        if (element.porfolioId.id == portfoliodata2) {
+          element.projectWithRoles.forEach((element1: any) => {
+            if (element1.projectId.id !== selectedproject1?.id) {
+              element1.roleId.forEach((element2: any) => {
+                if (!existingRoleIds.has(element2.id)) {
+                  existingRoleIds.add(element2.id);
+                  this.roleList.push(element2);
+                }
+              });
+            }
+          });
+        }
+      });
+      this.roleList = this.roleList.sort((a: any, b: any) =>
+        a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+      );
+      // Merge RBAC orgs/projects that are not yet in the legacy processdata lists.
+      this.supplementRbacData();
       if (this.portfolioflag == 1) {
         if (this.projectList.length > 0) {
           this.fetchroleflag = 1;
@@ -1838,6 +2790,8 @@ export class LandingComponent implements OnInit, AfterViewInit {
   }
 
   getNotifications() {
+    const _gnRole = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
+    if (this.roleMenuSvc.isRbacRole(_gnRole)) return;
     this.destroySubscription();
     this.roleName = JSON.parse(sessionStorage.getItem("role") || "").name;
     let dashconstant: any = new Object();
@@ -1948,6 +2902,109 @@ export class LandingComponent implements OnInit, AfterViewInit {
   }
 
   newsidebar() {
+    const _roleObj = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null'); } catch { return null; } })();
+    const _role: string = _roleObj?.name ?? '?';
+    const _roleRank: number = _roleObj?.rank ?? 0;
+    console.group(`[MENU] newsidebar() — role: ${_role}`);
+
+    // ── RBAC role: fetch menu from rbac_menu_item via /api/usm/menu ──────────
+    // Admin roles (rank ≥ 2) → filter keeps admin-console routes only.
+    // Non-admin roles (Developer, AI Client) → filter keeps product routes only.
+    // Items seeded per rank in rbac_menu_item; see rbac.xml rbac-22.
+    if (this.roleMenuSvc.isRbacRole(_role)) {
+      // For ALL RBAC roles, do NOT set currentrole to the role name.
+      // The shell sidebar (main sidenav) shows when selectedrole.name != currentrole.
+      // Setting currentrole = _role would hide the main sidenav and show app-sidebar instead,
+      // which has no RBAC items — causing the sidebar to visually vanish for AI Client etc.
+      // Fast path: menu already loaded for this role (sidebar click, URL change, any
+      // in-app navigation). Return immediately — never touch isSidebarLoading so the
+      // sidebar stays visible without a flicker.
+      if (this._loadedMenuRole === _role && this.sidebarMenu.length > 0) {
+        console.log('[MENU] newsidebar: menu stable for', _role, '— no-op');
+        console.groupEnd();
+        return;
+      }
+      // Defer if supplementRbacData() hasn't confirmed the correct role yet.
+      // This check MUST come before the sessionStorage restore below — on a fresh login
+      // the cached sidebar may still hold a stale role (e.g. "Developer") from the
+      // previous session. Restoring it before RBAC confirmation would flash the wrong
+      // menus and load Developer-era page content before the auto-switch fires.
+      if (this._rbacCheckPending) {
+        // Short-circuit: if the session is already confirmed and the cached role matches
+        // the current role, we can restore immediately instead of deferring.
+        // This prevents the double newsidebar() call on manual RBAC role switches:
+        //   1st call (ngOnInit) would defer → isSidebarLoading=true flicker
+        //   2nd call (getrolepage fast-path) would then restore — now collapsed into one.
+        const _earlyRole = sessionStorage.getItem('_rbac_sidebar_role');
+        const _earlyMenu = sessionStorage.getItem('_rbac_sidebar_menu');
+        const _earlyInit = sessionStorage.getItem('_rbac_session_initialized') === '1';
+        if (_earlyRole === _role && _earlyMenu && _earlyInit) {
+          // Fall through to the sessionStorage restore block below (don't return).
+          this._rbacCheckPending = false;
+        } else {
+          this.isSidebarLoading = true;
+          console.log('[MENU] newsidebar: RBAC check pending — deferring menu load');
+          console.groupEnd();
+          return;
+        }
+      }
+      // sessionStorage restore: LandingComponent is recreated on every navigation
+      // (shouldReuseRoute=false), so in-memory state is lost. Restore instantly from
+      // sessionStorage before falling through to the API call — prevents blank sidebar.
+      // Only restore when the session is already confirmed (_rbac_session_initialized='1')
+      // so a fresh login never loads a stale sidebar from a previous session.
+      const _ssRole = sessionStorage.getItem('_rbac_sidebar_role');
+      const _ssMenuRaw = sessionStorage.getItem('_rbac_sidebar_menu');
+      const _ssSessionConfirmed = sessionStorage.getItem('_rbac_session_initialized') === '1';
+      if (_ssRole === _role && _ssMenuRaw && _ssSessionConfirmed) {
+        try {
+          const _ssCached = JSON.parse(_ssMenuRaw);
+          if (Array.isArray(_ssCached) && _ssCached.length > 0) {
+            this.sidebarMenu = [..._ssCached];
+            this._menuSnapshot = [..._ssCached];
+            this._loadedMenuRole = _role;
+            this.isSidebarLoading = false;
+            // Menu confirmed ready via session cache — dismiss the init overlay.
+            // 2000ms delay matches the valuechangerole path so both timers fire at the
+            // same time and the earlier one wins (both are safe to fire, second is a no-op).
+            if (sessionStorage.getItem('_rbac_page_initializing') === '1') {
+              console.log('[OVERLAY] newsidebar restore for', _role, '— overlay dismisses in 2000ms');
+              setTimeout(() => {
+                console.log('[OVERLAY] 2000ms timer fired from newsidebar restore path → dispatching rbac-init-complete');
+                sessionStorage.removeItem('_rbac_page_initializing');
+                window.dispatchEvent(new Event('rbac-init-complete'));
+              }, 2000);
+            }
+            console.log('[MENU] newsidebar: restored from sessionStorage for', _role, '— no API call');
+            console.groupEnd();
+            return;
+          }
+        } catch {}
+      }
+      // Snapshot restore: role matches but sidebarMenu was temporarily cleared.
+      if (this._loadedMenuRole === _role && this._menuSnapshot.length > 0) {
+        this.sidebarMenu = [...this._menuSnapshot];
+        console.log('[MENU] newsidebar: snapshot restored for', _role);
+        console.groupEnd();
+        return;
+      }
+      const _userId = (() => { try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id; } catch { return null; } })();
+      this.isSidebarLoading = true;
+      this.roleMenuSvc.getMenuForRole(_role, _userId, _roleRank).subscribe(items => {
+        this.sidebarMenu = items;
+        this._menuSnapshot = [...items]; // save for instant restore on next in-app nav
+        this._loadedMenuRole = _role;
+        console.log('[MENU] RBAC menu for', _role, '→', items.map(i => i.label));
+        this.isSidebarLoading = false;
+        sessionStorage.setItem('_rbac_sidebar_role', _role);
+        sessionStorage.setItem('_rbac_sidebar_menu', JSON.stringify(items));
+        console.groupEnd();
+      });
+      return;
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
+    console.log('[MENU] newsidebar: starting getDashConsts');
    this.isSidebarLoading = true;
     // this.removeFilters();
     this.apisService.getDashConsts().subscribe(
@@ -2267,9 +3324,17 @@ export class LandingComponent implements OnInit, AfterViewInit {
         
         // Set sidebar menu if we have collected configurations
         if (sidebarMenutemp.length > 0) {
+          console.log('[MENU] newsidebar: setting sidebarMenu from DashConsts —', sidebarMenutemp.length, 'items:', sidebarMenutemp.map((i:any)=>i?.label));
           this.sidebarMenu = sidebarMenutemp;
 
-          if (!this.sidebarMenu.some((it: any) => it && it.label === 'Dashboard')) {
+          // RBAC admin tiers (Project Admin and above, bridgeToLegacyUserProjectRole
+          // sets projectadmin for rank>=2) land on the Admin Console Overview
+          // instead, so don't force the legacy Dashboard entry back in for them.
+          const roleForDashboard = JSON.parse(sessionStorage.getItem("role") || "null");
+          if (
+            !roleForDashboard?.projectadmin &&
+            !this.sidebarMenu.some((it: any) => it && it.label === 'Dashboard')
+          ) {
             this.sidebarMenu.unshift({ label: 'Dashboard', icon: 'tachometer', url: './dashboard' });
           }
 
@@ -2311,13 +3376,17 @@ export class LandingComponent implements OnInit, AfterViewInit {
                 return;               
             }
             // Regular navigation logic
-             else if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url && 
+             else if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url &&
                this.sidebarMenu[0].url.includes('./') && this.sidebarMenu[0].url.length > 2) {
                 let filterUrl = this.sidebarMenu[0].url.replace('./', '');
+                // cc/OCC and cc/BCC are legacy dashboard MFEs — always use host dashboard instead.
+                if (filterUrl.startsWith('cc/OCC') || filterUrl.startsWith('cc/BCC') || filterUrl.startsWith('dynamicDashboard')) {
+                  filterUrl = 'dashboard';
+                }
                 this.router.navigate(["/landing/" + filterUrl]).then(() => {
                   // Clear the flag after navigation is complete
                   setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
-                });            
+                });
             } else {
                 this.router
                   .navigate(["../"], { relativeTo: this.route })
@@ -2352,6 +3421,16 @@ export class LandingComponent implements OnInit, AfterViewInit {
             datafromcoreproject = false;
         }
         let temprole = JSON.parse(sessionStorage.getItem("role"));
+        // RBAC admin tiers have no legacy per-role sidebar rows of their own
+        // (the admin-console RBAC menu is their sidebar) — drop the component's
+        // hardcoded Dashboard/Configuration placeholder rather than show it.
+        if (
+          datafromcoreproject == false &&
+          datafromcurrentproject == false &&
+          temprole.projectadmin
+        ) {
+          this.sidebarMenu = [];
+        }
         if (
           datafromcoreproject == false &&
           datafromcurrentproject == false &&
@@ -2439,19 +3518,21 @@ export class LandingComponent implements OnInit, AfterViewInit {
           }
         }
 
-// Add this code around line 2218, after all sidebar menu processing
-// Check if user is admin and portfolio is Core
-const isAdmin = this.role21.toLowerCase() === "admin";
-const isCorePortfolio = JSON.parse(sessionStorage.getItem("portfoliodata") || "{}").portfolioName === "Core";
+// After all sidebar menu processing: land admins on the new Admin Console
+// Overview (the old iamp-usm/portfoliolist screen is retired — §7/§10 cutover).
+// Covers every RBAC admin tier (role.projectadmin, rank>=2), not just the
+// literal "Admin" role name, so Project/Organization Admin land there too.
+const roleForRedirect = JSON.parse(sessionStorage.getItem("role") || "null");
+const isAdmin = this.role21.toLowerCase() === "admin" || !!roleForRedirect?.projectadmin;
 const currentUrl = this.router.url;
 const isAtMainLanding = currentUrl === "/landing" || currentUrl === "/landing/";
 const isNavigatingToSpecificRoute = sessionStorage.getItem("navigatingToRoute");
 
-// Only navigate to portfoliolist if admin is on landing page and not actively navigating elsewhere
+// Only redirect if admin is on the bare landing page and not navigating elsewhere.
 if (isAdmin && isAtMainLanding && !isNavigatingToSpecificRoute) {
   // Set flag to indicate navigation is in progress to prevent interference
   sessionStorage.setItem("navigatingInProgress", "true");
-  this.router.navigate(["/landing/iamp-usm/portfoliolist"]).then(() => {
+  this.router.navigate(["/landing/admin-console/overview"]).then(() => {
     // Clear the flag after navigation is complete
     setTimeout(() => {
       sessionStorage.removeItem("navigatingInProgress");
@@ -2538,8 +3619,10 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         }     
       },
       (error) => {
-        console.error('Error loading sidebar:', error);
-        this.isSidebarLoading = false;
+        console.error('[MENU] newsidebar: getDashConsts error — falling back to _loadRoleMenus', error);
+        console.groupEnd();
+        // DashConsts failed — still try to load any configured role-menu.
+        this._loadRoleMenus(true);
       },
       () => {
         if (
@@ -2549,22 +3632,90 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
           this.sidebarSectionIndex = Number(
             sessionStorage.getItem("sidebarSectionIndex")
           );
-        
-        // Add a small delay before removing the navigation flag to ensure any pending
-        // navigations have completed
+
         setTimeout(() => {
-          // Only remove if not set by another action
-          if (sessionStorage.getItem("navigatingToRoute") && 
+          if (sessionStorage.getItem("navigatingToRoute") &&
               !sessionStorage.getItem("navigatingInProgress")) {
             sessionStorage.removeItem("navigatingToRoute");
           }
         }, 1000);
-        
-        // Reset sidebar loading flag now that everything is complete
-        this.isSidebarLoading = false;
+
+        // Load configured role-menu AFTER DashConsts sidebar is assembled.
+        // If any items are found they override the DashConsts sidebar AND
+        // handle navigation, so RBAC roles with no DashConsts entries don't
+        // land on a blank page.
+        console.log('[MENU] newsidebar: getDashConsts complete → calling _loadRoleMenus');
+        console.groupEnd();
+        this._loadRoleMenus(false);
       }
-    ); 
-      
+    );
+
+  }
+
+  /** Load the admin-configured role-menu for the current role+project.
+   *  If items are found, replaces this.sidebarMenu and navigates to the first item
+   *  when a role/project change is pending (so the user lands on the right page).
+   *  @param fromError  true when called from the getDashConsts error handler.
+   *  @param navigate   false to skip navigation entirely (e.g. live refresh from menu-picker). */
+  private _loadRoleMenus(fromError: boolean, navigate = true): void {
+    try {
+      const roleForMenu = JSON.parse(sessionStorage.getItem('role') || 'null');
+      const projectForMenu = JSON.parse(sessionStorage.getItem('project') || 'null');
+      const userForMenu = JSON.parse(sessionStorage.getItem('user') || 'null');
+      console.log(`[MENU] _loadRoleMenus(fromError=${fromError}, navigate=${navigate}) role="${roleForMenu?.name}" project="${projectForMenu?.name}"`);
+      if (!roleForMenu?.name || !projectForMenu?.name || !userForMenu?.id) {
+        console.log('[MENU] _loadRoleMenus: missing role/project/user — skipping');
+        this.isSidebarLoading = false;
+        return;
+      }
+      this.apisService.getRoleMenus(roleForMenu.name, projectForMenu.name, userForMenu.id)
+        .subscribe((roleMenuItems: any[]) => {
+          console.log(`[MENU] _loadRoleMenus: getRoleMenus returned ${roleMenuItems?.length ?? 0} items:`, (roleMenuItems||[]).map((m:any)=>m?.label));
+          if (roleMenuItems && roleMenuItems.length > 0) {
+            // Filter out malformed items (no label) to prevent nameless icons in sidebar
+            const menuFromRole = roleMenuItems
+              .filter((m: any) => m && m.label)
+              .map((m: any) => ({
+                label: m.label,
+                icon: m.icon && m.icon !== 'circle' ? m.icon : null,
+                // Top-level items that only have children: use first child URL for navigation.
+                url: m.url || (m.children?.length ? m.children[0].url : null),
+                children: m.children || [],
+              }));
+            if (menuFromRole.length > 0) {
+              console.log('[MENU] _loadRoleMenus: OVERRIDING sidebarMenu with configured role-menu —', menuFromRole.length, 'items:', menuFromRole.map((i:any)=>i?.label));
+              this.sidebarMenu = menuFromRole;
+            }
+
+            // Navigate to the first configured item when triggered by a role/project change.
+            const roleChanged = sessionStorage.getItem('roleChanged') === 'true';
+            const selectionChange = sessionStorage.getItem('selectionChange') || '';
+            const navInProgress = sessionStorage.getItem('navigatingInProgress') === 'true';
+            const isAdminRole = (roleForMenu.name || '').toLowerCase() === 'admin' ||
+                                (roleForMenu.name || '').toLowerCase() === 'it portfolio manager';
+            if (navigate && menuFromRole.length > 0 &&
+                (roleChanged || selectionChange || fromError) && !navInProgress && !isAdminRole) {
+              const first = menuFromRole[0];
+              if (first?.url) {
+                const raw = first.url.startsWith('./') ? first.url.slice(2) : first.url.replace(/^\/+/, '');
+                sessionStorage.setItem('navigatingInProgress', 'true');
+                this.router.navigate(['/landing/' + raw]).then(() => {
+                  setTimeout(() => {
+                    sessionStorage.removeItem('navigatingInProgress');
+                    sessionStorage.removeItem('roleChanged');
+                    sessionStorage.removeItem('selectionChange');
+                  }, 500);
+                });
+              }
+            }
+          } else {
+            console.log('[MENU] _loadRoleMenus: no configured role-menu found — keeping current sidebarMenu:', this.sidebarMenu?.map((i:any)=>i?.label));
+          }
+          this.isSidebarLoading = false;
+        });
+    } catch {
+      this.isSidebarLoading = false;
+    }
   }
   getIdDataObject(secondLevelObj: any) {
     let resObj: any = {};
@@ -2894,6 +4045,8 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   }
 
   checkDisplaySidebar() {
+    const _cdsRole = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
+    if (this.roleMenuSvc.isRbacRole(_cdsRole)) return;
     let project: any;
     try {
       project = JSON.parse(sessionStorage.getItem("project") || "");
@@ -2935,6 +4088,11 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
     });
   }
   setProjectTheme() {
+    // For RBAC roles, theme is not stored in DashConsts. Skip the HTTP call entirely to
+    // prevent handleAPIError crashes (TypeError: Cannot set properties of undefined) when
+    // getDashConsts returns a 403 — the error handler fires regardless of the next-callback guard.
+    const _sptRole = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
+    if (this.roleMenuSvc.isRbacRole(_sptRole)) return;
     this.apisService.getDashConsts().subscribe((response) => {
       let projecttheme = response.filter(
         (item) => item.keys == "Project Theme"
@@ -3102,6 +4260,10 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
 
     let filteredRows: any;
 
+    // For RBAC roles, DashConsts tab/header config does not apply. Skip the HTTP call entirely
+    // to prevent handleAPIError crashes when getDashConsts returns a 403.
+    const _cdcRole = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
+    if (this.roleMenuSvc.isRbacRole(_cdcRole)) return;
     this.apisService.getDashConsts().subscribe((res) => {
       this.dashConstantCheckResponse = res;
       let filteredArray = [];
@@ -3164,6 +4326,17 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         } catch (error) {}
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this._destroyed = true;
+    window.removeEventListener('essedum:assignments-changed', this.onAssignmentsChanged);
+    window.removeEventListener('essedum:tenancy-changed', this.onTenancyChanged);
+    window.removeEventListener('essedum:role-menu-changed', this.onRoleMenuChanged);
+    if (this._initCompleteHandler) {
+      window.removeEventListener('rbac-init-complete', this._initCompleteHandler);
+      this._initCompleteHandler = null;
+    }
   }
 
   ngAfterViewInit() {
@@ -3286,6 +4459,13 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       });
   }
   checkRole() {
+    // Guard: RBAC roles must not be overwritten with legacy project roles from processdata.
+    // Also skip when _rbacUser is true (supplementRbacData confirmed RBAC assignments exist)
+    // or when _rbacCheckPending is true (supplementRbacData hasn't fired yet — we must not
+    // overwrite sessionStorage role with a legacy default before the RBAC check completes,
+    // as that causes "Developer" to appear in the console on first login).
+    const _chkRoleName = (() => { try { return JSON.parse(sessionStorage.getItem('role')||'null')?.name; } catch { return null; } })();
+    if (this._rbacUser || this._rbacCheckPending || this.roleMenuSvc.isRbacRole(_chkRoleName)) return;
     let test = false;
     let roles;
     this.processdata.map((ele) => {
@@ -3303,6 +4483,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       }
     });
     if (!test) {
+      if (!roles || (roles as any[]).length === 0) return;
       sessionStorage.setItem("role", JSON.stringify(roles[0]));
     }
   }
@@ -3313,6 +4494,10 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       return false;
     }
   }
+  goToMyDetails() {
+    this.router.navigate(['landing/admin-console/my-details']);
+  }
+
   toggleProfileInfo() {
     this.showUploadElements = false;
     this.showProfileInfo = !this.showProfileInfo;
@@ -3850,17 +5035,156 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   // ── Menu Customization ───────────────────────────────────────────────────
 
   /** Returns the sidebarMenu with advanced items hidden unless the user has opted in. */
+  // ── RBAC cutover (plan §7) ──────────────────────────────────────────────
+  // Legacy iamp-usm admin screens superseded by the admin-console MFE. These
+  // are stripped from whatever DashConstant-built menu lands in sidebarMenu,
+  // and replaced by the data-driven /api/usm/menu "Admin Console" tree.
+  // Secret Management (./iamp-usm/secret) was removed outright (no
+  // replacement) — kept here too in case a stale DashConstant row still links to it.
+  private readonly supersededAdminUrls = [
+    "./iamp-usm/projectlist",
+    "./iamp-usm/portfoliolist",
+    "./iamp-usm/role/list",
+    "./iamp-usm/manageUsers",
+    "./iamp-usm/permissionlist",
+    "./iamp-usm/dashconstant",
+    "./iamp-usm/dashconstant/side",
+    "./iamp-usm/secret",
+  ];
+  rbacMenuNodes: any[] = [];
+  private rbacMenuFetched = false;
+
+  private stripSuperseded(items: any[]): any[] {
+    return (items || [])
+      .filter((it) => !(it && it.url && this.supersededAdminUrls.includes(it.url)))
+      .map((it) =>
+        it && Array.isArray(it.children) && it.children.length
+          ? { ...it, children: this.stripSuperseded(it.children) }
+          : it
+      );
+  }
+
+  /** Fetch the data-driven RBAC menu once and cache it as sidebar nodes. */
+  private loadRbacMenu(): void {
+    // For RBAC roles the sidebar comes entirely from newsidebar() / sidebarMenu.
+    // The legacy rbacMenuNodes system is not used, so skip it to prevent the
+    // "Role & Access Management" fallback from appearing alongside the real menu.
+    let role: any = null;
+    try { role = JSON.parse(sessionStorage.getItem("role") || "null"); } catch { role = null; }
+    if (this.roleMenuSvc.isRbacRole(role?.name)) {
+      this.rbacMenuNodes = [];
+      return;
+    }
+    if (this.rbacMenuFetched) return;
+    this.rbacMenuFetched = true;
+    let userId: number | null = null;
+    try {
+      const parsed = JSON.parse(sessionStorage.getItem("user") || "null");
+      userId = parsed && typeof parsed === "object" ? Number(parsed.user_login ?? parsed.id) : Number(parsed);
+    } catch { userId = null; }
+    const isAdmin = !!(role && (role.roleadmin || role.name === "Admin"));
+    const fallback = () => {
+      if (isAdmin) {
+        this.rbacMenuNodes = [{ label: "Role & Access Management", icon: "shield", url: "./admin-console/tenancy" }];
+      }
+    };
+    if (!userId || !Number.isFinite(userId)) { fallback(); return; }
+    this.apisService.getRbacMenu(userId).subscribe({
+      next: (menuItems: any[]) => {
+        if (!menuItems || menuItems.length === 0) { fallback(); return; }
+        const buildNode = (item: any): any => ({
+          label: item.label,
+          icon: item.icon || (item.parentId == null ? "shield" : ""),
+          url: `.${item.route}`,
+          roles: item.roles || "",
+          children: menuItems
+            .filter((child) => child.parentId === item.id)
+            .sort((a, b) => a.displayOrder - b.displayOrder)
+            .map(buildNode),
+        });
+        // Two supported shapes: nested (an "Admin Console" wrapper holding the
+        // screens) and flat (every screen top-level, no wrapper). Nested drops
+        // the wrapper and surfaces its children; flat uses the roots as-is.
+        const nested = menuItems.some((it) => it.parentId != null);
+        const roots = menuItems
+          // Nested only: a tagged top-level row is a migrated legacy per-role
+          // menu, not the admin-console wrapper. Flat has no wrapper, so every
+          // screen is top-level and the tag is honoured later per selected role.
+          .filter((it) => it.parentId == null && (!nested || !it.roles))
+          .sort((a, b) => a.displayOrder - b.displayOrder)
+          .map(buildNode);
+        const nodes = nested
+          ? roots
+              // The wrapper is seeded at min_role_rank 0, so the API returns it
+              // to everyone but with no visible children. Only surface a root
+              // the user can actually drill into.
+              .filter((node) => node.children && node.children.length > 0)
+              .reduce((acc: any[], root: any) => acc.concat(root.children || []), [])
+          : roots;
+        this.rbacMenuNodes = nodes.map((child: any) => ({
+          label: child.label,
+          url: child.url,
+          icon: child.icon || "shield",
+          roles: child.roles || "",
+          children: child.children || [],
+        }));
+      },
+      error: () => fallback(),
+    });
+  }
+
   get visibleSidebarMenu(): any[] {
+    this.loadRbacMenu();
     const seen = new Set<string>();
-    const items = this.sidebarMenu.filter(
+    const selectedRoleIsAdmin = !!(this.selectedrole && this.selectedrole.roleadmin);
+    const selectedRoleName = this.selectedrole && this.selectedrole.name;
+    const items: any[] = [];
+
+    // Cutover: the data-driven menu (plan §7) is authoritative for the admin
+    // screens, so it is collected BEFORE the legacy rows — otherwise a legacy
+    // row sharing a label would claim it in `seen` and suppress the real item.
+    // Visibility is "rank-based + role override":
+    //  • untagged → already rank-filtered server-side, so show it.
+    //  • `roles` tagged → only that role (or an admin role) sees it.
+    for (const node of this.rbacMenuNodes) {
+      if (!node || seen.has(node.label)) {
+        continue;
+      }
+      const nodeRoles = (node.roles || '')
+        .split(',')
+        .map((r: string) => r.trim())
+        .filter((r: string) => r);
+      const visibleForRole =
+        selectedRoleIsAdmin ||
+        nodeRoles.length === 0 ||
+        (!!selectedRoleName && nodeRoles.includes(selectedRoleName));
+      if (visibleForRole) {
+        seen.add(node.label);
+        items.push(node);
+      }
+    }
+
+    const legacy = this.stripSuperseded(this.sidebarMenu).filter(
       (item) => {
+        // For admins the platform Dashboard is replaced by the Admin Overview,
+        // so drop the legacy Dashboard entry when an admin role is selected.
+        if (selectedRoleIsAdmin && (item.label === 'Dashboard' || item.url === './dashboard')) {
+          return false;
+        }
         // Deduplicate items with the same label (e.g. renamed "Pipelines")
         if (seen.has(item.label)) return false;
+        if (this.ADVANCED_MENU_LABELS.includes(item.label) &&
+            this.customMenuState[item.label] !== true) {
+          // Toggled off — skip without claiming the label, so a later entry
+          // with the same name can still surface.
+          return false;
+        }
         seen.add(item.label);
-        return (!this.ADVANCED_MENU_LABELS.includes(item.label) ||
-          this.customMenuState[item.label] === true);
+        return true;
       }
     );
+    items.push(...legacy);
+
     // Include advanced items not in the DB sidebar when the user has toggled them ON
     for (const cfg of this.advancedMenuItems) {
       if (!seen.has(cfg.label) && this.customMenuState[cfg.label] === true) {

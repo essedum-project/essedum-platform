@@ -89,7 +89,7 @@ export class AppHomeComponent implements OnInit {
         }
       },
       (error) => {
-        this.messageService.error("unable to fetch mapping", "LEAP");
+        console.warn("unable to fetch dashboard mapping", error);
       }
     );
   }

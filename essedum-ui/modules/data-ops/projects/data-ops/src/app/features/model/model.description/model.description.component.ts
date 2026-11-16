@@ -61,6 +61,7 @@ export class ModelDescriptionComponent implements OnInit {
     });
   }
   calledRelatedComponent = false;
+  approvalSubmitting: boolean = false;
 
   @Output() newItemEvent = new EventEmitter<boolean>();
   
@@ -259,6 +260,72 @@ export class ModelDescriptionComponent implements OnInit {
   editModel(card: any) {
     this.router.navigate(['/model/edit-model', card.id], {
       queryParams: { org: this.organisation }
+    });
+  }
+
+  // ── Submit for Approval (mirrors modal-config) ──────────────────────
+  getApprovalStatus(): string {
+    return this.card?.approvalStatus || this.card?.approval_status || 'DRAFT';
+  }
+
+  hasApprovalStatus(): boolean {
+    return !!this.card && !!this.getApprovalStatus();
+  }
+
+  getApprovalStatusLabel(): string {
+    const statusMap: Record<string, string> = {
+      DRAFT: 'Draft',
+      PENDING_PROJECT_APPROVAL: 'Pending Project Approval',
+      PROJECT_APPROVED: 'Project Approved',
+      PROJECT_REJECTED: 'Project Rejected',
+      PENDING_ORG_APPROVAL: 'Pending Org Approval',
+      ORG_APPROVED: 'Org Approved',
+      ORG_REJECTED: 'Org Rejected',
+      PENDING_PLATFORM_APPROVAL: 'Pending Platform Approval',
+      PLATFORM_REJECTED: 'Platform Rejected',
+      PUBLISHED: 'Published',
+    };
+    return statusMap[this.getApprovalStatus()] || this.getApprovalStatus();
+  }
+
+  getApprovalStatusClass(): string {
+    const classMap: Record<string, string> = {
+      DRAFT: 'draft',
+      PENDING_PROJECT_APPROVAL: 'pending',
+      PROJECT_APPROVED: 'project-approved',
+      PROJECT_REJECTED: 'rejected',
+      PENDING_ORG_APPROVAL: 'pending',
+      ORG_APPROVED: 'org-approved',
+      ORG_REJECTED: 'rejected',
+      PENDING_PLATFORM_APPROVAL: 'pending',
+      PLATFORM_REJECTED: 'rejected',
+      PUBLISHED: 'published',
+    };
+    return classMap[this.getApprovalStatus()] || 'draft';
+  }
+
+  showSubmitButton(): boolean {
+    const status = this.getApprovalStatus();
+    return !!this.card && (status === 'DRAFT' || status === 'PROJECT_REJECTED');
+  }
+
+  submitForApproval(): void {
+    const projectId = JSON.parse(sessionStorage.getItem('project') || '{}')?.id;
+    if (!projectId) {
+      this.service.message('Project not set. Cannot submit for approval.', 'error');
+      return;
+    }
+    this.approvalSubmitting = true;
+    this.service.submitModelForApproval(this.card.id, projectId).subscribe({
+      next: () => {
+        this.approvalSubmitting = false;
+        this.service.message('Model submitted for project approval');
+        this.ngOnInit();
+      },
+      error: (err: any) => {
+        this.approvalSubmitting = false;
+        this.service.message(err?.error?.error || 'Failed to submit for approval', 'error');
+      },
     });
   }
 }

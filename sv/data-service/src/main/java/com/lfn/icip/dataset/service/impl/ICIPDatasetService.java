@@ -420,6 +420,12 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 		if(iCIPDataset2Save.getEvent_details()!=null) {
 			iCIPDataset.setEvent_details(iCIPDataset2Save.getEvent_details());
 		}
+		if (iCIPDataset2Save.getApprovalStatus() != null) {
+			iCIPDataset.setApprovalStatus(iCIPDataset2Save.getApprovalStatus());
+		}
+		if (iCIPDataset2Save.getProjectId() != null) {
+			iCIPDataset.setProjectId(iCIPDataset2Save.getProjectId());
+		}
 		logger.info("________________>>>>>>>>>>>>>>>{}", iCIPDataset.getId());
 		ICIPDataset2 result = null;
 		try {
@@ -736,16 +742,26 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 	}
 
 	public List<ICIPDataset> getDatasetsByOrgandPage(String organization,String search,Pageable paginate, Boolean isTemplate) {
-//		return datasetRepository.findByOrganization(organization,paginate);
+		List<ICIPDataset> orgDatasets;
 		if(!search.isEmpty()) {
-			return datasetRepository.findByOrganization(organization,search,paginate);
+			orgDatasets = new java.util.ArrayList<>(datasetRepository.findByOrganization(organization,search,paginate));
 		}
 		else if(isTemplate == true) {
-			return datasetRepository.findByOrganizationWithTemplate(organization,search,paginate);
+			orgDatasets = new java.util.ArrayList<>(datasetRepository.findByOrganizationWithTemplate(organization,search,paginate));
 		}
 		else {
-			return datasetRepository.findByOrganization(organization,paginate);
+			orgDatasets = new java.util.ArrayList<>(datasetRepository.findByOrganization(organization,paginate));
 		}
+		// Merge globally-published datasets (approvedOrganizationId = -1) from other orgs
+		List<ICIPDataset> globalPublished = datasetRepository.findByApprovalStatusAndApprovedOrganizationId("PUBLISHED", -1);
+		if (globalPublished != null && !globalPublished.isEmpty()) {
+			java.util.Set<Integer> seen = new java.util.HashSet<>();
+			orgDatasets.forEach(d -> seen.add(d.getId()));
+			globalPublished.stream()
+				.filter(d -> !seen.contains(d.getId()))
+				.forEach(orgDatasets::add);
+		}
+		return orgDatasets;
 	}
 
 	@Override
@@ -1651,6 +1667,47 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 		}
 
 		return filteredDatasets.subList(start, end);
+	}
+
+	public List<ICIPDataset> getAllDatasetsForAdvancedFilter(String organization, String aliasOrName,
+	                                                        List<String> types, List<String> knowledgeBases) {
+		List<ICIPDataset> result;
+		if (knowledgeBases == null || knowledgeBases.isEmpty()) {
+			result = datasetRepository.getDatasetsForAdvancedFilterTypes(organization, aliasOrName, types);
+		} else {
+			result = datasetRepository.getDatasetsForAdvancedFilterTypesAndKnowledgeBases(organization, aliasOrName,
+					types, knowledgeBases);
+		}
+		return result != null ? new ArrayList<>(result) : new ArrayList<>();
+	}
+
+	/** Fetch datasets from other projects approved at org/platform level for this portfolio (for cross-project visibility). */
+	public List<ICIPDataset> getOrgLevelDatasetsForPortfolio(Integer portfolioId) {
+		List<ICIPDataset> extra = new ArrayList<>();
+		// Datasets explicitly platform-approved for global visibility carry approvedOrganizationId = -1
+		// (set by approvePlatformApproval). Legacy "PUBLISHED" rows with null were created before the
+		// approval workflow and must stay org-scoped, so we do NOT include them here.
+		List<ICIPDataset> globallyPublished = datasetRepository.findByApprovalStatusAndApprovedOrganizationId("PUBLISHED", -1);
+		logger.info("[OrgLevel] Globally-published datasets (approvedOrgId=-1): {}", globallyPublished != null ? globallyPublished.size() : 0);
+		if (globallyPublished != null) {
+			globallyPublished.forEach(d -> {
+				logger.info("[OrgLevel] Adding globally-published dataset id={} org={}", d.getId(), d.getOrganization());
+				extra.add(d);
+			});
+		}
+		if (portfolioId == null) {
+			logger.info("[OrgLevel] portfolioId is null, returning {} extra datasets", extra.size());
+			return extra;
+		}
+		for (String status : java.util.Arrays.asList("ORG_APPROVED", "PENDING_ORG_APPROVAL", "PENDING_PLATFORM_APPROVAL")) {
+			List<ICIPDataset> batch = datasetRepository.findByApprovalStatusAndApprovedOrganizationId(status, portfolioId);
+			if (batch != null) {
+				logger.info("[OrgLevel] status={} portfolioId={} found={}", status, portfolioId, batch.size());
+				extra.addAll(batch);
+			}
+		}
+		logger.info("[OrgLevel] Total extra datasets for portfolioId={}: {}", portfolioId, extra.size());
+		return extra;
 	}
 
 	public List<String> getDatasetTypesForAdvancedFilter(String organization) {
