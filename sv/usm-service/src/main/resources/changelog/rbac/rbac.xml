@@ -801,7 +801,7 @@
 		</sql>
 	</changeSet>
 
-	<!-- rbac-31: rbac-16 backfilled usm_project.organisation_id from portfolio_id
+	<!-- rbac-38: rbac-16 backfilled usm_project.organisation_id from portfolio_id
 	     only once, and no application code ever set it afterwards (fixed now in
 	     ProjectServiceImpl#save). Any project created/re-portfolio'd between
 	     rbac-16 and that fix — e.g. a project under an org whose role grants
@@ -810,7 +810,7 @@
 	     projectOrganizationId/Name — is stuck with organisation_id NULL forever.
 	     Re-run the same backfill (idempotent: only touches NULL rows) to catch
 	     everything created since. -->
-	<changeSet author="Essedum (rbac)" id="rbac-31">
+	<changeSet author="Essedum (rbac)" id="rbac-38">
 		<validCheckSum>8:e4562ee58bb4491f6720429684e7dab7</validCheckSum>
 		<validCheckSum>8:eacffab13e6c4048c4060ecfef62a229</validCheckSum>
 		<preConditions onFail="MARK_RAN">
@@ -926,6 +926,24 @@
 		</preConditions>
 		<addColumn tableName="mlfederatedmodels">
 			<column name="approved_organization_id" type="int" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-38">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="rbac_audit_event" columnName="org_id" /></not>
+		</preConditions>
+		<addColumn tableName="rbac_audit_event">
+			<column name="org_id" type="int" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-39">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="rbac_audit_event" columnName="project_id" /></not>
+		</preConditions>
+		<addColumn tableName="rbac_audit_event">
+			<column name="project_id" type="int" />
 		</addColumn>
 	</changeSet>
 

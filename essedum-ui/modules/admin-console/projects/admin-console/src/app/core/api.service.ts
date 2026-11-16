@@ -262,8 +262,11 @@ export class ApiService {
   }
 
   // ---- audit (rbac_audit_event, NFR-O2) ----
-  getAuditEvents(actorUserId: number): Observable<AuditEvent[]> {
-    return this.http.get<AuditEvent[]>(`${this.base}/audit`, { params: { actorUserId } });
+  getAuditEvents(actorUserId: number, orgId?: number, projectId?: number): Observable<AuditEvent[]> {
+    const params: Record<string, number> = { actorUserId };
+    if (orgId != null) params['orgId'] = orgId;
+    if (projectId != null) params['projectId'] = projectId;
+    return this.http.get<AuditEvent[]>(`${this.base}/audit`, { params });
   }
 
   // ---- identity projection status (§8) ----

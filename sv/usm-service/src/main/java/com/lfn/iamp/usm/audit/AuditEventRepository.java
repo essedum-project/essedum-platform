@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AuditEventRepository extends JpaRepository<AuditEvent, Integer> {
 	List<AuditEvent> findAllByOrderByOccurredAtDesc();
+	List<AuditEvent> findByOrgIdOrderByOccurredAtDesc(Integer orgId);
+	List<AuditEvent> findByProjectIdOrderByOccurredAtDesc(Integer projectId);
 }

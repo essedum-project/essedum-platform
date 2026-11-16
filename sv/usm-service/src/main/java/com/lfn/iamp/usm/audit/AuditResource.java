@@ -31,7 +31,9 @@ public class AuditResource {
 	}
 
 	@GetMapping("/audit")
-	public ResponseEntity<List<AuditEvent>> list(@RequestParam Integer actorUserId) {
+	public ResponseEntity<List<AuditEvent>> list(@RequestParam Integer actorUserId,
+	                                              @RequestParam(required = false) Integer orgId,
+	                                              @RequestParam(required = false) Integer projectId) {
 		if (actorUserId == null) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "actorUserId required");
 		}
@@ -40,6 +42,6 @@ public class AuditResource {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
 					"Only an org admin or above may view the audit log (have rank " + rank + ")");
 		}
-		return ResponseEntity.ok(auditService.list());
+		return ResponseEntity.ok(auditService.list(orgId, projectId));
 	}
 }

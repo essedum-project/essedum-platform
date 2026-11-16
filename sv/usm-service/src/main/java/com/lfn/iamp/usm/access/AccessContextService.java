@@ -177,8 +177,13 @@ public class AccessContextService {
 		assignment.setProjectId(projectId);
 		assignment.setGrantedAt(Instant.now());
 		RoleAssignment saved = roleAssignmentRepository.save(assignment);
-		auditService.record("role_assignment", "granted", userId, "User #" + userId,
-				"role " + roleId + " granted, org=" + organizationId + " project=" + projectId);
+		String roleName = rbacRoleRepository.findById(roleId).map(RbacRole::getName).orElse(String.valueOf(roleId));
+		String orgName = organizationId != null ? organisationRepository.findById(organizationId).map(Organisation::getName).orElse(String.valueOf(organizationId)) : null;
+		String projName = projectId != null ? projectRepository.findById(projectId).map(Project::getName).orElse(String.valueOf(projectId)) : null;
+		String grantDetails = "role '" + roleName + "' granted"
+				+ (orgName != null ? ", org='" + orgName + "'" : "")
+				+ (projName != null ? ", project='" + projName + "'" : "");
+		auditService.record("role_assignment", "granted", userId, null, grantDetails, organizationId, projectId);
 		identityProjectionService.enqueueForProject(projectId);
 		bridgeAssignment(userId, roleId, organizationId, projectId, isLegacy);
 		return saved;
@@ -410,8 +415,9 @@ public class AccessContextService {
 		roleAssignmentRepository.findById(roleAssignmentId).ifPresent(assignment -> {
 			assignment.setRevokedAt(Instant.now());
 			roleAssignmentRepository.save(assignment);
-			auditService.record("role_assignment", "revoked", assignment.getUserId(),
-					"User #" + assignment.getUserId(), "role_assignment #" + roleAssignmentId + " revoked");
+			String revokedRoleName = rbacRoleRepository.findById(assignment.getRoleId()).map(RbacRole::getName).orElse(String.valueOf(assignment.getRoleId()));
+			auditService.record("role_assignment", "revoked", assignment.getUserId(), null,
+					"role '" + revokedRoleName + "' revoked", assignment.getOrganizationId(), assignment.getProjectId());
 		});
 	}
 

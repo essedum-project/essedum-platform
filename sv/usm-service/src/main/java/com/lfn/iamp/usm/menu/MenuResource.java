@@ -72,7 +72,7 @@ public class MenuResource {
 		requirePlatformAdmin(actorUserId);
 		item.setId(null);
 		MenuItem saved = menuItemRepository.save(item);
-		auditService.record("menu_item", "created", actorUserId, "User #" + actorUserId,
+		auditService.record("menu_item", "created", actorUserId, null,
 				"menu_item \"" + saved.getLabel() + "\" created");
 		return ResponseEntity.ok(saved);
 	}
@@ -83,18 +83,19 @@ public class MenuResource {
 		requirePlatformAdmin(actorUserId);
 		item.setId(id);
 		MenuItem saved = menuItemRepository.save(item);
-		auditService.record("menu_item", "updated", actorUserId, "User #" + actorUserId, "menu_item #" + id + " updated");
+		auditService.record("menu_item", "updated", actorUserId, null, "menu_item \"" + saved.getLabel() + "\" updated");
 		return ResponseEntity.ok(saved);
 	}
 
 	@DeleteMapping("/menu-items/{id}")
 	public ResponseEntity<Void> delete(@PathVariable Integer id, @RequestParam Integer actorUserId) {
 		requirePlatformAdmin(actorUserId);
+		String label = menuItemRepository.findById(id).map(MenuItem::getLabel).orElse("#" + id);
 		menuItemRepository.findAll().stream()
 				.filter(item -> id.equals(item.getParentId()))
 				.forEach(child -> menuItemRepository.deleteById(child.getId()));
 		menuItemRepository.deleteById(id);
-		auditService.record("menu_item", "deleted", actorUserId, "User #" + actorUserId, "menu_item #" + id + " deleted");
+		auditService.record("menu_item", "deleted", actorUserId, null, "menu_item \"" + label + "\" deleted");
 		return ResponseEntity.noContent().build();
 	}
 }

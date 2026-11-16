@@ -60,4 +60,10 @@ public class AuditEvent implements Serializable {
 
 	@Size(max = 1000)
 	private String details;
+
+	@Column(name = "org_id")
+	private Integer orgId;
+
+	@Column(name = "project_id")
+	private Integer projectId;
 }

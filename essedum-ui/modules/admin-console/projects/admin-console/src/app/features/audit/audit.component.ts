@@ -1,6 +1,8 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
+import { combineLatest } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import type { AuditEvent } from '../../core/api-models';
@@ -33,9 +35,11 @@ export class AuditComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    this.api.getAuditEvents(this.userContext.userId$.value).subscribe(events => {
-      this.events = events;
-      this.syncFilteredData();
+    combineLatest([this.userContext.orgId$, this.userContext.projectId$]).pipe(take(1)).subscribe(([orgId, projectId]) => {
+      this.api.getAuditEvents(this.userContext.userId$.value, orgId ?? undefined, projectId ?? undefined).subscribe(events => {
+        this.events = events;
+        this.syncFilteredData();
+      });
     });
   }
 
