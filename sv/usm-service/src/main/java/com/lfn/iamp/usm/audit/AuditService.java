@@ -44,6 +44,9 @@ public class AuditService {
 	}
 
 	public List<AuditEvent> list(Integer orgId, Integer projectId) {
+		if (orgId != null && projectId != null) {
+			return auditEventRepository.findByOrgIdOrProjectIdOrderByOccurredAtDesc(orgId, projectId);
+		}
 		if (orgId != null) {
 			return auditEventRepository.findByOrgIdOrderByOccurredAtDesc(orgId);
 		}
