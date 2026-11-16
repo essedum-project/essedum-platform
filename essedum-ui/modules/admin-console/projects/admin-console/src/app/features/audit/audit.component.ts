@@ -35,12 +35,19 @@ export class AuditComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    combineLatest([this.userContext.orgId$, this.userContext.projectId$]).pipe(take(1)).subscribe(([orgId, projectId]) => {
-      this.api.getAuditEvents(this.userContext.userId$.value, orgId ?? undefined, projectId ?? undefined).subscribe(events => {
-        this.events = events;
-        this.syncFilteredData();
+    combineLatest([this.userContext.orgId$, this.userContext.projectId$, this.userContext.selectedRoleRank$])
+      .pipe(take(1))
+      .subscribe(([orgId, projectId, roleRank]) => {
+        const isPlatformAdmin = roleRank != null && roleRank >= 4;
+        this.api.getAuditEvents(
+          this.userContext.userId$.value,
+          isPlatformAdmin ? undefined : (orgId ?? undefined),
+          isPlatformAdmin ? undefined : (projectId ?? undefined),
+        ).subscribe(events => {
+          this.events = events;
+          this.syncFilteredData();
+        });
       });
-    });
   }
 
   get filteredEvents(): AuditEvent[] {

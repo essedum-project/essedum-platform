@@ -21,7 +21,6 @@ import com.lfn.iamp.usm.access.AccessContextService;
 public class AuditResource {
 
 	private static final int ORG_ADMIN = 3;
-	private static final int PLATFORM_ADMIN = 4;
 
 	private final AuditService auditService;
 	private final AccessContextService accessContextService;
@@ -42,9 +41,6 @@ public class AuditResource {
 		if (rank < ORG_ADMIN) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
 					"Only an org admin or above may view the audit log (have rank " + rank + ")");
-		}
-		if (rank >= PLATFORM_ADMIN) {
-			return ResponseEntity.ok(auditService.list(null, null));
 		}
 		return ResponseEntity.ok(auditService.list(orgId, projectId));
 	}
