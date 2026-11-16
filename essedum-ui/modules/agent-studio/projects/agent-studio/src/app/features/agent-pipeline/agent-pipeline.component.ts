@@ -5175,6 +5175,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       return isCreator;
     }
 
+    // PLATFORM_REJECTED: visible to all users in same org (backend already filtered)
+    if (approvalStatus === 'PLATFORM_REJECTED') {
+      return true;
+    }
+
     return false;
   }
 
@@ -5275,6 +5280,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       'PENDING_ORG_APPROVAL': 'Pending Organization Approval',
       'ORG_APPROVED': 'Org Approved',
       'PENDING_PLATFORM_APPROVAL': 'Pending Platform Approval',
+      'PLATFORM_REJECTED': 'Platform Rejected',
       'GLOBALLY_PUBLISHED': 'Globally Published',
       'PUBLISHED': 'Published',
       'ORG_REJECTED': 'Organization Rejected'

@@ -1989,8 +1989,19 @@ public class ICIPMlopsController {
 									if (userProjectId.equals(resourceProjectId)) {
 										isVisible = true;
 									}
+								} else if ("PLATFORM_REJECTED".equals(approvalStatus)) {
+									// PLATFORM_REJECTED: visible to all users of the submitting organization
+									Integer approvedOrgId = result.getApprovedOrganizationId();
+									if (approvedOrgId != null && effectiveOrgId != null && approvedOrgId.equals(effectiveOrgId)) {
+										isVisible = true;
+									} else if (!isVisible) {
+										String resourceOrg = result.getOrganization();
+										if (resourceOrg != null && !orgStr.isEmpty() && resourceOrg.equals(orgStr)) {
+											isVisible = true;
+										}
+									}
 								}
-								
+
 								if (isVisible) {
 									filteredResults.add(result);
 								}
