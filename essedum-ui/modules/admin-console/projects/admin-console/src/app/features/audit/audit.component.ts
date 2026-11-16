@@ -50,6 +50,14 @@ export class AuditComponent implements OnInit, AfterViewInit {
       });
   }
 
+  cleanDetails(details: string | null): string {
+    if (!details) return '';
+    return details
+      .replace(/\s*\(org=\d+\)/g, '')
+      .replace(/\s*\(project=\d+\)/g, '')
+      .trim();
+  }
+
   get filteredEvents(): AuditEvent[] {
     if (!this._filterText) {
       return this.events;

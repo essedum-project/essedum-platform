@@ -179,6 +179,7 @@
   }
 
   .audit-actor-text { font-size: 13px; color: #c9d8f0; }
+  .audit-actor-text.audit-na { color: #3d4f65; font-size: 14px; }
   .audit-date-text  { font-size: 12px; color: #6e8ea8; white-space: nowrap; }
 
   .audit-details-text {
@@ -275,6 +276,7 @@
   }
 
   .audit-actor-text          { color: #334155; }
+  .audit-actor-text.audit-na { color: #cbd5e1; }
   .audit-date-text           { color: #64748b; }
   .audit-details-text        { color: #64748b; }
   .audit-correlation-text    { color: #64748b; background: rgba(15, 23, 42, 0.06); }
