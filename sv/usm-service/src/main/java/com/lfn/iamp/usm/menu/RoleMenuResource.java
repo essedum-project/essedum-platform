@@ -149,8 +149,8 @@ public class RoleMenuResource {
 		}
 		dc.setValue(writeValue(node));
 		DashConstant saved = dashConstantRepository.save(dc);
-		auditService.record("role_menu", "created", actorUserId, "User #" + actorUserId,
-				"menu '" + body.getLabel() + "' added to " + item + " / " + body.getProject() + " for user " + actorUserId);
+		auditService.record("role_menu", "created", actorUserId, null,
+				"menu '" + body.getLabel() + "' added to " + item + " / " + body.getProject());
 		return ResponseEntity.ok(toDto(saved, body.getRole()));
 	}
 
