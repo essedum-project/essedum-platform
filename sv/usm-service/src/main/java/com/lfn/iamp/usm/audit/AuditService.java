@@ -21,25 +21,31 @@ public class AuditService {
 	}
 
 	public void record(String entity, String action, Integer actorId, String actorName, String details) {
-		record(entity, action, actorId, actorName, details, null, null);
+		record(entity, action, actorId, actorName, details, null, null, null);
 	}
 
 	public void record(String entity, String action, Integer actorId, String actorName, String details,
 	                   Integer orgId, Integer projectId) {
+		record(entity, action, actorId, actorName, details, orgId, projectId, null);
+	}
+
+	public void record(String entity, String action, Integer actorId, String actorName, String details,
+	                   Integer orgId, Integer projectId, String targetUserName) {
 		AuditEvent event = new AuditEvent();
 		event.setCorrelationId(UUID.randomUUID().toString());
 		event.setEntity(entity);
 		event.setAction(action);
 		event.setActorId(actorId);
-		String resolvedName = usersRepository.findById(actorId)
+		String resolvedName = actorId != null ? usersRepository.findById(actorId)
 				.map(u -> u.getUser_email() != null && !u.getUser_email().isEmpty()
 						? u.getUser_email() : u.getUser_login())
-				.orElse(actorName);
+				.orElse(actorName) : actorName;
 		event.setActorName(resolvedName);
 		event.setDetails(details);
 		event.setOccurredAt(Instant.now());
 		event.setOrgId(orgId);
 		event.setProjectId(projectId);
+		event.setTargetUserName(targetUserName);
 		auditEventRepository.save(event);
 	}
 

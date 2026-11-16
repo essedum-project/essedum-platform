@@ -21,7 +21,7 @@ export class AuditComponent implements OnInit, AfterViewInit {
   get filterText(): string { return this._filterText; }
   set filterText(val: string) { this._filterText = val; this.syncFilteredData(); }
 
-  readonly columns = ['occurredAt', 'entity', 'action', 'actorName', 'details', 'correlationId'];
+  readonly columns = ['occurredAt', 'entity', 'action', 'actorName', 'targetUserName', 'details', 'correlationId'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 

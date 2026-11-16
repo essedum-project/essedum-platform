@@ -46,9 +46,16 @@
     </ng-container>
 
     <ng-container matColumnDef="actorName">
-      <th mat-header-cell *matHeaderCellDef>Actor</th>
+      <th mat-header-cell *matHeaderCellDef>Done By</th>
       <td mat-cell *matCellDef="let row">
         <span class="audit-actor-text">{{ row.actorName }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="targetUserName">
+      <th mat-header-cell *matHeaderCellDef>Affected User</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="audit-actor-text">{{ row.targetUserName }}</span>
       </td>
     </ng-container>
 

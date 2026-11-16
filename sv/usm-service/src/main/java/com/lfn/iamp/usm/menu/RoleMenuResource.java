@@ -158,9 +158,9 @@ public class RoleMenuResource {
 	public ResponseEntity<Void> delete(@PathVariable Integer id, @RequestParam Integer actorUserId) {
 		requirePlatformAdmin(actorUserId);
 		dashConstantRepository.findById(id).ifPresent(dc -> {
-			auditService.record("role_menu", "deleted", actorUserId,
-					"User #" + actorUserId, "menu row " + id + " removed from " + dc.getKeys() + " / " + dc.getProject_name());
+			String label = dc.getKeys() + " / " + dc.getProject_name();
 			dashConstantRepository.deleteById(id);
+			auditService.record("role_menu", "deleted", actorUserId, null, "menu row removed from " + label);
 		});
 		return ResponseEntity.noContent().build();
 	}
