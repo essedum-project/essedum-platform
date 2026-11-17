@@ -135,6 +135,7 @@
 
   ::ng-deep .mat-mdc-cell {
     color: #e2e8f0 !important;
+    font-size: 0.9rem !important;
     padding: 14px 16px !important;
     border-bottom: 1px solid var(--ac-border) !important;
   }
@@ -205,34 +206,37 @@ mat-paginator .mat-mdc-icon-button .mat-icon,
 mat-paginator .mat-mdc-icon-button[disabled],
 .mat-mdc-paginator .mat-mdc-icon-button[disabled] { opacity: 0.35; }
 
-body.header-light-theme mat-paginator,
-body.header-light-theme .mat-mdc-paginator {
+:host(.light-theme) mat-paginator,
+:host(.light-theme) .mat-mdc-paginator {
   --mat-paginator-container-background-color: #f1f5f9;
   background: #f1f5f9 !important;
   background-color: #f1f5f9 !important;
   color: #64748b !important;
   border-top: 1px solid rgba(15, 23, 42, 0.12);
 }
-body.header-light-theme mat-paginator .mat-mdc-paginator-outer-container,
-body.header-light-theme mat-paginator .mat-mdc-paginator-container,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-outer-container,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-container { background: #f1f5f9 !important; }
-body.header-light-theme mat-paginator .mat-mdc-paginator-range-label,
-body.header-light-theme mat-paginator .mat-mdc-paginator-page-size-label,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-range-label,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #64748b !important; }
-body.header-light-theme mat-paginator .mat-mdc-select-value,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-select-value { color: #1e293b !important; }
-body.header-light-theme mat-paginator .mat-mdc-icon-button,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b !important; }
-body.header-light-theme mat-paginator .mat-mdc-icon-button svg,
-body.header-light-theme mat-paginator .mat-mdc-icon-button .mat-icon,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button svg,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #64748b !important; fill: #64748b !important; }
+:host(.light-theme) mat-paginator .mat-mdc-paginator-outer-container,
+:host(.light-theme) mat-paginator .mat-mdc-paginator-container,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-paginator-outer-container,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-paginator-container { background: #f1f5f9 !important; }
+:host(.light-theme) mat-paginator .mat-mdc-paginator-range-label,
+:host(.light-theme) mat-paginator .mat-mdc-paginator-page-size-label,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-paginator-range-label,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #64748b !important; }
+:host(.light-theme) mat-paginator .mat-mdc-select-value,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-select-value { color: #1e293b !important; }
+:host(.light-theme) mat-paginator .mat-mdc-icon-button,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b !important; }
+:host(.light-theme) mat-paginator .mat-mdc-icon-button svg,
+:host(.light-theme) mat-paginator .mat-mdc-icon-button .mat-icon,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-icon-button svg,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #64748b !important; fill: #64748b !important; }
 
 /* ── Audit badge styles (mirrored from audit.component.scss) ─────────────── */
-.audit-date-text  { font-size: 0.82rem; color: var(--ac-text-muted); }
-.audit-actor-text { font-size: 0.88rem; color: var(--ac-text); }
+.audit-date-text        { font-size: 0.9rem;  color: var(--ac-text-muted); }
+.audit-actor-text       { font-size: 0.9rem;  color: var(--ac-text); }
+.audit-details-text     { font-size: 0.9rem;  color: var(--ac-text-muted); max-width: 260px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.audit-correlation-text { font-size: 0.8rem;  color: var(--ac-text-muted); font-family: monospace; max-width: 140px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.audit-na               { opacity: 0.4; }
 
 .audit-entity-badge,
 .audit-action-badge {
@@ -304,10 +308,20 @@ body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button .mat-icon { colo
   }
 }
 
-/* Empty / loading state */
-.empty {
-  color: var(--ac-text-muted);
-  font-size: 0.9rem;
-  padding: 32px 0;
-  text-align: center;
+/* Empty state */
+.audit-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 0 32px;
+  gap: 8px;
+}
+.audit-empty-icon  { font-size: 2.5rem; width: 2.5rem; height: 2.5rem; color: #94a3b8; }
+.audit-empty-title { margin: 0; font-size: 1rem; font-weight: 600; color: #94a3b8; }
+.audit-empty-sub   { margin: 0; font-size: 0.85rem; color: #64748b; }
+
+:host(.light-theme) {
+  .audit-empty-icon  { color: #94a3b8; }
+  .audit-empty-title { color: #64748b; }
+  .audit-empty-sub   { color: #94a3b8; }
 }
