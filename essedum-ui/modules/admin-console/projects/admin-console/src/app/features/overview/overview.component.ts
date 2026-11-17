@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation, ElementRef, effect, ViewChild, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin, of, combineLatest, Subject } from 'rxjs';
-import { catchError, switchMap, map, takeUntil } from 'rxjs/operators';
+import { forkJoin, of, combineLatest, Subject, merge, fromEvent } from 'rxjs';
+import { catchError, switchMap, map, takeUntil, take } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
@@ -69,11 +69,22 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    combineLatest([this.userContext.orgId$, this.userContext.projectId$, this.userContext.selectedRoleRank$])
-      .pipe(
-        takeUntil(this.destroy$),
-        switchMap(([orgId, projectId, roleRank]) => {
-          this.loading = true;
+    // Trigger on initial load AND whenever the shell signals RBAC context changed
+    // (role/org/project switch dispatches 'rbac-init-complete' on window).
+    // selectedRoleRank$ is a cold defer that completes immediately, so combineLatest
+    // alone does not re-fire on role change — the event bridges that gap.
+    merge(
+      of(null),
+      fromEvent(window, 'rbac-init-complete'),
+    ).pipe(
+      takeUntil(this.destroy$),
+      switchMap(() =>
+        combineLatest([this.userContext.orgId$, this.userContext.projectId$, this.userContext.selectedRoleRank$]).pipe(
+          take(1),
+        ),
+      ),
+      switchMap(([orgId, projectId, roleRank]) => {
+        this.loading = true;
           const userId = this.userContext.userId$.value;
           const isPlatformAdmin = roleRank != null && roleRank >= 4;
           const scopedOrgId     = isPlatformAdmin ? undefined : (orgId ?? undefined);

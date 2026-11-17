@@ -1,4 +1,7 @@
-﻿:host {
+﻿/* Pull Material Icons into the shadow root (not inherited from document). */
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+:host {
   display: block !important;
   width: 100% !important;
 
