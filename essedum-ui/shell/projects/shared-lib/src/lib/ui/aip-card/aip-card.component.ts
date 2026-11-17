@@ -174,7 +174,7 @@ export class AipCardComponent {
       [SERVICE_TYPES.SCHEMAS]:
         this.card?.lastmodifiedby || 'Name Not Available',
       [SERVICE_TYPES.CONNECTIONS]:
-        this.card?.lastmodifiedby || 'Name Not Available',
+        this.card?.created_by || this.card?.lastmodifiedby || 'Name Not Available',
       [SERVICE_TYPES.MODEL]: this.card?.createdBy || 'Name Not Available',
       [SERVICE_TYPES.DATASETS]:
         this.card?.created_by || this.card?.lastmodifiedby || this.card?.createdby || 'Name Not Available',
@@ -260,9 +260,13 @@ export class AipCardComponent {
     PUBLISHED: 'public',
   };
 
-  /** Raw approval status for cards that carry one (Connections and Models). Empty string hides the badge. */
+  /** Raw approval status for cards that carry one. Empty string hides the badge. */
   getApprovalStatus(): string {
-    if (this.servicev1 !== SERVICE_TYPES.CONNECTIONS && this.servicev1 !== SERVICE_TYPES.MODEL) {
+    const showFor = [
+      SERVICE_TYPES.CONNECTIONS, SERVICE_TYPES.MODEL,
+      SERVICE_TYPES.DATASETS, SERVICE_TYPES.PIPELINEAGENT, SERVICE_TYPES.AGENT,
+    ];
+    if (!showFor.includes(this.servicev1)) {
       return '';
     }
     return this.card?.approval_status || this.card?.approvalStatus || '';
