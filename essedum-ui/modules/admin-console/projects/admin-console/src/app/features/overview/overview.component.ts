@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation, ElementRef, effect, ViewChild, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin, of, combineLatest, Subject, merge, fromEvent } from 'rxjs';
+import { forkJoin, of, combineLatest, Subject, merge, fromEvent, Observable } from 'rxjs';
 import { catchError, switchMap, map, takeUntil, take } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
