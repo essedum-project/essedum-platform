@@ -406,6 +406,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
    *  Prevents concurrent HTTP chains from racing each other (setProjectTheme and getrolepage
    *  both call getDashConsts which both trigger supplementRbacData in the same component). */
   private _rbacDataLoading = false;
+  /** When true, supplementRbacData() refreshes roles/projects but does NOT navigate (auto-switch suppressed). */
+  private _suppressAutoSwitch = false;
   /** Timestamp (Date.now()) of the last deliberate role switch by the user.
    *  Prevents supplementRbacData() from auto-switching after a manual selection. */
   private _lastManualRoleSwitch = 0;
@@ -527,8 +529,11 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     // Refresh RBAC role list so newly granted roles appear without logout.
     // Do NOT call setportfolio() here — it resets portfoliodata and triggers a full
     // RBAC reinit that navigates away from the current screen.
+    // Suppress auto-switch so the admin stays on the current screen.
     setTimeout(() => {
+      this._suppressAutoSwitch = true;
       this.supplementRbacData();
+      setTimeout(() => { this._suppressAutoSwitch = false; }, 3000);
       // Also refresh sidebar in case the current role's menu changed.
       const role = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return ''; } })();
       if (this.roleMenuSvc.isRbacRole(role)) this.newsidebar();
@@ -910,7 +915,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               const _recentAutoSwitch = (() => {
                 try { const t = sessionStorage.getItem('_rbac_last_auto_switch'); return !!t && (Date.now() - parseInt(t)) < 10000; } catch { return false; }
               })();
-              if ((!curStillValid || !currentOrgHasAssignments || !_sessionInit) && !recentManualSwitch && !_recentAutoSwitch) {
+              if ((!curStillValid || !currentOrgHasAssignments || !_sessionInit) && !recentManualSwitch && !_recentAutoSwitch && !this._suppressAutoSwitch) {
                 if (this._destroyed) { this._rbacDataLoading = false; return; } // zombie guard
                 // Mark session initialized BEFORE navigating so the recreated component
                 // skips the auto-switch and restores the menu from sessionStorage cache.
