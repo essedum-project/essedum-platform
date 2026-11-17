@@ -1,13 +1,28 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation, ElementRef, effect, ViewChild, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin, of, combineLatest, Subject, merge, fromEvent, Observable } from 'rxjs';
-import { catchError, switchMap, map, takeUntil, take } from 'rxjs/operators';
+import { catchError, switchMap, map, takeUntil, take, filter } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { UserContextService } from '../../core/user-context.service';
 import { ThemeService } from '../../core/theme.service';
 import type { AuditEvent } from '../../core/api-models';
+
+// Module-level flag: set as soon as the shell fires valuechangerole,
+// cleared when rbac-init-complete arrives. Used to suppress the
+// stale-context initial load when the component is recreated mid-change.
+let rbacChangePending = false;
+if (typeof window !== 'undefined') {
+  window.addEventListener('valuechangerole', () => {
+    rbacChangePending = true;
+    console.log('[OVERVIEW] valuechangerole caught at module level — suppressing initial load');
+  });
+  window.addEventListener('rbac-init-complete', () => {
+    rbacChangePending = false;
+    console.log('[OVERVIEW] rbac-init-complete caught at module level — flag cleared');
+  });
+}
 
 interface StatCard {
   label: string;
@@ -69,31 +84,36 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Show spinner instantly when user changes role (valuechangerole fires immediately,
-    // but rbac-init-complete is delayed 2s by the shell overlay timer).
-    fromEvent(window, 'valuechangerole').pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.loading = true;
-      this.cards.forEach(c => c.count = 0);
-      this.recentAudit.data = [];
-    });
+    console.log('[OVERVIEW] ngOnInit — rbacChangePending:', rbacChangePending);
 
-    // Trigger on initial load AND whenever the shell signals RBAC context changed
-    // (role/org/project switch dispatches 'rbac-init-complete' on window).
+    // Trigger on initial load AND whenever the shell signals RBAC context changed.
+    // The null emission (initial load) is filtered out when a role/org/project
+    // change is in progress: the component was just recreated by the shell's
+    // navigation, but the new RBAC context won't be ready until rbac-init-complete.
     merge(
       of(null),
       fromEvent(window, 'rbac-init-complete'),
     ).pipe(
       takeUntil(this.destroy$),
+      filter(event => {
+        if (event === null && rbacChangePending) {
+          console.log('[OVERVIEW] Initial load suppressed — rbac change in progress, waiting for rbac-init-complete');
+          return false;
+        }
+        console.log('[OVERVIEW] Load triggered by:', event === null ? 'initial' : 'rbac-init-complete');
+        return true;
+      }),
       switchMap(() => {
-        // Reset immediately so stale data disappears before API responds
         this.loading = true;
         this.cards.forEach(c => c.count = 0);
         this.recentAudit.data = [];
+        console.log('[OVERVIEW] Reading RBAC context...');
         return combineLatest([this.userContext.orgId$, this.userContext.projectId$, this.userContext.selectedRoleRank$]).pipe(
           take(1),
         );
       }),
       switchMap(([orgId, projectId, roleRank]) => {
+          console.log('[OVERVIEW] Fetching data — orgId:', orgId, 'projectId:', projectId, 'roleRank:', roleRank);
           const userId = this.userContext.userId$.value;
           const isPlatformAdmin = roleRank != null && roleRank >= 4;
           const scopedOrgId     = isPlatformAdmin ? undefined : (orgId ?? undefined);
@@ -135,6 +155,7 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
       )
       .subscribe(data => {
         if (!data) { this.loading = false; return; }
+        console.log('[OVERVIEW] Data loaded — orgs:', data.orgs.length, 'projects:', data.projects.length, 'members:', data.members.length, 'approvals:', data.approvalsCount);
         this.cards[0].count = data.orgs.length;
         this.cards[1].count = data.projects.length;
         this.cards[2].count = data.members.length;
