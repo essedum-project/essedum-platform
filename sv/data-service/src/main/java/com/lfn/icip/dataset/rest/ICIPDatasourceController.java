@@ -622,6 +622,14 @@ public class ICIPDatasourceController {
 		}
 	}
 
+	/** Extract the mandatory admin comment from the JSON body, falling back to the supplied value. */
+	private String extractComments(java.util.Map<String, Object> body, String fallback) {
+		if (body != null && body.get("comments") != null && !String.valueOf(body.get("comments")).isBlank()) {
+			return String.valueOf(body.get("comments"));
+		}
+		return fallback;
+	}
+
 	@PostMapping("/approval/project/approve/{resourceId}")
 	public ResponseEntity<java.util.Map<String, Object>> approveProjectApproval(
 			@PathVariable Integer resourceId,
@@ -659,10 +667,12 @@ public class ICIPDatasourceController {
 				return ResponseEntity.status(403).body(response);
 			}
 
-			ICIPDatasource result = approvalWorkflowService.approveProjectApproval(resourceId, projectId, userRank);
+			String comments = extractComments(request, null);
+			ICIPDatasource result = approvalWorkflowService.approveProjectApproval(resourceId, projectId, userRank, comments);
 			response.put("success", true);
 			response.put("message", "Datasource project approval approved");
 			response.put("status", result.getApprovalStatus());
+			response.put("comments", result.getComments() != null ? result.getComments() : "");
 			logger.info("[Approval] Datasource {} approved at project level", resourceId);
 			return ResponseEntity.ok(response);
 		} catch (IllegalAccessError e) {
@@ -684,6 +694,7 @@ public class ICIPDatasourceController {
 	@PostMapping("/approval/project/reject/{resourceId}")
 	public ResponseEntity<java.util.Map<String, Object>> rejectProjectApproval(
 			@PathVariable Integer resourceId,
+			@RequestBody(required = false) java.util.Map<String, Object> request,
 			@RequestParam(value = "rank", required = false) String rank,
 			@RequestHeader(value = "roleId", required = false) String roleId,
 			jakarta.servlet.http.HttpServletRequest httpRequest) {
@@ -703,10 +714,12 @@ public class ICIPDatasourceController {
 				return ResponseEntity.status(403).body(response);
 			}
 
-			ICIPDatasource result = approvalWorkflowService.rejectProjectApproval(resourceId, userRank);
+			String comments = extractComments(request, null);
+			ICIPDatasource result = approvalWorkflowService.rejectProjectApproval(resourceId, userRank, comments);
 			response.put("success", true);
 			response.put("message", "Datasource project approval rejected");
 			response.put("status", result.getApprovalStatus());
+			response.put("comments", result.getComments() != null ? result.getComments() : "");
 			logger.info("[Approval] Datasource {} rejected at project level", resourceId);
 			return ResponseEntity.ok(response);
 		} catch (IllegalAccessError e) {
@@ -875,6 +888,7 @@ public class ICIPDatasourceController {
 	public ResponseEntity<?> approveOrgApproval(
 			@PathVariable Integer resourceId,
 			@RequestParam(value = "rank", required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
@@ -882,13 +896,15 @@ public class ICIPDatasourceController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
 			}
 
-			ICIPDatasource result = approvalWorkflowService.approveOrgApproval(resourceId, userRank);
+			String comments = extractComments(body, null);
+			ICIPDatasource result = approvalWorkflowService.approveOrgApproval(resourceId, userRank, comments);
 			logger.info("[Approval] Datasource {} approved at org level", resourceId);
 			return ResponseEntity.ok(java.util.Map.of(
 				"success", true,
 				"message", "Connection approved at organization level",
 				"resourceId", resourceId,
-				"status", result.getApprovalStatus()
+				"status", result.getApprovalStatus(),
+				"comments", result.getComments() != null ? result.getComments() : ""
 			));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
@@ -908,6 +924,7 @@ public class ICIPDatasourceController {
 	public ResponseEntity<?> rejectOrgApproval(
 			@PathVariable Integer resourceId,
 			@RequestParam(value = "rank", required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
@@ -915,13 +932,15 @@ public class ICIPDatasourceController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
 			}
 
-			ICIPDatasource result = approvalWorkflowService.rejectOrgApproval(resourceId, userRank);
+			String comments = extractComments(body, null);
+			ICIPDatasource result = approvalWorkflowService.rejectOrgApproval(resourceId, userRank, comments);
 			logger.info("[Approval] Datasource {} rejected at org level", resourceId);
 			return ResponseEntity.ok(java.util.Map.of(
 				"success", true,
 				"message", "Connection rejected at organization level",
 				"resourceId", resourceId,
-				"status", result.getApprovalStatus()
+				"status", result.getApprovalStatus(),
+				"comments", result.getComments() != null ? result.getComments() : ""
 			));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
@@ -979,6 +998,7 @@ public class ICIPDatasourceController {
 	public ResponseEntity<?> approvePlatformApproval(
 			@PathVariable Integer resourceId,
 			@RequestParam(value = "rank", required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
@@ -986,13 +1006,15 @@ public class ICIPDatasourceController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
 			}
 
-			ICIPDatasource result = approvalWorkflowService.approvePlatformApproval(resourceId, userRank);
+			String comments = extractComments(body, null);
+			ICIPDatasource result = approvalWorkflowService.approvePlatformApproval(resourceId, userRank, comments);
 			logger.info("[Approval] Datasource {} published globally", resourceId);
 			return ResponseEntity.ok(java.util.Map.of(
 				"success", true,
 				"message", "Connection published globally",
 				"resourceId", resourceId,
-				"status", result.getApprovalStatus()
+				"status", result.getApprovalStatus(),
+				"comments", result.getComments() != null ? result.getComments() : ""
 			));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
@@ -1012,6 +1034,7 @@ public class ICIPDatasourceController {
 	public ResponseEntity<?> rejectPlatformApproval(
 			@PathVariable Integer resourceId,
 			@RequestParam(value = "rank", required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
@@ -1019,13 +1042,15 @@ public class ICIPDatasourceController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
 			}
 
-			ICIPDatasource result = approvalWorkflowService.rejectPlatformApproval(resourceId, userRank);
+			String comments = extractComments(body, null);
+			ICIPDatasource result = approvalWorkflowService.rejectPlatformApproval(resourceId, userRank, comments);
 			logger.info("[Approval] Datasource {} rejected at platform level", resourceId);
 			return ResponseEntity.ok(java.util.Map.of(
 				"success", true,
 				"message", "Connection rejected",
 				"resourceId", resourceId,
-				"status", result.getApprovalStatus()
+				"status", result.getApprovalStatus(),
+				"comments", result.getComments() != null ? result.getComments() : ""
 			));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));

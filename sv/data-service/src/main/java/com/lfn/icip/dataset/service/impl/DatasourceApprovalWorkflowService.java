@@ -72,7 +72,10 @@ public class DatasourceApprovalWorkflowService {
 	 * Status: PENDING_PROJECT_APPROVAL -> PROJECT_APPROVED
 	 * Resource becomes visible to ALL users of same project.
 	 */
-	public ICIPDatasource approveProjectApproval(Integer resourceId, Integer projectId, String currentUserRank) {
+	public ICIPDatasource approveProjectApproval(Integer resourceId, Integer projectId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[Approval] Project Admin approving datasource {} for project {}, rank: {}", resourceId, projectId, currentUserRank);
 
 		if (!"2".equals(currentUserRank)) {
@@ -93,6 +96,7 @@ public class DatasourceApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PROJECT_APPROVED");
+		resource.setComments(comments);
 		return datasourceRepository.save(resource);
 	}
 
@@ -100,7 +104,10 @@ public class DatasourceApprovalWorkflowService {
 	 * Project Admin rejects resource.
 	 * Status: PENDING_PROJECT_APPROVAL -> PROJECT_REJECTED
 	 */
-	public ICIPDatasource rejectProjectApproval(Integer resourceId, String currentUserRank) {
+	public ICIPDatasource rejectProjectApproval(Integer resourceId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[Approval] Project Admin rejecting datasource {}", resourceId);
 
 		if (!"2".equals(currentUserRank)) {
@@ -113,6 +120,7 @@ public class DatasourceApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PROJECT_REJECTED");
+		resource.setComments(comments);
 		return datasourceRepository.save(resource);
 	}
 
@@ -147,7 +155,10 @@ public class DatasourceApprovalWorkflowService {
 	 * Visible to ALL users of the approved organization; awaits an explicit submission
 	 * by the Org Admin to the Platform Admin before it becomes globally PUBLISHED.
 	 */
-	public ICIPDatasource approveOrgApproval(Integer resourceId, String currentUserRank) {
+	public ICIPDatasource approveOrgApproval(Integer resourceId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[Approval] Org Admin approving datasource {} at org level", resourceId);
 
 		if (!"3".equals(currentUserRank)) {
@@ -164,6 +175,7 @@ public class DatasourceApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("ORG_APPROVED");
+		resource.setComments(comments);
 		return datasourceRepository.save(resource);
 	}
 
@@ -171,7 +183,10 @@ public class DatasourceApprovalWorkflowService {
 	 * Org Admin rejects organization publishing.
 	 * Status: PENDING_ORG_APPROVAL -> ORG_REJECTED
 	 */
-	public ICIPDatasource rejectOrgApproval(Integer resourceId, String currentUserRank) {
+	public ICIPDatasource rejectOrgApproval(Integer resourceId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[Approval] Org Admin rejecting org approval for datasource {}", resourceId);
 
 		if (!"3".equals(currentUserRank)) {
@@ -184,6 +199,7 @@ public class DatasourceApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("ORG_REJECTED");
+		resource.setComments(comments);
 		return datasourceRepository.save(resource);
 	}
 
@@ -215,7 +231,10 @@ public class DatasourceApprovalWorkflowService {
 	 * Platform Admin approves and publishes resource globally.
 	 * Status: PENDING_PLATFORM_APPROVAL -> PUBLISHED (approvedOrganizationId cleared = global visibility)
 	 */
-	public ICIPDatasource approvePlatformApproval(Integer resourceId, String currentUserRank) {
+	public ICIPDatasource approvePlatformApproval(Integer resourceId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[Approval] Platform Admin publishing datasource {} globally", resourceId);
 
 		if (!"4".equals(currentUserRank)) {
@@ -233,6 +252,7 @@ public class DatasourceApprovalWorkflowService {
 
 		resource.setApprovalStatus("PUBLISHED");
 		resource.setApprovedOrganizationId(null);
+		resource.setComments(comments);
 		return datasourceRepository.save(resource);
 	}
 
@@ -240,7 +260,10 @@ public class DatasourceApprovalWorkflowService {
 	 * Platform Admin rejects resource submitted for global publishing.
 	 * Status: PENDING_PLATFORM_APPROVAL -> PLATFORM_REJECTED
 	 */
-	public ICIPDatasource rejectPlatformApproval(Integer resourceId, String currentUserRank) {
+	public ICIPDatasource rejectPlatformApproval(Integer resourceId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[Approval] Platform Admin rejecting datasource {}", resourceId);
 
 		if (!"4".equals(currentUserRank)) {
@@ -253,6 +276,7 @@ public class DatasourceApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PLATFORM_REJECTED");
+		resource.setComments(comments);
 		return datasourceRepository.save(resource);
 	}
 
