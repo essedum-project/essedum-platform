@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewEncapsulation, ViewChild, AfterViewInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, map } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
@@ -71,31 +72,41 @@ export class AccessComponent implements OnInit, AfterViewInit {
   }
 
   private load(): void {
-    combineLatest([
-      this.api.getRoleAssignments(this.userContext.userId$.value),
-      this.api.getRoles(),
-      this.api.getUsers(),
-      this.api.getProjects(),
-      this.api.getOrganisations(),
-    ])
-      .pipe(
-        map(([assignments, roles, users, projects, organisations]) => {
-          this.roles = roles;
-          return assignments
-            .filter(a => !a.revokedAt)
-            .map(a => ({
-              ...a,
-              roleName: this.getDisplayRoleName(roles.find(r => r.id === a.roleId)?.name ?? 'unknown'),
-              userName: users.find((u: UserOption) => u.id === a.userId)?.name ?? `User #${a.userId}`,
-              scopeLabel: a.projectId
-                ? `Project: ${projects.find(p => p.id === a.projectId)?.name ?? '#' + a.projectId}`
-                : a.organizationId
-                ? `Organization: ${organisations.find(o => o.id === a.organizationId)?.name ?? '#' + a.organizationId}`
-                : 'Platform',
-            }));
-        }),
-      )
-      .subscribe(rows => (this.rows.data = rows));
+    combineLatest([this.userContext.orgId$, this.userContext.projectId$, this.userContext.selectedRoleRank$])
+      .pipe(take(1))
+      .subscribe(([orgId, projectId, roleRank]) => {
+        const isPlatformAdmin = roleRank != null && roleRank >= 4;
+        combineLatest([
+          this.api.getRoleAssignments(this.userContext.userId$.value),
+          this.api.getRoles(),
+          this.api.getUsers(),
+          this.api.getProjects(),
+          this.api.getOrganisations(),
+        ])
+          .pipe(
+            map(([assignments, roles, users, projects, organisations]) => {
+              this.roles = roles;
+              let filtered = assignments.filter(a => !a.revokedAt);
+              if (!isPlatformAdmin) {
+                filtered = filtered.filter(a =>
+                  (orgId == null || a.organizationId == null || Number(a.organizationId) === Number(orgId)) &&
+                  (projectId == null || a.projectId == null || Number(a.projectId) === Number(projectId))
+                );
+              }
+              return filtered.map(a => ({
+                ...a,
+                roleName: this.getDisplayRoleName(roles.find(r => r.id === a.roleId)?.name ?? 'unknown'),
+                userName: users.find((u: UserOption) => u.id === a.userId)?.name ?? `User #${a.userId}`,
+                scopeLabel: a.projectId
+                  ? `Project: ${projects.find(p => p.id === a.projectId)?.name ?? '#' + a.projectId}`
+                  : a.organizationId
+                  ? `Organization: ${organisations.find(o => o.id === a.organizationId)?.name ?? '#' + a.organizationId}`
+                  : 'Platform',
+              }));
+            }),
+          )
+          .subscribe(rows => (this.rows.data = rows));
+      });
   }
 
   grantRole(): void {

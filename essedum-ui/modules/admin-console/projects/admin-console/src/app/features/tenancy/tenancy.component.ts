@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewEncapsulation, ViewChild, AfterViewInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import { forkJoin, of, switchMap } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { forkJoin, of, switchMap, combineLatest } from 'rxjs';
+import { catchError, take } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
@@ -49,6 +49,9 @@ export class TenancyComponent implements OnInit, AfterViewInit {
   selectedTab = 0;
 
   rank = 0;
+  private _isPlatformAdmin = true;
+  private _orgId: number | null = null;
+  private _projectId: number | null = null;
 
   constructor(
     private readonly api: ApiService,
@@ -71,14 +74,23 @@ export class TenancyComponent implements OnInit, AfterViewInit {
     });
     const userId = this.userContext.userId$.value;
     this.api.getAccessContext(userId).subscribe(ctx => (this.rank = ctx?.highestRank ?? 0));
-    this.loadOrgs();
-    this.loadProjects();
-    this.loadEnvironments();
+    combineLatest([this.userContext.orgId$, this.userContext.projectId$, this.userContext.selectedRoleRank$])
+      .pipe(take(1))
+      .subscribe(([orgId, projectId, roleRank]) => {
+        this._isPlatformAdmin = roleRank != null && roleRank >= 4;
+        this._orgId = orgId;
+        this._projectId = projectId;
+        this.loadOrgs();
+        this.loadProjects();
+        this.loadEnvironments();
+      });
   }
 
   private loadOrgs(): void {
     this.api.getOrganisations().pipe(catchError(() => of([] as LegacyOrganisation[]))).subscribe(orgs => {
-      this.organizations = orgs;
+      this.organizations = this._isPlatformAdmin
+        ? orgs
+        : orgs.filter(o => this._orgId != null && Number(o.id) === Number(this._orgId));
       this.buildDisplayOrgs();
     });
   }
@@ -90,7 +102,16 @@ export class TenancyComponent implements OnInit, AfterViewInit {
   }
 
   private loadProjects(): void {
-    this.api.getProjects().subscribe(projects => (this.projectDataSource.data = projects));
+    this.api.getProjects().subscribe(projects => {
+      this.projectDataSource.data = this._isPlatformAdmin
+        ? projects
+        : projects.filter((p: any) =>
+            this._orgId != null && (
+              (p.organisationId != null && Number(p.organisationId) === Number(this._orgId)) ||
+              (p.portfolioId?.id != null && Number(p.portfolioId.id) === Number(this._orgId))
+            )
+          );
+    });
   }
 
   organizationName(project: LegacyProject): string {
@@ -108,7 +129,15 @@ export class TenancyComponent implements OnInit, AfterViewInit {
     this.api
       .getProjects()
       .pipe(
-        switchMap(projects => {
+        switchMap(allProjects => {
+          const projects = this._isPlatformAdmin
+            ? allProjects
+            : allProjects.filter((p: any) =>
+                this._orgId != null && (
+                  (p.organisationId != null && Number(p.organisationId) === Number(this._orgId)) ||
+                  (p.portfolioId?.id != null && Number(p.portfolioId.id) === Number(this._orgId))
+                )
+              );
           if (projects.length === 0) {
             return of([] as EnvironmentRow[]);
           }
