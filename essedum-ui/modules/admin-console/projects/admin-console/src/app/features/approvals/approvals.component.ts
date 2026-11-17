@@ -414,7 +414,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   decide(event: PromotionEventRow, action: 'approved' | 'rejected'): void {
     this.dialog
-      .open(ApproveRejectDialogComponent, { width: '480px', panelClass: 'approve-reject-dialog', data: { action } })
+      .open(ApproveRejectDialogComponent, { width: '500px', panelClass: 'approve-reject-dialog', data: { action, resourceName: event.assetName } })
       .afterClosed()
       .subscribe((result: ApproveRejectDialogResult | undefined) => {
         if (!result) {
@@ -442,49 +442,85 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Streaming service (Pipeline/Agent/MCP) approval methods
   approveStreamingService(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
-    let apiCall$;
-
-    if (isPlatformLevel) {
-      apiCall$ = this.api.approvePlatformApproval(resourceId);
-    } else if (isOrgLevel) {
-      apiCall$ = this.api.approveOrgApproval(resourceId);
-    } else {
-      // Get projectId from component property or fallback to sessionStorage
-      let finalProjectId = this.projectId;
-      if (!finalProjectId) {
-        try {
-          const projObj = JSON.parse(sessionStorage.getItem('project') || '{}');
-          finalProjectId = projObj?.id ? Number(projObj.id) : null;
-          console.log('[APPROVALS] approveStreamingService - Using projectId from sessionStorage:', finalProjectId);
-        } catch (e) {
-          console.error('[APPROVALS] Error reading projectId from sessionStorage:', e);
-        }
+    const dialogRef = this.dialog.open(ApproveRejectDialogComponent, {
+      width: '500px',
+      panelClass: 'approve-reject-dialog',
+      disableClose: true,
+      data: {
+        action: 'approved',
+        resourceType: 'Pipeline',
+        resourceName: name
       }
-      apiCall$ = this.api.approveProjectApproval(resourceId, finalProjectId || 0);
-    }
+    });
 
-    apiCall$.subscribe({
-      next: () => {
-        this.notify.success(`${name} approved successfully`);
-        this.load();
-      },
-      error: () => this.notify.error(`Failed to approve ${name}`),
+    dialogRef.afterClosed().subscribe((result?: ApproveRejectDialogResult) => {
+
+      if (!result) {
+        return; // User clicked Cancel
+      }
+
+      let apiCall$;
+
+      if (isPlatformLevel) {
+        apiCall$ = this.api.approvePlatformApproval(resourceId, result.note);
+      } else if (isOrgLevel) {
+        apiCall$ = this.api.approveOrgApproval(resourceId, result.note);
+      } else {
+        // Get projectId from component property or fallback to sessionStorage
+        let finalProjectId = this.projectId;
+        if (!finalProjectId) {
+          try {
+            const projObj = JSON.parse(sessionStorage.getItem('project') || '{}');
+            finalProjectId = projObj?.id ? Number(projObj.id) : null;
+            console.log('[APPROVALS] approveStreamingService - Using projectId from sessionStorage:', finalProjectId);
+          } catch (e) {
+            console.error('[APPROVALS] Error reading projectId from sessionStorage:', e);
+          }
+        }
+        apiCall$ = this.api.approveProjectApproval(resourceId, finalProjectId || 0, result.note);
+      }
+
+      apiCall$.subscribe({
+        next: () => {
+          this.notify.success(`${name} approved successfully`);
+          this.load();
+        },
+        error: () => this.notify.error(`Failed to approve ${name}`),
+      });
     });
   }
 
   rejectStreamingService(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
-    const apiCall$ = isPlatformLevel
-      ? this.api.rejectPlatformApproval(resourceId)
-      : isOrgLevel
-        ? this.api.rejectOrgApproval(resourceId)
-        : this.api.rejectProjectApproval(resourceId);
+    const dialogRef = this.dialog.open(ApproveRejectDialogComponent, {
+      width: '500px',
+      panelClass: 'approve-reject-dialog',
+      disableClose: true,
+      data: {
+        action: 'rejected',
+        resourceType: 'Pipeline',
+        resourceName: name
+      }
+    });
 
-    apiCall$.subscribe({
-      next: () => {
-        this.notify.success(`${name} rejected successfully`);
-        this.load();
-      },
-      error: () => this.notify.error(`Failed to reject ${name}`),
+    dialogRef.afterClosed().subscribe((result?: ApproveRejectDialogResult) => {
+
+      if (!result) {
+        return; // User clicked Cancel
+      }
+
+      const apiCall$ = isPlatformLevel
+        ? this.api.rejectPlatformApproval(resourceId, result.note)
+        : isOrgLevel
+          ? this.api.rejectOrgApproval(resourceId, result.note)
+          : this.api.rejectProjectApproval(resourceId, result.note);
+
+      apiCall$.subscribe({
+        next: () => {
+          this.notify.success(`${name} rejected successfully`);
+          this.load();
+        },
+        error: () => this.notify.error(`Failed to reject ${name}`),
+      });
     });
   }
 
@@ -496,50 +532,132 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   approveDataset(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
-    const apiCall$ = isPlatformLevel
-      ? this.api.approveDatasetPlatformApproval(resourceId)
-      : isOrgLevel
-        ? this.api.approveDatasetOrgApproval(resourceId)
-        : this.api.approveDatasetProjectApproval(resourceId, this.projectId || 0);
-    apiCall$.subscribe({
-      next: () => { this.notify.success(`${name} approved successfully`); this.load(); },
-      error: () => this.notify.error(`Failed to approve ${name}`),
+    const dialogRef = this.dialog.open(ApproveRejectDialogComponent, {
+      width: '500px',
+      panelClass: 'approve-reject-dialog',
+      disableClose: true,
+      data: {
+        action: 'approved',
+        resourceType: 'Dataset',
+        resourceName: name
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result?: ApproveRejectDialogResult) => {
+
+      if (!result) {
+        return; // User clicked Cancel
+      }
+
+      const apiCall$ = isPlatformLevel
+        ? this.api.approveDatasetPlatformApproval(resourceId, result.note)
+        : isOrgLevel
+          ? this.api.approveDatasetOrgApproval(resourceId, result.note)
+          : this.api.approveDatasetProjectApproval(resourceId, this.projectId || 0, result.note);
+
+      apiCall$.subscribe({
+        next: () => { this.notify.success(`${name} approved successfully`); this.load(); },
+        error: () => this.notify.error(`Failed to approve ${name}`),
+      });
     });
   }
 
   rejectDataset(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
-    const apiCall$ = isPlatformLevel
-      ? this.api.rejectDatasetPlatformApproval(resourceId)
-      : isOrgLevel
-        ? this.api.rejectDatasetOrgApproval(resourceId)
-        : this.api.rejectDatasetProjectApproval(resourceId);
-    apiCall$.subscribe({
-      next: () => { this.notify.success(`${name} rejected successfully`); this.load(); },
-      error: () => this.notify.error(`Failed to reject ${name}`),
+    const dialogRef = this.dialog.open(ApproveRejectDialogComponent, {
+      width: '500px',
+      panelClass: 'approve-reject-dialog',
+      disableClose: true,
+      data: {
+        action: 'rejected',
+        resourceType: 'Dataset',
+        resourceName: name
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result?: ApproveRejectDialogResult) => {
+
+      if (!result) {
+        return; // User clicked Cancel
+      }
+
+      const apiCall$ = isPlatformLevel
+        ? this.api.rejectDatasetPlatformApproval(resourceId, result.note)
+        : isOrgLevel
+          ? this.api.rejectDatasetOrgApproval(resourceId, result.note)
+          : this.api.rejectDatasetProjectApproval(resourceId, result.note);
+
+      apiCall$.subscribe({
+        next: () => { this.notify.success(`${name} rejected successfully`); this.load(); },
+        error: () => this.notify.error(`Failed to reject ${name}`),
+      });
     });
   }
 
   approveDatasource(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
-    const apiCall$ = isPlatformLevel
-      ? this.api.approveDatasourcePlatformApproval(resourceId)
-      : isOrgLevel
-        ? this.api.approveDatasourceOrgApproval(resourceId)
-        : this.api.approveDatasourceProjectApproval(resourceId, this.projectId || 0);
-    apiCall$.subscribe({
-      next: () => { this.notify.success(`${name} approved successfully`); this.load(); },
-      error: () => this.notify.error(`Failed to approve ${name}`),
+    const dialogRef = this.dialog.open(ApproveRejectDialogComponent, {
+      width: '500px',
+      panelClass: 'approve-reject-dialog',
+      disableClose: true,
+      data: {
+        action: 'approved',
+        resourceType: 'Connection',
+        resourceName: name
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result?: ApproveRejectDialogResult) => {
+
+      if (!result) {
+        return; // User clicked Cancel
+      }
+
+      const apiCall$ = isPlatformLevel
+        ? this.api.approveDatasourcePlatformApproval(resourceId, result.note)
+        : isOrgLevel
+          ? this.api.approveDatasourceOrgApproval(resourceId, result.note)
+          : this.api.approveDatasourceProjectApproval(resourceId, this.projectId || 0, result.note);
+
+      apiCall$.subscribe({
+        next: () => {
+          this.notify.success(`${name} approved successfully`);
+          this.load();
+        },
+        error: () => this.notify.error(`Failed to approve ${name}`),
+      });
     });
   }
 
   rejectDatasource(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
-    const apiCall$ = isPlatformLevel
-      ? this.api.rejectDatasourcePlatformApproval(resourceId)
-      : isOrgLevel
-        ? this.api.rejectDatasourceOrgApproval(resourceId)
-        : this.api.rejectDatasourceProjectApproval(resourceId);
-    apiCall$.subscribe({
-      next: () => { this.notify.success(`${name} rejected successfully`); this.load(); },
-      error: () => this.notify.error(`Failed to reject ${name}`),
+    const dialogRef = this.dialog.open(ApproveRejectDialogComponent, {
+      width: '500px',
+      panelClass: 'approve-reject-dialog',
+      disableClose: true,
+      data: {
+        action: 'rejected',
+        resourceType: 'Connection',
+        resourceName: name
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result?: ApproveRejectDialogResult) => {
+
+      if (!result) {
+        return; // User clicked Cancel
+      }
+
+      const apiCall$ = isPlatformLevel
+        ? this.api.rejectDatasourcePlatformApproval(resourceId, result.note)
+        : isOrgLevel
+          ? this.api.rejectDatasourceOrgApproval(resourceId, result.note)
+          : this.api.rejectDatasourceProjectApproval(resourceId, result.note);
+
+      apiCall$.subscribe({
+        next: () => {
+          this.notify.success(`${name} rejected successfully`);
+          this.load();
+        },
+        error: () => this.notify.error(`Failed to reject ${name}`),
+      });
     });
   }
 
@@ -594,29 +712,97 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  approveModel(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
-    const apiCall$ = isPlatformLevel
-      ? this.api.approveModelPlatformApproval(resourceId)
-      : isOrgLevel
-        ? this.api.approveModelOrgApproval(resourceId)
-        : this.api.approveModelProjectApproval(resourceId, this.projectId || 0);
-    apiCall$.subscribe({
-      next: () => { this.notify.success(`${name} approved successfully`); this.load(); },
-      error: () => this.notify.error(`Failed to approve ${name}`),
-    });
-  }
+  approveModel(
+  name: string,
+  resourceId: number,
+  isOrgLevel: boolean = false,
+  isPlatformLevel: boolean = false
+): void {
 
-  rejectModel(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
+  const dialogRef = this.dialog.open(ApproveRejectDialogComponent, {
+    width: '500px',
+    panelClass: 'approve-reject-dialog',
+    disableClose: true,
+    data: {
+      action: 'approved',
+      resourceType: 'Model',
+      resourceName: name
+    }
+  });
+
+  dialogRef.afterClosed().subscribe((result?: ApproveRejectDialogResult) => {
+
+    if (!result) {
+      return; // User clicked Cancel
+    }
+
+    console.log('Approval Note:', result.note);
+
     const apiCall$ = isPlatformLevel
-      ? this.api.rejectModelPlatformApproval(resourceId)
+      ? this.api.approveModelPlatformApproval(resourceId, result.note)
       : isOrgLevel
-        ? this.api.rejectModelOrgApproval(resourceId)
-        : this.api.rejectModelProjectApproval(resourceId);
+        ? this.api.approveModelOrgApproval(resourceId, result.note)
+        : this.api.approveModelProjectApproval(
+            resourceId,
+            this.projectId || 0,
+            result.note
+          );
+
     apiCall$.subscribe({
-      next: () => { this.notify.success(`${name} rejected successfully`); this.load(); },
-      error: () => this.notify.error(`Failed to reject ${name}`),
+      next: () => {
+        this.notify.success(`${name} approved successfully`);
+        this.load();
+      },
+      error: () => {
+        this.notify.error(`Failed to approve ${name}`);
+      },
     });
-  }
+  });
+}
+
+  rejectModel(
+  name: string,
+  resourceId: number,
+  isOrgLevel: boolean = false,
+  isPlatformLevel: boolean = false
+): void {
+
+  const dialogRef = this.dialog.open(ApproveRejectDialogComponent, {
+    width: '500px',
+    panelClass: 'approve-reject-dialog',
+    disableClose: true,
+    data: {
+      action: 'rejected',
+      resourceType: 'Model',
+      resourceName: name
+    }
+  });
+
+  dialogRef.afterClosed().subscribe((result?: ApproveRejectDialogResult) => {
+
+    if (!result) {
+      return; // User clicked Cancel
+    }
+
+    console.log('Rejection Note:', result.note);
+
+    const apiCall$ = isPlatformLevel
+      ? this.api.rejectModelPlatformApproval(resourceId , result.note )
+      : isOrgLevel
+        ? this.api.rejectModelOrgApproval(resourceId , result.note )
+        : this.api.rejectModelProjectApproval(resourceId , result.note );
+
+    apiCall$.subscribe({
+      next: () => {
+        this.notify.success(`${name} rejected successfully`);
+        this.load();
+      },
+      error: () => {
+        this.notify.error(`Failed to reject ${name}`);
+      },
+    });
+  });
+}
 
   onModelApprovalsPage(event: PageEvent): void {
     this.modelApprovalsPageIndex = event.pageIndex;

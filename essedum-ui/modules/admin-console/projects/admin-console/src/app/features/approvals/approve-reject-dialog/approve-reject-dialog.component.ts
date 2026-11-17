@@ -3,6 +3,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 export interface ApproveRejectDialogData {
   action: 'approved' | 'rejected';
+  resourceType?: string;
+  resourceName?: string;
 }
 
 export interface ApproveRejectDialogResult {
@@ -24,7 +26,10 @@ export class ApproveRejectDialogComponent {
   ) {}
 
   get title(): string {
-    return this.data.action === 'approved' ? 'Approve Asset' : 'Reject Asset';
+    const verb = this.data.action === 'approved' ? 'Approve' : 'Reject';
+    const type = this.data.resourceType || 'Asset';
+    const name = this.data.resourceName ? ` "${this.data.resourceName}"` : '';
+    return `${verb} ${type}${name}`;
   }
 
   get label(): string {
