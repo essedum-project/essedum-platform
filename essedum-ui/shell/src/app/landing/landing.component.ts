@@ -524,8 +524,9 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   // The event is dispatched by AccessComponent and MyDetailsComponent after any
   // successful grant/revoke so the shell's role dropdown stays in sync without a page reload.
   private readonly onAssignmentsChanged = () => {
-    this.setportfolio();
     // Refresh RBAC role list so newly granted roles appear without logout.
+    // Do NOT call setportfolio() here — it resets portfoliodata and triggers a full
+    // RBAC reinit that navigates away from the current screen.
     setTimeout(() => {
       this.supplementRbacData();
       // Also refresh sidebar in case the current role's menu changed.
