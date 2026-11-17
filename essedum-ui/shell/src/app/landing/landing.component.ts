@@ -1103,6 +1103,23 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isRoleLoading = true;
     this.roleList = [];
 
+    // If the assignments cache from supplementRbacData() is ready, use it directly.
+    // _applyRbacScope() merges platform-wide, org-scoped, AND project-scoped roles so
+    // higher-ranked roles (org admin, platform admin) remain visible even when the user
+    // also has a lower-ranked project-only role.
+    if (this._rbacAssignmentsCache.length > 0) {
+      this.selectedproject = project;
+      this._applyRbacScope();
+      this.isRoleLoading = false;
+      sessionStorage.setItem('_rbac_role_list', JSON.stringify(this.roleList));
+      if (this.roleList.length > 0) {
+        this._lastManualRoleSwitch = 0;
+        this.valuechangerole(this.roleList[0]);
+      }
+      return;
+    }
+
+    // Cache not ready yet (first load) — fall back to the project-specific API.
     const userId = (() => {
       try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id ?? null; }
       catch { return null; }
