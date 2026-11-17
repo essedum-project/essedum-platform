@@ -69,10 +69,16 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Show spinner instantly when user changes role (valuechangerole fires immediately,
+    // but rbac-init-complete is delayed 2s by the shell overlay timer).
+    fromEvent(window, 'valuechangerole').pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.loading = true;
+      this.cards.forEach(c => c.count = 0);
+      this.recentAudit.data = [];
+    });
+
     // Trigger on initial load AND whenever the shell signals RBAC context changed
     // (role/org/project switch dispatches 'rbac-init-complete' on window).
-    // selectedRoleRank$ is a cold defer that completes immediately, so combineLatest
-    // alone does not re-fire on role change — the event bridges that gap.
     merge(
       of(null),
       fromEvent(window, 'rbac-init-complete'),
@@ -94,11 +100,11 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
           const scopedProjectId = isPlatformAdmin ? undefined : (projectId ?? undefined);
 
           return forkJoin({
-            orgs:      this.api.getOrganisations().pipe(catchError(() => of([] as any[]))),
-            projects:  this.api.getProjects().pipe(catchError(() => of([] as any[]))),
-            members:   this.api.getRoleAssignments(userId).pipe(catchError(() => of([] as any[]))),
-            approvals: this.api.getApprovals(userId, scopedOrgId, scopedProjectId).pipe(catchError(() => of([] as any[]))),
-            audit:     this.api.getAuditEvents(userId, scopedOrgId, scopedProjectId).pipe(catchError(() => of([] as AuditEvent[]))),
+            orgs:          this.api.getOrganisations().pipe(catchError(() => of([] as any[]))),
+            projects:      this.api.getProjects().pipe(catchError(() => of([] as any[]))),
+            members:       this.api.getRoleAssignments(userId).pipe(catchError(() => of([] as any[]))),
+            approvalsCount: this.countApprovals(orgId, projectId, roleRank).pipe(catchError(() => of(0))),
+            audit:         this.api.getAuditEvents(userId, scopedOrgId, scopedProjectId).pipe(catchError(() => of([] as AuditEvent[]))),
           }).pipe(
             map(res => {
               const orgs = isPlatformAdmin
@@ -121,7 +127,7 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
                     (projectId == null || m.projectId == null      || Number(m.projectId)      === Number(projectId))
                   );
 
-              return { orgs, projects, members, approvals: res.approvals, audit: res.audit };
+              return { orgs, projects, members, approvalsCount: res.approvalsCount, audit: res.audit };
             }),
             catchError(() => of(null)),
           );
@@ -132,10 +138,35 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cards[0].count = data.orgs.length;
         this.cards[1].count = data.projects.length;
         this.cards[2].count = data.members.length;
-        this.cards[3].count = data.approvals.length;
+        this.cards[3].count = data.approvalsCount;
         this.recentAudit.data = (data.audit || []).slice(0, 8);
         this.loading = false;
       });
+  }
+
+  private countApprovals(orgId: number | null, projectId: number | null, roleRank: number | null): Observable<number> {
+    const rank = roleRank ?? -1;
+    const toCount = (raw: any): number => {
+      if (Array.isArray(raw)) return raw.length;
+      if (typeof raw?.count === 'number') return raw.count;
+      if (Array.isArray(raw?.data)) return raw.data.length;
+      return 0;
+    };
+    const calls: Observable<any>[] = [
+      projectId ? this.api.getProjectAdminApprovals(projectId).pipe(catchError(() => of([]))) : of([]),
+      orgId     ? this.api.getOrgAdminApprovals(orgId).pipe(catchError(() => of([])))     : of([]),
+      rank >= 4 ? this.api.getPlatformAdminApprovals().pipe(catchError(() => of([])))     : of([]),
+      projectId ? this.api.getProjectAdminDatasetApprovals(projectId).pipe(catchError(() => of([])))   : of([]),
+      orgId     ? this.api.getOrgAdminDatasetApprovals(orgId).pipe(catchError(() => of([])))           : of([]),
+      rank >= 4 ? this.api.getPlatformAdminDatasetApprovals().pipe(catchError(() => of([])))           : of([]),
+      projectId ? this.api.getProjectAdminDatasourceApprovals(projectId, 0, 1).pipe(catchError(() => of([]))) : of([]),
+      orgId     ? this.api.getOrgAdminDatasourceApprovals(orgId, 0, 1).pipe(catchError(() => of([])))         : of([]),
+      rank >= 4 ? this.api.getPlatformAdminDatasourceApprovals(0, 1).pipe(catchError(() => of([])))           : of([]),
+      projectId ? this.api.getProjectAdminModelApprovals(projectId, 0, 1).pipe(catchError(() => of([]))) : of([]),
+      orgId     ? this.api.getOrgAdminModelApprovals(orgId, 0, 1).pipe(catchError(() => of([])))         : of([]),
+      rank >= 4 ? this.api.getPlatformAdminModelApprovals(0, 1).pipe(catchError(() => of([])))           : of([]),
+    ];
+    return forkJoin(calls).pipe(map(results => results.reduce((sum, r) => sum + toCount(r), 0)));
   }
 
   ngOnDestroy(): void {
