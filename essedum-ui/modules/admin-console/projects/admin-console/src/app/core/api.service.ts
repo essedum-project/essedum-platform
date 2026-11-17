@@ -269,6 +269,13 @@ export class ApiService {
     return this.http.get<AuditEvent[]>(`${this.base}/audit`, { params });
   }
 
+  postAuditEvent(event: {
+    entity: string; action: string; actorId: number; actorName?: string;
+    details?: string; orgId?: number | null; projectId?: number | null;
+  }): Observable<void> {
+    return this.http.post<void>(`${this.base}/audit`, event);
+  }
+
   // ---- identity projection status (§8) ----
   getIdentityTargets(actorUserId: number): Observable<IdentityTarget[]> {
     return this.http.get<IdentityTarget[]>(`${this.base}/identity/targets`, { params: { actorUserId } });

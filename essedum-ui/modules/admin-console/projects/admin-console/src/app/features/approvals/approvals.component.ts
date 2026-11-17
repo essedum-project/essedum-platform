@@ -440,6 +440,19 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
+  private audit(action: string, entity: string, name: string, isOrgLevel: boolean, isPlatformLevel: boolean): void {
+    const userId = this.userContext.userId$.value;
+    const scope = isPlatformLevel ? 'platform-level' : isOrgLevel ? 'org-level' : 'project-level';
+    this.api.postAuditEvent({
+      entity,
+      action,
+      actorId: userId,
+      details: `${name} (${scope})`,
+      orgId: this.orgId,
+      projectId: this.projectId,
+    }).subscribe({ error: () => {} });
+  }
+
   // Streaming service (Pipeline/Agent/MCP) approval methods
   approveStreamingService(name: string, resourceId: number, isOrgLevel: boolean = false, isPlatformLevel: boolean = false): void {
     let apiCall$;
@@ -466,6 +479,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
     apiCall$.subscribe({
       next: () => {
         this.notify.success(`${name} approved successfully`);
+        this.audit('APPROVED', 'Pipeline', name, isOrgLevel, isPlatformLevel);
         this.load();
       },
       error: () => this.notify.error(`Failed to approve ${name}`),
@@ -482,6 +496,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
     apiCall$.subscribe({
       next: () => {
         this.notify.success(`${name} rejected successfully`);
+        this.audit('REJECTED', 'Pipeline', name, isOrgLevel, isPlatformLevel);
         this.load();
       },
       error: () => this.notify.error(`Failed to reject ${name}`),
@@ -502,7 +517,11 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
         ? this.api.approveDatasetOrgApproval(resourceId)
         : this.api.approveDatasetProjectApproval(resourceId, this.projectId || 0);
     apiCall$.subscribe({
-      next: () => { this.notify.success(`${name} approved successfully`); this.load(); },
+      next: () => {
+        this.notify.success(`${name} approved successfully`);
+        this.audit('APPROVED', 'Dataset', name, isOrgLevel, isPlatformLevel);
+        this.load();
+      },
       error: () => this.notify.error(`Failed to approve ${name}`),
     });
   }
@@ -514,7 +533,11 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
         ? this.api.rejectDatasetOrgApproval(resourceId)
         : this.api.rejectDatasetProjectApproval(resourceId);
     apiCall$.subscribe({
-      next: () => { this.notify.success(`${name} rejected successfully`); this.load(); },
+      next: () => {
+        this.notify.success(`${name} rejected successfully`);
+        this.audit('REJECTED', 'Dataset', name, isOrgLevel, isPlatformLevel);
+        this.load();
+      },
       error: () => this.notify.error(`Failed to reject ${name}`),
     });
   }
@@ -526,7 +549,11 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
         ? this.api.approveDatasourceOrgApproval(resourceId)
         : this.api.approveDatasourceProjectApproval(resourceId, this.projectId || 0);
     apiCall$.subscribe({
-      next: () => { this.notify.success(`${name} approved successfully`); this.load(); },
+      next: () => {
+        this.notify.success(`${name} approved successfully`);
+        this.audit('APPROVED', 'Connection', name, isOrgLevel, isPlatformLevel);
+        this.load();
+      },
       error: () => this.notify.error(`Failed to approve ${name}`),
     });
   }
@@ -538,7 +565,11 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
         ? this.api.rejectDatasourceOrgApproval(resourceId)
         : this.api.rejectDatasourceProjectApproval(resourceId);
     apiCall$.subscribe({
-      next: () => { this.notify.success(`${name} rejected successfully`); this.load(); },
+      next: () => {
+        this.notify.success(`${name} rejected successfully`);
+        this.audit('REJECTED', 'Connection', name, isOrgLevel, isPlatformLevel);
+        this.load();
+      },
       error: () => this.notify.error(`Failed to reject ${name}`),
     });
   }
@@ -601,7 +632,11 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
         ? this.api.approveModelOrgApproval(resourceId)
         : this.api.approveModelProjectApproval(resourceId, this.projectId || 0);
     apiCall$.subscribe({
-      next: () => { this.notify.success(`${name} approved successfully`); this.load(); },
+      next: () => {
+        this.notify.success(`${name} approved successfully`);
+        this.audit('APPROVED', 'Model', name, isOrgLevel, isPlatformLevel);
+        this.load();
+      },
       error: () => this.notify.error(`Failed to approve ${name}`),
     });
   }
@@ -613,7 +648,11 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
         ? this.api.rejectModelOrgApproval(resourceId)
         : this.api.rejectModelProjectApproval(resourceId);
     apiCall$.subscribe({
-      next: () => { this.notify.success(`${name} rejected successfully`); this.load(); },
+      next: () => {
+        this.notify.success(`${name} rejected successfully`);
+        this.audit('REJECTED', 'Model', name, isOrgLevel, isPlatformLevel);
+        this.load();
+      },
       error: () => this.notify.error(`Failed to reject ${name}`),
     });
   }

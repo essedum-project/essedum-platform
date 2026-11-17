@@ -358,6 +358,16 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
+  private audit(action: string, entity: string, name: string, scope: string): void {
+    const userId = this.userContext.userId$.value;
+    this.api.postAuditEvent({
+      entity, action, actorId: userId,
+      details: `${name} (${scope})`,
+      orgId: this.orgId,
+      projectId: this.projectId,
+    }).subscribe({ error: () => {} });
+  }
+
   // Submit to the next gate — the backend computes which gate from the
   // version's own promotion history; §5 state machine.
   submit(version: AssetVersionRow): void {
@@ -365,7 +375,11 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.api
       .submitVersion(version.id, { actorId: userId, actorName: `User #${userId}`, note: '' })
       .subscribe({
-        next: () => { this.notify.success('Submitted for review successfully.'); this.load(); },
+        next: () => {
+          this.notify.success('Submitted for review successfully.');
+          this.audit('SUBMITTED', 'Asset', version.assetName || `Asset #${version.assetId}`, 'draft');
+          this.load();
+        },
         error: err => this.notify.error(err?.error?.message || 'Failed to submit for approval.'),
       });
   }
@@ -409,7 +423,8 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.api.submitForOrgApproval(resource.cid, this.orgId).subscribe({
       next: () => {
         this.notify.success(`${resource.alias || resource.name} submitted to organization for approval`);
-        
+        this.audit('SUBMITTED', 'Pipeline', resource.alias || resource.name, 'org-level');
+
         // Remove submitted resource from the drafts list immediately
         const index = this.streamingServicesDrafts.findIndex(s => s.cid === resource.cid);
         if (index !== -1) {
@@ -417,7 +432,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
           this.streamingServicesDraftsDataSource.data = [...this.streamingServicesDrafts];
           console.log('[PUBLISHING] Removed submitted resource, remaining drafts:', this.streamingServicesDrafts.length);
         }
-        
+
         // Also refresh legacy version data if needed
         this.load();
       },
@@ -430,6 +445,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.api.submitForPlatformApproval(resource.cid).subscribe({
       next: () => {
         this.notify.success(`${resource.alias || resource.name} submitted to Platform Admin for approval`);
+        this.audit('SUBMITTED', 'Pipeline', resource.alias || resource.name, 'platform-level');
         const index = this.streamingOrgDrafts.findIndex(s => s.cid === resource.cid);
         if (index !== -1) {
           this.streamingOrgDrafts.splice(index, 1);
@@ -453,6 +469,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.api.submitDatasetForOrgApproval(resource.id, this.orgId).subscribe({
       next: () => {
         this.notify.success(`${resource.alias || resource.name} submitted to organization for approval`);
+        this.audit('SUBMITTED', 'Dataset', resource.alias || resource.name, 'org-level');
         this.datasetDrafts = this.datasetDrafts.filter(s => s.id !== resource.id);
         this.datasetDraftsDataSource.data = [...this.datasetDrafts];
         this.load();
@@ -465,6 +482,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.api.submitDatasetForPlatformApproval(resource.id).subscribe({
       next: () => {
         this.notify.success(`${resource.alias || resource.name} submitted to Platform Admin for approval`);
+        this.audit('SUBMITTED', 'Dataset', resource.alias || resource.name, 'platform-level');
         this.datasetOrgDrafts = this.datasetOrgDrafts.filter(s => s.id !== resource.id);
         this.datasetOrgDraftsDataSource.data = [...this.datasetOrgDrafts];
         this.load();
@@ -478,6 +496,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.api.submitDatasourceForOrgApproval(resource.id, this.orgId).subscribe({
       next: () => {
         this.notify.success(`${resource.alias || resource.name} submitted to organization for approval`);
+        this.audit('SUBMITTED', 'Connection', resource.alias || resource.name, 'org-level');
         this.datasourceDrafts = this.datasourceDrafts.filter(s => s.id !== resource.id);
         this.datasourceDraftsDataSource.data = [...this.datasourceDrafts];
         this.load();
@@ -490,6 +509,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.api.submitDatasourceForPlatformApproval(resource.id).subscribe({
       next: () => {
         this.notify.success(`${resource.alias || resource.name} submitted to Platform Admin for approval`);
+        this.audit('SUBMITTED', 'Connection', resource.alias || resource.name, 'platform-level');
         this.datasourceOrgDrafts = this.datasourceOrgDrafts.filter(s => s.id !== resource.id);
         this.datasourceOrgDraftsDataSource.data = [...this.datasourceOrgDrafts];
         this.load();
@@ -537,6 +557,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.api.submitModelForOrgApproval(resource.id, this.orgId).subscribe({
       next: () => {
         this.notify.success(`${resource.modelName || resource.model_name} submitted to organization for approval`);
+        this.audit('SUBMITTED', 'Model', resource.modelName || resource.model_name, 'org-level');
         this.modelDrafts = this.modelDrafts.filter(s => s.id !== resource.id);
         this.modelDraftsDataSource.data = [...this.modelDrafts];
         this.load();
@@ -549,6 +570,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.api.submitModelForPlatformApproval(resource.id).subscribe({
       next: () => {
         this.notify.success(`${resource.modelName || resource.model_name} submitted to Platform Admin for approval`);
+        this.audit('SUBMITTED', 'Model', resource.modelName || resource.model_name, 'platform-level');
         this.modelOrgDrafts = this.modelOrgDrafts.filter(s => s.id !== resource.id);
         this.modelOrgDraftsDataSource.data = [...this.modelOrgDrafts];
         this.load();
