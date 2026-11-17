@@ -2189,6 +2189,9 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
             } else {
               dest = '/landing/dashboard';
             }
+            // Signal immediately so already-loaded MFEs (e.g. overview) can start
+            // fetching with the new context without waiting for the 2 s overlay timer.
+            window.dispatchEvent(new CustomEvent('rbac-context-ready'));
             this.router.navigate([dest]);
             // Dismiss init overlay after navigate + delay so intermediate navigations and
             // MFE initialization complete before the overlay lifts. 2000ms covers:
