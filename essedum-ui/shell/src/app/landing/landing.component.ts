@@ -1713,6 +1713,12 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       this.portfoliodata = this.portfoliodata.sort((a: any, b: any) =>
         a.portfolioName.toLowerCase() > b.portfolioName.toLowerCase() ? 1 : -1
       );
+      // Sync thumbnail org to the most recent org stored in session storage.
+      const _savedOrg = sessionStorage.getItem('organization');
+      if (_savedOrg) {
+        const _match = this.portfoliodata.find((p: any) => p.portfolioName === _savedOrg);
+        if (_match) this.selectedportfolio = _match;
+      }
       this.fetchRolesforUser();
       if (this.portfoliodata.length > 0) {
         this.portfolio = this.portfoliodata[0].id;
