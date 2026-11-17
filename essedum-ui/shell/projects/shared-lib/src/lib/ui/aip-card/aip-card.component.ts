@@ -262,13 +262,6 @@ export class AipCardComponent {
 
   /** Raw approval status for cards that carry one. Empty string hides the badge. */
   getApprovalStatus(): string {
-    const showFor = [
-      SERVICE_TYPES.CONNECTIONS, SERVICE_TYPES.MODEL,
-      SERVICE_TYPES.DATASETS, SERVICE_TYPES.PIPELINEAGENT, SERVICE_TYPES.AGENT,
-    ];
-    if (!showFor.includes(this.servicev1)) {
-      return '';
-    }
     return this.card?.approval_status || this.card?.approvalStatus || this.card?.target?.approval_status || '';
   }
 
