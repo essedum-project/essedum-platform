@@ -177,6 +177,11 @@ public class ICIPStreamingServices extends BaseDomain implements Serializable {
 	@JsonProperty("approval_status")
 	private String approvalStatus = "DRAFT";
 
+	/** Admin comment captured when a resource is approved or rejected */
+	@Column(name = "comments", columnDefinition = "TEXT")
+	@com.fasterxml.jackson.annotation.JsonProperty("comments")
+	private String comments;
+
 	/** Project ID for project-level approvals */
 	@Column(name = "project_id")
 	@JsonProperty("project_id")
