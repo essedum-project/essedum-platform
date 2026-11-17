@@ -328,3 +328,33 @@
     --mdc-icon-button-icon-color: #64748b !important;
   }
 }
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.audit-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  gap: 8px;
+
+  .audit-empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #4b5563;
+  }
+
+  .audit-empty-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #94a3b8;
+  }
+
+  .audit-empty-sub {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+}

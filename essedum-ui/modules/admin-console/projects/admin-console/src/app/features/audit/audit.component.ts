@@ -15,6 +15,7 @@ import type { AuditEvent } from '../../core/api-models';
 })
 export class AuditComponent implements OnInit, AfterViewInit {
   events: AuditEvent[] = [];
+  loading = true;
   auditDataSource = new MatTableDataSource<AuditEvent>([]);
 
   private _filterText = '';
@@ -45,6 +46,7 @@ export class AuditComponent implements OnInit, AfterViewInit {
           isPlatformAdmin ? undefined : (projectId ?? undefined),
         ).subscribe(events => {
           this.events = events;
+          this.loading = false;
           this.syncFilteredData();
         });
       });
