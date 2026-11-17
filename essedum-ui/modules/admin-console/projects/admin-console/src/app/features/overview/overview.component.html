@@ -13,7 +13,7 @@
       (keydown.space)="open(c)"
       [style.borderTopColor]="c.accent"
     >
-      <div class="stat-count" [style.color]="c.accent">{{ c.count }}</div>
+      <div class="stat-count" [style.color]="c.accent" [class.stat-loading]="loading">{{ c.count }}</div>
       <div class="stat-label">{{ c.label }}</div>
     </mat-card>
   </div>
@@ -75,6 +75,13 @@
     <tr mat-row *matRowDef="let row; columns: auditColumns"></tr>
   </table>
 
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="overview-loading">
+    <div class="overview-spinner"></div>
+    <span class="overview-loading-text">Loading…</span>
+  </div>
+
+  <!-- Empty state -->
   <div *ngIf="!loading && recentAudit.data.length === 0" class="audit-empty-state">
     <mat-icon class="audit-empty-icon">history</mat-icon>
     <p class="audit-empty-title">No logs available</p>

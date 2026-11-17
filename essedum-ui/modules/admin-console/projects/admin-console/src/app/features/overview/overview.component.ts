@@ -78,13 +78,16 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
       fromEvent(window, 'rbac-init-complete'),
     ).pipe(
       takeUntil(this.destroy$),
-      switchMap(() =>
-        combineLatest([this.userContext.orgId$, this.userContext.projectId$, this.userContext.selectedRoleRank$]).pipe(
-          take(1),
-        ),
-      ),
-      switchMap(([orgId, projectId, roleRank]) => {
+      switchMap(() => {
+        // Reset immediately so stale data disappears before API responds
         this.loading = true;
+        this.cards.forEach(c => c.count = 0);
+        this.recentAudit.data = [];
+        return combineLatest([this.userContext.orgId$, this.userContext.projectId$, this.userContext.selectedRoleRank$]).pipe(
+          take(1),
+        );
+      }),
+      switchMap(([orgId, projectId, roleRank]) => {
           const userId = this.userContext.userId$.value;
           const isPlatformAdmin = roleRank != null && roleRank >= 4;
           const scopedOrgId     = isPlatformAdmin ? undefined : (orgId ?? undefined);

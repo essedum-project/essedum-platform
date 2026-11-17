@@ -93,6 +93,8 @@
   line-height: 1 !important;
   margin-bottom: 8px !important;
   color: var(--ac-text) !important;
+  transition: opacity 0.2s ease !important;
+  &.stat-loading { opacity: 0.3 !important; }
 }
 
 .stat-label {
@@ -310,6 +312,25 @@ mat-paginator .mat-mdc-icon-button[disabled],
     &.action-publish { background: rgba(245, 158, 11, 0.10); color: #b45309; }
   }
 }
+
+/* Loading spinner */
+.overview-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 0 24px;
+}
+.overview-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--ac-border);
+  border-top-color: var(--ac-accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.overview-loading-text { font-size: 0.9rem; color: var(--ac-text-muted); }
 
 /* Empty state */
 .audit-empty-state {
