@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation, ElementRef, effect, ViewChild, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { forkJoin, of, combineLatest } from 'rxjs';
+import { catchError, take } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
@@ -69,23 +69,51 @@ export class OverviewComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    const userId = this.userContext.userId$.value;
-    forkJoin({
-      orgs: this.api.getOrganisations().pipe(catchError(() => of([] as any[]))),
-      projects: this.api.getProjects().pipe(catchError(() => of([] as any[]))),
-      members: this.api.getRoleAssignments(userId).pipe(catchError(() => of([] as any[]))),
-      approvals: this.api.getApprovals(userId).pipe(catchError(() => of([] as any[]))),
-      menus: this.api.getMenuItems(userId).pipe(catchError(() => of([] as any[]))),
-      audit: this.api.getAuditEvents(userId).pipe(catchError(() => of([] as AuditEvent[]))),
-    }).subscribe(res => {
-      this.cards[0].count = res.orgs.length;
-      this.cards[1].count = res.projects.length;
-      this.cards[2].count = res.members.length;
-      this.cards[3].count = res.approvals.length;
-      this.cards[4].count = res.menus.length;
-      this.recentAudit.data = (res.audit || []).slice(0, 8);
-      this.loading = false;
-    });
+    combineLatest([this.userContext.orgId$, this.userContext.projectId$, this.userContext.selectedRoleRank$])
+      .pipe(take(1))
+      .subscribe(([orgId, projectId, roleRank]) => {
+        const userId = this.userContext.userId$.value;
+        const isPlatformAdmin = roleRank != null && roleRank >= 4;
+        const scopedOrgId    = isPlatformAdmin ? undefined : (orgId ?? undefined);
+        const scopedProjectId = isPlatformAdmin ? undefined : (projectId ?? undefined);
+
+        forkJoin({
+          orgs:     this.api.getOrganisations().pipe(catchError(() => of([] as any[]))),
+          projects: this.api.getProjects().pipe(catchError(() => of([] as any[]))),
+          members:  this.api.getRoleAssignments(userId).pipe(catchError(() => of([] as any[]))),
+          approvals: this.api.getApprovals(userId, scopedOrgId, scopedProjectId).pipe(catchError(() => of([] as any[]))),
+          menus:    this.api.getMenuItems(userId).pipe(catchError(() => of([] as any[]))),
+          audit:    this.api.getAuditEvents(userId, scopedOrgId, scopedProjectId).pipe(catchError(() => of([] as AuditEvent[]))),
+        }).subscribe(res => {
+          const orgs = isPlatformAdmin
+            ? res.orgs
+            : res.orgs.filter((o: any) => orgId != null && Number(o.id) === Number(orgId));
+
+          const projects = isPlatformAdmin
+            ? res.projects
+            : res.projects.filter((p: any) =>
+                orgId != null && (
+                  (p.organisationId != null && Number(p.organisationId) === Number(orgId)) ||
+                  (p.portfolioId?.id != null && Number(p.portfolioId.id) === Number(orgId))
+                )
+              );
+
+          const members = isPlatformAdmin
+            ? res.members
+            : res.members.filter((m: any) =>
+                (orgId == null     || m.organizationId == null || Number(m.organizationId) === Number(orgId)) &&
+                (projectId == null || m.projectId == null      || Number(m.projectId)      === Number(projectId))
+              );
+
+          this.cards[0].count = orgs.length;
+          this.cards[1].count = projects.length;
+          this.cards[2].count = members.length;
+          this.cards[3].count = res.approvals.length;
+          this.cards[4].count = res.menus.length;
+          this.recentAudit.data = (res.audit || []).slice(0, 8);
+          this.loading = false;
+        });
+      });
   }
 
   open(card: StatCard): void {

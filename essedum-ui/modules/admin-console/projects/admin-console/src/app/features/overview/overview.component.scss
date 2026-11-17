@@ -229,3 +229,85 @@ body.header-light-theme mat-paginator .mat-mdc-icon-button svg,
 body.header-light-theme mat-paginator .mat-mdc-icon-button .mat-icon,
 body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button svg,
 body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #64748b !important; fill: #64748b !important; }
+
+/* ── Audit badge styles (mirrored from audit.component.scss) ─────────────── */
+.audit-date-text  { font-size: 0.82rem; color: var(--ac-text-muted); }
+.audit-actor-text { font-size: 0.88rem; color: var(--ac-text); }
+
+.audit-entity-badge,
+.audit-action-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* Entity colours */
+.audit-entity-badge {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  &.entity-connection  { background: rgba(14, 165, 233, 0.15); color: #7dd3fc; }
+  &.entity-dataset     { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
+  &.entity-model       { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
+  &.entity-agent       { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; }
+  &.entity-pipeline    { background: rgba(236, 72, 153, 0.15); color: #f9a8d4; }
+  &.entity-user        { background: rgba(248, 113, 113, 0.15); color: #fca5a5; }
+  &.entity-role        { background: rgba(251, 191, 36, 0.15); color: #fde68a; }
+  &.entity-project     { background: rgba(52, 211, 153, 0.15); color: #6ee7b7; }
+  &.entity-organization{ background: rgba(96, 165, 250, 0.15); color: #93c5fd; }
+}
+
+/* Action colours */
+.audit-action-badge {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--ac-text-muted);
+  &.action-create  { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
+  &.action-update  { background: rgba(59, 130, 246, 0.15); color: #93c5fd; }
+  &.action-delete  { background: rgba(239, 68, 68, 0.15);  color: #fca5a5; }
+  &.action-login   { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
+  &.action-logout  { background: rgba(107, 114, 128, 0.15);color: #d1d5db; }
+  &.action-approve { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
+  &.action-reject  { background: rgba(239, 68, 68, 0.15);  color: #fca5a5; }
+  &.action-publish { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
+}
+
+/* Light theme overrides for badges */
+:host(.light-theme) {
+  .audit-date-text  { color: #64748b; }
+  .audit-actor-text { color: #1e293b; }
+  .audit-entity-badge {
+    background: rgba(99, 102, 241, 0.10);  color: #4f46e5;
+    &.entity-connection  { background: rgba(14, 165, 233, 0.10); color: #0284c7; }
+    &.entity-dataset     { background: rgba(16, 185, 129, 0.10); color: #059669; }
+    &.entity-model       { background: rgba(245, 158, 11, 0.10); color: #d97706; }
+    &.entity-agent       { background: rgba(139, 92, 246, 0.10); color: #7c3aed; }
+    &.entity-pipeline    { background: rgba(236, 72, 153, 0.10); color: #db2777; }
+    &.entity-user        { background: rgba(248, 113, 113, 0.10);color: #dc2626; }
+    &.entity-role        { background: rgba(251, 191, 36, 0.10); color: #b45309; }
+    &.entity-project     { background: rgba(52, 211, 153, 0.10); color: #047857; }
+    &.entity-organization{ background: rgba(96, 165, 250, 0.10); color: #1d4ed8; }
+  }
+  .audit-action-badge {
+    background: rgba(100, 116, 139, 0.10); color: #475569;
+    &.action-create  { background: rgba(16, 185, 129, 0.10); color: #047857; }
+    &.action-update  { background: rgba(59, 130, 246, 0.10); color: #1d4ed8; }
+    &.action-delete  { background: rgba(239, 68, 68, 0.10);  color: #dc2626; }
+    &.action-login   { background: rgba(99, 102, 241, 0.10); color: #4f46e5; }
+    &.action-logout  { background: rgba(107, 114, 128, 0.10);color: #374151; }
+    &.action-approve { background: rgba(16, 185, 129, 0.10); color: #047857; }
+    &.action-reject  { background: rgba(239, 68, 68, 0.10);  color: #dc2626; }
+    &.action-publish { background: rgba(245, 158, 11, 0.10); color: #b45309; }
+  }
+}
+
+/* Empty / loading state */
+.empty {
+  color: var(--ac-text-muted);
+  font-size: 0.9rem;
+  padding: 32px 0;
+  text-align: center;
+}

@@ -23,9 +23,9 @@
   <table mat-table [dataSource]="auditDataSource" class="admin-console-table">
 
     <ng-container matColumnDef="occurredAt">
-      <th mat-header-cell *matHeaderCellDef>When</th>
+      <th mat-header-cell *matHeaderCellDef>Date</th>
       <td mat-cell *matCellDef="let row">
-        <span class="audit-date-text">{{ row.occurredAt | date: 'medium' }}</span>
+        <span class="audit-date-text">{{ row.occurredAt | date: 'dd-MM-yyyy' }}</span>
       </td>
     </ng-container>
 
