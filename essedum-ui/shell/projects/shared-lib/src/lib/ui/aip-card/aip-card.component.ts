@@ -269,7 +269,7 @@ export class AipCardComponent {
     if (!showFor.includes(this.servicev1)) {
       return '';
     }
-    return this.card?.approval_status || this.card?.approvalStatus || '';
+    return this.card?.approval_status || this.card?.approvalStatus || this.card?.target?.approval_status || '';
   }
 
   getApprovalStatusLabel(): string {
