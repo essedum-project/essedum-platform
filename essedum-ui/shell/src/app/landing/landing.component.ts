@@ -760,6 +760,21 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               sessionStorage.setItem('_rbac_role_name_map', JSON.stringify([...roleNameById.entries()]));
             } catch {}
 
+            // Filter org dropdown to only orgs the user has a role assignment for.
+            // Platform-level assignments have organizationId=null (unscoped) — skip filter for those users.
+            const _hasUnscopedAssignment = active.some((a: any) => a.organizationId == null);
+            if (!_hasUnscopedAssignment) {
+              const _assignedOrgIds = new Set(
+                active.filter((a: any) => a.organizationId != null).map((a: any) => Number(a.organizationId))
+              );
+              if (_assignedOrgIds.size > 0) {
+                this.portfoliodata = this.portfoliodata.filter((p: any) =>
+                  p.id == null || _assignedOrgIds.has(Number(p.id))
+                );
+                sessionStorage.setItem('_rbac_portfolio_list', JSON.stringify(this.portfoliodata));
+              }
+            }
+
             const seen = new Set<string>();
             const rbacList: any[] = [];
 
