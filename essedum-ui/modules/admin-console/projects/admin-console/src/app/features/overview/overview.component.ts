@@ -9,20 +9,6 @@ import { UserContextService } from '../../core/user-context.service';
 import { ThemeService } from '../../core/theme.service';
 import type { AuditEvent } from '../../core/api-models';
 
-// Module-level flag: set as soon as the shell fires valuechangerole,
-// cleared when rbac-init-complete arrives. Used to suppress the
-// stale-context initial load when the component is recreated mid-change.
-let rbacChangePending = false;
-if (typeof window !== 'undefined') {
-  window.addEventListener('valuechangerole', () => {
-    rbacChangePending = true;
-    console.log('[OVERVIEW] valuechangerole caught at module level — suppressing initial load');
-  });
-  window.addEventListener('rbac-init-complete', () => {
-    rbacChangePending = false;
-    console.log('[OVERVIEW] rbac-init-complete caught at module level — flag cleared');
-  });
-}
 
 interface StatCard {
   label: string;
@@ -83,27 +69,32 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
-    console.log('[OVERVIEW] ngOnInit — rbacChangePending:', rbacChangePending);
+  // Timestamp of the last completed data load — used to skip the redundant
+  // rbac-init-complete (2 s after role change) if rbac-context-ready already
+  // triggered a fresh fetch.
+  private lastLoadedAt = 0;
 
-    // Trigger on initial load AND whenever the shell signals RBAC context changed.
-    // The null emission (initial load) is filtered out when a role/org/project
-    // change is in progress: the component was just recreated by the shell's
-    // navigation, but the new RBAC context won't be ready until rbac-init-complete.
+  ngOnInit(): void {
+    console.log('[OVERVIEW] ngOnInit');
+
+    // rbac-context-ready fires immediately when the shell has updated sessionStorage
+    // (before the 2 s overlay timer). rbac-init-complete fires after 2 s.
+    // of(null) handles the first render.
+    // If rbac-context-ready already loaded within the last 3 s, skip rbac-init-complete.
     merge(
       of(null),
-      fromEvent(window, 'rbac-init-complete'),
+      fromEvent(window, 'rbac-context-ready'),
+      fromEvent(window, 'rbac-init-complete').pipe(
+        filter(() => {
+          const skip = Date.now() - this.lastLoadedAt < 3000;
+          console.log('[OVERVIEW] rbac-init-complete received —', skip ? 'skipping (already loaded recently)' : 'loading');
+          return !skip;
+        }),
+      ),
     ).pipe(
       takeUntil(this.destroy$),
-      filter(event => {
-        if (event === null && rbacChangePending) {
-          console.log('[OVERVIEW] Initial load suppressed — rbac change in progress, waiting for rbac-init-complete');
-          return false;
-        }
-        console.log('[OVERVIEW] Load triggered by:', event === null ? 'initial' : 'rbac-init-complete');
-        return true;
-      }),
-      switchMap(() => {
+      switchMap(event => {
+        console.log('[OVERVIEW] Load triggered by:', event === null ? 'initial' : (event as Event).type);
         this.loading = true;
         this.cards.forEach(c => c.count = 0);
         this.recentAudit.data = [];
@@ -155,6 +146,7 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
       )
       .subscribe(data => {
         if (!data) { this.loading = false; return; }
+        this.lastLoadedAt = Date.now();
         console.log('[OVERVIEW] Data loaded — orgs:', data.orgs.length, 'projects:', data.projects.length, 'members:', data.members.length, 'approvals:', data.approvalsCount);
         this.cards[0].count = data.orgs.length;
         this.cards[1].count = data.projects.length;
