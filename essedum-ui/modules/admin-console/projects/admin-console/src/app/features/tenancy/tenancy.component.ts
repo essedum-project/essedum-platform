@@ -88,9 +88,24 @@ export class TenancyComponent implements OnInit, AfterViewInit {
 
   private loadOrgs(): void {
     this.api.getOrganisations().pipe(catchError(() => of([] as LegacyOrganisation[]))).subscribe(orgs => {
-      this.organizations = this._isPlatformAdmin
-        ? orgs
-        : orgs.filter(o => this._orgId != null && Number(o.id) === Number(this._orgId));
+      if (this._isPlatformAdmin) {
+        this.organizations = orgs;
+      } else {
+        // orgId$ is the thumbnail's portfolio id, which can differ from the organisation
+        // table id — also match by the selected org's name, else show the selected org itself.
+        let selName = '';
+        try {
+          const pd = JSON.parse(sessionStorage.getItem('portfoliodata') || '{}');
+          selName = String(pd?.portfolioName || pd?.name || '').trim().toLowerCase();
+        } catch {}
+        let matched = orgs.filter(o =>
+          (this._orgId != null && Number(o.id) === Number(this._orgId)) ||
+          (selName !== '' && (o.name || '').trim().toLowerCase() === selName));
+        if (matched.length === 0 && this._orgId != null && selName !== '') {
+          matched = [{ id: this._orgId, name: selName, status: null } as LegacyOrganisation];
+        }
+        this.organizations = matched;
+      }
       this.buildDisplayOrgs();
     });
   }

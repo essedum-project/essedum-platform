@@ -200,6 +200,8 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
       .replace(/\s*\(project=\d+\)/g, '')
       .replace(/AI Client/g, 'AI Engineer')
       .replace(/'Admin'/g, "'AI Platform Admin'")
+      .replace(/'Organization Admin'/g, "'AI Organization Admin'")
+      .replace(/'Project Admin'/g, "'AI Project Admin'")
       .trim();
   }
 
