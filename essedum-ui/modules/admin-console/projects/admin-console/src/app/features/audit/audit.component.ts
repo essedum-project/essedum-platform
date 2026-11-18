@@ -57,6 +57,7 @@ export class AuditComponent implements OnInit, AfterViewInit {
     return details
       .replace(/\s*\(org=\d+\)/g, '')
       .replace(/\s*\(project=\d+\)/g, '')
+      .replace(/AI Client/g, 'AI Engineer')
       .trim();
   }
 
