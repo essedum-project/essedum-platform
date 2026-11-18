@@ -8,7 +8,7 @@ export interface ApproveRejectDialogData {
 }
 
 export interface ApproveRejectDialogResult {
-  note: string;
+  comments: string;
 }
 
 @Component({
@@ -18,7 +18,7 @@ export interface ApproveRejectDialogResult {
   standalone: false,
 })
 export class ApproveRejectDialogComponent {
-  note = '';
+  comments = '';
 
   constructor(
     private readonly ref: MatDialogRef<ApproveRejectDialogComponent>,
@@ -32,19 +32,15 @@ export class ApproveRejectDialogComponent {
     return `${verb} ${type}${name}`;
   }
 
-  get label(): string {
-    return this.data.action === 'approved' ? 'Approval' : 'Rejection';
-  }
-
   get valid(): boolean {
-    return this.note.trim().length > 0;
+    return this.comments.trim().length > 0;
   }
 
   submit(): void {
     if (!this.valid) {
       return;
     }
-    this.ref.close({ note: this.note.trim() } as ApproveRejectDialogResult);
+    this.ref.close({ comments: this.comments.trim() } as ApproveRejectDialogResult);
   }
 
   cancel(): void {

@@ -427,7 +427,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
             action,
             actorId: userId,
             actorName: `User #${userId}`,
-            note: result.note,
+            note: result.comments,
           })
           .subscribe({
             next: () => {
@@ -462,9 +462,9 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       let apiCall$;
 
       if (isPlatformLevel) {
-        apiCall$ = this.api.approvePlatformApproval(resourceId, result.note);
+        apiCall$ = this.api.approvePlatformApproval(resourceId, result.comments);
       } else if (isOrgLevel) {
-        apiCall$ = this.api.approveOrgApproval(resourceId, result.note);
+        apiCall$ = this.api.approveOrgApproval(resourceId, result.comments);
       } else {
         // Get projectId from component property or fallback to sessionStorage
         let finalProjectId = this.projectId;
@@ -477,7 +477,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
             console.error('[APPROVALS] Error reading projectId from sessionStorage:', e);
           }
         }
-        apiCall$ = this.api.approveProjectApproval(resourceId, finalProjectId || 0, result.note);
+        apiCall$ = this.api.approveProjectApproval(resourceId, finalProjectId || 0, result.comments);
       }
 
       apiCall$.subscribe({
@@ -509,10 +509,10 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       const apiCall$ = isPlatformLevel
-        ? this.api.rejectPlatformApproval(resourceId, result.note)
+        ? this.api.rejectPlatformApproval(resourceId, result.comments)
         : isOrgLevel
-          ? this.api.rejectOrgApproval(resourceId, result.note)
-          : this.api.rejectProjectApproval(resourceId, result.note);
+          ? this.api.rejectOrgApproval(resourceId, result.comments)
+          : this.api.rejectProjectApproval(resourceId, result.comments);
 
       apiCall$.subscribe({
         next: () => {
@@ -550,10 +550,10 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       const apiCall$ = isPlatformLevel
-        ? this.api.approveDatasetPlatformApproval(resourceId, result.note)
+        ? this.api.approveDatasetPlatformApproval(resourceId, result.comments)
         : isOrgLevel
-          ? this.api.approveDatasetOrgApproval(resourceId, result.note)
-          : this.api.approveDatasetProjectApproval(resourceId, this.projectId || 0, result.note);
+          ? this.api.approveDatasetOrgApproval(resourceId, result.comments)
+          : this.api.approveDatasetProjectApproval(resourceId, this.projectId || 0, result.comments);
 
       apiCall$.subscribe({
         next: () => { this.notify.success(`${name} approved successfully`); this.load(); },
@@ -581,10 +581,10 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       const apiCall$ = isPlatformLevel
-        ? this.api.rejectDatasetPlatformApproval(resourceId, result.note)
+        ? this.api.rejectDatasetPlatformApproval(resourceId, result.comments)
         : isOrgLevel
-          ? this.api.rejectDatasetOrgApproval(resourceId, result.note)
-          : this.api.rejectDatasetProjectApproval(resourceId, result.note);
+          ? this.api.rejectDatasetOrgApproval(resourceId, result.comments)
+          : this.api.rejectDatasetProjectApproval(resourceId, result.comments);
 
       apiCall$.subscribe({
         next: () => { this.notify.success(`${name} rejected successfully`); this.load(); },
@@ -612,10 +612,10 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       const apiCall$ = isPlatformLevel
-        ? this.api.approveDatasourcePlatformApproval(resourceId, result.note)
+        ? this.api.approveDatasourcePlatformApproval(resourceId, result.comments)
         : isOrgLevel
-          ? this.api.approveDatasourceOrgApproval(resourceId, result.note)
-          : this.api.approveDatasourceProjectApproval(resourceId, this.projectId || 0, result.note);
+          ? this.api.approveDatasourceOrgApproval(resourceId, result.comments)
+          : this.api.approveDatasourceProjectApproval(resourceId, this.projectId || 0, result.comments);
 
       apiCall$.subscribe({
         next: () => {
@@ -646,10 +646,10 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       const apiCall$ = isPlatformLevel
-        ? this.api.rejectDatasourcePlatformApproval(resourceId, result.note)
+        ? this.api.rejectDatasourcePlatformApproval(resourceId, result.comments)
         : isOrgLevel
-          ? this.api.rejectDatasourceOrgApproval(resourceId, result.note)
-          : this.api.rejectDatasourceProjectApproval(resourceId, result.note);
+          ? this.api.rejectDatasourceOrgApproval(resourceId, result.comments)
+          : this.api.rejectDatasourceProjectApproval(resourceId, result.comments);
 
       apiCall$.subscribe({
         next: () => {
@@ -736,16 +736,16 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       return; // User clicked Cancel
     }
 
-    console.log('Approval Note:', result.note);
+    console.log('Approval Note:', result.comments);
 
     const apiCall$ = isPlatformLevel
-      ? this.api.approveModelPlatformApproval(resourceId, result.note)
+      ? this.api.approveModelPlatformApproval(resourceId, result.comments)
       : isOrgLevel
-        ? this.api.approveModelOrgApproval(resourceId, result.note)
+        ? this.api.approveModelOrgApproval(resourceId, result.comments)
         : this.api.approveModelProjectApproval(
             resourceId,
             this.projectId || 0,
-            result.note
+            result.comments
           );
 
     apiCall$.subscribe({
@@ -784,13 +784,13 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       return; // User clicked Cancel
     }
 
-    console.log('Rejection Note:', result.note);
+    console.log('Rejection Note:', result.comments);
 
     const apiCall$ = isPlatformLevel
-      ? this.api.rejectModelPlatformApproval(resourceId , result.note )
+      ? this.api.rejectModelPlatformApproval(resourceId , result.comments )
       : isOrgLevel
-        ? this.api.rejectModelOrgApproval(resourceId , result.note )
-        : this.api.rejectModelProjectApproval(resourceId , result.note );
+        ? this.api.rejectModelOrgApproval(resourceId , result.comments )
+        : this.api.rejectModelProjectApproval(resourceId , result.comments );
 
     apiCall$.subscribe({
       next: () => {

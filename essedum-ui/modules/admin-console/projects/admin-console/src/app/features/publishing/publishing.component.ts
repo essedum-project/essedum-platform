@@ -111,8 +111,8 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   readonly columns = ['assetName', 'versionNo', 'status', 'comments', 'nextGate', 'updatedAt', 'actions'];
-  readonly streamingColumns = ['name', 'type', 'createdBy', 'status', 'actions'];
-  readonly orgStreamingColumns = ['name', 'type', 'createdBy', 'status', 'actions'];
+  readonly streamingColumns = ['name', 'type', 'createdBy', 'status', 'comments', 'actions'];
+  readonly orgStreamingColumns = ['name', 'type', 'createdBy', 'status', 'comments', 'actions'];
 
   constructor(
     private readonly api: ApiService,

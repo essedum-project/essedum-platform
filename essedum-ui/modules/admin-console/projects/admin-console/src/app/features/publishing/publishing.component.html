@@ -70,6 +70,10 @@
       </ng-container>
 
       <!-- Actions Column -->
+      <ng-container matColumnDef="comments">
+        <th mat-header-cell *matHeaderCellDef>Comments</th>
+        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+      </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
@@ -138,6 +142,10 @@
       </ng-container>
 
       <!-- Actions Column -->
+      <ng-container matColumnDef="comments">
+        <th mat-header-cell *matHeaderCellDef>Comments</th>
+        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+      </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
@@ -196,6 +204,10 @@
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let row"><span class="status-badge status-approved"><mat-icon>check_circle</mat-icon> Project Approved</span></td>
       </ng-container>
+      <ng-container matColumnDef="comments">
+        <th mat-header-cell *matHeaderCellDef>Comments</th>
+        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+      </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
@@ -230,6 +242,10 @@
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let row"><span class="status-badge status-org-approved"><mat-icon>check_circle</mat-icon> Organization Approved</span></td>
+      </ng-container>
+      <ng-container matColumnDef="comments">
+        <th mat-header-cell *matHeaderCellDef>Comments</th>
+        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
@@ -279,6 +295,10 @@
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let row"><span class="status-badge status-approved"><mat-icon>check_circle</mat-icon> Project Approved</span></td>
       </ng-container>
+      <ng-container matColumnDef="comments">
+        <th mat-header-cell *matHeaderCellDef>Comments</th>
+        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+      </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
@@ -323,6 +343,10 @@
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let row"><span class="status-badge status-org-approved"><mat-icon>check_circle</mat-icon> Organization Approved</span></td>
+      </ng-container>
+      <ng-container matColumnDef="comments">
+        <th mat-header-cell *matHeaderCellDef>Comments</th>
+        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
@@ -382,6 +406,10 @@
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let row"><span class="status-badge status-project-approved"><mat-icon>check_circle</mat-icon> Project Approved</span></td>
       </ng-container>
+      <ng-container matColumnDef="comments">
+        <th mat-header-cell *matHeaderCellDef>Comments</th>
+        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+      </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
@@ -427,6 +455,10 @@
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let row"><span class="status-badge status-org-approved"><mat-icon>check_circle</mat-icon> Org Approved</span></td>
+      </ng-container>
+      <ng-container matColumnDef="comments">
+        <th mat-header-cell *matHeaderCellDef>Comments</th>
+        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>

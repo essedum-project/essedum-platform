@@ -1,13 +1,13 @@
 <h2 mat-dialog-title>{{ title }}</h2>
 <div mat-dialog-content>
   <mat-form-field appearance="fill" class="full-width">
-    <mat-label>{{ label }} Note</mat-label>
+    <mat-label>Comments</mat-label>
     <textarea
       matInput
-      [(ngModel)]="note"
-      name="note"
+      [(ngModel)]="comments"
+      name="comments"
       rows="5"
-      [placeholder]="'Enter ' + label.toLowerCase() + ' note...'">
+      placeholder="Enter comments...">
     </textarea>
   </mat-form-field>
 </div>
