@@ -15,19 +15,21 @@ import type { AuditEvent } from '../../core/api-models';
 })
 export class AuditComponent implements OnInit, AfterViewInit {
   events: AuditEvent[] = [];
+  loading = true;
   auditDataSource = new MatTableDataSource<AuditEvent>([]);
 
   private _filterText = '';
   get filterText(): string { return this._filterText; }
   set filterText(val: string) { this._filterText = val; this.syncFilteredData(); }
 
-  readonly columns = ['occurredAt', 'entity', 'action', 'actorName', 'details', 'correlationId'];
+  readonly columns = ['occurredAt', 'entity', 'action', 'actorName', 'targetUserName', 'details', 'correlationId'];
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  ngAfterViewInit(): void {
-    this.auditDataSource.paginator = this.paginator;
+  // The paginator renders only once events exist (*ngIf), so bind it when it appears.
+  @ViewChild(MatPaginator) set paginator(p: MatPaginator | undefined) {
+    if (p) this.auditDataSource.paginator = p;
   }
+
+  ngAfterViewInit(): void {}
 
   constructor(
     private readonly api: ApiService,
@@ -35,12 +37,32 @@ export class AuditComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    combineLatest([this.userContext.orgId$, this.userContext.projectId$]).pipe(take(1)).subscribe(([orgId, projectId]) => {
-      this.api.getAuditEvents(this.userContext.userId$.value, orgId ?? undefined, projectId ?? undefined).subscribe(events => {
-        this.events = events;
-        this.syncFilteredData();
+    combineLatest([this.userContext.orgId$, this.userContext.projectId$, this.userContext.selectedRoleRank$])
+      .pipe(take(1))
+      .subscribe(([orgId, projectId, roleRank]) => {
+        const isPlatformAdmin = roleRank != null && roleRank >= 4;
+        this.api.getAuditEvents(
+          this.userContext.userId$.value,
+          isPlatformAdmin ? undefined : (orgId ?? undefined),
+          isPlatformAdmin ? undefined : (projectId ?? undefined),
+        ).subscribe(events => {
+          this.events = events;
+          this.loading = false;
+          this.syncFilteredData();
+        });
       });
-    });
+  }
+
+  cleanDetails(details: string | null): string {
+    if (!details) return '';
+    return details
+      .replace(/\s*\(org=\d+\)/g, '')
+      .replace(/\s*\(project=\d+\)/g, '')
+      .replace(/AI Client/g, 'AI Engineer')
+      .replace(/'Admin'/g, "'AI Platform Admin'")
+      .replace(/'Organization Admin'/g, "'AI Organization Admin'")
+      .replace(/'Project Admin'/g, "'AI Project Admin'")
+      .trim();
   }
 
   get filteredEvents(): AuditEvent[] {
@@ -59,6 +81,5 @@ export class AuditComponent implements OnInit, AfterViewInit {
 
   private syncFilteredData(): void {
     this.auditDataSource.data = this.filteredEvents;
-    this.auditDataSource.paginator = this.paginator;
   }
 }

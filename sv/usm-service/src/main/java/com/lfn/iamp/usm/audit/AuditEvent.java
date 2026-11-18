@@ -66,4 +66,8 @@ public class AuditEvent implements Serializable {
 
 	@Column(name = "project_id")
 	private Integer projectId;
+
+	@Size(max = 255)
+	@Column(name = "target_user_name")
+	private String targetUserName;
 }

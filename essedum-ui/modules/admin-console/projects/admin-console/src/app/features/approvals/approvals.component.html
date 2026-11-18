@@ -283,7 +283,7 @@
       <tr mat-row *matRowDef="let row; columns: streamingPlatformColumns"></tr>
     </table>
     <div class="table-footer" *ngIf="streamingPlatformApprovals.length > 0">
-      <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+      <mat-paginator #platformStreamingPaginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
     </div>
   </div>
 

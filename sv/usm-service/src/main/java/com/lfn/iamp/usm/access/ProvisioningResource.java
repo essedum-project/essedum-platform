@@ -183,8 +183,8 @@ public class ProvisioningResource {
 					"An organization named \"" + req.name() + "\" already exists");
 		}
 		findOrCreatePortfolio(saved.getName());
-		auditService.record("organisation", "created", actorUserId, "User #" + actorUserId,
-				"organisation \"" + saved.getName() + "\" created");
+		auditService.record("organisation", "created", actorUserId, null,
+				"organisation \"" + saved.getName() + "\" created", saved.getId(), null);
 		return ResponseEntity.ok(saved);
 	}
 
@@ -208,8 +208,9 @@ public class ProvisioningResource {
 			throw new ResponseStatusException(HttpStatus.CONFLICT,
 					"A project named \"" + req.name() + "\" already exists");
 		}
-		auditService.record("project", "created", actorUserId, "User #" + actorUserId,
-				"project \"" + saved.getName() + "\" created (org=" + req.organisationId() + ")");
+		String orgNameForAudit = organisationRepository.findById(req.organisationId()).map(Organisation::getName).orElse(String.valueOf(req.organisationId()));
+		auditService.record("project", "created", actorUserId, null,
+				"project \"" + saved.getName() + "\" created, org='" + orgNameForAudit + "'", req.organisationId(), saved.getId());
 		seedDefaultRoleMenus(saved.getName());
 		return ResponseEntity.ok(saved);
 	}
@@ -234,8 +235,8 @@ public class ProvisioningResource {
 			throw new ResponseStatusException(HttpStatus.CONFLICT,
 					"This organization is still referenced elsewhere and cannot be deleted");
 		}
-		auditService.record("organisation", "deleted", actorUserId, "User #" + actorUserId,
-				"organisation #" + id + " deleted (cascaded " + orgProjects.size() + " project(s))");
+		auditService.record("organisation", "deleted", actorUserId, null,
+				"organisation deleted (cascaded " + orgProjects.size() + " project(s))", id, null);
 		return ResponseEntity.noContent().build();
 	}
 
@@ -243,8 +244,12 @@ public class ProvisioningResource {
 	public ResponseEntity<Void> deleteProject(@PathVariable Integer id, @RequestParam Integer actorUserId) {
 		int rank = require(actorUserId, ORG_ADMIN, "delete a project");
 		requireProjectReach(actorUserId, rank, id, "delete a project");
+		Project deletedProject = projectRepository.findById(id).orElse(null);
+		String projectName = deletedProject != null ? deletedProject.getName() : "#" + id;
+		Integer projectOrgId = deletedProject != null ? deletedProject.getOrganisationId() : null;
 		deleteProjectCascade(id);
-		auditService.record("project", "deleted", actorUserId, "User #" + actorUserId, "project #" + id + " deleted");
+		auditService.record("project", "deleted", actorUserId, null,
+				"project \"" + projectName + "\" deleted", projectOrgId, id);
 		return ResponseEntity.noContent().build();
 	}
 
@@ -283,8 +288,8 @@ public class ProvisioningResource {
 		e.setProjectId(req.projectId());
 		e.setConfigRef(req.configRef());
 		Environment saved = environmentRepository.save(e);
-		auditService.record("environment", "created", actorUserId, "User #" + actorUserId,
-				"environment \"" + saved.getName() + "\" created (project=" + req.projectId() + ")");
+		auditService.record("environment", "created", actorUserId, null,
+				"environment \"" + saved.getName() + "\" created", null, req.projectId());
 		return ResponseEntity.ok(saved);
 	}
 
@@ -304,8 +309,8 @@ public class ProvisioningResource {
 		r.setName(req.name());
 		r.setRank(rank);
 		RbacRole saved = rbacRoleRepository.save(r);
-		auditService.record("rbac_role", "created", actorUserId, "User #" + actorUserId,
-				"role \"" + saved.getName() + "\" (rank " + saved.getRank() + ") created");
+		auditService.record("rbac_role", "created", actorUserId, null,
+				"role \"" + saved.getName() + "\" (rank " + saved.getRank() + ") created", null, null);
 		return ResponseEntity.ok(saved);
 	}
 

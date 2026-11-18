@@ -10,4 +10,5 @@ public interface AuditEventRepository extends JpaRepository<AuditEvent, Integer>
 	List<AuditEvent> findAllByOrderByOccurredAtDesc();
 	List<AuditEvent> findByOrgIdOrderByOccurredAtDesc(Integer orgId);
 	List<AuditEvent> findByProjectIdOrderByOccurredAtDesc(Integer projectId);
+	List<AuditEvent> findByOrgIdOrProjectIdOrderByOccurredAtDesc(Integer orgId, Integer projectId);
 }

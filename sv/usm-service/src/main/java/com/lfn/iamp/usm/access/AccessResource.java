@@ -159,7 +159,7 @@ public class AccessResource {
 		}
 		try {
 			RoleAssignment saved = accessContextService.grant(request.getUserId(), request.getRoleId(),
-					request.getOrganizationId(), request.getProjectId(), isLegacyRole);
+					request.getOrganizationId(), request.getProjectId(), isLegacyRole, request.getActorUserId());
 			return ResponseEntity.ok(saved);
 		} catch (ResponseStatusException ex) {
 			if (ex.getStatusCode() == HttpStatus.CONFLICT) {
@@ -196,7 +196,7 @@ public class AccessResource {
 						"Cannot revoke a role outside your own projects/organizations");
 			}
 		}
-		accessContextService.revoke(id);
+		accessContextService.revoke(id, actorUserId);
 		return ResponseEntity.noContent().build();
 	}
 

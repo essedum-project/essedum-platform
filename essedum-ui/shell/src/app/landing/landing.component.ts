@@ -406,6 +406,8 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
    *  Prevents concurrent HTTP chains from racing each other (setProjectTheme and getrolepage
    *  both call getDashConsts which both trigger supplementRbacData in the same component). */
   private _rbacDataLoading = false;
+  /** When true, supplementRbacData() refreshes roles/projects but does NOT navigate (auto-switch suppressed). */
+  private _suppressAutoSwitch = false;
   /** Timestamp (Date.now()) of the last deliberate role switch by the user.
    *  Prevents supplementRbacData() from auto-switching after a manual selection. */
   private _lastManualRoleSwitch = 0;
@@ -524,10 +526,17 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   // The event is dispatched by AccessComponent and MyDetailsComponent after any
   // successful grant/revoke so the shell's role dropdown stays in sync without a page reload.
   private readonly onAssignmentsChanged = () => {
-    this.setportfolio();
     // Refresh RBAC role list so newly granted roles appear without logout.
+    // Do NOT call setportfolio() here — it resets portfoliodata and triggers a full
+    // RBAC reinit that navigates away from the current screen.
+    // Suppress auto-switch so the admin stays on the current screen.
     setTimeout(() => {
+      this._suppressAutoSwitch = true;
+      // An in-flight call would make supplementRbacData() return early and leave the
+      // role dropdown without the just-granted role.
+      this._rbacDataLoading = false;
       this.supplementRbacData();
+      setTimeout(() => { this._suppressAutoSwitch = false; }, 3000);
       // Also refresh sidebar in case the current role's menu changed.
       const role = (() => { try { return JSON.parse(sessionStorage.getItem('role') || 'null')?.name; } catch { return ''; } })();
       if (this.roleMenuSvc.isRbacRole(role)) this.newsidebar();
@@ -760,6 +769,21 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               sessionStorage.setItem('_rbac_role_name_map', JSON.stringify([...roleNameById.entries()]));
             } catch {}
 
+            // Filter org dropdown to only orgs the user has a role assignment for.
+            // Platform-level assignments have organizationId=null (unscoped) — skip filter for those users.
+            const _hasUnscopedAssignment = active.some((a: any) => a.organizationId == null);
+            if (!_hasUnscopedAssignment) {
+              const _assignedOrgIds = new Set(
+                active.filter((a: any) => a.organizationId != null).map((a: any) => Number(a.organizationId))
+              );
+              if (_assignedOrgIds.size > 0) {
+                this.portfoliodata = this.portfoliodata.filter((p: any) =>
+                  p.id == null || _assignedOrgIds.has(Number(p.id))
+                );
+                sessionStorage.setItem('_rbac_portfolio_list', JSON.stringify(this.portfoliodata));
+              }
+            }
+
             const seen = new Set<string>();
             const rbacList: any[] = [];
 
@@ -894,7 +918,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
               const _recentAutoSwitch = (() => {
                 try { const t = sessionStorage.getItem('_rbac_last_auto_switch'); return !!t && (Date.now() - parseInt(t)) < 10000; } catch { return false; }
               })();
-              if ((!curStillValid || !currentOrgHasAssignments || !_sessionInit) && !recentManualSwitch && !_recentAutoSwitch) {
+              if ((!curStillValid || !currentOrgHasAssignments || !_sessionInit) && !recentManualSwitch && !_recentAutoSwitch && !this._suppressAutoSwitch) {
                 if (this._destroyed) { this._rbacDataLoading = false; return; } // zombie guard
                 // Mark session initialized BEFORE navigating so the recreated component
                 // skips the auto-switch and restores the menu from sessionStorage cache.
@@ -1082,13 +1106,37 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isRoleLoading = true;
     this.roleList = [];
 
+    // If the assignments cache from supplementRbacData() is ready, use it directly.
+    // _applyRbacScope() merges platform-wide, org-scoped, AND project-scoped roles so
+    // higher-ranked roles (org admin, platform admin) remain visible even when the user
+    // also has a lower-ranked project-only role.
+    // The cached roles are then merged with by-user-project below (that API also covers
+    // org-wide grants via the project's organisation, which the cache can miss/be stale on).
+    let cacheRoles: any[] = [];
+    if (this._rbacAssignmentsCache.length > 0) {
+      this.selectedproject = project;
+      this._applyRbacScope();
+      cacheRoles = [...this.roleList];
+    }
+
+    // Fetch project-specific roles and merge with the cached ones.
     const userId = (() => {
       try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id ?? null; }
       catch { return null; }
     })();
 
-    if (!userId || !projId) {
+    const applyRoles = (roles: any[]) => {
       this.isRoleLoading = false;
+      this.roleList = roles;
+      sessionStorage.setItem('_rbac_role_list', JSON.stringify(roles));
+      if (roles.length > 0) {
+        this._lastManualRoleSwitch = 0;
+        this.valuechangerole(roles[0]);
+      }
+    };
+
+    if (!userId || !projId) {
+      if (cacheRoles.length > 0) { applyRoles(cacheRoles); } else { this.isRoleLoading = false; }
       return;
     }
 
@@ -1110,20 +1158,19 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
           seen.add(key);
           scopedRoles.push({ name: roleName, rank: a.roleRank, id: a.roleId });
         }
+        for (const r of cacheRoles) {
+          const key = (r.name || '').toLowerCase();
+          if (!seen.has(key)) { seen.add(key); scopedRoles.push(r); }
+        }
         scopedRoles.sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
-
-        this.isRoleLoading = false;
 
         // Always update roleList (even when empty) so stale roles from a previous
         // project don't persist when the new project has no granted roles.
-        this.roleList = scopedRoles;
-        sessionStorage.setItem('_rbac_role_list', JSON.stringify(scopedRoles));
-        if (scopedRoles.length > 0) {
-          this._lastManualRoleSwitch = 0;
-          this.valuechangerole(scopedRoles[0]);
-        }
+        applyRoles(scopedRoles);
       },
-      error: () => { this.isRoleLoading = false; }
+      error: () => {
+        if (cacheRoles.length > 0) { applyRoles(cacheRoles); } else { this.isRoleLoading = false; }
+      }
     });
   }
 
@@ -1713,6 +1760,12 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
       this.portfoliodata = this.portfoliodata.sort((a: any, b: any) =>
         a.portfolioName.toLowerCase() > b.portfolioName.toLowerCase() ? 1 : -1
       );
+      // Sync thumbnail org to the most recent org stored in session storage.
+      const _savedOrg = sessionStorage.getItem('organization');
+      if (_savedOrg) {
+        const _match = this.portfoliodata.find((p: any) => p.portfolioName === _savedOrg);
+        if (_match) this.selectedportfolio = _match;
+      }
       this.fetchRolesforUser();
       if (this.portfoliodata.length > 0) {
         this.portfolio = this.portfoliodata[0].id;
@@ -2168,6 +2221,9 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
             } else {
               dest = '/landing/dashboard';
             }
+            // Signal immediately so already-loaded MFEs (e.g. overview) can start
+            // fetching with the new context without waiting for the 2 s overlay timer.
+            window.dispatchEvent(new CustomEvent('rbac-context-ready'));
             this.router.navigate([dest]);
             // Dismiss init overlay after navigate + delay so intermediate navigations and
             // MFE initialization complete before the overlay lifts. 2000ms covers:

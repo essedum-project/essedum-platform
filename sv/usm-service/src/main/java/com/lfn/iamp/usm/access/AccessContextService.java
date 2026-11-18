@@ -148,10 +148,14 @@ public class AccessContextService {
 	}
 
 	public RoleAssignment grant(Integer userId, Integer roleId, Integer organizationId, Integer projectId) {
-		return grant(userId, roleId, organizationId, projectId, false);
+		return grant(userId, roleId, organizationId, projectId, false, null);
 	}
 
 	public RoleAssignment grant(Integer userId, Integer roleId, Integer organizationId, Integer projectId, boolean isLegacy) {
+		return grant(userId, roleId, organizationId, projectId, isLegacy, null);
+	}
+
+	public RoleAssignment grant(Integer userId, Integer roleId, Integer organizationId, Integer projectId, boolean isLegacy, Integer actorUserId) {
 		if (organizationId != null && projectId != null) {
 			throw new IllegalArgumentException("A role assignment scopes to at most one of organization/project");
 		}
@@ -183,7 +187,11 @@ public class AccessContextService {
 		String grantDetails = "role '" + roleName + "' granted"
 				+ (orgName != null ? ", org='" + orgName + "'" : "")
 				+ (projName != null ? ", project='" + projName + "'" : "");
-		auditService.record("role_assignment", "granted", userId, null, grantDetails, organizationId, projectId);
+		Integer auditActor = actorUserId != null ? actorUserId : userId;
+		String targetEmail = usersRepository.findById(userId)
+				.map(u -> u.getUser_email() != null && !u.getUser_email().isEmpty() ? u.getUser_email() : u.getUser_login())
+				.orElse(null);
+		auditService.record("role_assignment", "granted", auditActor, null, grantDetails, organizationId, projectId, targetEmail);
 		identityProjectionService.enqueueForProject(projectId);
 		bridgeAssignment(userId, roleId, organizationId, projectId, isLegacy);
 		return saved;
@@ -412,12 +420,20 @@ public class AccessContextService {
 	}
 
 	public void revoke(Integer roleAssignmentId) {
+		revoke(roleAssignmentId, null);
+	}
+
+	public void revoke(Integer roleAssignmentId, Integer actorUserId) {
 		roleAssignmentRepository.findById(roleAssignmentId).ifPresent(assignment -> {
 			assignment.setRevokedAt(Instant.now());
 			roleAssignmentRepository.save(assignment);
 			String revokedRoleName = rbacRoleRepository.findById(assignment.getRoleId()).map(RbacRole::getName).orElse(String.valueOf(assignment.getRoleId()));
-			auditService.record("role_assignment", "revoked", assignment.getUserId(), null,
-					"role '" + revokedRoleName + "' revoked", assignment.getOrganizationId(), assignment.getProjectId());
+			Integer auditActor = actorUserId != null ? actorUserId : assignment.getUserId();
+			String targetEmail = usersRepository.findById(assignment.getUserId())
+					.map(u -> u.getUser_email() != null && !u.getUser_email().isEmpty() ? u.getUser_email() : u.getUser_login())
+					.orElse(null);
+			auditService.record("role_assignment", "revoked", auditActor, null,
+					"role '" + revokedRoleName + "' revoked", assignment.getOrganizationId(), assignment.getProjectId(), targetEmail);
 		});
 	}
 
