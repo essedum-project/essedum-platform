@@ -72,7 +72,7 @@
       <!-- Actions Column -->
       <ng-container matColumnDef="comments">
         <th mat-header-cell *matHeaderCellDef>Comments</th>
-        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+        <td mat-cell *matCellDef="let row"><span class="comment-text" [title]="row.comments || ''">{{ row.comments || '—' }}</span></td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
@@ -98,10 +98,10 @@
 
   <!-- STREAMING SERVICES (Pipeline/Agent/MCP) - Org Approved, Ready for Platform Admin (Rank 3) -->
   <div class="streaming-org-drafts-section" *ngIf="streamingOrgDrafts.length > 0">
-    <!-- <div class="section-title">
+    <div class="section-title">
       <mat-icon>public</mat-icon>
       <span>Resources Ready for Platform Admin Approval</span>
-    </div> -->
+    </div>
 
     <table mat-table [dataSource]="streamingOrgDraftsDataSource" class="admin-console-table streaming-table">
 
@@ -144,7 +144,7 @@
       <!-- Actions Column -->
       <ng-container matColumnDef="comments">
         <th mat-header-cell *matHeaderCellDef>Comments</th>
-        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+        <td mat-cell *matCellDef="let row"><span class="comment-text" [title]="row.comments || ''">{{ row.comments || '—' }}</span></td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
@@ -206,7 +206,7 @@
       </ng-container>
       <ng-container matColumnDef="comments">
         <th mat-header-cell *matHeaderCellDef>Comments</th>
-        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+        <td mat-cell *matCellDef="let row"><span class="comment-text" [title]="row.comments || ''">{{ row.comments || '—' }}</span></td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
@@ -245,7 +245,7 @@
       </ng-container>
       <ng-container matColumnDef="comments">
         <th mat-header-cell *matHeaderCellDef>Comments</th>
-        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+        <td mat-cell *matCellDef="let row"><span class="comment-text" [title]="row.comments || ''">{{ row.comments || '—' }}</span></td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
@@ -297,7 +297,7 @@
       </ng-container>
       <ng-container matColumnDef="comments">
         <th mat-header-cell *matHeaderCellDef>Comments</th>
-        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+        <td mat-cell *matCellDef="let row"><span class="comment-text" [title]="row.comments || ''">{{ row.comments || '—' }}</span></td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
@@ -346,7 +346,7 @@
       </ng-container>
       <ng-container matColumnDef="comments">
         <th mat-header-cell *matHeaderCellDef>Comments</th>
-        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+        <td mat-cell *matCellDef="let row"><span class="comment-text" [title]="row.comments || ''">{{ row.comments || '—' }}</span></td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
@@ -408,7 +408,7 @@
       </ng-container>
       <ng-container matColumnDef="comments">
         <th mat-header-cell *matHeaderCellDef>Comments</th>
-        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+        <td mat-cell *matCellDef="let row"><span class="comment-text" [title]="row.comments || ''">{{ row.comments || '—' }}</span></td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
@@ -458,7 +458,7 @@
       </ng-container>
       <ng-container matColumnDef="comments">
         <th mat-header-cell *matHeaderCellDef>Comments</th>
-        <td mat-cell *matCellDef="let row"><span class="comment-text">{{ row.comments || '—' }}</span></td>
+        <td mat-cell *matCellDef="let row"><span class="comment-text" [title]="row.comments || ''">{{ row.comments || '—' }}</span></td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>

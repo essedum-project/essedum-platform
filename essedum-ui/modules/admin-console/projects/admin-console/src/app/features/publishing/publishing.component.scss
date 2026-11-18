@@ -281,6 +281,22 @@ body.header-light-theme .comment-badge,
   border-color: rgba(220, 38, 38, 0.2);
 }
 
+/* ── Comments column (read-only text) ───────────────────────────────────── */
+.comment-text {
+  display: inline-block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  color: #e2e8f0 !important;
+}
+
+body.header-light-theme .comment-text,
+.admin-console-shell.light-theme .comment-text {
+  color: #1e293b !important;
+}
+
 /* ── Paginator theme ─────────────────────────────────────────────────────── */
 mat-paginator,
 .mat-mdc-paginator {
@@ -368,7 +384,8 @@ body.header-light-theme .draft-creator-badge,
 /* STREAMING SERVICES STYLING (Pipeline/Agent/MCP Resources) */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-.streaming-drafts-section {
+.streaming-drafts-section,
+.streaming-org-drafts-section {
   margin-top: 24px;
   padding: 0;
 
@@ -522,7 +539,8 @@ body.header-light-theme .draft-creator-badge,
   }
 }
 
-body.header-light-theme .streaming-drafts-section .section-title {
+body.header-light-theme .streaming-drafts-section .section-title,
+body.header-light-theme .streaming-org-drafts-section .section-title {
   color: #1e293b;
   border-bottom: 2px solid rgba(37, 99, 235, 0.2);
 
@@ -581,7 +599,8 @@ body.header-light-theme .empty-state {
 }
 
 /* ── STREAMING SERVICES TABLE STYLES ── */
-.streaming-drafts-section {
+.streaming-drafts-section,
+.streaming-org-drafts-section {
   margin-top: 20px;
 
   .section-title {
@@ -605,7 +624,9 @@ body.header-light-theme .empty-state {
 }
 
 body.header-light-theme .streaming-drafts-section .section-title,
-.admin-console-shell.light-theme .streaming-drafts-section .section-title {
+body.header-light-theme .streaming-org-drafts-section .section-title,
+.admin-console-shell.light-theme .streaming-drafts-section .section-title,
+.admin-console-shell.light-theme .streaming-org-drafts-section .section-title {
   color: #1e293b;
 
   mat-icon {

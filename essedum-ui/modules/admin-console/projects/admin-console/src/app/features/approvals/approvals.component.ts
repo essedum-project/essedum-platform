@@ -489,13 +489,14 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
         apiCall$ = this.api.approveProjectApproval(resourceId, finalProjectId || 0, result.comments);
       }
 
-    apiCall$.subscribe({
-      next: () => {
-        this.notify.success(`${name} approved successfully`);
-        this.audit('APPROVED', 'Pipeline', name, isOrgLevel, isPlatformLevel);
-        this.load();
-      },
-      error: () => this.notify.error(`Failed to approve ${name}`),
+      apiCall$.subscribe({
+        next: () => {
+          this.notify.success(`${name} approved successfully`);
+          this.audit('APPROVED', 'Pipeline', name, isOrgLevel, isPlatformLevel);
+          this.load();
+        },
+        error: () => this.notify.error(`Failed to approve ${name}`),
+      });
     });
   }
 
