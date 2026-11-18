@@ -1283,6 +1283,22 @@ button[mat-button], button[mat-stroked-button] {
   justify-content: flex-end;
   gap: 12px;
 
+  .pipeline-approval-comments {
+    display: inline-flex;
+    align-items: center;
+    max-width: 320px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #475569;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   // Compact inline approval status badge
   .approval-status-inline {
     display: inline-flex;
