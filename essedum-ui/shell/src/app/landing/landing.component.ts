@@ -1110,26 +1110,33 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     // _applyRbacScope() merges platform-wide, org-scoped, AND project-scoped roles so
     // higher-ranked roles (org admin, platform admin) remain visible even when the user
     // also has a lower-ranked project-only role.
+    // The cached roles are then merged with by-user-project below (that API also covers
+    // org-wide grants via the project's organisation, which the cache can miss/be stale on).
+    let cacheRoles: any[] = [];
     if (this._rbacAssignmentsCache.length > 0) {
       this.selectedproject = project;
       this._applyRbacScope();
-      this.isRoleLoading = false;
-      sessionStorage.setItem('_rbac_role_list', JSON.stringify(this.roleList));
-      if (this.roleList.length > 0) {
-        this._lastManualRoleSwitch = 0;
-        this.valuechangerole(this.roleList[0]);
-      }
-      return;
+      cacheRoles = [...this.roleList];
     }
 
-    // Cache not ready yet (first load) — fall back to the project-specific API.
+    // Fetch project-specific roles and merge with the cached ones.
     const userId = (() => {
       try { return JSON.parse(sessionStorage.getItem('user') || 'null')?.id ?? null; }
       catch { return null; }
     })();
 
-    if (!userId || !projId) {
+    const applyRoles = (roles: any[]) => {
       this.isRoleLoading = false;
+      this.roleList = roles;
+      sessionStorage.setItem('_rbac_role_list', JSON.stringify(roles));
+      if (roles.length > 0) {
+        this._lastManualRoleSwitch = 0;
+        this.valuechangerole(roles[0]);
+      }
+    };
+
+    if (!userId || !projId) {
+      if (cacheRoles.length > 0) { applyRoles(cacheRoles); } else { this.isRoleLoading = false; }
       return;
     }
 
@@ -1151,20 +1158,19 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
           seen.add(key);
           scopedRoles.push({ name: roleName, rank: a.roleRank, id: a.roleId });
         }
+        for (const r of cacheRoles) {
+          const key = (r.name || '').toLowerCase();
+          if (!seen.has(key)) { seen.add(key); scopedRoles.push(r); }
+        }
         scopedRoles.sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
-
-        this.isRoleLoading = false;
 
         // Always update roleList (even when empty) so stale roles from a previous
         // project don't persist when the new project has no granted roles.
-        this.roleList = scopedRoles;
-        sessionStorage.setItem('_rbac_role_list', JSON.stringify(scopedRoles));
-        if (scopedRoles.length > 0) {
-          this._lastManualRoleSwitch = 0;
-          this.valuechangerole(scopedRoles[0]);
-        }
+        applyRoles(scopedRoles);
       },
-      error: () => { this.isRoleLoading = false; }
+      error: () => {
+        if (cacheRoles.length > 0) { applyRoles(cacheRoles); } else { this.isRoleLoading = false; }
+      }
     });
   }
 
