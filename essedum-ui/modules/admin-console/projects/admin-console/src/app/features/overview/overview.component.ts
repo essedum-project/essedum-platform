@@ -192,6 +192,7 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
     return details
       .replace(/\s*\(org=\d+\)/g, '')
       .replace(/\s*\(project=\d+\)/g, '')
+      .replace(/AI Client/g, 'AI Engineer')
       .trim();
   }
 
