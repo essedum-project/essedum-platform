@@ -532,6 +532,9 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     // Suppress auto-switch so the admin stays on the current screen.
     setTimeout(() => {
       this._suppressAutoSwitch = true;
+      // An in-flight call would make supplementRbacData() return early and leave the
+      // role dropdown without the just-granted role.
+      this._rbacDataLoading = false;
       this.supplementRbacData();
       setTimeout(() => { this._suppressAutoSwitch = false; }, 3000);
       // Also refresh sidebar in case the current role's menu changed.
