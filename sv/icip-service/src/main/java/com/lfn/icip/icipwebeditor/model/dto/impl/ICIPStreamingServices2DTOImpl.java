@@ -152,5 +152,11 @@ public class ICIPStreamingServices2DTOImpl implements ICIPStreamingServices2DTO 
         }
         return null;
     }
+
+    @Override
+    public String getComments() {
+        Object val = data.get("comments");
+        return val != null ? val.toString() : null;
+    }
 }
 
