@@ -177,6 +177,11 @@ public class ICIPPartialDatasource extends BaseDomain implements Serializable {
 	@com.fasterxml.jackson.annotation.JsonProperty("approval_status")
 	private String approvalStatus = "DRAFT";
 
+	/** Admin comment captured when a resource is approved or rejected */
+	@Column(name = "comments", columnDefinition = "TEXT")
+	@com.fasterxml.jackson.annotation.JsonProperty("comments")
+	private String comments;
+
 	@Column(name = "project_id")
 	@com.fasterxml.jackson.annotation.JsonProperty("project_id")
 	private Integer projectId;
