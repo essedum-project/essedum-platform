@@ -147,7 +147,7 @@
             </div>
             <!-- ── / Menu Customizer ── -->
 
-            <button mat-icon-button="" [matMenuTriggerFor]="menu" (click)="getSession()" [matTooltip]="user.user_f_name"
+            <button mat-icon-button="" [matMenuTriggerFor]="menu" #profileMenuTrigger="matMenuTrigger" (click)="getSession()" [matTooltip]="user.user_f_name"
               class="userMobile selector-3-80 user-profile-btn user-btn-height">
               <span *ngIf="!profileimage"
                 [ngClass]="umargin ? 'uname1' : 'uname2'"
@@ -178,7 +178,7 @@
                 </span>
                 <mat-form-field class="profile-form-field" appearance="outline" subscriptSizing="dynamic">
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedportfolio"
-                    (ngModelChange)="onSelection($event)" name="Portfolio" panelClass="profile-select-panel"
+                    (ngModelChange)="onSelection($event); profileMenuTrigger.closeMenu()" name="Portfolio" panelClass="profile-select-panel"
                     [disabled]="isOrgLoading">
                     <mat-option *ngFor="let item of portfoliodata; trackBy: trackByMethod" [value]="item">
                       {{ item.portfolioName }}
@@ -195,7 +195,7 @@
                 </span>
                 <mat-form-field class="profile-form-field" appearance="outline" subscriptSizing="dynamic">
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedproject"
-                    (ngModelChange)="valuechangeproject1($event)" name="project" panelClass="profile-select-panel"
+                    (ngModelChange)="valuechangeproject1($event); profileMenuTrigger.closeMenu()" name="project" panelClass="profile-select-panel"
                     [disabled]="isProjectLoading">
                     <mat-option *ngFor="let item of projectList; trackBy: trackByMethod" [value]="item">
                       {{ item.projectdisplayname }}
@@ -212,7 +212,7 @@
                 </span>
                 <mat-form-field class="profile-form-field" appearance="outline" subscriptSizing="dynamic">
                   <mat-select [compareWith]="compareObjects" [(ngModel)]="selectedrole"
-                    (ngModelChange)="valuechangerole($event); clearsession()" name="role"
+                    (ngModelChange)="valuechangerole($event); clearsession(); profileMenuTrigger.closeMenu()" name="role"
                     panelClass="profile-select-panel matOptionPopup"
                     [disabled]="isRoleLoading">
                     <mat-option *ngFor="let item of roleList; trackBy: trackByMethod" [value]="item" [id]="'role-' + item.name">

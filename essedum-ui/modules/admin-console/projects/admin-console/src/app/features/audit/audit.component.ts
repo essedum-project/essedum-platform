@@ -24,11 +24,12 @@ export class AuditComponent implements OnInit, AfterViewInit {
 
   readonly columns = ['occurredAt', 'entity', 'action', 'actorName', 'targetUserName', 'details', 'correlationId'];
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  ngAfterViewInit(): void {
-    this.auditDataSource.paginator = this.paginator;
+  // The paginator renders only once events exist (*ngIf), so bind it when it appears.
+  @ViewChild(MatPaginator) set paginator(p: MatPaginator | undefined) {
+    if (p) this.auditDataSource.paginator = p;
   }
+
+  ngAfterViewInit(): void {}
 
   constructor(
     private readonly api: ApiService,
@@ -58,6 +59,7 @@ export class AuditComponent implements OnInit, AfterViewInit {
       .replace(/\s*\(org=\d+\)/g, '')
       .replace(/\s*\(project=\d+\)/g, '')
       .replace(/AI Client/g, 'AI Engineer')
+      .replace(/'Admin'/g, "'AI Platform Admin'")
       .trim();
   }
 
@@ -77,6 +79,5 @@ export class AuditComponent implements OnInit, AfterViewInit {
 
   private syncFilteredData(): void {
     this.auditDataSource.data = this.filteredEvents;
-    this.auditDataSource.paginator = this.paginator;
   }
 }

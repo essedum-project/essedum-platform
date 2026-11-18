@@ -43,11 +43,12 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly auditColumns = ['occurredAt', 'entity', 'action', 'actorName', 'targetUserName', 'details', 'correlationId'];
   loading = true;
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  ngAfterViewInit(): void {
-    this.recentAudit.paginator = this.paginator;
+  // The paginator renders only once audit rows exist (*ngIf), so bind it when it appears.
+  @ViewChild(MatPaginator) set paginator(p: MatPaginator | undefined) {
+    if (p) this.recentAudit.paginator = p;
   }
+
+  ngAfterViewInit(): void {}
 
   constructor(
     private readonly api: ApiService,
@@ -73,6 +74,8 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
   // rbac-init-complete (2 s after role change) if rbac-context-ready already
   // triggered a fresh fetch.
   private lastLoadedAt = 0;
+  private isPlatformAdminView = false;
+  private scopedOrgId: number | null = null;
 
   ngOnInit(): void {
     console.log('[OVERVIEW] ngOnInit');
@@ -107,6 +110,8 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
           console.log('[OVERVIEW] Fetching data — orgId:', orgId, 'projectId:', projectId, 'roleRank:', roleRank);
           const userId = this.userContext.userId$.value;
           const isPlatformAdmin = roleRank != null && roleRank >= 4;
+          this.isPlatformAdminView = isPlatformAdmin;
+          this.scopedOrgId = orgId;
           const scopedOrgId     = isPlatformAdmin ? undefined : (orgId ?? undefined);
           const scopedProjectId = isPlatformAdmin ? undefined : (projectId ?? undefined);
 
@@ -148,7 +153,8 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!data) { this.loading = false; return; }
         this.lastLoadedAt = Date.now();
         console.log('[OVERVIEW] Data loaded — orgs:', data.orgs.length, 'projects:', data.projects.length, 'members:', data.members.length, 'approvals:', data.approvalsCount);
-        this.cards[0].count = data.orgs.length;
+        // Non-platform-admins are scoped to the one org selected in the thumbnail.
+        this.cards[0].count = this.isPlatformAdminView ? data.orgs.length : (this.scopedOrgId != null ? 1 : data.orgs.length);
         this.cards[1].count = data.projects.length;
         this.cards[2].count = data.members.length;
         this.cards[3].count = data.approvalsCount;
@@ -193,6 +199,7 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
       .replace(/\s*\(org=\d+\)/g, '')
       .replace(/\s*\(project=\d+\)/g, '')
       .replace(/AI Client/g, 'AI Engineer')
+      .replace(/'Admin'/g, "'AI Platform Admin'")
       .trim();
   }
 

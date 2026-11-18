@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewChildren, QueryList, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { combineLatest, switchMap, map, take, of, Subject } from 'rxjs';
 import { takeUntil, distinctUntilChanged, catchError } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
@@ -92,28 +92,24 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly streamingOrgColumns = ['name', 'type', 'createdBy', 'status', 'actions'];
   readonly streamingPlatformColumns = ['name', 'type', 'createdBy', 'status', 'actions'];
 
-  @ViewChild(MatPaginator) legacyPaginator!: MatPaginator;
-  @ViewChildren(MatPaginator) allPaginators!: QueryList<MatPaginator>;
-  
+  // These paginators sit behind *ngIf, so bind each one whenever it actually renders
+  // (index-based binding in ngAfterViewInit crashed/mis-bound and left "0 of 0").
+  @ViewChild('legacyPaginator') set legacyPaginator(p: MatPaginator | undefined) {
+    if (p) this.pending.paginator = p;
+  }
+  @ViewChild('streamingPaginator') set streamingPaginator(p: MatPaginator | undefined) {
+    if (p) this.streamingApprovalsDataSource.paginator = p;
+  }
+  @ViewChild('orgStreamingPaginator') set orgStreamingPaginator(p: MatPaginator | undefined) {
+    if (p) this.streamingOrgApprovalsDataSource.paginator = p;
+  }
+  @ViewChild('platformStreamingPaginator') set platformStreamingPaginator(p: MatPaginator | undefined) {
+    if (p) this.streamingPlatformApprovalsDataSource.paginator = p;
+  }
+
   private readonly destroy$ = new Subject<void>();
 
-  ngAfterViewInit(): void {
-    // Bind legacy paginator
-    this.legacyPaginator.pageSizeOptions = [5, 10, 25];
-    this.pending.paginator = this.legacyPaginator;
-
-    // Bind paginators for streaming tables
-    const paginators = this.allPaginators.toArray();
-    if (paginators.length >= 1) {
-      this.streamingApprovalsDataSource.paginator = paginators[0];
-    }
-    if (paginators.length >= 2) {
-      this.streamingOrgApprovalsDataSource.paginator = paginators[1];
-    }
-    if (paginators.length >= 3) {
-      this.streamingPlatformApprovalsDataSource.paginator = paginators[2];
-    }
-  }
+  ngAfterViewInit(): void {}
 
   ngOnDestroy(): void {
     this.destroy$.next();

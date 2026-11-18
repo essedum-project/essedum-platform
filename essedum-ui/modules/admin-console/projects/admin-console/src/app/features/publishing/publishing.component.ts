@@ -88,22 +88,18 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Org id used for ORG_APPROVED lookups (portfoliodata.id — see load()). */
   private approvalOrgId: number | null = null;
 
-  @ViewChild(MatPaginator) legacyPaginator!: MatPaginator;
-  @ViewChild('streamingPaginator') streamingPaginator!: MatPaginator;
-  @ViewChild('orgStreamingPaginator') orgStreamingPaginator!: MatPaginator;
+  // These paginators sit behind *ngIf, so bind them whenever they actually render
+  // (binding once in ngAfterViewInit left them showing "0 of 0").
+  @ViewChild('streamingPaginator') set streamingPaginator(p: MatPaginator | undefined) {
+    if (p) this.streamingServicesDraftsDataSource.paginator = p;
+  }
+  @ViewChild('orgStreamingPaginator') set orgStreamingPaginator(p: MatPaginator | undefined) {
+    if (p) this.streamingOrgDraftsDataSource.paginator = p;
+  }
 
   private readonly destroy$ = new Subject<void>();
 
-  ngAfterViewInit(): void {
-    this.versions.paginator = this.legacyPaginator;
-
-    if (this.streamingPaginator) {
-      this.streamingServicesDraftsDataSource.paginator = this.streamingPaginator;
-    }
-    if (this.orgStreamingPaginator) {
-      this.streamingOrgDraftsDataSource.paginator = this.orgStreamingPaginator;
-    }
-  }
+  ngAfterViewInit(): void {}
 
   ngOnDestroy(): void {
     this.destroy$.next();
