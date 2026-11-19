@@ -938,3 +938,12 @@ body.header-light-theme .streaming-table,
   }
 }
 
+
+/* Keep submit button text readable in every theme */
+.btn-submit-org.mat-mdc-button,
+.btn-submit-platform.mat-mdc-button,
+.btn-submit-org.mat-mdc-button .mdc-button__label,
+.btn-submit-platform.mat-mdc-button .mdc-button__label {
+  color: #ffffff !important;
+  --mdc-text-button-label-text-color: #ffffff;
+}
