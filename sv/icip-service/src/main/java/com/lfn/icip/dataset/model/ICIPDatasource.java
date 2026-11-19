@@ -273,7 +273,7 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 	public ICIPDatasource clone() {
 		ICIPDatasource ds = new ICIPDatasource(id, name, description, type, connectionDetails, salt, organization,
 				dshashcode, activetime, category,extras, interfacetype,fordataset,forruntime,foradapter,formodel,forpromptprovider,forendpoint,forapp,
-				approvalStatus, projectId, approvedOrganizationId);
+				approvalStatus, comments, projectId, approvedOrganizationId);
 		ds.setAlias(alias);
 		ds.setLastmodifiedby(lastmodifiedby);
 		ds.setLastmodifieddate(lastmodifieddate);

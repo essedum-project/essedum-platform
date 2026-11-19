@@ -527,6 +527,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       apiCall$.subscribe({
         next: () => {
           this.notify.success(`${name} rejected successfully`);
+          this.audit('REJECTED', 'Pipeline', name, isOrgLevel, isPlatformLevel);
           this.load();
         },
         error: () => this.notify.error(`Failed to reject ${name}`),
@@ -566,7 +567,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
           : this.api.approveDatasetProjectApproval(resourceId, this.projectId || 0, result.comments);
 
       apiCall$.subscribe({
-        next: () => { this.notify.success(`${name} approved successfully`); this.load(); },
+        next: () => { this.notify.success(`${name} approved successfully`); this.audit('APPROVED', 'Dataset', name, isOrgLevel, isPlatformLevel); this.load(); },
         error: () => this.notify.error(`Failed to approve ${name}`),
       });
     });
@@ -597,7 +598,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
           : this.api.rejectDatasetProjectApproval(resourceId, result.comments);
 
       apiCall$.subscribe({
-        next: () => { this.notify.success(`${name} rejected successfully`); this.load(); },
+        next: () => { this.notify.success(`${name} rejected successfully`); this.audit('REJECTED', 'Dataset', name, isOrgLevel, isPlatformLevel); this.load(); },
         error: () => this.notify.error(`Failed to reject ${name}`),
       });
     });
@@ -630,6 +631,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       apiCall$.subscribe({
         next: () => {
           this.notify.success(`${name} approved successfully`);
+          this.audit('APPROVED', 'Connection', name, isOrgLevel, isPlatformLevel);
           this.load();
         },
         error: () => this.notify.error(`Failed to approve ${name}`),
@@ -664,6 +666,7 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
       apiCall$.subscribe({
         next: () => {
           this.notify.success(`${name} rejected successfully`);
+          this.audit('REJECTED', 'Connection', name, isOrgLevel, isPlatformLevel);
           this.load();
         },
         error: () => this.notify.error(`Failed to reject ${name}`),

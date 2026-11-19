@@ -961,3 +961,23 @@ body.header-light-theme .streaming-table {
   .date-text { color: #64748b; }
 }
 
+
+/* Light-theme paginator (::ng-deep so it reaches Material's inner elements under emulated encapsulation) */
+:host-context(body.header-light-theme) ::ng-deep mat-paginator.mat-mdc-paginator,
+:host-context(.admin-console-shell.light-theme) ::ng-deep mat-paginator.mat-mdc-paginator,
+body.header-light-theme ::ng-deep mat-paginator.mat-mdc-paginator,
+.admin-console-shell.light-theme ::ng-deep mat-paginator.mat-mdc-paginator {
+  --mat-paginator-container-background-color: #f1f5f9;
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+
+  .mat-mdc-paginator-outer-container,
+  .mat-mdc-paginator-container { background: #f1f5f9 !important; }
+  .mat-mdc-paginator-range-label,
+  .mat-mdc-paginator-page-size-label { color: #64748b !important; }
+  .mat-mdc-select-value { color: #1e293b !important; }
+  .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b !important; }
+  .mat-mdc-icon-button svg,
+  .mat-mdc-icon-button .mat-icon { color: #64748b !important; fill: #64748b !important; }
+}
