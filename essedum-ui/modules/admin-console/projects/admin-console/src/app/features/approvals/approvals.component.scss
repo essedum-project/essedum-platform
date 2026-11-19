@@ -963,6 +963,8 @@ body.header-light-theme .streaming-table {
 
 
 /* Light-theme paginator (::ng-deep so it reaches Material's inner elements under emulated encapsulation) */
+:host-context(body.header-light-theme) ::ng-deep mat-paginator.mat-mdc-paginator,
+:host-context(.admin-console-shell.light-theme) ::ng-deep mat-paginator.mat-mdc-paginator,
 body.header-light-theme ::ng-deep mat-paginator.mat-mdc-paginator,
 .admin-console-shell.light-theme ::ng-deep mat-paginator.mat-mdc-paginator {
   --mat-paginator-container-background-color: #f1f5f9;
