@@ -6,7 +6,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from '../../core/api.service';
 import { RoleNameUtil } from '../../core/role-name.util';
-import type { RbacRole, RoleAssignment, UserOption } from '../../core/api-models';
+import type { LegacyOrganisation, LegacyProject, RbacRole, RoleAssignment, UserOption } from '../../core/api-models';
 import { GrantRoleDialogComponent } from './grant-role-dialog/grant-role-dialog.component';
 import { UserContextService } from '../../core/user-context.service';
 import { NotificationService } from '../../core/notification.service';
@@ -16,6 +16,8 @@ interface RoleAssignmentRow extends RoleAssignment {
   roleName: string;
   userName: string;
   scopeLabel: string;
+  /** Organisation the grant belongs to (direct, or via the project's organisation). */
+  orgId: number | null;
 }
 
 @Component({
@@ -27,8 +29,29 @@ interface RoleAssignmentRow extends RoleAssignment {
 })
 export class AccessComponent implements OnInit, AfterViewInit {
   rows = new MatTableDataSource<RoleAssignmentRow>([]);
-  roles: RbacRole[] = [];
   rank = 0;
+
+  /** Filter dropdown sources (same lists the grant-role dialog uses). */
+  users: UserOption[] = [];
+  roles: RbacRole[] = [];
+  projects: LegacyProject[] = [];
+  organisations: LegacyOrganisation[] = [];
+
+  /** Current filter selections; null = "All". */
+  selectedUserId: number | null = null;
+  selectedRoleId: number | null = null;
+  selectedOrgId: number | null = null;
+  selectedProjectId: number | null = null;
+
+  /** Projects narrowed to the selected organisation (all projects when none selected). */
+  get filteredProjects(): LegacyProject[] {
+    if (this.selectedOrgId == null) {
+      return this.projects;
+    }
+    return this.projects.filter(p => p.organisationId === this.selectedOrgId);
+  }
+
+  private allRows: RoleAssignmentRow[] = [];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -47,6 +70,11 @@ export class AccessComponent implements OnInit, AfterViewInit {
 
   get canCreateRole(): boolean { return this.rank >= 4; }
 
+  get hasActiveFilter(): boolean {
+    return this.selectedUserId != null || this.selectedRoleId != null
+      || this.selectedOrgId != null || this.selectedProjectId != null;
+  }
+
   getDisplayRoleName(roleName: string): string {
     return RoleNameUtil.getDisplayNameByRoleName(roleName);
   }
@@ -54,7 +82,48 @@ export class AccessComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.api.getAccessContext(this.userContext.userId$.value)
       .subscribe(ctx => (this.rank = ctx?.highestRank ?? 0));
+
+    // Same filtering/sorting as GrantRoleDialogComponent: only RBAC roles (rank defined),
+    // hide AI Engineer (rank 1), sort lowest → highest rank.
+    this.api.getRoles().subscribe(roles => {
+      this.roles = roles
+        .filter(r => r.rank != null)
+        .filter(r => r.rank !== 1)
+        .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
+    });
+    this.api.getUsers().subscribe(users => (this.users = users));
+    this.api.getProjects().subscribe(projects => (this.projects = projects));
+    this.api.getOrganisations()
+      .subscribe(orgs => (this.organisations = orgs));
+
     this.load();
+  }
+
+  /** Re-applies the User / Role / Organisation / Project filters to the loaded rows. */
+  applyFilters(): void {
+    this.rows.data = this.allRows.filter(row =>
+      (this.selectedUserId == null || row.userId === this.selectedUserId) &&
+      (this.selectedRoleId == null || row.roleId === this.selectedRoleId) &&
+      (this.selectedOrgId == null || row.orgId === this.selectedOrgId) &&
+      (this.selectedProjectId == null || row.projectId === this.selectedProjectId),
+    );
+    this.paginator?.firstPage();
+  }
+
+  /** Changing the organisation drops a project selection that belongs to another org. */
+  onOrgChange(): void {
+    if (this.selectedProjectId != null && !this.filteredProjects.some(p => p.id === this.selectedProjectId)) {
+      this.selectedProjectId = null;
+    }
+    this.applyFilters();
+  }
+
+  clearFilters(): void {
+    this.selectedUserId = null;
+    this.selectedRoleId = null;
+    this.selectedOrgId = null;
+    this.selectedProjectId = null;
+    this.applyFilters();
   }
 
   createRole(): void {
@@ -72,40 +141,35 @@ export class AccessComponent implements OnInit, AfterViewInit {
   }
 
   private load(): void {
-    combineLatest([this.userContext.orgId$, this.userContext.projectId$, this.userContext.selectedRoleRank$])
-      .pipe(take(1))
-      .subscribe(([orgId, projectId, roleRank]) => {
-        const isPlatformAdmin = roleRank != null && roleRank >= 4;
-        combineLatest([
-          this.api.getRoleAssignments(this.userContext.userId$.value),
-          this.api.getRoles(),
-          this.api.getUsers(),
-          this.api.getProjects(),
-          this.api.getOrganisations(),
-        ])
-          .pipe(
-            map(([assignments, roles, users, projects, organisations]) => {
-              this.roles = roles;
-              let filtered = assignments.filter(a => !a.revokedAt);
-              if (!isPlatformAdmin) {
-                filtered = filtered.filter(a =>
-                  (orgId == null || a.organizationId == null || Number(a.organizationId) === Number(orgId)) &&
-                  (projectId == null || a.projectId == null || Number(a.projectId) === Number(projectId))
-                );
-              }
-              return filtered.map(a => ({
-                ...a,
-                roleName: this.getDisplayRoleName(roles.find(r => r.id === a.roleId)?.name ?? 'unknown'),
-                userName: users.find((u: UserOption) => u.id === a.userId)?.name ?? `User #${a.userId}`,
-                scopeLabel: a.projectId
-                  ? `Project: ${projects.find(p => p.id === a.projectId)?.name ?? '#' + a.projectId}`
-                  : a.organizationId
-                  ? `Organization: ${organisations.find(o => o.id === a.organizationId)?.name ?? '#' + a.organizationId}`
-                  : 'Platform',
-              }));
-            }),
-          )
-          .subscribe(rows => (this.rows.data = rows));
+    combineLatest([
+      this.api.getRoleAssignments(this.userContext.userId$.value),
+      this.api.getRoles(),
+      this.api.getUsers(),
+      this.api.getProjects(),
+      this.api.getOrganisations(),
+    ])
+      .pipe(
+        map(([assignments, roles, users, projects, organisations]) =>
+          assignments
+            .filter(a => !a.revokedAt)
+            .map(a => ({
+              ...a,
+              orgId: a.organizationId
+                ?? projects.find(p => p.id === a.projectId)?.organisationId
+                ?? null,
+              roleName: this.getDisplayRoleName(roles.find(r => r.id === a.roleId)?.name ?? 'unknown'),
+              userName: users.find((u: UserOption) => u.id === a.userId)?.name ?? `User #${a.userId}`,
+              scopeLabel: a.projectId
+                ? `Project: ${projects.find(p => p.id === a.projectId)?.name ?? '#' + a.projectId}`
+                : a.organizationId
+                ? `Organization: ${organisations.find(o => o.id === a.organizationId)?.name ?? '#' + a.organizationId}`
+                : 'Platform',
+            })),
+        ),
+      )
+      .subscribe(rows => {
+        this.allRows = rows;
+        this.applyFilters();
       });
   }
 
@@ -153,4 +217,3 @@ export class AccessComponent implements OnInit, AfterViewInit {
     });
   }
 }
-

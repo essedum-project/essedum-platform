@@ -635,16 +635,26 @@ public class ICIPDatasetController {
 		}
 	}
 
+	/** Extract the mandatory admin comment from the JSON body, falling back to the supplied value. */
+	private String extractComments(java.util.Map<String, Object> body, String fallback) {
+		if (body != null && body.get("comments") != null && !String.valueOf(body.get("comments")).isBlank()) {
+			return String.valueOf(body.get("comments"));
+		}
+		return fallback;
+	}
+
 	/** POST /approval/project/approve/{id}?projectId=X&rank=2 — Project Admin approves. */
 	@PostMapping("/approval/project/approve/{id}")
 	public ResponseEntity<?> approveDatasetProjectApproval(@PathVariable Integer id,
-			@RequestParam(required = false) Integer projectId, @RequestParam(required = false) String rank) {
+			@RequestParam(required = false) Integer projectId, @RequestParam(required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPDataset result = datasetApprovalWorkflowService.approveProjectApproval(id, projectId, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+			String comments = extractComments(body, null);
+			ICIPDataset result = datasetApprovalWorkflowService.approveProjectApproval(id, projectId, rank, comments);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus(), "comments", result.getComments() != null ? result.getComments() : ""));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
 		} catch (IllegalStateException | IllegalArgumentException e) {
@@ -657,13 +667,15 @@ public class ICIPDatasetController {
 
 	/** POST /approval/project/reject/{id}?rank=2 — Project Admin rejects. */
 	@PostMapping("/approval/project/reject/{id}")
-	public ResponseEntity<?> rejectDatasetProjectApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> rejectDatasetProjectApproval(@PathVariable Integer id, @RequestParam(required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPDataset result = datasetApprovalWorkflowService.rejectProjectApproval(id, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+			String comments = extractComments(body, null);
+			ICIPDataset result = datasetApprovalWorkflowService.rejectProjectApproval(id, rank, comments);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus(), "comments", result.getComments() != null ? result.getComments() : ""));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
 		} catch (IllegalStateException | IllegalArgumentException e) {
@@ -705,13 +717,15 @@ public class ICIPDatasetController {
 	@PostMapping("/approval/org/approve/{id}")
 	public ResponseEntity<?> approveDatasetOrgApproval(@PathVariable Integer id,
 			@RequestParam(required = false) String rank,
-			@RequestParam(required = false) Integer organizationId) {
+			@RequestParam(required = false) Integer organizationId,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPDataset result = datasetApprovalWorkflowService.approveOrgApproval(id, rank, organizationId);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+			String comments = extractComments(body, null);
+			ICIPDataset result = datasetApprovalWorkflowService.approveOrgApproval(id, rank, organizationId, comments);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus(), "comments", result.getComments() != null ? result.getComments() : ""));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
 		} catch (IllegalStateException | IllegalArgumentException e) {
@@ -724,13 +738,15 @@ public class ICIPDatasetController {
 
 	/** POST /approval/org/reject/{id}?rank=3 — Org Admin rejects. */
 	@PostMapping("/approval/org/reject/{id}")
-	public ResponseEntity<?> rejectDatasetOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> rejectDatasetOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPDataset result = datasetApprovalWorkflowService.rejectOrgApproval(id, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+			String comments = extractComments(body, null);
+			ICIPDataset result = datasetApprovalWorkflowService.rejectOrgApproval(id, rank, comments);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus(), "comments", result.getComments() != null ? result.getComments() : ""));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
 		} catch (IllegalStateException | IllegalArgumentException e) {
@@ -767,13 +783,15 @@ public class ICIPDatasetController {
 
 	/** POST /approval/platform/approve/{id}?rank=4 — Platform Admin approves (-> PUBLISHED). */
 	@PostMapping("/approval/platform/approve/{id}")
-	public ResponseEntity<?> approveDatasetPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> approveDatasetPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPDataset result = datasetApprovalWorkflowService.approvePlatformApproval(id, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+			String comments = extractComments(body, null);
+			ICIPDataset result = datasetApprovalWorkflowService.approvePlatformApproval(id, rank, comments);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus(), "comments", result.getComments() != null ? result.getComments() : ""));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
 		} catch (IllegalStateException | IllegalArgumentException e) {
@@ -786,13 +804,15 @@ public class ICIPDatasetController {
 
 	/** POST /approval/platform/reject/{id}?rank=4 — Platform Admin rejects. */
 	@PostMapping("/approval/platform/reject/{id}")
-	public ResponseEntity<?> rejectDatasetPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> rejectDatasetPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPDataset result = datasetApprovalWorkflowService.rejectPlatformApproval(id, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+			String comments = extractComments(body, null);
+			ICIPDataset result = datasetApprovalWorkflowService.rejectPlatformApproval(id, rank, comments);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus(), "comments", result.getComments() != null ? result.getComments() : ""));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
 		} catch (IllegalStateException | IllegalArgumentException e) {

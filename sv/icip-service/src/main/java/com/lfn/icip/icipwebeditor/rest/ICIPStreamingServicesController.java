@@ -226,6 +226,17 @@ public class ICIPStreamingServicesController {
 	}
 
 	/**
+	 * Extract the mandatory admin comment from the JSON request body, falling back to
+	 * the supplied value (legacy query parameter) when the body carries no comment.
+	 */
+	private String extractComments(java.util.Map<String, Object> body, String fallback) {
+		if (body != null && body.get("comments") != null && !String.valueOf(body.get("comments")).isBlank()) {
+			return String.valueOf(body.get("comments"));
+		}
+		return fallback;
+	}
+
+	/**
 	 * POST /approval/project/approve/{resourceId}?rank=2
 	 * Project Admin approves resource (PENDING_PROJECT_APPROVAL -> PROJECT_APPROVED)
 	 * projectId extracted from query param or 'project' header for visibility filtering
@@ -235,6 +246,7 @@ public class ICIPStreamingServicesController {
 			@PathVariable Integer resourceId,
 			@RequestParam(required = false) Integer projectId,
 			@RequestParam(required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body,
 			@RequestHeader Map<String, String> headers) {
 		try {
 			// Try query param first, then fall back to project header
@@ -259,7 +271,8 @@ public class ICIPStreamingServicesController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
 
-			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approveProjectApproval(resourceId, resolvedProjectId, rank);
+			String comments = extractComments(body, null);
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approveProjectApproval(resourceId, resolvedProjectId, rank, comments);
 			logger.info("[Approval] Resource {} approved at project level - Saved status: {}, projectId in DB: {}",
 					resourceId, result.getApprovalStatus(), result.getProjectId());
 			return ResponseEntity.ok(java.util.Map.of(
@@ -267,7 +280,8 @@ public class ICIPStreamingServicesController {
 					"message", "Resource approved",
 					"resourceId", resourceId,
 					"status", result.getApprovalStatus(),
-					"projectIdInDb", result.getProjectId()
+					"projectIdInDb", result.getProjectId(),
+					"comments", result.getComments() != null ? result.getComments() : ""
 			));
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
@@ -289,7 +303,8 @@ public class ICIPStreamingServicesController {
 	public ResponseEntity<?> rejectProjectApproval(
 			@PathVariable Integer resourceId,
 			@RequestParam(required = false) String rank,
-			@RequestParam(required = false) String reason) {
+			@RequestParam(required = false) String reason,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			logger.info("[Approval] POST /approval/project/reject/{} - rank: {}", resourceId, rank);
 
@@ -298,7 +313,8 @@ public class ICIPStreamingServicesController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
 
-			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectProjectApproval(resourceId, rank, reason);
+			String comments = extractComments(body, reason);
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectProjectApproval(resourceId, rank, comments);
 			logger.info("[Approval] Resource {} rejected at project level by rank: {}", resourceId, rank);
 			java.util.Map<String, Object> resp = new java.util.LinkedHashMap<>();
 			resp.put("success", true);
@@ -306,6 +322,7 @@ public class ICIPStreamingServicesController {
 			resp.put("resourceId", resourceId);
 			resp.put("status", result.getApprovalStatus());
 			resp.put("rejection_reason", result.getRejectionReason() != null ? result.getRejectionReason() : "");
+			resp.put("comments", result.getComments() != null ? result.getComments() : "");
 			return ResponseEntity.ok(resp);
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
@@ -392,6 +409,7 @@ public class ICIPStreamingServicesController {
 			@RequestParam(value = "rank", required = false) String rank,
 			@RequestParam(value = "orgName", required = false) String orgName,
 			@RequestParam(value = "orgId", required = false) Integer orgId,
+			@RequestBody(required = false) java.util.Map<String, Object> body,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
@@ -400,13 +418,15 @@ public class ICIPStreamingServicesController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
 			}
 
-			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approveOrgApproval(resourceId, userRank, orgName, orgId);
+			String comments = extractComments(body, null);
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approveOrgApproval(resourceId, userRank, orgName, orgId, comments);
 			logger.info("[Approval] Resource {} approved and published at org level", resourceId);
 			return ResponseEntity.ok(java.util.Map.of(
 					"success", true,
 					"message", "Resource published",
 					"resourceId", resourceId,
-					"status", result.getApprovalStatus()
+					"status", result.getApprovalStatus(),
+					"comments", result.getComments() != null ? result.getComments() : ""
 			));
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
@@ -429,7 +449,8 @@ public class ICIPStreamingServicesController {
 			@PathVariable Integer resourceId,
 			@RequestParam(value = "rank", required = false) String rank,
 			@RequestHeader(value = "roleId", required = false) String roleId,
-			@RequestParam(required = false) String reason) {
+			@RequestParam(required = false) String reason,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
 			if (userRank == null || userRank.isEmpty()) {
@@ -437,7 +458,8 @@ public class ICIPStreamingServicesController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
 			}
 
-			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectOrgApproval(resourceId, userRank, reason);
+			String comments = extractComments(body, reason);
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectOrgApproval(resourceId, userRank, comments);
 			logger.info("[Approval] Resource {} rejected at org level", resourceId);
 			java.util.Map<String, Object> resp = new java.util.LinkedHashMap<>();
 			resp.put("success", true);
@@ -445,6 +467,7 @@ public class ICIPStreamingServicesController {
 			resp.put("resourceId", resourceId);
 			resp.put("status", result.getApprovalStatus());
 			resp.put("rejection_reason", result.getRejectionReason() != null ? result.getRejectionReason() : "");
+			resp.put("comments", result.getComments() != null ? result.getComments() : "");
 			return ResponseEntity.ok(resp);
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
@@ -508,6 +531,7 @@ public class ICIPStreamingServicesController {
 	public ResponseEntity<?> approvePlatformApproval(
 			@PathVariable Integer resourceId,
 			@RequestParam(value = "rank", required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body,
 			@RequestHeader(value = "roleId", required = false) String roleId) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
@@ -516,13 +540,15 @@ public class ICIPStreamingServicesController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
 			}
 
-			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approvePlatformApproval(resourceId, userRank);
+			String comments = extractComments(body, null);
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.approvePlatformApproval(resourceId, userRank, comments);
 			logger.info("[Approval] Resource {} approved and published globally", resourceId);
 			return ResponseEntity.ok(java.util.Map.of(
 					"success", true,
 					"message", "Resource published globally",
 					"resourceId", resourceId,
-					"status", result.getApprovalStatus()
+					"status", result.getApprovalStatus(),
+					"comments", result.getComments() != null ? result.getComments() : ""
 			));
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());
@@ -545,7 +571,8 @@ public class ICIPStreamingServicesController {
 			@PathVariable Integer resourceId,
 			@RequestParam(value = "rank", required = false) String rank,
 			@RequestHeader(value = "roleId", required = false) String roleId,
-			@RequestParam(required = false) String reason) {
+			@RequestParam(required = false) String reason,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			String userRank = (rank != null && !rank.isEmpty()) ? rank : roleId;
 			if (userRank == null || userRank.isEmpty()) {
@@ -553,7 +580,8 @@ public class ICIPStreamingServicesController {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing user rank"));
 			}
 
-			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectPlatformApproval(resourceId, userRank, reason);
+			String comments = extractComments(body, reason);
+			com.lfn.icip.icipwebeditor.model.ICIPStreamingServices result = approvalWorkflowService.rejectPlatformApproval(resourceId, userRank, comments);
 			logger.info("[Approval] Resource {} rejected at platform level", resourceId);
 			java.util.Map<String, Object> resp = new java.util.LinkedHashMap<>();
 			resp.put("success", true);
@@ -561,6 +589,7 @@ public class ICIPStreamingServicesController {
 			resp.put("resourceId", resourceId);
 			resp.put("status", result.getApprovalStatus());
 			resp.put("rejection_reason", result.getRejectionReason() != null ? result.getRejectionReason() : "");
+			resp.put("comments", result.getComments() != null ? result.getComments() : "");
 			return ResponseEntity.ok(resp);
 		} catch (IllegalAccessError e) {
 			logger.warn("[Approval] Forbidden: {}", e.getMessage());

@@ -101,14 +101,28 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {}
 
+  typeLabel(row: any): string {
+    const t = String(row?.type || '').toLowerCase();
+    const i = String(row?.interfacetype || '').toLowerCase();
+    if (t === 'nativescript') return 'Native';
+    if (t === 'mcpserver' || i === 'mcp-pipeline' || i === 'tool') return 'MCP';
+    if (t === 'apppipeline' || t === 'app' || i === 'app-pipeline' || i === 'app') return 'App';
+    return row?.resource_type || 'Agent';
+  }
+
+  typeClass(row: any): string {
+    const l = this.typeLabel(row);
+    return l === 'App' ? 'pipeline' : l.toLowerCase();
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   readonly columns = ['assetName', 'versionNo', 'status', 'comments', 'nextGate', 'updatedAt', 'actions'];
-  readonly streamingColumns = ['name', 'type', 'createdBy', 'status', 'actions'];
-  readonly orgStreamingColumns = ['name', 'type', 'createdBy', 'status', 'actions'];
+  readonly streamingColumns = ['name', 'type', 'createdBy', 'status', 'comments', 'actions'];
+  readonly orgStreamingColumns = ['name', 'type', 'createdBy', 'status', 'comments', 'actions'];
 
   constructor(
     private readonly api: ApiService,

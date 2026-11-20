@@ -304,6 +304,20 @@ export class ModelDescriptionComponent implements OnInit {
     return classMap[this.getApprovalStatus()] || 'draft';
   }
 
+  /**
+   * Admin approval/rejection comment, shown beside the status badge for every
+   * status except DRAFT and PENDING_PROJECT_APPROVAL (where no comment exists yet).
+   */
+  getApprovalComments(): string {
+    const status = this.getApprovalStatus();
+    if (!status || status === 'DRAFT' || status === 'PENDING_PROJECT_APPROVAL') return '';
+    return (this.card?.comments || this.card?.approval_comments || '').toString().trim();
+  }
+
+  hasApprovalComments(): boolean {
+    return !!this.getApprovalComments();
+  }
+
   showSubmitButton(): boolean {
     const status = this.getApprovalStatus();
     return !!this.card && (status === 'DRAFT' || status === 'PROJECT_REJECTED');

@@ -46,14 +46,14 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 	private final UserProjectRoleService userProjectRoleService;
 
 	public CustomAuthorizationManager(ConfigurationApisService configurationApisService,
-			UserProjectRoleService userProjectRoleService) {
+	                                  UserProjectRoleService userProjectRoleService) {
 		this.configurationApisService = configurationApisService;
 		this.userProjectRoleService = userProjectRoleService;
 	}
 
 	@Override
 	public AuthorizationDecision check(Supplier<Authentication> authentication,
-			RequestAuthorizationContext authorizationContext) {
+	                                   RequestAuthorizationContext authorizationContext) {
 		HttpServletRequest request = authorizationContext.getRequest();
 		String urlForValidation = request.getRequestURI();
 
@@ -95,6 +95,7 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				|| ("POST".equals(dataMethod) && urlForValidation.contains("/datasets/test"))
 				|| ("POST".equals(dataMethod) && urlForValidation.contains("/datasets/add"))
 				|| ("DELETE".equals(dataMethod) && urlForValidation.contains("/datasets/delete"))
+				|| ("DELETE".equals(dataMethod) && urlForValidation.contains("/datasources/delete"))
 				|| ("POST".equals(dataMethod) && urlForValidation.contains("/fileserver/uploadTemp"))
 				|| ("POST".equals(dataMethod) && urlForValidation.contains("/file/create/"))
 				|| ("PUT".equals(dataMethod) && urlForValidation.contains("/streamingServices/update"))
