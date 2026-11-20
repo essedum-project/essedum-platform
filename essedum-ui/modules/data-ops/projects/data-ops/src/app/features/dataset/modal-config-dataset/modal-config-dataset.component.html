@@ -63,7 +63,7 @@
                                             <mat-label>Datasource</mat-label>
 
                                             <mat-select [(ngModel)]="data_datasource" name="datasource" required
-                                                [disabled]="isAuth" placeholder="Select Datasource"
+                                                 placeholder="Select Datasource"
                                                 (selectionChange)="onChanginDatasource($event.value)">
                                                 <mat-option *ngFor="let opt of datasourcesOpt" [value]="opt">
                                                     {{ opt }}
