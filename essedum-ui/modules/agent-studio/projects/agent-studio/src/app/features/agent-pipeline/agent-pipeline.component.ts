@@ -5332,6 +5332,25 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
+   * Admin approval/rejection comment, shown beside the status badge for every
+   * status except DRAFT and PENDING_PROJECT_APPROVAL (where no comment exists yet).
+   */
+  getApprovalComments(): string {
+    const status = this.getApprovalStatus();
+    if (!status || status === 'DRAFT' || status === 'PENDING_PROJECT_APPROVAL') return '';
+    // streamItem may be seeded from the dashboard card (no comments); the fetchPipeline
+    // response stored in this.card carries the admin comment.
+    const item: any = this.streamItem || {};
+    const fetched: any = this.card || {};
+    return (item.comments || fetched.comments || item.approval_comments || fetched.approval_comments || '')
+      .toString().trim();
+  }
+
+  hasApprovalComments(): boolean {
+    return !!this.getApprovalComments();
+  }
+
+  /**
    * Get approval icon for status
    */
   getApprovalStatusIcon(): string {

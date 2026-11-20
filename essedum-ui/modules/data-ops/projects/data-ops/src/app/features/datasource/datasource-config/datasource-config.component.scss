@@ -14,11 +14,11 @@ app-datasource-config .mdc-text-field--filled:hover:not(.mdc-text-field--disable
   background-color: transparent !important;
   background: transparent !important;
 }
-// Select underline — highest specificity via element selector (dark/default)
+// Select underline ï¿½ highest specificity via element selector (dark/default)
 app-datasource-config .mat-mdc-form-field-type-mat-select .mdc-text-field--filled {
   border-bottom: 1px solid rgba(79,142,247,0.5) !important;
 }
-// Select underline — light theme
+// Select underline ï¿½ light theme
 body.header-light-theme app-datasource-config .mat-mdc-form-field-type-mat-select .mdc-text-field--filled {
   border-bottom: 1px solid rgba(35,79,153,0.45) !important;
 }
@@ -72,7 +72,7 @@ app-datasource-config .mdc-text-field {
 :host ::ng-deep mat-form-field.full-width,
 .full-width { width: 100% !important; min-width: 0 !important; }
 
-// -- Form field — MDC variables + full background suppression (dark default) ---
+// -- Form field ï¿½ MDC variables + full background suppression (dark default) ---
 // Dual targeting: :host ::ng-deep (scoped) + ::ng-deep (global) covers all render contexts
 :host ::ng-deep .mat-mdc-form-field,
 :host ::ng-deep mat-form-field,
@@ -141,7 +141,7 @@ app-datasource-config .mdc-text-field {
 :host ::ng-deep mat-error,
 ::ng-deep mat-error { color: #f87171 !important; font-size: 11px !important; }
 
-// -- Select — SVG arrow, no fill (dark default) --------------------------------
+// -- Select ï¿½ SVG arrow, no fill (dark default) --------------------------------
 :host ::ng-deep .mat-mdc-select-trigger,
 ::ng-deep .mat-mdc-select-trigger { background: transparent !important; border: none !important; padding: 0 !important; }
 :host ::ng-deep .mat-mdc-select,
@@ -180,7 +180,7 @@ app-datasource-config .mdc-text-field {
 :host ::ng-deep mat-panel-title { color: #b8cce0 !important; font-size: 13px !important; font-weight: 600 !important; }
 :host ::ng-deep .mat-expansion-panel-body { color: #c8d8ea !important; }
 
-// -- mat-card — gradient top stripe via background shorthand (dark default) ---
+// -- mat-card ï¿½ gradient top stripe via background shorthand (dark default) ---
 // Using background gradient trick avoids conflict with MDC ::before state-layer
 :host ::ng-deep mat-card,
 :host ::ng-deep .mat-mdc-card {
@@ -243,7 +243,7 @@ app-datasource-config .mdc-text-field {
   tbody tr { border-bottom: 1px solid rgba(79,142,247,0.07); &:last-child { border-bottom: none; } }
 }
 
-// -- Action buttons — ::ng-deep defeats mat-raised-button MDC (dark default) --
+// -- Action buttons ï¿½ ::ng-deep defeats mat-raised-button MDC (dark default) --
 :host ::ng-deep button.cancel-btn,
 :host ::ng-deep button[mat-raised-button].cancel-btn,
 :host ::ng-deep .mat-mdc-raised-button.cancel-btn,
@@ -645,6 +645,22 @@ select.form-control {
   &--org-approved    { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
   &--rejected        { background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
   &--published       { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+}
+
+.conn-approval-comments {
+  display: inline-flex;
+  align-items: center;
+  max-width: 320px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .conn-submit-approval-btn {

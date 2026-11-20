@@ -26,6 +26,9 @@ export class StreamingServices {
   approval_status: string; // Approval workflow status: DRAFT, PENDING_PROJECT_APPROVAL, etc.
   project_id: number; // Project ID for approval workflow
   approved_organization_id: number; // Org ID for org-level approvals
+  comments: string; // Approval/rejection comment from the approval workflow
+  approval_comments: string;
+  rejection_reason: string;
   constructor(json?: any) {
     if (json != null) {
       this.cid = json.cid;
@@ -57,6 +60,9 @@ export class StreamingServices {
       this.approval_status = json.approval_status || 'DRAFT';
       this.project_id = json.project_id;
       this.approved_organization_id = json.approved_organization_id;
+      this.comments = json.comments;
+      this.approval_comments = json.approval_comments;
+      this.rejection_reason = json.rejection_reason;
     }
   }
 

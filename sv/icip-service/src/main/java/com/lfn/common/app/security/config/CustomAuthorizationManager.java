@@ -28,27 +28,27 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 
 	@Value("${apipermission.disable_api_security_validation:#{false}}")
 	private String permissionCheck;
-	
+
 	@Value("${security.claim:email}")
 	private String claim;
-	
+
 	@Value("${icip.pathPrefix}")
 	private String icipPathPrefix;
-	
+
 	@Autowired
 	ConfigurationApisService configurationApisService;
-	
+
 	@Autowired
 	private UserProjectRoleService userProjectRoleService;
-	
+
 	@Override
 	public AuthorizationDecision check(Supplier<Authentication> authentication,
-			RequestAuthorizationContext authorizationContext) {
+	                                   RequestAuthorizationContext authorizationContext) {
 		//The below URLS - does not require authentication nor authorization  - permitAll
 		if(AntPathRequestMatcher.antMatcher("/api/getConfigDetails").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/authenticate").matcher(authorizationContext.getRequest()).isMatch() ||
-                AntPathRequestMatcher.antMatcher("/api/github/**").matcher(authorizationContext.getRequest()).isMatch() ||
-                AntPathRequestMatcher.antMatcher("/actuator/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/api/github/**").matcher(authorizationContext.getRequest()).isMatch() ||
+				AntPathRequestMatcher.antMatcher("/actuator/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/get-startup-constants**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/pipelinemodels/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/projects/page").matcher(authorizationContext.getRequest()).isMatch() ||
@@ -79,23 +79,23 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				AntPathRequestMatcher.antMatcher("/api/interactiveWorkflow/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/RPAExternalTask/**").matcher(authorizationContext.getRequest()).isMatch())
 			return new AuthorizationDecision(true);
-		
+
 		String urlForValidation=authorizationContext.getRequest().getRequestURI();
 
 		//Fetch the whitelistedURL - does not require authentication nor authorization - permitAll
-		List<String> whitelistedURL = configurationApisService.getWhiteListedUrl(); 
+		List<String> whitelistedURL = configurationApisService.getWhiteListedUrl();
 		if(!whitelistedURL.isEmpty())
 			for (String apiRegex : whitelistedURL) {
 				if (RegularExpressionUtil.matchInputForRegex(urlForValidation, apiRegex)) {
 					return new AuthorizationDecision(true);
 				}
-			}	
-		
+			}
+
 		if (authorizationContext.getRequest().getUserPrincipal() == null) {
 			log.debug("Request unauthenticated: ", authorizationContext.getRequest().toString());
 			return new AuthorizationDecision(false);
 		}
-		
+
 		if (permissionCheck.equalsIgnoreCase("true")) {
 			log.debug("permissionCheck - ", permissionCheck);
 			return new AuthorizationDecision(true);
@@ -105,7 +105,7 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 			log.debug("Request assigned Anonymous User: ", authorizationContext.getRequest().toString());
 			return new AuthorizationDecision(false);
 		}
-		
+
 		if (HeadersUtil.getAuthorizationToken(authorizationContext.getRequest())!= null) {
 			userProjectRoleService.deleteExpiredToken();
 			if (userProjectRoleService
@@ -133,6 +133,7 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasets/test"))
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/datasets/add"))
 				|| ("DELETE".equals(pipelineMethod) && pipelineUri.contains("/datasets/delete"))
+				|| ("DELETE".equals(pipelineMethod) && pipelineUri.contains("/datasources/delete"))
 				|| ("POST".equals(pipelineMethod) && pipelineUri.contains("/git-configs/save"))
 				|| pipelineUri.contains("/folder/upload/")
 				|| pipelineUri.contains("/folder/update/")
@@ -153,12 +154,12 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 		} catch (InvalidProjectRequestHeader e) {
 			log.error("Invalid project request header", e);
 		}
-		
+
 		if (projectId == null) {
 			log.debug("Request does not have project ID: ", authorizationContext.getRequest().toString());
 			return new AuthorizationDecision(false);
 		}
-		
+
 		List<Integer> roleIdList = new ArrayList<Integer>();
 		if (roleId == null && HeadersUtil.getRoleName(authorizationContext.getRequest()) == null) {
 			roleIdList = userProjectRoleService.getMappedRolesForUserLoginAndProject(ICIPUtils.getUser(claim), projectId);
@@ -180,12 +181,12 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 		}
 
 		for (Integer loop_roleid : roleIdList) {
-				for (Map.Entry<String, List<String>> apiMap : this.configurationApisService.getRoleMappedApis(loop_roleid).entrySet()) {
-					if (RegularExpressionUtil.matchInputForRegex(urlForValidation,apiMap.getKey())
-							&& ((apiMap.getValue().contains(authorizationContext.getRequest().getMethod().toUpperCase())) || apiMap.getValue().contains("ALL"))) {
-						return new AuthorizationDecision(true);
-					}
+			for (Map.Entry<String, List<String>> apiMap : this.configurationApisService.getRoleMappedApis(loop_roleid).entrySet()) {
+				if (RegularExpressionUtil.matchInputForRegex(urlForValidation,apiMap.getKey())
+						&& ((apiMap.getValue().contains(authorizationContext.getRequest().getMethod().toUpperCase())) || apiMap.getValue().contains("ALL"))) {
+					return new AuthorizationDecision(true);
 				}
+			}
 		}
 
 		return new AuthorizationDecision(false);

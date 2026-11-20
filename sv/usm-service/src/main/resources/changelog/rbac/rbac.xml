@@ -929,7 +929,16 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Essedum (rbac)" id="rbac-38">
+	<changeSet author="Essedum (rbac)" id="rbac-42">
+		<preConditions onFail="MARK_RAN">
+			<not><columnExists tableName="rbac_audit_event" columnName="target_user_name" /></not>
+		</preConditions>
+		<addColumn tableName="rbac_audit_event">
+			<column name="target_user_name" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Essedum (rbac)" id="rbac-40">
 		<preConditions onFail="MARK_RAN">
 			<not><columnExists tableName="rbac_audit_event" columnName="org_id" /></not>
 		</preConditions>
@@ -938,7 +947,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Essedum (rbac)" id="rbac-39">
+	<changeSet author="Essedum (rbac)" id="rbac-41">
 		<preConditions onFail="MARK_RAN">
 			<not><columnExists tableName="rbac_audit_event" columnName="project_id" /></not>
 		</preConditions>

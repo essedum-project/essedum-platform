@@ -246,6 +246,11 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 	@com.fasterxml.jackson.annotation.JsonProperty("approval_status")
 	private String approvalStatus = "DRAFT";
 
+	/** Admin comment captured when a resource is approved or rejected */
+	@Column(name = "comments", columnDefinition = "TEXT")
+	@com.fasterxml.jackson.annotation.JsonProperty("comments")
+	private String comments;
+
 	/** The project the connection was submitted to for project level approval. */
 	@Column(name = "project_id")
 	@com.fasterxml.jackson.annotation.JsonProperty("project_id")
@@ -268,7 +273,7 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 	public ICIPDatasource clone() {
 		ICIPDatasource ds = new ICIPDatasource(id, name, description, type, connectionDetails, salt, organization,
 				dshashcode, activetime, category,extras, interfacetype,fordataset,forruntime,foradapter,formodel,forpromptprovider,forendpoint,forapp,
-				approvalStatus, projectId, approvedOrganizationId);
+				approvalStatus, comments, projectId, approvedOrganizationId);
 		ds.setAlias(alias);
 		ds.setLastmodifiedby(lastmodifiedby);
 		ds.setLastmodifieddate(lastmodifieddate);

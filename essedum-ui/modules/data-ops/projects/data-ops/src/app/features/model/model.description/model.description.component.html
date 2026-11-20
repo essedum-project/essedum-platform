@@ -24,6 +24,7 @@
                             <div class="d-flex align-items-center" *ngIf="card">
                                 <span *ngIf="hasApprovalStatus()"
                                     class="model-approval-badge model-approval-badge--{{ getApprovalStatusClass() }}">{{ getApprovalStatusLabel() }}</span>
+                                <span *ngIf="hasApprovalComments()" class="model-approval-comments" [title]="getApprovalComments()">Comments: {{ getApprovalComments() }}</span>
                                 <button *ngIf="showSubmitButton()" class="btn-submit-approval" [disabled]="approvalSubmitting"
                                     (click)="submitForApproval()">Submit for Approval</button>
                             </div>

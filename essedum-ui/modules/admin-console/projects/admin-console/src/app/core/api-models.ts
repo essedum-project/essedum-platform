@@ -152,5 +152,6 @@ export interface AuditEvent {
   actorName: string | null;
   occurredAt: string;
   details: string | null;
+  targetUserName: string | null;
 }
 

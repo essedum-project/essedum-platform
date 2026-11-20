@@ -59,6 +59,11 @@
           <span class="meta-label">Date</span>
           <span class="meta-value">{{ displayDate(asset.created_date) }}</span>
         </div>
+        <div class="meta-row" *ngIf="asset.comments">
+          <mat-icon class="meta-icon">comment</mat-icon>
+          <span class="meta-label">Comments</span>
+          <span class="meta-value comment-value" [title]="asset.comments">{{ asset.comments }}</span>
+        </div>
       </div>
 
       <!-- <div class="card-actions">
@@ -119,6 +124,11 @@
             <mat-icon class="meta-icon">calendar_today</mat-icon>
             <span class="meta-label">Date</span>
             <span class="meta-value">{{ displayDate(asset.lastmodifieddate) }}</span>
+          </div>
+          <div class="meta-row" *ngIf="asset.comments">
+            <mat-icon class="meta-icon">comment</mat-icon>
+            <span class="meta-label">Comments</span>
+            <span class="meta-value comment-value" [title]="asset.comments">{{ asset.comments }}</span>
           </div>
         </div>
         <!-- <div class="card-actions">
@@ -185,6 +195,11 @@
           <span class="meta-label">Date</span>
           <span class="meta-value">{{ displayDate(asset.createdOn || asset.created_date) }}</span>
         </div>
+        <div class="meta-row" *ngIf="asset.comments">
+          <mat-icon class="meta-icon">comment</mat-icon>
+          <span class="meta-label">Comments</span>
+          <span class="meta-value comment-value" [title]="asset.comments">{{ asset.comments }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -233,6 +248,11 @@
             <mat-icon class="meta-icon">calendar_today</mat-icon>
             <span class="meta-label">Date</span>
             <span class="meta-value">{{ displayDate(asset.lastmodifieddate) }}</span>
+          </div>
+          <div class="meta-row" *ngIf="asset.comments">
+            <mat-icon class="meta-icon">comment</mat-icon>
+            <span class="meta-label">Comments</span>
+            <span class="meta-value comment-value" [title]="asset.comments">{{ asset.comments }}</span>
           </div>
         </div>
         <!-- <div class="card-actions">

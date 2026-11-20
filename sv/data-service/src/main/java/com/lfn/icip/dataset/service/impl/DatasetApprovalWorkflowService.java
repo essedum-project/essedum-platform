@@ -69,7 +69,10 @@ public class DatasetApprovalWorkflowService {
 	 * Project Admin approves resource.
 	 * Status: PENDING_PROJECT_APPROVAL -> PROJECT_APPROVED
 	 */
-	public ICIPDataset approveProjectApproval(Integer id, Integer projectId, String currentUserRank) {
+	public ICIPDataset approveProjectApproval(Integer id, Integer projectId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[DatasetApproval] Project Admin approving dataset {} for project {}", id, projectId);
 
 		if (!"2".equals(currentUserRank)) {
@@ -90,6 +93,7 @@ public class DatasetApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PROJECT_APPROVED");
+		resource.setComments(comments);
 		return datasetRepository.save(resource);
 	}
 
@@ -97,7 +101,10 @@ public class DatasetApprovalWorkflowService {
 	 * Project Admin rejects resource.
 	 * Status: PENDING_PROJECT_APPROVAL -> PROJECT_REJECTED
 	 */
-	public ICIPDataset rejectProjectApproval(Integer id, String currentUserRank) {
+	public ICIPDataset rejectProjectApproval(Integer id, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[DatasetApproval] Project Admin rejecting dataset {}", id);
 
 		if (!"2".equals(currentUserRank)) {
@@ -110,6 +117,7 @@ public class DatasetApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PROJECT_REJECTED");
+		resource.setComments(comments);
 		return datasetRepository.save(resource);
 	}
 
@@ -144,7 +152,10 @@ public class DatasetApprovalWorkflowService {
 	 * organizationId: the approving org admin's portfolioId — stamped onto the record so queries
 	 * using that same portfolioId can find it reliably.
 	 */
-	public ICIPDataset approveOrgApproval(Integer id, String currentUserRank, Integer organizationId) {
+	public ICIPDataset approveOrgApproval(Integer id, String currentUserRank, Integer organizationId, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[DatasetApproval] Org Admin approving dataset {} at org level, orgId={}", id, organizationId);
 
 		if (!"3".equals(currentUserRank)) {
@@ -164,6 +175,7 @@ public class DatasetApprovalWorkflowService {
 		if (organizationId != null) {
 			resource.setApprovedOrganizationId(organizationId);
 		}
+		resource.setComments(comments);
 		return datasetRepository.save(resource);
 	}
 
@@ -171,7 +183,10 @@ public class DatasetApprovalWorkflowService {
 	 * Org Admin rejects organization publishing.
 	 * Status: PENDING_ORG_APPROVAL -> ORG_REJECTED
 	 */
-	public ICIPDataset rejectOrgApproval(Integer id, String currentUserRank) {
+	public ICIPDataset rejectOrgApproval(Integer id, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[DatasetApproval] Org Admin rejecting org approval for dataset {}", id);
 
 		if (!"3".equals(currentUserRank)) {
@@ -184,6 +199,7 @@ public class DatasetApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("ORG_REJECTED");
+		resource.setComments(comments);
 		return datasetRepository.save(resource);
 	}
 
@@ -216,7 +232,10 @@ public class DatasetApprovalWorkflowService {
 	 * Status: PENDING_PLATFORM_APPROVAL -> PUBLISHED (approvedOrganizationId = -1 = global visibility sentinel)
 	 * Also accepts already-PUBLISHED datasets so platform admin can re-mark them as globally visible.
 	 */
-	public ICIPDataset approvePlatformApproval(Integer id, String currentUserRank) {
+	public ICIPDataset approvePlatformApproval(Integer id, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[DatasetApproval] Platform Admin publishing dataset {} globally", id);
 
 		if (!"4".equals(currentUserRank)) {
@@ -237,6 +256,7 @@ public class DatasetApprovalWorkflowService {
 		// Legacy rows that were directly PUBLISHED (never through the workflow) have null and stay org-scoped.
 		resource.setApprovalStatus("PUBLISHED");
 		resource.setApprovedOrganizationId(-1);
+		resource.setComments(comments);
 		return datasetRepository.save(resource);
 	}
 
@@ -244,7 +264,10 @@ public class DatasetApprovalWorkflowService {
 	 * Platform Admin rejects resource submitted for global publishing.
 	 * Status: PENDING_PLATFORM_APPROVAL -> PLATFORM_REJECTED
 	 */
-	public ICIPDataset rejectPlatformApproval(Integer id, String currentUserRank) {
+	public ICIPDataset rejectPlatformApproval(Integer id, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[DatasetApproval] Platform Admin rejecting dataset {}", id);
 
 		if (!"4".equals(currentUserRank)) {
@@ -257,6 +280,7 @@ public class DatasetApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PLATFORM_REJECTED");
+		resource.setComments(comments);
 		return datasetRepository.save(resource);
 	}
 

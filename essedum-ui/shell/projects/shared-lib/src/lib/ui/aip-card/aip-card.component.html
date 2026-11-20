@@ -33,7 +33,7 @@
                 {{ getDate() | date : "mediumDate" }}
             </p>
 
-            <!-- Approval-status pill (Connections and Models cards) -->
+            <!-- Approval-status pill -->
             <span *ngIf="getApprovalStatus()"
                 class="card-approval-badge"
                 [ngClass]="'approval-' + getApprovalStatusClass()"

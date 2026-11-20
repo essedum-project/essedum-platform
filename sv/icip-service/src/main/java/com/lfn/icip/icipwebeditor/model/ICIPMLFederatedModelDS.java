@@ -75,4 +75,9 @@ public class ICIPMLFederatedModelDS {
 	@JsonProperty("approved_organization_id")
 	private Integer approvedOrganizationId;
 
+	/** Admin comment captured when the resource is approved or rejected. */
+	@Column(name = "comments", columnDefinition = "TEXT")
+	@JsonProperty("comments")
+	private String comments;
+
 }
