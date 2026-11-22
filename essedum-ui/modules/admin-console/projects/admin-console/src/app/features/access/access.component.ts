@@ -141,35 +141,43 @@ export class AccessComponent implements OnInit, AfterViewInit {
   }
 
   private load(): void {
-    combineLatest([
-      this.api.getRoleAssignments(this.userContext.userId$.value),
-      this.api.getRoles(),
-      this.api.getUsers(),
-      this.api.getProjects(),
-      this.api.getOrganisations(),
-    ])
-      .pipe(
-        map(([assignments, roles, users, projects, organisations]) =>
-          assignments
-            .filter(a => !a.revokedAt)
-            .map(a => ({
-              ...a,
-              orgId: a.organizationId
-                ?? projects.find(p => p.id === a.projectId)?.organisationId
-                ?? null,
-              roleName: this.getDisplayRoleName(roles.find(r => r.id === a.roleId)?.name ?? 'unknown'),
-              userName: users.find((u: UserOption) => u.id === a.userId)?.name ?? `User #${a.userId}`,
-              scopeLabel: a.projectId
-                ? `Project: ${projects.find(p => p.id === a.projectId)?.name ?? '#' + a.projectId}`
-                : a.organizationId
-                ? `Organization: ${organisations.find(o => o.id === a.organizationId)?.name ?? '#' + a.organizationId}`
-                : 'Platform',
-            })),
-        ),
-      )
-      .subscribe(rows => {
-        this.allRows = rows;
-        this.applyFilters();
+    const actorUserId = this.userContext.userId$.value;
+    // Session context: the shell writes the active user/project/org into
+    // sessionStorage, and UserContextService re-reads it on every subscription,
+    // so pass those ids through to scope the server-side query.
+    combineLatest([this.userContext.orgId$, this.userContext.projectId$])
+      .pipe(take(1))
+      .subscribe(([organizationId, projectId]) => {
+        combineLatest([
+          this.api.getRoleAssignments(actorUserId, { userId: actorUserId, organizationId, projectId }),
+          this.api.getRoles(),
+          this.api.getUsers(),
+          this.api.getProjects(),
+          this.api.getOrganisations(),
+        ])
+          .pipe(
+            map(([assignments, roles, users, projects, organisations]) =>
+              assignments
+                .filter(a => !a.revokedAt)
+                .map(a => ({
+                  ...a,
+                  orgId: a.organizationId
+                    ?? projects.find(p => p.id === a.projectId)?.organisationId
+                    ?? null,
+                  roleName: this.getDisplayRoleName(roles.find(r => r.id === a.roleId)?.name ?? 'unknown'),
+                  userName: users.find((u: UserOption) => u.id === a.userId)?.name ?? `User #${a.userId}`,
+                  scopeLabel: a.projectId
+                    ? `Project: ${projects.find(p => p.id === a.projectId)?.name ?? '#' + a.projectId}`
+                    : a.organizationId
+                    ? `Organization: ${organisations.find(o => o.id === a.organizationId)?.name ?? '#' + a.organizationId}`
+                    : 'Platform',
+                })),
+            ),
+          )
+          .subscribe(rows => {
+            this.allRows = rows;
+            this.applyFilters();
+          });
       });
   }
 

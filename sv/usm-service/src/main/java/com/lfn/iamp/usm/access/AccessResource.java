@@ -93,24 +93,52 @@ public class AccessResource {
 		return login != null && !login.isEmpty() ? login : "User #" + u.getId();
 	}
 
+	/**
+	 * Lists active role assignments visible to the acting user, optionally
+	 * narrowed by user, organization and/or project. The actor-based scoping
+	 * (platform admins see all; everyone else sees only their own grants plus
+	 * grants inside their reachable projects/organizations) is always applied
+	 * first, so the optional filters can never widen visibility.
+	 */
 	@GetMapping("/access/role-assignments")
-	public ResponseEntity<List<RoleAssignment>> listRoleAssignments(@RequestParam Integer actorUserId) {
+	public ResponseEntity<List<RoleAssignment>> listRoleAssignments(
+			@RequestParam Integer actorUserId,
+			@RequestParam(required = false) Integer userId,
+			@RequestParam(required = false) Integer organizationId,
+			@RequestParam(required = false) Integer projectId) {
 		if (actorUserId == null) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "actorUserId required");
 		}
 		AccessContext ctx = accessContextService.resolve(actorUserId);
 		List<RoleAssignment> all = accessContextService.listActive();
+
+		java.util.stream.Stream<RoleAssignment> scoped;
 		if (ctx.getHighestRank() >= PLATFORM_ADMIN) {
-			return ResponseEntity.ok(all);
+			scoped = all.stream();
+		} else {
+			List<Integer> projectIds = ctx.getReachableProjectIds();
+			List<Integer> orgIds = ctx.getReachableOrganizationIds();
+			scoped = all.stream()
+					.filter(a -> actorUserId.equals(a.getUserId())
+							|| (a.getProjectId() != null && projectIds.contains(a.getProjectId()))
+							|| (a.getOrganizationId() != null && orgIds.contains(a.getOrganizationId())));
 		}
-		List<Integer> projectIds = ctx.getReachableProjectIds();
-		List<Integer> orgIds = ctx.getReachableOrganizationIds();
-		List<RoleAssignment> scoped = all.stream()
-				.filter(a -> actorUserId.equals(a.getUserId())
-						|| (a.getProjectId() != null && projectIds.contains(a.getProjectId()))
-						|| (a.getOrganizationId() != null && orgIds.contains(a.getOrganizationId())))
-				.collect(Collectors.toList());
-		return ResponseEntity.ok(scoped);
+
+		// Optional narrowing filters — never widen the actor-based scope above.
+		if (userId != null) {
+			scoped = scoped.filter(a -> userId.equals(a.getUserId()));
+		}
+		// organizationId / projectId narrow to a scope. A role assignment is scoped
+		// to at most one of organization/project (or neither for a platform-wide
+		// grant), so requiring both would always match nothing — treat them as a
+		// union: keep rows scoped to the given organization OR the given project.
+		if (organizationId != null || projectId != null) {
+			scoped = scoped.filter(a ->
+					(organizationId != null && organizationId.equals(a.getOrganizationId()))
+					|| (projectId != null && projectId.equals(a.getProjectId())));
+		}
+
+		return ResponseEntity.ok(scoped.collect(Collectors.toList()));
 	}
 
 	/**

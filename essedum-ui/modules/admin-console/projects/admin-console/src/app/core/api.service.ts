@@ -34,8 +34,15 @@ export class ApiService {
     return this.http.get<string[]>(`${this.base}/role-names`);
   }
 
-  getRoleAssignments(actorUserId: number): Observable<RoleAssignment[]> {
-    return this.http.get<RoleAssignment[]>(`${this.base}/access/role-assignments`, { params: { actorUserId } });
+  getRoleAssignments(
+    actorUserId: number,
+    filters: { userId?: number | null; organizationId?: number | null; projectId?: number | null } = {},
+  ): Observable<RoleAssignment[]> {
+    const params: Record<string, string> = { actorUserId: String(actorUserId) };
+    if (filters.userId != null) params['userId'] = String(filters.userId);
+    if (filters.organizationId != null) params['organizationId'] = String(filters.organizationId);
+    if (filters.projectId != null) params['projectId'] = String(filters.projectId);
+    return this.http.get<RoleAssignment[]>(`${this.base}/access/role-assignments`, { params });
   }
 
   grantRole(payload: {
