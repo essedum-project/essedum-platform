@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: essedum-frontend-admin-console
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: essedum-frontend-admin-console
+  template:
+    metadata:
+      labels:
+        app: essedum-frontend-admin-console
+    spec:
+      containers:
+      - name: essedum-frontend-admin-console
+        image: ${DOCKER_REGISTRY}/${FRONTEND_ADMIN_CONSOLE_IMAGE}:${IMAGE_TAG}
+        imagePullPolicy: Always
+        env:
+        - name: KEYCLOAK_ISSUER
+          value: "${KEYCLOAK_ISSUER}"
+        - name: FE_AGENT_DESIGNER_URL
+          value: "${AGENT_DESIGNER_URL}"
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: essedum-frontend-admin-console-service
+  namespace: aipns
+spec:
+  selector:
+    app: essedum-frontend-admin-console
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP

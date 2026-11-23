@@ -1,0 +1,37 @@
+# Build context: essedum-platform/ (repo root)
+# Shell sources needed for @essedum/shared-lib TypeScript path alias in tsconfig.
+FROM node:20-alpine AS build
+
+ARG NPM_REGISTRY_URL
+ARG NPM_AUTH_TOKEN
+ARG NPM_ALWAYS_AUTH=true
+
+# Disable SSL verification (corporate self-signed CA environment)
+RUN npm config set strict-ssl false
+
+# Configure Artifactory npm registry when credentials are supplied
+RUN if [ -n "${NPM_REGISTRY_URL}" ] && [ -n "${NPM_AUTH_TOKEN}" ]; then \
+      REGISTRY_HOST=$(echo "${NPM_REGISTRY_URL}" | sed 's|https:||'); \
+      echo "registry=${NPM_REGISTRY_URL}" >> /root/.npmrc && \
+      echo "${REGISTRY_HOST}:_authToken=${NPM_AUTH_TOKEN}" >> /root/.npmrc && \
+      echo "always-auth=${NPM_ALWAYS_AUTH}" >> /root/.npmrc; \
+    fi
+
+WORKDIR /workspace
+COPY essedum-ui/shell/ ./shell/
+
+COPY essedum-ui/modules/admin-console/ /workspace/modules/admin-console/
+WORKDIR /workspace/modules/admin-console
+RUN rm -f package-lock.json yarn.lock
+RUN npm install --legacy-peer-deps
+RUN npm run build-prod
+
+FROM nginx:alpine
+COPY essedum-ui/nginx_mfe.conf /etc/nginx/nginx.conf
+WORKDIR /app/ui
+COPY --from=build /workspace/modules/admin-console/dist/admin-console /app/ui/
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh && chmod -R 755 /app/ui
+
+EXPOSE 80
+ENTRYPOINT ["/entrypoint.sh"]
