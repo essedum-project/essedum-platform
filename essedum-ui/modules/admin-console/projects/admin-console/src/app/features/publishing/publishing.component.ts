@@ -173,7 +173,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
           if (streamingRank > 0) { this.userRank = streamingRank; }
 
           // Rank 2: PROJECT_APPROVED resources ready to submit to org
-          const streamingRank2$ = projectId ? this.api.getDraftResources(projectId) : of([]);
+          const streamingRank2$ = projectId ? this.api.getDraftResources(projectId).pipe(catchError(() => of([]))) : of([]);
           // Rank 3: ORG_APPROVED resources — must query by portfoliodata.id (the same value stored
           // in approvedOrganizationId during org approval), not project.organisationId which is a
           // different numeric ID and causes a mismatch.
@@ -183,7 +183,7 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
             if (pd?.id) { approvalOrgId = Number(pd.id); }
           } catch {}
           this.approvalOrgId = approvalOrgId;
-          const streamingRank3$ = (streamingRank === 3 && approvalOrgId) ? this.api.getOrgAdminDraftResources(approvalOrgId) : of([]);
+          const streamingRank3$ = (streamingRank === 3 && approvalOrgId) ? this.api.getOrgAdminDraftResources(approvalOrgId).pipe(catchError(() => of([]))) : of([]);
 
           const datasetRank2$ = (streamingRank === 2 && projectId) ? this.api.getDatasetDraftResources(projectId).pipe(catchError(() => of([]))) : of([]);
           const datasetRank3$ = (streamingRank === 3 && approvalOrgId) ? this.api.getDatasetOrgDraftResources(approvalOrgId).pipe(catchError(() => of([]))) : of([]);
@@ -202,8 +202,8 @@ export class PublishingComponent implements OnInit, AfterViewInit, OnDestroy {
             : of([]);
 
           return combineLatest([
-            this.api.getDraftVersions(userId, orgId, projectId),
-            this.api.getAssets(userId, orgId, projectId),
+            this.api.getDraftVersions(userId, orgId, projectId).pipe(catchError(() => of([] as any[]))),
+            this.api.getAssets(userId, orgId, projectId).pipe(catchError(() => of([] as any[]))),
             streamingRank2$,
             streamingRank3$,
             datasetRank2$,

@@ -219,9 +219,9 @@ export class ApprovalsComponent implements OnInit, AfterViewInit, OnDestroy {
             return combineLatest([of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([]), of([])]);
           }
 
-          const streamingApi$ = finalProjectId ? this.api.getProjectAdminApprovals(finalProjectId) : of([]);
-          const streamingOrgApi$ = finalOrgId ? this.api.getOrgAdminApprovals(finalOrgId) : of([]);
-          const platformApi$ = streamingUserRank === 4 ? this.api.getPlatformAdminApprovals() : of([]);
+          const streamingApi$ = finalProjectId ? this.api.getProjectAdminApprovals(finalProjectId).pipe(catchError(() => of([]))) : of([]);
+          const streamingOrgApi$ = finalOrgId ? this.api.getOrgAdminApprovals(finalOrgId).pipe(catchError(() => of([]))) : of([]);
+          const platformApi$ = streamingUserRank === 4 ? this.api.getPlatformAdminApprovals().pipe(catchError(() => of([]))) : of([]);
 
           const datasetApi$ = finalProjectId ? this.api.getProjectAdminDatasetApprovals(finalProjectId).pipe(catchError(() => of([]))) : of([]);
           const datasetOrgApi$ = finalOrgId ? this.api.getOrgAdminDatasetApprovals(finalOrgId).pipe(catchError(() => of([]))) : of([]);
