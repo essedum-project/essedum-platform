@@ -500,6 +500,7 @@
          appendRbacMenu() URL-dedup prevents duplicates for higher-rank users who
          already received the same routes from DashConstant. -->
 	<changeSet author="Essedum (rbac)" id="rbac-22">
+		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM rbac_menu_item WHERE min_role_rank = 0
@@ -560,13 +561,6 @@
 			<column name="icon"          value="code"/>
 			<column name="min_role_rank" valueNumeric="0"/>
 			<column name="display_order" valueNumeric="8"/>
-		</insert>
-		<insert tableName="rbac_menu_item">
-			<column name="label"         value="Agent MCP Pipelines"/>
-			<column name="route"         value="/agent/pipeline"/>
-			<column name="icon"          value="share-alt"/>
-			<column name="min_role_rank" valueNumeric="0"/>
-			<column name="display_order" valueNumeric="9"/>
 		</insert>
 		<insert tableName="rbac_menu_item">
 			<column name="label"         value="Skills"/>
@@ -637,6 +631,7 @@
 	<!-- rbac-25: re-seed product sidebar items (AI Client only — rank 0) that may have
 	     been deleted via Menu Configuration. Uses NOT EXISTS per label+route. -->
 	<changeSet author="Essedum (rbac)" id="rbac-25" runOnChange="false">
+		<validCheckSum>any</validCheckSum>
 		<sql>
 			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
 			SELECT 'Dashboard', '/dashboard', 0, 1, 'tachometer', NULL, NULL
@@ -669,10 +664,6 @@
 			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
 			SELECT 'Vibe Studio', '/vibe/editor', 0, 8, 'code', NULL, NULL
 				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE route = '/vibe/editor');
-
-			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
-			SELECT 'Agent MCP Pipelines', '/agent/pipeline', 0, 9, 'share-alt', NULL, NULL
-				WHERE NOT EXISTS (SELECT 1 FROM rbac_menu_item WHERE label = 'Agent MCP Pipelines');
 
 			INSERT INTO rbac_menu_item (label, route, min_role_rank, display_order, icon, parent_id, max_role_rank)
 			SELECT 'Skills', '/agent/skills', 0, 10, 'star', NULL, NULL
@@ -954,6 +945,26 @@
 		<addColumn tableName="rbac_audit_event">
 			<column name="project_id" type="int" />
 		</addColumn>
+	</changeSet>
+
+	<!-- rbac-29: remove the "Agent MCP Pipelines" menu row for every role. Matches on
+	     label AND route so the "Pipelines" row (same route, different label) is kept. -->
+	<changeSet author="Essedum (rbac)" id="rbac-29" runOnChange="false">
+		<sql>
+			DELETE FROM rbac_menu_item
+			WHERE label = 'Agent MCP Pipelines' AND route = '/agent/pipeline';
+		</sql>
+	</changeSet>
+
+	<!-- rbac-30: remove the legacy DashConstant "Agent MCP Pipelines" side-menu object
+	     that the 311_to_312 / 312_to_320 changelogs inserted. Exact-value match only,
+	     so no other side-menu entry is touched. -->
+	<changeSet author="Essedum (rbac)" id="rbac-30" runOnChange="false">
+		<sql>
+			DELETE FROM usm_constant
+			WHERE item = 'IT Portfolio Manager Side'
+			AND item_value = '{"label":"Agent MCP Pipelines","altText":null,"icon":"th","url":"./aip/agent-pipeline","children":[]}';
+		</sql>
 	</changeSet>
 
 </databaseChangeLog>
