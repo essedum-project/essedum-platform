@@ -114,10 +114,6 @@ public class ICIPDatasourceController {
 	@Value("${security.claim:#{null}}")
 	private String claim;
 
-	/** Display claim — used for creator tracking (email); does not affect auth role lookups. */
-	@Value("${security.display-claim:${security.claim:preferred_username||admin}}")
-	private String displayClaim;
-
 	/** The scheduler status. */
 	@EssedumProperty("icip.scheduler.pause.status")
 	private String schedulerPauseStatus;
@@ -332,7 +328,7 @@ public class ICIPDatasourceController {
 		datasourceDTO.setOrganization(org);
 		datasourceDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
 		datasourceDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
-		datasourceDTO.setCreatedBy(ICIPUtils.getUser(displayClaim));
+		datasourceDTO.setCreatedBy(ICIPUtils.getUser(claim));
 		logger.debug("loading modelmapper");
 		ModelMapper modelmapper = new ModelMapper();
 		ICIPDatasource datasource = modelmapper.map(datasourceDTO, ICIPDatasource.class);
@@ -396,7 +392,7 @@ public class ICIPDatasourceController {
 	 */
 	@DeleteMapping("/delete/{nameStr}/{org}")
 	public ResponseEntity<?> deleteDatasource(@PathVariable(name = "nameStr") String name,
-	                                          @PathVariable(name = "org") String org) {
+			@PathVariable(name = "org") String org) {
 		logger.info("deleting datasource ");
 		try {
 			iICIPDatasourceService.delete(name, org);
