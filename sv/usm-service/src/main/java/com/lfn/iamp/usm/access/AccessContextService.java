@@ -16,6 +16,7 @@ import com.lfn.iamp.usm.domain.Organisation;
 import com.lfn.iamp.usm.domain.Project;
 import com.lfn.iamp.usm.domain.Role;
 import com.lfn.iamp.usm.domain.UserProjectRole;
+import com.lfn.iamp.usm.domain.Users;
 import com.lfn.iamp.usm.domain.UsmPortfolio;
 import com.lfn.iamp.usm.domain.UsmRolePermissions;
 import com.lfn.iamp.usm.identity.IdentityProjectionService;
@@ -435,6 +436,80 @@ public class AccessContextService {
 			auditService.record("role_assignment", "revoked", auditActor, null,
 					"role '" + revokedRoleName + "' revoked", assignment.getOrganizationId(), assignment.getProjectId(), targetEmail);
 		});
+	}
+
+
+	// ---- Members & Roles: paged, filtered, rank-capped listing ----
+
+	/** Highest rbac rank an actor may see in the list: project admin 2, org admin 3, platform admin 4. */
+	private int visibleRankCap(int actorRank) {
+		return Math.min(actorRank, PLATFORM_ADMIN_RANK);
+	}
+
+	/**
+	 * Roles the actor may see/filter by: platform admin gets everything (incl. legacy),
+	 * org admin ranks 0-3, project admin ranks 0-2, anyone lower ranks 0-1.
+	 */
+	public List<UnifiedRole> listVisibleRoles(Integer actorUserId) {
+		int rank = highestRank(actorUserId);
+		List<UnifiedRole> all = listRoles();
+		if (rank >= PLATFORM_ADMIN_RANK) {
+			return all;
+		}
+		int cap = Math.max(rank, 1);
+		return all.stream().filter(r -> r.getRank() != null && r.getRank() <= cap).collect(Collectors.toList());
+	}
+
+	public PagedResponse<RoleAssignmentView> pageAssignments(Integer actorUserId, Integer roleId, Integer projectId,
+			int page, int size) {
+		AccessContext ctx = resolve(actorUserId);
+		int rank = ctx.getHighestRank();
+		boolean platformAdmin = rank >= PLATFORM_ADMIN_RANK;
+
+		List<Integer> allowedRoleIds = null; // null = unrestricted
+		if (!platformAdmin) {
+			int cap = Math.max(visibleRankCap(rank), 1); // AI Engineer (0,1) always visible
+			allowedRoleIds = rbacRoleRepository.findAll().stream()
+					.filter(r -> r.getRank() != null && r.getRank() <= cap)
+					.map(RbacRole::getId).collect(Collectors.toList());
+		}
+
+		// Legacy role ids (>= LEGACY_ROLE_ID_OFFSET) are not filterable here. Stripping the
+		// offset would match RBAC rows that share the same numeric role_id, so return an
+		// empty page for every actor. The role dropdown no longer offers legacy roles.
+		if (roleId != null && roleId >= LEGACY_ROLE_ID_OFFSET) {
+			return new PagedResponse<>(Collections.emptyList(), page, size, 0, 0);
+		}
+		Integer roleFilter = roleId;
+
+		org.springframework.data.jpa.domain.Specification<RoleAssignment> spec = RoleAssignmentSpecs.build(
+				allowedRoleIds, platformAdmin ? null : actorUserId, ctx.getReachableProjectIds(),
+				ctx.getReachableOrganizationIds(), roleFilter, projectId);
+
+		org.springframework.data.domain.Page<RoleAssignment> result = roleAssignmentRepository.findAll(spec,
+				org.springframework.data.domain.PageRequest.of(page, size,
+						org.springframework.data.domain.Sort.by(
+								org.springframework.data.domain.Sort.Order.desc("grantedAt"),
+								org.springframework.data.domain.Sort.Order.desc("id"))));
+
+		java.util.Map<Integer, Users> users = usersRepository
+				.findAllById(result.getContent().stream().map(RoleAssignment::getUserId).distinct().collect(Collectors.toList()))
+				.stream().collect(Collectors.toMap(Users::getId, u -> u));
+
+		List<RoleAssignmentView> views = result.getContent().stream().map(a -> {
+			RoleAssignmentView v = toView(a);
+			Users u = users.get(a.getUserId());
+			if (u != null) {
+				String full = ((u.getUser_f_name() == null ? "" : u.getUser_f_name()) + " "
+						+ (u.getUser_l_name() == null ? "" : u.getUser_l_name())).trim();
+				v.setUserName(!full.isEmpty() ? full : u.getUser_login());
+				v.setUserEmail(u.getUser_email());
+			}
+			return v;
+		}).collect(Collectors.toList());
+
+		return new PagedResponse<>(views, result.getNumber(), result.getSize(), result.getTotalElements(),
+				result.getTotalPages());
 	}
 
 	public List<RoleAssignment> listActive() {

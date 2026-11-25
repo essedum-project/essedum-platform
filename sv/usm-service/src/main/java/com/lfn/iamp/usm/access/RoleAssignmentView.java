@@ -19,6 +19,9 @@ public class RoleAssignmentView {
 	private Integer userId;
 	private Integer roleId;
 	private String roleName;
+	/** Filled only by the paged Members & Roles endpoint. */
+	private String userName;
+	private String userEmail;
 	/** Null for legacy (usm_role) assignments, which have no RBAC rank. */
 	private Integer roleRank;
 	/** Set only when this grant's own scope is organization-wide (project-scoped grants leave this null). */

@@ -51,9 +51,15 @@ public class AccessResource {
 		return ResponseEntity.ok(accessContextService.resolve(userId));
 	}
 
+	/**
+	 * With actorUserId the list is capped to the roles that actor may see
+	 * (platform admin: all; org admin: AI Engineer/Project Admin/Org Admin;
+	 * project admin: AI Engineer/Project Admin). Without it: unchanged.
+	 */
 	@GetMapping("/roles")
-	public ResponseEntity<List<UnifiedRole>> listRoles() {
-		return ResponseEntity.ok(accessContextService.listRoles());
+	public ResponseEntity<List<UnifiedRole>> listRoles(@RequestParam(required = false) Integer actorUserId) {
+		return ResponseEntity.ok(actorUserId == null ? accessContextService.listRoles()
+				: accessContextService.listVisibleRoles(actorUserId));
 	}
 
 	/**
@@ -139,6 +145,26 @@ public class AccessResource {
 		}
 
 		return ResponseEntity.ok(scoped.collect(Collectors.toList()));
+	}
+
+	/**
+	 * Paged Members &amp; Roles list. Scope and visible roles depend on the actor's
+	 * rank (see AccessContextService#pageAssignments); filters can only narrow.
+	 */
+	@GetMapping("/access/role-assignments/page")
+	public ResponseEntity<PagedResponse<RoleAssignmentView>> pageRoleAssignments(
+			@RequestParam Integer actorUserId,
+			@RequestParam(required = false) Integer roleId,
+			@RequestParam(required = false) Integer projectId,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size) {
+		if (actorUserId == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "actorUserId required");
+		}
+		int safePage = Math.max(page, 0);
+		int safeSize = Math.min(Math.max(size, 1), 50);
+		return ResponseEntity.ok(accessContextService.pageAssignments(actorUserId, roleId, projectId,
+				safePage, safeSize));
 	}
 
 	/**

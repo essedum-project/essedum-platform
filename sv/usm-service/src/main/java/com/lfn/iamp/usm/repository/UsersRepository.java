@@ -37,6 +37,7 @@ import com.lfn.iamp.usm.dto.UserPartialDTO;
 //@Repository("usmUsersRepository")
 @NoRepositoryBean
 public interface UsersRepository extends JpaRepository<Users, Integer> {
+
 	
 	/**
 	 * Find by user login.
