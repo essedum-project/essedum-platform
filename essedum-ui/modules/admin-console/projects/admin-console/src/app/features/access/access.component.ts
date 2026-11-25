@@ -1,23 +1,18 @@
-import { Component, OnInit, ViewEncapsulation, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { combineLatest, map } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
+import { combineLatest } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { RoleNameUtil } from '../../core/role-name.util';
-import type { LegacyOrganisation, LegacyProject, RbacRole, RoleAssignment, UserOption } from '../../core/api-models';
+import type { LegacyProject, RbacRole, RoleAssignmentView } from '../../core/api-models';
 import { GrantRoleDialogComponent } from './grant-role-dialog/grant-role-dialog.component';
 import { UserContextService } from '../../core/user-context.service';
 import { NotificationService } from '../../core/notification.service';
 import { ProvisionDialogComponent } from '../tenancy/provision-dialog/provision-dialog.component';
 
-interface RoleAssignmentRow extends RoleAssignment {
-  roleName: string;
-  userName: string;
+interface RoleAssignmentRow extends RoleAssignmentView {
   scopeLabel: string;
-  /** Organisation the grant belongs to (direct, or via the project's organisation). */
-  orgId: number | null;
 }
 
 @Component({
@@ -27,37 +22,23 @@ interface RoleAssignmentRow extends RoleAssignment {
   encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
-export class AccessComponent implements OnInit, AfterViewInit {
+export class AccessComponent implements OnInit {
   rows = new MatTableDataSource<RoleAssignmentRow>([]);
   rank = 0;
 
-  /** Filter dropdown sources (same lists the grant-role dialog uses). */
-  users: UserOption[] = [];
+  /** Filter dropdown sources. */
   roles: RbacRole[] = [];
   projects: LegacyProject[] = [];
-  organisations: LegacyOrganisation[] = [];
 
-  /** Current filter selections; null = "All". */
-  selectedUserId: number | null = null;
+  /** Current filter selections; null = "All". Both narrow the server-side query. */
   selectedRoleId: number | null = null;
-  selectedOrgId: number | null = null;
   selectedProjectId: number | null = null;
 
-  /** Projects narrowed to the selected organisation (all projects when none selected). */
-  get filteredProjects(): LegacyProject[] {
-    if (this.selectedOrgId == null) {
-      return this.projects;
-    }
-    return this.projects.filter(p => p.organisationId === this.selectedOrgId);
-  }
-
-  private allRows: RoleAssignmentRow[] = [];
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  ngAfterViewInit(): void {
-    this.rows.paginator = this.paginator;
-  }
+  /** Server-side paging state. */
+  pageIndex = 0;
+  pageSize = 5;
+  totalElements = 0;
+  loading = false;
 
   readonly columns = ['userName', 'roleName', 'scopeLabel', 'grantedAt', 'actions'];
 
@@ -71,8 +52,7 @@ export class AccessComponent implements OnInit, AfterViewInit {
   get canCreateRole(): boolean { return this.rank >= 4; }
 
   get hasActiveFilter(): boolean {
-    return this.selectedUserId != null || this.selectedRoleId != null
-      || this.selectedOrgId != null || this.selectedProjectId != null;
+    return this.selectedRoleId != null || this.selectedProjectId != null;
   }
 
   getDisplayRoleName(roleName: string): string {
@@ -80,50 +60,34 @@ export class AccessComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.api.getAccessContext(this.userContext.userId$.value)
+    const actorUserId = this.userContext.userId$.value;
+
+    this.api.getAccessContext(actorUserId)
       .subscribe(ctx => (this.rank = ctx?.highestRank ?? 0));
 
-    // Same filtering/sorting as GrantRoleDialogComponent: only RBAC roles (rank defined),
-    // hide AI Engineer (rank 1), sort lowest → highest rank.
-    this.api.getRoles().subscribe(roles => {
-      this.roles = roles
-        .filter(r => r.rank != null)
-        .filter(r => r.rank !== 1)
-        .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
-    });
-    this.api.getUsers().subscribe(users => (this.users = users));
+    // Role dropdown: the server returns only the roles this actor may see.
+    this.api.getRoles(actorUserId).subscribe(roles => (this.roles = roles));
     this.api.getProjects().subscribe(projects => (this.projects = projects));
-    this.api.getOrganisations()
-      .subscribe(orgs => (this.organisations = orgs));
 
-    this.load();
+    this.loadPage();
   }
 
-  /** Re-applies the User / Role / Organisation / Project filters to the loaded rows. */
+  /** A filter change always returns to the first page and re-queries. */
   applyFilters(): void {
-    this.rows.data = this.allRows.filter(row =>
-      (this.selectedUserId == null || row.userId === this.selectedUserId) &&
-      (this.selectedRoleId == null || row.roleId === this.selectedRoleId) &&
-      (this.selectedOrgId == null || row.orgId === this.selectedOrgId) &&
-      (this.selectedProjectId == null || row.projectId === this.selectedProjectId),
-    );
-    this.paginator?.firstPage();
-  }
-
-  /** Changing the organisation drops a project selection that belongs to another org. */
-  onOrgChange(): void {
-    if (this.selectedProjectId != null && !this.filteredProjects.some(p => p.id === this.selectedProjectId)) {
-      this.selectedProjectId = null;
-    }
-    this.applyFilters();
+    this.pageIndex = 0;
+    this.loadPage();
   }
 
   clearFilters(): void {
-    this.selectedUserId = null;
     this.selectedRoleId = null;
-    this.selectedOrgId = null;
     this.selectedProjectId = null;
     this.applyFilters();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadPage();
   }
 
   createRole(): void {
@@ -134,51 +98,53 @@ export class AccessComponent implements OnInit, AfterViewInit {
         return;
       }
       this.api.createRole(userId, { name: r.name, rank: r.rank }).subscribe({
-        next: () => { this.notify.success('Role created successfully.'); this.load(); },
+        next: () => { this.notify.success('Role created successfully.'); this.loadPage(); },
         error: err => this.notify.error(err?.error?.message || 'Failed to create role.'),
       });
     });
   }
 
-  private load(): void {
+  private loadPage(): void {
     const actorUserId = this.userContext.userId$.value;
-    // Session context: the shell writes the active user/project/org into
-    // sessionStorage, and UserContextService re-reads it on every subscription,
-    // so pass those ids through to scope the server-side query.
-    combineLatest([this.userContext.orgId$, this.userContext.projectId$])
-      .pipe(take(1))
-      .subscribe(([organizationId, projectId]) => {
-        combineLatest([
-          this.api.getRoleAssignments(actorUserId, { userId: actorUserId, organizationId, projectId }),
-          this.api.getRoles(),
-          this.api.getUsers(),
-          this.api.getProjects(),
-          this.api.getOrganisations(),
-        ])
-          .pipe(
-            map(([assignments, roles, users, projects, organisations]) =>
-              assignments
-                .filter(a => !a.revokedAt)
-                .map(a => ({
-                  ...a,
-                  orgId: a.organizationId
-                    ?? projects.find(p => p.id === a.projectId)?.organisationId
-                    ?? null,
-                  roleName: this.getDisplayRoleName(roles.find(r => r.id === a.roleId)?.name ?? 'unknown'),
-                  userName: users.find((u: UserOption) => u.id === a.userId)?.name ?? `User #${a.userId}`,
-                  scopeLabel: a.projectId
-                    ? `Project: ${projects.find(p => p.id === a.projectId)?.name ?? '#' + a.projectId}`
-                    : a.organizationId
-                    ? `Organization: ${organisations.find(o => o.id === a.organizationId)?.name ?? '#' + a.organizationId}`
-                    : 'Platform',
-                })),
-            ),
-          )
-          .subscribe(rows => {
-            this.allRows = rows;
-            this.applyFilters();
-          });
-      });
+    this.loading = true;
+    this.api.getRoleAssignmentsPage(actorUserId, {
+      roleId: this.selectedRoleId,
+      projectId: this.selectedProjectId,
+      page: this.pageIndex,
+      size: this.pageSize,
+    }).subscribe({
+      next: res => {
+        // If the requested page fell out of range (e.g. after a revoke emptied it),
+        // step back one page instead of showing an empty table.
+        if (res.content.length === 0 && this.pageIndex > 0 && res.totalElements > 0) {
+          this.pageIndex = this.pageIndex - 1;
+          this.loadPage();
+          return;
+        }
+        this.rows.data = res.content.map(v => this.toRow(v));
+        this.totalElements = res.totalElements;
+        this.pageIndex = res.page;
+        this.pageSize = res.size;
+        this.loading = false;
+      },
+      error: err => {
+        this.loading = false;
+        this.notify.error(err?.error?.message || 'Failed to load role assignments.');
+      },
+    });
+  }
+
+  private toRow(v: RoleAssignmentView): RoleAssignmentRow {
+    return {
+      ...v,
+      roleName: this.getDisplayRoleName(v.roleName ?? 'unknown'),
+      userName: v.userName ?? `User #${v.userId}`,
+      scopeLabel: v.projectId
+        ? `Project: ${v.projectName ?? '#' + v.projectId}`
+        : v.organizationId
+        ? `Organization: ${v.organizationName ?? '#' + v.organizationId}`
+        : 'Platform',
+    };
   }
 
   grantRole(): void {
@@ -206,7 +172,7 @@ export class AccessComponent implements OnInit, AfterViewInit {
       combineLatest(grants).subscribe({
         next: () => {
           this.notify.success('Role granted successfully.');
-          this.load();
+          this.loadPage();
           window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
         },
         error: err => this.notify.error(err?.error?.message || 'Failed to grant role.'),
@@ -218,7 +184,7 @@ export class AccessComponent implements OnInit, AfterViewInit {
     this.api.revokeRoleAssignment(row.id, this.userContext.userId$.value).subscribe({
       next: () => {
         this.notify.warning('Role assignment revoked.');
-        this.load();
+        this.loadPage();
         window.dispatchEvent(new CustomEvent('essedum:assignments-changed'));
       },
       error: err => this.notify.error(err?.error?.message || 'Failed to revoke role assignment.'),

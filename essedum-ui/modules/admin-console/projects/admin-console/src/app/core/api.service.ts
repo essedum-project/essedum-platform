@@ -6,6 +6,7 @@ import { environment } from '../../environments/environment';
 import type {
   AccessContext, RbacRole, RoleAssignment, Asset, AssetVersion, PromotionEvent, MenuItem,
   LegacyOrganisation, LegacyProject, LegacyPortfolio, RbacEnvironment, AuditEvent, UserOption, IdentityTarget, RoleMenu,
+  RoleAssignmentView, PagedResponse,
 } from './api-models';
 
 // Thin HTTP client over the sv/usm-service RBAC endpoints
@@ -21,8 +22,10 @@ export class ApiService {
     return this.http.get<AccessContext>(`${this.base}/access-context/${userId}`);
   }
 
-  getRoles(): Observable<RbacRole[]> {
-    return this.http.get<RbacRole[]>(`${this.base}/roles`);
+  getRoles(actorUserId?: number): Observable<RbacRole[]> {
+    const params: Record<string, string> = {};
+    if (actorUserId != null) params['actorUserId'] = String(actorUserId);
+    return this.http.get<RbacRole[]>(`${this.base}/roles`, { params });
   }
 
   getUsers(): Observable<UserOption[]> {
@@ -43,6 +46,20 @@ export class ApiService {
     if (filters.organizationId != null) params['organizationId'] = String(filters.organizationId);
     if (filters.projectId != null) params['projectId'] = String(filters.projectId);
     return this.http.get<RoleAssignment[]>(`${this.base}/access/role-assignments`, { params });
+  }
+
+  // Paged Members & Roles list. actorUserId is required by the server; roleId
+  // and projectId only narrow the result. page/size are clamped server-side.
+  getRoleAssignmentsPage(
+    actorUserId: number,
+    filters: { roleId?: number | null; projectId?: number | null; page?: number; size?: number } = {},
+  ): Observable<PagedResponse<RoleAssignmentView>> {
+    const params: Record<string, string> = { actorUserId: String(actorUserId) };
+    if (filters.roleId != null) params['roleId'] = String(filters.roleId);
+    if (filters.projectId != null) params['projectId'] = String(filters.projectId);
+    params['page'] = String(filters.page ?? 0);
+    params['size'] = String(filters.size ?? 5);
+    return this.http.get<PagedResponse<RoleAssignmentView>>(`${this.base}/access/role-assignments/page`, { params });
   }
 
   grantRole(payload: {

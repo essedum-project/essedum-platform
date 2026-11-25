@@ -155,3 +155,31 @@ export interface AuditEvent {
   targetUserName: string | null;
 }
 
+// Row shape returned by GET /api/usm/access/role-assignments/page.
+export interface RoleAssignmentView {
+  id: number;
+  userId: number;
+  userName: string | null;
+  userEmail: string | null;
+  roleId: number;
+  roleName: string | null;
+  roleRank: number | null;
+  organizationId: number | null;
+  organizationName: string | null;
+  projectId: number | null;
+  projectName: string | null;
+  projectOrganizationId: number | null;
+  projectOrganizationName: string | null;
+  grantedAt: string;
+  revokedAt: string | null;
+}
+
+// Minimal page envelope used by paged USM endpoints.
+export interface PagedResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
