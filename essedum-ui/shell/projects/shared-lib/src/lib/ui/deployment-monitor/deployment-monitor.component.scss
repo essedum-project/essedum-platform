@@ -46,6 +46,16 @@
   padding: 18px 20px;
   margin: 16px 0;
   font-size: 13px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--dm-accent), #6a8dff 60%, var(--dm-success));
+  }
 }
 
 .dm-header {
@@ -84,14 +94,6 @@
   color: var(--dm-muted);
   font-family: monospace;
   font-size: 12px;
-}
-
-.dm-preview-note {
-  display: block;
-  margin-top: 2px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--dm-accent);
 }
 
 .dm-header-actions {
@@ -220,6 +222,12 @@
   border-radius: 12px;
   padding: 12px 14px;
   min-width: 0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: var(--dm-accent-soft);
+    box-shadow: var(--dm-shadow);
+  }
 }
 
 .dm-activity {

@@ -4,7 +4,6 @@ import { Location } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Services } from '../../../services/service';
-import { DeploymentMonitorService, MONITOR_PREVIEW_DEPLOYMENT_ID, SHOW_MONITOR_PREVIEW } from '@essedum/shared-lib';
 import { io } from 'socket.io-client';
 import { RunHistoryTabComponent } from './tabs/run-history-tab.component';
 import { OptionsDTO, StreamingServices } from '@essedum/shared-lib';
@@ -51,9 +50,6 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   savedAfterModify = false;
   private containerLastDeploymentName = '';
   containerDeploymentId = '';
-  get monitorId(): string {
-    return this.containerDeploymentId || (SHOW_MONITOR_PREVIEW ? MONITOR_PREVIEW_DEPLOYMENT_ID : '');
-  }
   private containerLastNamespace = 'vibe-pipelines';
   private _containerPollInterval: any = null;
   private _redeployPending = false;
@@ -71,7 +67,6 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     private router: Router,
     private location: Location,
     private services: Services,
-    private monitor: DeploymentMonitorService,
   ) {}
 
   ngOnInit(): void {
@@ -109,7 +104,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
           if (cd && cd.deploymentName) {
             this.containerLastDeploymentName = cd.deploymentName;
             this.containerLastNamespace = cd.namespace || 'vibe-pipelines';
-            this.containerDeploymentId = cd.deploymentId || this.monitor.dummyIdFor(cd.deploymentName);
+            this.containerDeploymentId = cd.deploymentId || '';
             this.containerInternalDnsUrl = cd.internalDnsUrl || '';
             this.containerDeployStatus = 'success';
             this.containerDeployMessage = 'Deployment active';
@@ -564,7 +559,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
         this.containerDeployStatus = 'success';
         this.containerDeployMessage = 'Deployment successful';
         this.addContainerLog('FINAL STATUS: SUCCESS');
-        this.containerDeploymentId = data.deployment_id || data.deploymentId || this.monitor.dummyIdFor(this.containerLastDeploymentName);
+        this.containerDeploymentId = data.deployment_id || data.deploymentId || '';
         this.persistContainerDeployment(
           this.containerLastDeploymentName,
           this.containerLastNamespace,

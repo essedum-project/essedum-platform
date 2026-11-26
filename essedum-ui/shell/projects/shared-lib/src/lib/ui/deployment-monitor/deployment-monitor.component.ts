@@ -1,10 +1,10 @@
 import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { Observable, Subscription, interval } from 'rxjs';
-import { filter, switchMap } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { Services } from '../../legacy/services/service';
 import { DeploymentMonitorService } from './deployment-monitor.service';
-import { MONITOR_PREVIEW_DEPLOYMENT_ID } from './monitor-preview.config';
 import {
+  ApiErrorDto,
   CheckpointDto,
   DeploymentEventDto,
   DeploymentState,
@@ -16,6 +16,7 @@ import {
 const POLL_INTERVAL_MS = 3000;
 const TERMINAL_STATES: DeploymentState[] = ['COMPLETED', 'FAILED', 'STOPPED'];
 const RECENT_EVENT_LIMIT = 6;
+export const NO_RECORDS = 'No records available';
 
 @Component({
   selector: 'app-deployment-monitor',
@@ -25,18 +26,20 @@ const RECENT_EVENT_LIMIT = 6;
 })
 export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
   @Input() deploymentId = '';
-  readonly previewId = MONITOR_PREVIEW_DEPLOYMENT_ID;
 
+  readonly noRecords = NO_RECORDS;
   status: DeploymentStatusDto | null = null;
   metrics: MetricSeriesDto | null = null;
   checkpoints: CheckpointDto[] = [];
   recentEvents: DeploymentEventDto[] = [];
   selectedCheckpointId = '';
-  loadError = '';
+  loadError: ApiErrorDto | null = null;
+  loading = false;
   busy = false;
 
   private lastVersion = -1;
   private lastSequence = 0;
+  private fetching = false;
   private pollSub: Subscription | null = null;
 
   constructor(private monitor: DeploymentMonitorService, private services: Services) {}
@@ -47,6 +50,10 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.pollSub?.unsubscribe();
+  }
+
+  get hasId(): boolean {
+    return !!this.deploymentId;
   }
 
   get isTerminal(): boolean {
@@ -77,7 +84,7 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
       case 'REGISTERING': return { icon: 'sync', text: 'Saving to Models...' };
       case 'PENDING': return { icon: 'hourglass_top', text: 'Waiting to save to Models' };
       case 'FAILED': return { icon: 'error', text: `Failed: ${reg.failureReason || 'unknown error'}` };
-      default: return { icon: 'hourglass_top', text: 'Waiting to save to Models' };
+      default: return { icon: 'inbox', text: NO_RECORDS };
     }
   }
 
@@ -100,11 +107,7 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
   }
 
   refresh(): void {
-    const id = this.deploymentId;
-    this.monitor.getStatus(id).subscribe({
-      next: s => { if (id === this.deploymentId) this.applyStatus(s); },
-      error: e => { this.loadError = this.errorText(e); },
-    });
+    this.fetchStatus();
   }
 
   stop(): void {
@@ -125,28 +128,39 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
   private start(): void {
     this.pollSub?.unsubscribe();
     this.pollSub = null;
-    this.status = null;
-    this.metrics = null;
-    this.checkpoints = [];
-    this.recentEvents = [];
-    this.selectedCheckpointId = '';
-    this.loadError = '';
+    this.clearData();
+    this.loadError = null;
     this.lastVersion = -1;
     this.lastSequence = 0;
-    if (!this.deploymentId) return;
+    if (!this.hasId) return;
 
-    this.refresh();
-    this.pollSub = interval(POLL_INTERVAL_MS).pipe(
-      filter(() => !!this.status && !this.isTerminal && !this.busy),
-      switchMap(() => this.monitor.getStatus(this.deploymentId)),
-    ).subscribe({
-      next: s => this.applyStatus(s),
-      error: e => { this.loadError = this.errorText(e); },
+    this.loading = true;
+    this.fetchStatus();
+    // Keeps polling while the deployment is not yet known to the backend, so data appears once the API is up.
+    this.pollSub = interval(POLL_INTERVAL_MS)
+      .pipe(filter(() => this.hasId && !this.busy && !this.isTerminal))
+      .subscribe(() => this.fetchStatus());
+  }
+
+  private fetchStatus(): void {
+    const id = this.deploymentId;
+    if (!id || this.fetching) return;
+    this.fetching = true;
+    this.monitor.getStatus(id).subscribe({
+      next: s => {
+        this.fetching = false;
+        if (id === this.deploymentId) this.applyStatus(s);
+      },
+      error: (e: ApiErrorDto) => {
+        this.fetching = false;
+        if (id === this.deploymentId) this.onLoadError(e);
+      },
     });
   }
 
   private applyStatus(s: DeploymentStatusDto): void {
-    this.loadError = '';
+    this.loading = false;
+    this.loadError = null;
     this.status = s;
     if (s.version !== this.lastVersion) {
       this.lastVersion = s.version;
@@ -155,18 +169,40 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
     this.fetchEvents();
   }
 
+  private onLoadError(e: ApiErrorDto): void {
+    this.loading = false;
+    this.loadError = e;
+    this.clearData();
+  }
+
+  private clearData(): void {
+    this.status = null;
+    this.metrics = null;
+    this.checkpoints = [];
+    this.recentEvents = [];
+    this.selectedCheckpointId = '';
+  }
+
   private loadSeriesAndCheckpoints(): void {
     const id = this.deploymentId;
-    this.monitor.getMetrics(id, 'loss').subscribe(m => {
-      if (id === this.deploymentId) this.metrics = m;
+    this.monitor.getMetrics(id, 'loss').subscribe({
+      next: m => { if (id === this.deploymentId) this.metrics = m; },
+      error: () => { if (id === this.deploymentId) this.metrics = null; },
     });
-    this.monitor.getCheckpoints(id).subscribe(res => {
-      if (id !== this.deploymentId) return;
-      this.checkpoints = res.checkpoints;
-      const selectionValid = this.checkpoints.some(c => c.checkpointId === this.selectedCheckpointId && c.valid);
-      if (!selectionValid) {
-        this.selectedCheckpointId = this.checkpoints.find(c => c.valid)?.checkpointId ?? '';
-      }
+    this.monitor.getCheckpoints(id).subscribe({
+      next: res => {
+        if (id !== this.deploymentId) return;
+        this.checkpoints = res.checkpoints;
+        const selectionValid = this.checkpoints.some(c => c.checkpointId === this.selectedCheckpointId && c.valid);
+        if (!selectionValid) {
+          this.selectedCheckpointId = this.checkpoints.find(c => c.valid)?.checkpointId ?? '';
+        }
+      },
+      error: () => {
+        if (id !== this.deploymentId) return;
+        this.checkpoints = [];
+        this.selectedCheckpointId = '';
+      },
     });
   }
 
@@ -178,7 +214,7 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
         this.lastSequence = res.latestSequence;
         this.recentEvents = [...res.events.reverse(), ...this.recentEvents].slice(0, RECENT_EVENT_LIMIT);
       },
-      error: () => { /* activity list is best-effort */ },
+      error: () => { /* activity list is best-effort; status errors are shown by fetchStatus */ },
     });
   }
 
@@ -188,16 +224,12 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
       next: () => {
         this.busy = false;
         this.services.message(successMessage, 'success');
-        this.refresh();
+        this.fetchStatus();
       },
-      error: e => {
+      error: (e: ApiErrorDto) => {
         this.busy = false;
-        this.services.message(this.errorText(e), 'error');
+        this.services.message(e.detail, 'error');
       },
     });
-  }
-
-  private errorText(e: any): string {
-    return e?.detail || e?.message || 'Request failed';
   }
 }

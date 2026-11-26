@@ -24,7 +24,6 @@ export * from './lib/ui/confirm-delete-dialog/confirm-delete-dialog.component';
 export * from './lib/ui/deployment-monitor/deployment-monitor.component';
 export * from './lib/ui/deployment-monitor/deployment-monitor.service';
 export * from './lib/ui/deployment-monitor/deployment-monitor.models';
-export * from './lib/ui/deployment-monitor/monitor-preview.config';
 export * from './lib/ui/pagination/pagination.component';
 export * from './lib/ui/pipes/first-character.pipe';
 export * from './lib/ui/pipes/highlight.pipe';

@@ -15,7 +15,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTabGroup } from '@angular/material/tabs';
 import { Services } from '@essedum/shared-lib';
-import { SHOW_MONITOR_PREVIEW, MONITOR_PREVIEW_DEPLOYMENT_ID } from '@essedum/shared-lib';
 import {
   AgentPipelineService,
   FileNode as ServiceFileNode,
@@ -447,10 +446,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     const base = (environment as any).langfuseUrl ?? '/langfuse';
     return `${base.replace(/\/$/, '')}/trace/${this.lastLangfuseTraceId}`;
   }
-  /** Deployment id for the Monitor tab. Dummy preview id while SHOW_MONITOR_PREVIEW is on. */
-  get monitorId(): string {
-    return SHOW_MONITOR_PREVIEW ? MONITOR_PREVIEW_DEPLOYMENT_ID : '';
-  }
+  /** Deployment id for the Monitor tab, taken from the live pipeline_status event. */
+  containerDeploymentId = '';
   appPort = ''; // Store app port from deployment
 
   // GitHub Push functionality
@@ -3057,6 +3054,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
             this.deploymentStatus = 'success';
             this.deploymentStatusMessage = 'Deployment completed successfully! Playground is now enabled.';
             this.isPlaygroundEnabled = true; // Enable playground only on successful deployment
+            this.containerDeploymentId = data.deployment_id || data.deploymentId || '';
             
             // Call streaming services API after successful deployment
             this.updateStreamingServicesWithPlaygroundUrl();
