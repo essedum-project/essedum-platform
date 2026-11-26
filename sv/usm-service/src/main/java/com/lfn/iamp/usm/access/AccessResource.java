@@ -156,6 +156,8 @@ public class AccessResource {
 			@RequestParam Integer actorUserId,
 			@RequestParam(required = false) Integer roleId,
 			@RequestParam(required = false) Integer projectId,
+			@RequestParam(required = false) Integer activeProjectId,
+			@RequestParam(required = false) Integer activeRoleRank,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "5") int size) {
 		if (actorUserId == null) {
@@ -164,7 +166,7 @@ public class AccessResource {
 		int safePage = Math.max(page, 0);
 		int safeSize = Math.min(Math.max(size, 1), 50);
 		return ResponseEntity.ok(accessContextService.pageAssignments(actorUserId, roleId, projectId,
-				safePage, safeSize));
+				activeProjectId, activeRoleRank, safePage, safeSize));
 	}
 
 	/**

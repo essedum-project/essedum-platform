@@ -52,11 +52,18 @@ export class ApiService {
   // and projectId only narrow the result. page/size are clamped server-side.
   getRoleAssignmentsPage(
     actorUserId: number,
-    filters: { roleId?: number | null; projectId?: number | null; page?: number; size?: number } = {},
+    filters: {
+      roleId?: number | null; projectId?: number | null;
+      activeProjectId?: number | null; activeRoleRank?: number | null;
+      page?: number; size?: number;
+    } = {},
   ): Observable<PagedResponse<RoleAssignmentView>> {
     const params: Record<string, string> = { actorUserId: String(actorUserId) };
     if (filters.roleId != null) params['roleId'] = String(filters.roleId);
     if (filters.projectId != null) params['projectId'] = String(filters.projectId);
+    // Profile-switcher context: the server scopes the list to this project's org/project.
+    if (filters.activeProjectId != null) params['activeProjectId'] = String(filters.activeProjectId);
+    if (filters.activeRoleRank != null) params['activeRoleRank'] = String(filters.activeRoleRank);
     params['page'] = String(filters.page ?? 0);
     params['size'] = String(filters.size ?? 5);
     return this.http.get<PagedResponse<RoleAssignmentView>>(`${this.base}/access/role-assignments/page`, { params });

@@ -2,7 +2,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { combineLatest } from 'rxjs';
+import { combineLatest, take } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { RoleNameUtil } from '../../core/role-name.util';
 import type { LegacyProject, RbacRole, RoleAssignmentView } from '../../core/api-models';
@@ -67,7 +67,12 @@ export class AccessComponent implements OnInit {
 
     // Role dropdown: the server returns only the roles this actor may see.
     this.api.getRoles(actorUserId).subscribe(roles => (this.roles = roles));
-    this.api.getProjects().subscribe(projects => (this.projects = projects));
+    // Project filter: only projects of the organisation selected in the profile switcher.
+    this.api.getProjects().subscribe(projects => {
+      const activeId = this.activeProjectId();
+      const activeOrg = projects.find(p => p.id === activeId)?.organisationId ?? null;
+      this.projects = activeOrg != null ? projects.filter(p => p.organisationId === activeOrg) : projects;
+    });
 
     this.loadPage();
   }
@@ -104,10 +109,26 @@ export class AccessComponent implements OnInit {
     });
   }
 
+  // projectId$/selectedRoleRank$ re-read sessionStorage on subscribe (synchronous), so the
+  // list always follows whatever project/role is currently selected in the profile switcher.
+  private activeProjectId(): number | null {
+    let v: number | null = null;
+    this.userContext.projectId$.pipe(take(1)).subscribe(x => (v = x));
+    return v;
+  }
+
+  private activeRoleRank(): number | null {
+    let v: number | null = null;
+    this.userContext.selectedRoleRank$.pipe(take(1)).subscribe(x => (v = x));
+    return v;
+  }
+
   private loadPage(): void {
     const actorUserId = this.userContext.userId$.value;
     this.loading = true;
     this.api.getRoleAssignmentsPage(actorUserId, {
+      activeProjectId: this.activeProjectId(),
+      activeRoleRank: this.activeRoleRank(),
       roleId: this.selectedRoleId,
       projectId: this.selectedProjectId,
       page: this.pageIndex,

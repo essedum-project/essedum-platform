@@ -472,8 +472,15 @@ public class AccessContextService {
 		return all.stream().filter(r -> r.getRank() != null && r.getRank() <= cap).collect(Collectors.toList());
 	}
 
+	/**
+	 * @param activeProjectId project currently selected in the profile switcher (null = no context,
+	 *                        falls back to the union of all the actor's grants). The organisation is derived
+	 *                        from this project, so only rows in that org / project are listed.
+	 * @param activeRoleRank  rank of the role currently selected in the profile switcher; can only lower
+	 *                        the visible-role cap, never raise it
+	 */
 	public PagedResponse<RoleAssignmentView> pageAssignments(Integer actorUserId, Integer roleId, Integer projectId,
-			int page, int size) {
+			Integer activeProjectId, Integer activeRoleRank, int page, int size) {
 		// Legacy role ids (>= LEGACY_ROLE_ID_OFFSET) are not filterable here. Stripping the
 		// offset would match RBAC rows that share the same numeric role_id, so return an
 		// empty page for every actor. The role dropdown no longer offers legacy roles.
@@ -491,6 +498,7 @@ public class AccessContextService {
 		//  - Platform Admin (rank 4) on an org or project: every role in that org/project and its projects;
 		//  - any lower grant: only roles up to that grant's rank (min 1, so AI Engineer rows stay visible).
 		List<RoleAssignmentSpecs.RowScope> scopes = null;
+		boolean contextual = activeProjectId != null;
 		if (!platformWide) {
 			java.util.Map<Integer, Set<Integer>> projectsByOrg = projectRepository.findAll().stream()
 					.filter(p -> p.getOrganisationId() != null)
@@ -498,9 +506,27 @@ public class AccessContextService {
 							Collectors.mapping(Project::getId, Collectors.toSet())));
 			List<RbacRole> allRoles = rbacRoleRepository.findAll();
 
+			// The org of the active project; org-level grants only apply when they match it.
+			Integer activeOrgId = contextual
+					? projectRepository.findById(activeProjectId).map(Project::getOrganisationId).orElse(null)
+					: null;
+
 			scopes = new ArrayList<>();
 			for (RoleAssignment a : active) {
+				if (contextual) {
+					// Only grants that cover the selected org/project count; grants held in
+					// other orgs/projects must not widen what is listed here.
+					boolean covers = a.getOrganizationId() != null
+							? a.getOrganizationId().equals(activeOrgId)
+							: activeProjectId.equals(a.getProjectId());
+					if (!covers) {
+						continue;
+					}
+				}
 				int rank = grantRank(a);
+				if (contextual && activeRoleRank != null) {
+					rank = Math.min(rank, activeRoleRank);
+				}
 				Set<Integer> roleIds = null; // null = any role
 				if (rank < PLATFORM_ADMIN_RANK) {
 					int cap = Math.max(rank, 1);
@@ -518,7 +544,7 @@ public class AccessContextService {
 		}
 
 		org.springframework.data.jpa.domain.Specification<RoleAssignment> spec =
-				RoleAssignmentSpecs.build(scopes, platformWide ? null : actorUserId, roleId, projectId);
+				RoleAssignmentSpecs.build(scopes, platformWide ? null : actorUserId, contextual, roleId, projectId);
 
 		org.springframework.data.domain.Page<RoleAssignment> result = roleAssignmentRepository.findAll(spec,
 				org.springframework.data.domain.PageRequest.of(page, size,
