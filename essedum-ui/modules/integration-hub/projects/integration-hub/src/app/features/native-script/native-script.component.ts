@@ -28,6 +28,7 @@ import { NotebookDialogComponent, NotebookDialogData } from '../pipeline.descrip
 import { io } from 'socket.io-client';
 import { Subject } from 'rxjs';
 import { takeUntil, timeout, catchError, switchMap } from 'rxjs/operators';
+import { MONITOR_PREVIEW_DEPLOYMENT_ID, SHOW_MONITOR_PREVIEW } from '@essedum/shared-lib';
 import { of } from 'rxjs';
 
 interface FileNode {
@@ -129,6 +130,9 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     containerDeployStatus: 'idle' | 'deploying' | 'success' | 'error' = 'idle';
     containerDeployMessage: string = '';
     containerInternalDnsUrl: string = '';
+    get monitorId(): string {
+      return SHOW_MONITOR_PREVIEW ? MONITOR_PREVIEW_DEPLOYMENT_ID : '';
+    }
     containerDeployLogs: string[] = [];
     isDeletingContainer: boolean = false;
     codeModifiedSinceDeployed: boolean = false;
@@ -1199,7 +1203,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
       if (status === 'SUCCESS') {
         this.containerDeployStatus = 'success';
         this.containerDeployMessage = 'Deployment successful';
-        this.containerInternalDnsUrl = data.internal_dns_url || '';
+        this.containerInternalDnsUrl = data.internal_dns_url || data.url || '';
         this.addContainerLog('FINAL STATUS: SUCCESS');
         this.persistContainerDeployment(
           this.containerLastDeploymentName,

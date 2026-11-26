@@ -1,0 +1,131 @@
+<section class="dm-card">
+  <header class="dm-header">
+    <div class="dm-title">
+      <mat-icon class="dm-title-icon">monitor_heart</mat-icon>
+      <div>
+        <h3>Deployment monitor</h3>
+        <span class="dm-id">{{ deploymentId }}</span>
+        <span *ngIf="deploymentId === previewId" class="dm-preview-note">Preview with dummy data</span>
+      </div>
+    </div>
+    <div class="dm-header-actions">
+      <span *ngIf="status" class="dm-chip" [ngClass]="'dm-chip--' + (status.state | lowercase)">
+        <span class="dm-dot" [class.dm-dot--pulse]="status.state === 'RUNNING' || status.state === 'DEPLOYING'"></span>
+        {{ status.state | titlecase }}
+      </span>
+      <ng-container *ngIf="status">
+        <button mat-stroked-button class="dm-btn dm-btn--danger" [disabled]="!canStop" (click)="stop()">
+          <mat-icon>stop_circle</mat-icon>
+          Stop
+        </button>
+        <button mat-flat-button class="dm-btn dm-btn--primary" [disabled]="!canResume" (click)="resume()"
+          matTooltip="Resume from the selected checkpoint">
+          <mat-icon>play_circle</mat-icon>
+          Resume
+        </button>
+      </ng-container>
+      <button mat-icon-button class="dm-icon-btn" matTooltip="Refresh" (click)="refresh()" aria-label="Refresh status">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="loadError" class="dm-alert dm-alert--error" role="alert">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ loadError }}</span>
+  </div>
+
+  <div *ngIf="!status && !loadError" class="dm-loading">
+    <mat-spinner diameter="28"></mat-spinner>
+    <span>Loading deployment status...</span>
+  </div>
+
+  <ng-container *ngIf="status">
+    <p class="dm-message">{{ status.message }}</p>
+    <div *ngIf="status.failureReason" class="dm-alert dm-alert--error" role="alert">
+      <mat-icon>report_problem</mat-icon>
+      <span>{{ status.failureReason }}</span>
+    </div>
+
+    <div class="dm-grid">
+      <!-- Steps -->
+      <div class="dm-panel">
+        <div class="dm-panel-title">Steps</div>
+        <ol class="dm-steps">
+          <li *ngFor="let step of status.steps" class="dm-step" [ngClass]="'dm-step--' + (step.state | lowercase)">
+            <span class="dm-step-marker">
+              <mat-icon *ngIf="step.state === 'DONE'">check</mat-icon>
+              <mat-icon *ngIf="step.state === 'FAILED'">close</mat-icon>
+              <span *ngIf="step.state === 'RUNNING'" class="dm-spinner-ring"></span>
+            </span>
+            <span class="dm-step-name">{{ step.name }}</span>
+            <span class="dm-step-state">{{ step.state | titlecase }}</span>
+          </li>
+        </ol>
+      </div>
+
+      <!-- Loss -->
+      <div class="dm-panel">
+        <div class="dm-panel-title">
+          <span>{{ metrics?.name || 'loss' }}</span>
+          <span *ngIf="latestMetric !== null" class="dm-metric-value">{{ latestMetric | number: '1.3-3' }}</span>
+        </div>
+        <svg *ngIf="chart.line; else noChart" class="dm-chart" viewBox="0 0 300 90" preserveAspectRatio="none" role="img" aria-label="Loss chart">
+          <polygon class="dm-chart-area" [attr.points]="chart.area"></polygon>
+          <polyline class="dm-chart-line" [attr.points]="chart.line"></polyline>
+        </svg>
+        <ng-template #noChart>
+          <div class="dm-empty">No metric points yet</div>
+        </ng-template>
+      </div>
+
+      <!-- Checkpoints -->
+      <div class="dm-panel">
+        <div class="dm-panel-title">Checkpoints</div>
+        <div *ngIf="checkpoints.length === 0" class="dm-empty">No checkpoints saved yet</div>
+        <ul class="dm-checkpoints">
+          <li *ngFor="let cp of checkpoints" class="dm-checkpoint" [class.dm-checkpoint--invalid]="!cp.valid">
+            <label>
+              <input
+                type="radio"
+                name="dm-checkpoint"
+                [value]="cp.checkpointId"
+                [checked]="cp.checkpointId === selectedCheckpointId"
+                [disabled]="!cp.valid || busy"
+                (change)="selectedCheckpointId = cp.checkpointId" />
+              <span class="dm-cp-id">{{ cp.checkpointId }}</span>
+              <span class="dm-cp-meta">step {{ cp.step }}</span>
+              <span *ngIf="!cp.valid" class="dm-cp-badge">Invalid</span>
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Models registration -->
+      <div class="dm-panel">
+        <div class="dm-panel-title">Models registration</div>
+        <div class="dm-registration" [ngClass]="'dm-registration--' + (status.registration.state | lowercase)">
+          <mat-icon>{{ registrationView.icon }}</mat-icon>
+          <span>{{ registrationView.text }}</span>
+        </div>
+        <button *ngIf="canRetryRegistration" mat-stroked-button class="dm-btn dm-btn--ghost" (click)="retryRegistration()">
+          <mat-icon>replay</mat-icon>
+          Retry registration
+        </button>
+      </div>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="dm-panel dm-activity">
+      <div class="dm-panel-title">Recent activity</div>
+      <div *ngIf="recentEvents.length === 0" class="dm-empty">No activity yet</div>
+      <ul class="dm-events">
+        <li *ngFor="let ev of recentEvents" class="dm-event">
+          <span class="dm-event-time">{{ ev.timestamp | date: 'HH:mm:ss' }}</span>
+          <span *ngIf="ev.type === 'STATE_CHANGED'">State changed to <b>{{ ev.state | titlecase }}</b></span>
+          <span *ngIf="ev.type === 'METRIC'">{{ ev.name }} = {{ ev.value | number: '1.3-3' }}</span>
+        </li>
+      </ul>
+    </div>
+  </ng-container>
+</section>

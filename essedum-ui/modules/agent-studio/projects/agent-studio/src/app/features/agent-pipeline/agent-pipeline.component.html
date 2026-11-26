@@ -937,6 +937,11 @@
                 </mat-tab>
 
              
+              <mat-tab *ngIf="monitorId" label="Monitor" class="lfx-u-header-xl">
+                <div class="tab-content monitor-tab-body mb-5">
+                  <app-deployment-monitor [deploymentId]="monitorId"></app-deployment-monitor>
+                </div>
+              </mat-tab>
               </mat-tab-group>
             </div>
           </div>

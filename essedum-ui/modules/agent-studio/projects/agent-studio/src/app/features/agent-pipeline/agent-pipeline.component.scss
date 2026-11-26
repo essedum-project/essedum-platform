@@ -107,6 +107,13 @@
   min-width: 0 !important;
 }
 
+// Keeps the deployment monitor card inside the Monitor tab's parent card,
+// since .tab-content above forces padding to 0.
+.monitor-tab-body {
+  padding: 24px 48px !important;
+  box-sizing: border-box;
+}
+
 // Material's tab-body chain (mat-tab-group → mat-mdc-tab-body-wrapper →
 // mat-mdc-tab-body → mat-mdc-tab-body-content) collapses to shrink-to-content
 // inside the federated MFE bundle (the host's Material CSS singleton doesn't

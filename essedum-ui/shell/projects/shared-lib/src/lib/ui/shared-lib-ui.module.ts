@@ -9,6 +9,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -27,6 +28,7 @@ import { FirstCharacterPipe } from './pipes/first-character.pipe';
 import { HighlightPipe, HighlightSearchPipe } from './pipes/highlight.pipe';
 import { StringToJSON, FilterPipe } from './pipes/string-utils.pipes';
 import { SecondsToTimePipe } from './pipes/seconds-to-time.pipe';
+import { DeploymentMonitorComponent } from './deployment-monitor/deployment-monitor.component';
 
 // Tags component — depends on the relocated Services + TagsService. Lives in legacy/.
 import { TagsComponent } from '../legacy/tags/tags.component';
@@ -40,6 +42,7 @@ const PUBLIC_DECLARATIONS = [
   AipPaginationComponent,
   AipSnackbarCustomComponent,
   ConfirmDeleteDialogComponent,
+  DeploymentMonitorComponent,
   EnlCodeEditorComponent,
   PaginationComponent,
   FirstCharacterPipe,
@@ -62,6 +65,7 @@ const PUBLIC_DECLARATIONS = [
     MatButtonModule,
     MatDialogModule,
     MatDividerModule,
+    MatProgressSpinnerModule,
     MatSnackBarModule,
     MatTooltipModule,
   ],

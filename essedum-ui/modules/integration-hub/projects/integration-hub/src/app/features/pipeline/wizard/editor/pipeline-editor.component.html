@@ -147,6 +147,14 @@
       </div>
     </mat-tab>
 
+    <!-- Deployment monitor tab — shown once a deployment id exists (or preview is on) -->
+    <mat-tab *ngIf="monitorId">
+      <ng-template mat-tab-label>Monitor</ng-template>
+      <div class="tab-content p-3">
+        <app-deployment-monitor [deploymentId]="monitorId"></app-deployment-monitor>
+      </div>
+    </mat-tab>
+
   </mat-tab-group>
 </div>
 

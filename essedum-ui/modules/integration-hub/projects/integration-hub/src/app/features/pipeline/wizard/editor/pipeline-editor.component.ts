@@ -4,6 +4,7 @@ import { Location } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Services } from '../../../services/service';
+import { DeploymentMonitorService, MONITOR_PREVIEW_DEPLOYMENT_ID, SHOW_MONITOR_PREVIEW } from '@essedum/shared-lib';
 import { io } from 'socket.io-client';
 import { RunHistoryTabComponent } from './tabs/run-history-tab.component';
 import { OptionsDTO, StreamingServices } from '@essedum/shared-lib';
@@ -49,6 +50,10 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   codeModifiedSinceDeployed = false;
   savedAfterModify = false;
   private containerLastDeploymentName = '';
+  containerDeploymentId = '';
+  get monitorId(): string {
+    return this.containerDeploymentId || (SHOW_MONITOR_PREVIEW ? MONITOR_PREVIEW_DEPLOYMENT_ID : '');
+  }
   private containerLastNamespace = 'vibe-pipelines';
   private _containerPollInterval: any = null;
   private _redeployPending = false;
@@ -66,6 +71,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     private router: Router,
     private location: Location,
     private services: Services,
+    private monitor: DeploymentMonitorService,
   ) {}
 
   ngOnInit(): void {
@@ -103,6 +109,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
           if (cd && cd.deploymentName) {
             this.containerLastDeploymentName = cd.deploymentName;
             this.containerLastNamespace = cd.namespace || 'vibe-pipelines';
+            this.containerDeploymentId = cd.deploymentId || this.monitor.dummyIdFor(cd.deploymentName);
             this.containerInternalDnsUrl = cd.internalDnsUrl || '';
             this.containerDeployStatus = 'success';
             this.containerDeployMessage = 'Deployment active';
@@ -464,6 +471,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     this.containerDeployStatus = 'deploying';
     this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';
+    this.containerDeploymentId = '';
     if (!this.containerDeployLogs.some(l => l.includes('Preparing pipeline package'))) {
       this.addContainerLog('Preparing pipeline package...');
     }
@@ -556,10 +564,12 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
         this.containerDeployStatus = 'success';
         this.containerDeployMessage = 'Deployment successful';
         this.addContainerLog('FINAL STATUS: SUCCESS');
+        this.containerDeploymentId = data.deployment_id || data.deploymentId || this.monitor.dummyIdFor(this.containerLastDeploymentName);
         this.persistContainerDeployment(
           this.containerLastDeploymentName,
           this.containerLastNamespace,
-          data.internal_dns_url || ''
+          data.internal_dns_url || data.url || '',
+          this.containerDeploymentId
         );
       } else {
         this.containerDeployStatus = 'error';
@@ -612,7 +622,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
       if (status === 'SUCCESS' || status === 'NOT_FOUND') {
         this.containerDeployStatus = 'idle';
         this.containerInternalDnsUrl = '';
-        this.containerDeployMessage = data.message || (status === 'SUCCESS' ? 'Deployment deleted' : 'No deployment found');
+        this.containerDeploymentId = '';
         this.clearContainerDeployment();
       } else {
         this.containerDeployStatus = 'error';
@@ -626,12 +636,12 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     });
   }
 
-  private persistContainerDeployment(deploymentName: string, namespace: string, internalDnsUrl: string): void {
+  private persistContainerDeployment(deploymentName: string, namespace: string, internalDnsUrl: string, deploymentId: string): void {
     if (!this.model) return;
     let parsed: any = {};
     try { parsed = JSON.parse(this.model.raw.json_content || '{}'); } catch {}
     parsed.containerDeployment = {
-      deploymentName, namespace, internalDnsUrl,
+      deploymentName, deploymentId, namespace, internalDnsUrl,
       buildLogs: this.containerDeployLogs.slice(-500),
     };
     this.model.raw.json_content = JSON.stringify(parsed);

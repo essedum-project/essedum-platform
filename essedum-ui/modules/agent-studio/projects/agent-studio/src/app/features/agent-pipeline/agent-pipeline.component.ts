@@ -15,6 +15,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTabGroup } from '@angular/material/tabs';
 import { Services } from '@essedum/shared-lib';
+import { SHOW_MONITOR_PREVIEW, MONITOR_PREVIEW_DEPLOYMENT_ID } from '@essedum/shared-lib';
 import {
   AgentPipelineService,
   FileNode as ServiceFileNode,
@@ -445,6 +446,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     if (!this.lastLangfuseTraceId) return null;
     const base = (environment as any).langfuseUrl ?? '/langfuse';
     return `${base.replace(/\/$/, '')}/trace/${this.lastLangfuseTraceId}`;
+  }
+  /** Deployment id for the Monitor tab. Dummy preview id while SHOW_MONITOR_PREVIEW is on. */
+  get monitorId(): string {
+    return SHOW_MONITOR_PREVIEW ? MONITOR_PREVIEW_DEPLOYMENT_ID : '';
   }
   appPort = ''; // Store app port from deployment
 
