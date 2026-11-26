@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -99,6 +100,14 @@ public class AccessContextService {
 			return new AccessContext(userId, highestRank, allProjectIds, allOrganizationIds, allProjectIds);
 		}
 
+		return scopedContext(userId, active, highestRank);
+	}
+
+	/**
+	 * Reachable projects/orgs for an actor built only from their own grants (no platform-wide
+	 * expansion). Used by resolve() for non-platform admins and by the Members &amp; Roles list.
+	 */
+	private AccessContext scopedContext(Integer userId, List<RoleAssignment> active, int highestRank) {
 		List<Integer> organizationIds = active.stream()
 				.map(RoleAssignment::getOrganizationId)
 				.filter(id -> id != null)
@@ -441,9 +450,12 @@ public class AccessContextService {
 
 	// ---- Members & Roles: paged, filtered, rank-capped listing ----
 
-	/** Highest rbac rank an actor may see in the list: project admin 2, org admin 3, platform admin 4. */
-	private int visibleRankCap(int actorRank) {
-		return Math.min(actorRank, PLATFORM_ADMIN_RANK);
+	private int grantRank(RoleAssignment a) {
+		return rbacRoleRepository.findById(a.getRoleId()).map(RbacRole::getRank).orElse(0);
+	}
+
+	private static boolean isPlatformWide(RoleAssignment a) {
+		return a.getOrganizationId() == null && a.getProjectId() == null;
 	}
 
 	/**
@@ -462,29 +474,51 @@ public class AccessContextService {
 
 	public PagedResponse<RoleAssignmentView> pageAssignments(Integer actorUserId, Integer roleId, Integer projectId,
 			int page, int size) {
-		AccessContext ctx = resolve(actorUserId);
-		int rank = ctx.getHighestRank();
-		boolean platformAdmin = rank >= PLATFORM_ADMIN_RANK;
-
-		List<Integer> allowedRoleIds = null; // null = unrestricted
-		if (!platformAdmin) {
-			int cap = Math.max(visibleRankCap(rank), 1); // AI Engineer (0,1) always visible
-			allowedRoleIds = rbacRoleRepository.findAll().stream()
-					.filter(r -> r.getRank() != null && r.getRank() <= cap)
-					.map(RbacRole::getId).collect(Collectors.toList());
-		}
-
 		// Legacy role ids (>= LEGACY_ROLE_ID_OFFSET) are not filterable here. Stripping the
 		// offset would match RBAC rows that share the same numeric role_id, so return an
 		// empty page for every actor. The role dropdown no longer offers legacy roles.
 		if (roleId != null && roleId >= LEGACY_ROLE_ID_OFFSET) {
 			return new PagedResponse<>(Collections.emptyList(), page, size, 0, 0);
 		}
-		Integer roleFilter = roleId;
 
-		org.springframework.data.jpa.domain.Specification<RoleAssignment> spec = RoleAssignmentSpecs.build(
-				allowedRoleIds, platformAdmin ? null : actorUserId, ctx.getReachableProjectIds(),
-				ctx.getReachableOrganizationIds(), roleFilter, projectId);
+		List<RoleAssignment> active = roleAssignmentRepository.findByUserIdAndRevokedAtIsNull(actorUserId);
+
+		// Platform Admin via a platform-wide grant: no restriction at all.
+		boolean platformWide = active.stream()
+				.anyMatch(a -> isPlatformWide(a) && grantRank(a) >= PLATFORM_ADMIN_RANK);
+
+		// Otherwise each grant the actor holds defines one visibility rule:
+		//  - Platform Admin (rank 4) on an org or project: every role in that org/project and its projects;
+		//  - any lower grant: only roles up to that grant's rank (min 1, so AI Engineer rows stay visible).
+		List<RoleAssignmentSpecs.RowScope> scopes = null;
+		if (!platformWide) {
+			java.util.Map<Integer, Set<Integer>> projectsByOrg = projectRepository.findAll().stream()
+					.filter(p -> p.getOrganisationId() != null)
+					.collect(Collectors.groupingBy(Project::getOrganisationId,
+							Collectors.mapping(Project::getId, Collectors.toSet())));
+			List<RbacRole> allRoles = rbacRoleRepository.findAll();
+
+			scopes = new ArrayList<>();
+			for (RoleAssignment a : active) {
+				int rank = grantRank(a);
+				Set<Integer> roleIds = null; // null = any role
+				if (rank < PLATFORM_ADMIN_RANK) {
+					int cap = Math.max(rank, 1);
+					roleIds = allRoles.stream()
+							.filter(r -> r.getRank() != null && r.getRank() <= cap)
+							.map(RbacRole::getId).collect(Collectors.toSet());
+				}
+				if (a.getOrganizationId() != null) {
+					Set<Integer> projects = projectsByOrg.getOrDefault(a.getOrganizationId(), Collections.emptySet());
+					scopes.add(new RoleAssignmentSpecs.RowScope(Set.of(a.getOrganizationId()), projects, roleIds));
+				} else if (a.getProjectId() != null) {
+					scopes.add(new RoleAssignmentSpecs.RowScope(Collections.emptySet(), Set.of(a.getProjectId()), roleIds));
+				}
+			}
+		}
+
+		org.springframework.data.jpa.domain.Specification<RoleAssignment> spec =
+				RoleAssignmentSpecs.build(scopes, platformWide ? null : actorUserId, roleId, projectId);
 
 		org.springframework.data.domain.Page<RoleAssignment> result = roleAssignmentRepository.findAll(spec,
 				org.springframework.data.domain.PageRequest.of(page, size,

@@ -1,8 +1,8 @@
 package com.lfn.iamp.usm.access;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -15,33 +15,52 @@ final class RoleAssignmentSpecs {
 	}
 
 	/**
-	 * @param allowedRoleIds  null = no role restriction (platform admin); otherwise rows must have one of these role ids
-	 * @param scopeUserId     non-null = row must be this user's own, or inside the reachable projects/orgs (non platform admin)
+	 * One visibility rule derived from one of the actor's grants: rows inside these
+	 * organisations or projects are visible, optionally only when their role is in roleIds.
+	 *
+	 * @param orgIds     organisations whose rows are covered (may be empty)
+	 * @param projectIds projects whose rows are covered (may be empty)
+	 * @param roleIds    null = any role; otherwise only rows with one of these role ids
 	 */
-	static Specification<RoleAssignment> build(Collection<Integer> allowedRoleIds, Integer scopeUserId,
-			Collection<Integer> reachableProjectIds, Collection<Integer> reachableOrgIds, Integer roleId,
+	record RowScope(Set<Integer> orgIds, Set<Integer> projectIds, Set<Integer> roleIds) {
+	}
+
+	/**
+	 * @param scopes     null = no scope restriction (platform admin); otherwise a row is visible if it
+	 *                   belongs to ownUserId, or matches any scope
+	 * @param ownUserId  the viewer; their own rows are always visible when scopes is non-null
+	 */
+	static Specification<RoleAssignment> build(List<RowScope> scopes, Integer ownUserId, Integer roleId,
 			Integer projectId) {
 		return (root, query, cb) -> {
 			List<Predicate> and = new ArrayList<>();
 			and.add(cb.isNull(root.get("revokedAt")));
 
-			if (allowedRoleIds != null) {
-				if (allowedRoleIds.isEmpty()) {
-					and.add(cb.disjunction());
-				} else {
-					and.add(root.get("roleId").in(allowedRoleIds));
-				}
-			}
-			if (scopeUserId != null) {
+			if (scopes != null) {
 				List<Predicate> or = new ArrayList<>();
-				or.add(cb.equal(root.get("userId"), scopeUserId));
-				if (!reachableProjectIds.isEmpty()) {
-					or.add(root.get("projectId").in(reachableProjectIds));
+				if (ownUserId != null) {
+					or.add(cb.equal(root.get("userId"), ownUserId));
 				}
-				if (!reachableOrgIds.isEmpty()) {
-					or.add(root.get("organizationId").in(reachableOrgIds));
+				for (RowScope s : scopes) {
+					List<Predicate> location = new ArrayList<>();
+					if (!s.orgIds().isEmpty()) {
+						location.add(root.get("organizationId").in(s.orgIds()));
+					}
+					if (!s.projectIds().isEmpty()) {
+						location.add(root.get("projectId").in(s.projectIds()));
+					}
+					if (location.isEmpty()) {
+						continue;
+					}
+					Predicate match = cb.or(location.toArray(new Predicate[0]));
+					if (s.roleIds() != null) {
+						match = cb.and(match, s.roleIds().isEmpty()
+								? cb.disjunction()
+								: root.get("roleId").in(s.roleIds()));
+					}
+					or.add(match);
 				}
-				and.add(cb.or(or.toArray(new Predicate[0])));
+				and.add(or.isEmpty() ? cb.disjunction() : cb.or(or.toArray(new Predicate[0])));
 			}
 			if (roleId != null) {
 				and.add(cb.equal(root.get("roleId"), roleId));
