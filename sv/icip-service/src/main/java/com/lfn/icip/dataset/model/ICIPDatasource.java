@@ -261,6 +261,11 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 	@com.fasterxml.jackson.annotation.JsonProperty("approved_organization_id")
 	private Integer approvedOrganizationId;
 
+	/** The user who originally created the connection. Set once on create, never overwritten on edit. */
+	@Column(name = "created_by", length = 255, updatable = false)
+	@com.fasterxml.jackson.annotation.JsonProperty("created_by")
+	private String createdBy;
+
 	/**
 	 * Clone.
 	 *
@@ -273,7 +278,7 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 	public ICIPDatasource clone() {
 		ICIPDatasource ds = new ICIPDatasource(id, name, description, type, connectionDetails, salt, organization,
 				dshashcode, activetime, category,extras, interfacetype,fordataset,forruntime,foradapter,formodel,forpromptprovider,forendpoint,forapp,
-				approvalStatus, comments, projectId, approvedOrganizationId);
+				approvalStatus, comments, projectId, approvedOrganizationId, createdBy);
 		ds.setAlias(alias);
 		ds.setLastmodifiedby(lastmodifiedby);
 		ds.setLastmodifieddate(lastmodifieddate);

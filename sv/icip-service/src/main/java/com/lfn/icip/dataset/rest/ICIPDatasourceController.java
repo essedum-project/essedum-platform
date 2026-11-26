@@ -370,6 +370,8 @@ public class ICIPDatasourceController {
 		datasourceDTO.setOrganization(org);
 		datasourceDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
 		datasourceDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
+		// Never trust a client-supplied creator on save; the service keeps the stored value.
+		datasourceDTO.setCreatedBy(null);
 		logger.debug("loading modelmapper");
 		ModelMapper modelmapper = new ModelMapper();
 		ICIPDatasource datasource = modelmapper.map(datasourceDTO, ICIPDatasource.class);

@@ -348,6 +348,8 @@ public class DatasourceApprovalWorkflowService {
 		clone.setForapp(original.getForapp());
 		clone.setLastmodifiedby(currentUser != null && !currentUser.isEmpty() ? currentUser : original.getLastmodifiedby());
 		clone.setLastmodifieddate(new Timestamp(System.currentTimeMillis()));
+		// The clone's creator is the original connection's creator, not the user who cloned it.
+		clone.setCreatedBy(original.getCreatedBy());
 
 		clone.setApprovalStatus("DRAFT");
 		clone.setProjectId(projectId != null ? projectId : original.getProjectId());
