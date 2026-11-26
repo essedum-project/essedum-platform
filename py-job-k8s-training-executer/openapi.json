@@ -1,0 +1,729 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ESSEDUM Kubernetes Training Executor",
+    "description": "Stateless executor that turns ICIP training requests into Kubernetes Jobs. Contract v1.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "ops"
+        ],
+        "summary": "Health",
+        "description": "Liveness. Unauthenticated so Kubernetes probes work.",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/capacity": {
+      "get": {
+        "tags": [
+          "capacity"
+        ],
+        "summary": "Capacity",
+        "description": "Allocatable vs. used GPU capacity per pool/type. Stub until PY-03.",
+        "operationId": "capacity_api_v1_capacity_get",
+        "parameters": [
+          {
+            "name": "X-Service-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Service-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CapacityResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tasks": {
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Create Task",
+        "description": "Create a training task. Idempotent per (runId, attempt): a repeat returns\nthe existing task with 200 instead of creating a second Job.",
+        "operationId": "create_task_api_v1_tasks_post",
+        "parameters": [
+          {
+            "name": "X-Service-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Service-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tasks/{task_id}": {
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Get Task",
+        "operationId": "get_task_api_v1_tasks__task_id__get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          },
+          {
+            "name": "X-Service-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Service-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tasks/{task_id}/stop": {
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Stop Task",
+        "description": "Cancel a task. Idempotent.",
+        "operationId": "stop_task_api_v1_tasks__task_id__stop_post",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          },
+          {
+            "name": "X-Service-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Service-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tasks/{task_id}/logs": {
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Task Logs",
+        "operationId": "task_logs_api_v1_tasks__task_id__logs_get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          },
+          {
+            "name": "tail",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 1,
+              "description": "Last N lines",
+              "default": 200,
+              "title": "Tail"
+            },
+            "description": "Last N lines"
+          },
+          {
+            "name": "follow",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Stream new lines (implemented in PY-03)",
+              "default": false,
+              "title": "Follow"
+            },
+            "description": "Stream new lines (implemented in PY-03)"
+          },
+          {
+            "name": "X-Service-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Service-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CapacityResponse": {
+        "properties": {
+          "gpus": {
+            "items": {
+              "$ref": "#/components/schemas/GpuCapacity"
+            },
+            "type": "array",
+            "title": "Gpus"
+          },
+          "cpuAllocatable": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cpuallocatable"
+          },
+          "memoryAllocatable": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memoryallocatable"
+          }
+        },
+        "type": "object",
+        "title": "CapacityResponse"
+      },
+      "CreateTaskRequest": {
+        "properties": {
+          "runId": {
+            "type": "string",
+            "title": "Runid"
+          },
+          "projectId": {
+            "type": "string",
+            "title": "Projectid"
+          },
+          "attempt": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Attempt",
+            "default": 1
+          },
+          "image": {
+            "type": "string",
+            "title": "Image",
+            "description": "Trainer container image"
+          },
+          "command": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Command"
+          },
+          "args": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Args"
+          },
+          "env": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Env"
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params",
+            "description": "Template parameters"
+          },
+          "resources": {
+            "$ref": "#/components/schemas/Resources"
+          },
+          "namespace": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Namespace"
+          },
+          "nodeSelector": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Nodeselector"
+          },
+          "inputs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Inputs",
+            "description": "Input URIs staged by the init container"
+          },
+          "checkpointBaseUri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkpointbaseuri",
+            "description": "Where the SDK writes checkpoints"
+          },
+          "resumeFrom": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resumefrom",
+            "description": "Checkpoint URI; exported as ESSEDUM_RESUME_FROM"
+          },
+          "callback": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventCallback"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "runId",
+          "projectId",
+          "image"
+        ],
+        "title": "CreateTaskRequest"
+      },
+      "EventCallback": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "ICIP internal event endpoint the SDK posts to"
+          },
+          "token": {
+            "type": "string",
+            "title": "Token",
+            "description": "Per-run token for the callback; never logged"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url",
+          "token"
+        ],
+        "title": "EventCallback"
+      },
+      "FailureType": {
+        "type": "string",
+        "enum": [
+          "FAILED_RETRYABLE",
+          "FAILED_PERMANENT",
+          "OOM",
+          "EVICTED",
+          "NODE_LOST",
+          "CANCELLED"
+        ],
+        "title": "FailureType",
+        "description": "Failure taxonomy agreed with ICIP."
+      },
+      "GpuCapacity": {
+        "properties": {
+          "pool": {
+            "type": "string",
+            "title": "Pool"
+          },
+          "gpuType": {
+            "type": "string",
+            "title": "Gputype"
+          },
+          "allocatable": {
+            "type": "integer",
+            "title": "Allocatable"
+          },
+          "used": {
+            "type": "integer",
+            "title": "Used"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pool",
+          "gpuType",
+          "allocatable",
+          "used"
+        ],
+        "title": "GpuCapacity"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "UP"
+          },
+          "contractVersion": {
+            "type": "string",
+            "title": "Contractversion",
+            "default": "v1"
+          }
+        },
+        "type": "object",
+        "title": "HealthResponse"
+      },
+      "Resources": {
+        "properties": {
+          "cpu": {
+            "type": "string",
+            "title": "Cpu",
+            "description": "CPU limit, Kubernetes quantity, e.g. '2' or '500m'",
+            "default": "1"
+          },
+          "memory": {
+            "type": "string",
+            "title": "Memory",
+            "description": "Memory limit, e.g. '4Gi'",
+            "default": "2Gi"
+          },
+          "gpu": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Gpu",
+            "description": "Number of GPUs; 0 = CPU only",
+            "default": 0
+          },
+          "gpuType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gputype",
+            "description": "GPU pool/type, e.g. 'a100'"
+          }
+        },
+        "type": "object",
+        "title": "Resources"
+      },
+      "TaskResponse": {
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "title": "Taskid"
+          },
+          "runId": {
+            "type": "string",
+            "title": "Runid"
+          },
+          "attempt": {
+            "type": "integer",
+            "title": "Attempt"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TaskStatus"
+          },
+          "failureType": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FailureType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startedat"
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finishedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "taskId",
+          "runId",
+          "attempt",
+          "status",
+          "createdAt"
+        ],
+        "title": "TaskResponse"
+      },
+      "TaskStatus": {
+        "type": "string",
+        "enum": [
+          "Pending",
+          "Preparing",
+          "Running",
+          "Succeeded",
+          "Failed",
+          "Cancelled"
+        ],
+        "title": "TaskStatus"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
