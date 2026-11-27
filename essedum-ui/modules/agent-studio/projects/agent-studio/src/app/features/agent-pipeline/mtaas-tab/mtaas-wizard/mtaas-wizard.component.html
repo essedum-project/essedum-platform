@@ -1,0 +1,149 @@
+<header class="wizard-header">
+  <div class="title">
+    <mat-icon class="sparkle">hub</mat-icon>
+    <div>
+      <h2>New MTaaS Run</h2>
+      <p>Submit a model-training-as-a-service run from a template in three guided steps.</p>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button mat-icon-button class="close" (click)="cancel()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</header>
+
+<div class="wizard-shell" mat-dialog-content>
+  <mat-stepper #stepper linear class="wizard-stepper">
+
+    <!-- Step 1: Template -->
+    <mat-step [stepControl]="templateForm" label="Template">
+      <form [formGroup]="templateForm">
+        <h3 class="step-title"><mat-icon>category</mat-icon> Choose a training template</h3>
+        <app-aip-loading *ngIf="!loaded"></app-aip-loading>
+        <div class="type-grid">
+          <button type="button" *ngFor="let t of templates"
+                  class="type-card"
+                  [class.active]="templateForm.value.templateId === t.id"
+                  [class.disabled]="!t.enabled"
+                  [disabled]="!t.enabled"
+                  (click)="selectTemplate(t)">
+            <mat-icon>{{ iconFor(t) }}</mat-icon>
+            <div class="type-label">{{ t.name }} · v{{ t.version }}</div>
+            <div class="type-desc">{{ t.description }}</div>
+          </button>
+        </div>
+        <div class="step-actions">
+          <button mat-button type="button" (click)="cancel()">Cancel</button>
+          <button mat-flat-button color="primary" matStepperNext [disabled]="templateForm.invalid">Next</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- Step 2: Dataset & Parameters -->
+    <mat-step [stepControl]="dataParamsForm" label="Dataset & Parameters">
+      <form [formGroup]="dataParamsForm">
+        <h3 class="step-title"><mat-icon>storage</mat-icon> Dataset & hyper-parameters</h3>
+        <mat-form-field appearance="fill" class="full">
+          <mat-label>Run name</mat-label>
+          <input matInput formControlName="displayName" placeholder="resnet-cifar-v1">
+          <mat-hint>letters, digits, dash, underscore, space</mat-hint>
+        </mat-form-field>
+
+        <div class="row three-col">
+          <mat-form-field appearance="fill">
+            <mat-label>Dataset</mat-label>
+            <mat-select formControlName="datasetId">
+              <mat-option *ngFor="let d of datasets" [value]="d.id">{{ d.name }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Version</mat-label>
+            <mat-select formControlName="datasetVersion">
+              <mat-option *ngFor="let v of datasetVersions" [value]="v">{{ v }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <h4 class="params-title">Parameters</h4>
+        <app-mtaas-schema-form [fields]="paramFields" [form]="paramsForm" [submitted]="submitted"></app-mtaas-schema-form>
+
+        <div class="step-actions">
+          <button mat-button type="button" matStepperPrevious>Back</button>
+          <button mat-flat-button color="primary" matStepperNext [disabled]="dataParamsForm.invalid">Next</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- Step 3: Resources & Submit -->
+    <mat-step [stepControl]="resourcesForm" label="Resources & Submit">
+      <form [formGroup]="resourcesForm">
+        <h3 class="step-title"><mat-icon>memory</mat-icon> Compute resources</h3>
+        <app-mtaas-quota-capacity-card [quota]="quota"></app-mtaas-quota-capacity-card>
+        <div class="row two-col">
+          <mat-form-field appearance="fill">
+            <mat-label>Compute target</mat-label>
+            <mat-select formControlName="computeTargetId">
+              <mat-option *ngFor="let c of computeTargets" [value]="c.id" [disabled]="!c.available">
+                {{ c.name }}<span *ngIf="!c.available"> (unavailable)</span>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Priority</mat-label>
+            <mat-select formControlName="priority">
+              <mat-option *ngFor="let p of priorities" [value]="p">{{ p }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="row two-col">
+          <mat-form-field appearance="fill">
+            <mat-label>GPUs</mat-label>
+            <input matInput type="number" min="0" step="1" formControlName="gpus">
+            <mat-hint *ngIf="gpusAvailable !== null && !gpuQuotaError">{{ gpusAvailable }} free of {{ quota?.quotaGpus }}</mat-hint>
+            <mat-error *ngIf="gpuQuotaError">{{ gpuQuotaError }}</mat-error>
+            <mat-error *ngIf="resourcesForm.get('gpus')?.hasError('pattern') || resourcesForm.get('gpus')?.hasError('min')">Whole number, 0 or more.</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>GPU type</mat-label>
+            <mat-select formControlName="gpuType">
+              <mat-option [value]="''">(none)</mat-option>
+              <mat-option *ngFor="let g of gpuTypes" [value]="g">{{ g }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="gpuTypeMissing">Pick a GPU type when requesting GPUs.</mat-error>
+          </mat-form-field>
+        </div>
+        <p class="queue-hint muted" *ngIf="gpuQueueHint">{{ gpuQueueHint }}</p>
+
+        <div class="row two-col">
+          <mat-form-field appearance="fill">
+            <mat-label>CPU</mat-label>
+            <input matInput formControlName="cpu" placeholder="4">
+            <mat-hint>Cores, e.g. 4 or 500m</mat-hint>
+            <mat-error *ngIf="resourcesForm.get('cpu')?.hasError('required')">CPU is required.</mat-error>
+            <mat-error *ngIf="resourcesForm.get('cpu')?.hasError('pattern')">Use cores like 4 or millicores like 500m.</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Memory</mat-label>
+            <input matInput formControlName="memory" placeholder="16Gi">
+            <mat-hint>e.g. 16Gi, 512Mi</mat-hint>
+            <mat-error *ngIf="resourcesForm.get('memory')?.hasError('required')">Memory is required.</mat-error>
+            <mat-error *ngIf="resourcesForm.get('memory')?.hasError('pattern')">Use a quantity like 16Gi or 512Mi.</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="step-actions">
+          <button mat-button type="button" matStepperPrevious>Back</button>
+          <button mat-flat-button color="primary" type="button"
+                  [disabled]="submitting || !allValid"
+                  (click)="submit()">
+            <mat-icon>rocket_launch</mat-icon>&nbsp;Submit Run
+          </button>
+        </div>
+      </form>
+    </mat-step>
+
+  </mat-stepper>
+  <app-mtaas-problem-details [problem]="problem"></app-mtaas-problem-details>
+</div>

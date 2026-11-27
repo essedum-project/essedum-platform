@@ -23,6 +23,8 @@ import { catchError, map, takeUntil, timeout } from 'rxjs/operators';
 import { PipelineCreateComponent } from '../../pipeline/pipeline-create/pipeline-create.component';
 import { DataPipelineWizardLocalComponent } from '../wizard/data-pipeline-wizard/data-pipeline-wizard.component';
 import { TrainingPipelineWizardLocalComponent } from '../wizard/training-pipeline-wizard/training-pipeline-wizard.component';
+import { MtaasTabComponent } from '../mtaas-tab/mtaas-tab.component';
+import { MtaasWizardComponent } from '../mtaas-tab/mtaas-wizard/mtaas-wizard.component';
 
 @Component({
     selector: 'app-agent-pipeline-dashboard',
@@ -48,6 +50,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
       return 'Data Pipelines';
     } else if (this.pipelineMode === 'training') {
       return 'Training Pipelines';
+    } else if (this.pipelineMode === 'mtaas') {
+      return 'MTaaS';
     } else {
       return 'Agent Pipelines';
     }
@@ -55,7 +59,9 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
   readonly SERVICE_V1 = 'pipelineagent';
 
   // Pipeline Mode Support
-  pipelineMode: 'agent' | 'mcp' | 'app' | 'pipeline' | 'data' | 'training' = 'agent';
+  pipelineMode: 'agent' | 'mcp' | 'app' | 'pipeline' | 'data' | 'training' | 'mtaas' = 'agent';
+
+  @ViewChild(MtaasTabComponent) mtaasTab?: MtaasTabComponent;
 
   // Component state
   hoverStates: boolean[] = [];
@@ -228,60 +234,10 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
     });
   }
 
-  gitLogin(): void {
-    this.isGitLoading = true;
-    this.githubService.initiateOAuthFlow().subscribe({
-      next: (status) => {
-        this.isGitLoading = false;
-        this.isGitAuthenticated = true;
-        this.githubService.cacheClientAuth(status);
-        this.gitUsername = status.githubUsername || status.username || '';
-        this.service.message('Git login success', 'success');
-        this.changeDetectionRef.detectChanges();
-      },
-      error: () => {
-        this.isGitLoading = false;
-        this.changeDetectionRef.detectChanges();
-      }
-    });
-  }
+ 
+  
 
-  gitLogout(): void {
-    this.showGitDropdown = false;
-    this.isGitLoading = true;
-    this.githubService.logout().subscribe({
-      next: () => {
-        this.isGitAuthenticated = false;
-        this.gitUsername = '';
-        this.isGitLoading = false;
-        this.clearGitSessionData();
-        this.service.message('Logout successful', 'success');
-        this.changeDetectionRef.detectChanges();
-      },
-      error: () => {
-        this.isGitLoading = false;
-        this.changeDetectionRef.detectChanges();
-      }
-    });
-  }
-
-  /**
-   * Remove all GitHub-related data cached in this browser session
-   * (username, session id, and any previously selected repo/branch).
-   */
-  private clearGitSessionData(): void {
-    this.githubService.clearClientGitSession();
-  }
-
-  toggleGitDropdown(event: Event): void {
-    event.stopPropagation();
-    this.showGitDropdown = !this.showGitDropdown;
-  }
-
-  @HostListener('document:click')
-  closeGitDropdown(): void {
-    this.showGitDropdown = false;
-  }
+ 
 
   private handleRouteState(): void {
     const state = this.location.getState() as any;
@@ -382,6 +338,12 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
   }
 
   private getCards(): void {
+    // MTaaS runs are loaded by MtaasTabComponent, not from the streaming-services API.
+    if (this.pipelineMode === 'mtaas') {
+      this.loading = false;
+      this.mtaasTab?.reload();
+      return;
+    }
     try {
       // Fetch all visible items at once; pagination is handled client-side so the
       // page count is derived from actual visible items, not the total DB count.
@@ -616,6 +578,9 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
   }
 
   private getCountPipelines(): void {
+    if (this.pipelineMode === 'mtaas') {
+      return;
+    }
     try {
       let params = this.buildHttpParams();
       params = params.set('cloud_provider', 'internal');
@@ -763,6 +728,22 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
   }
 
   onAdd(): void {
+    if (this.pipelineMode === 'mtaas') {
+      // Open MTaaS run wizard dialog
+      const dialogRef = this.dialog.open(MtaasWizardComponent, {
+        width: '900px',
+        maxWidth: '94vw',
+        disableClose: true,
+        panelClass: 'wizard-dialog',
+      });
+      dialogRef.afterClosed().subscribe(result => {
+        if (result?.run) {
+          this.mtaasTab?.reload();
+        }
+      });
+      return;
+    }
+
     if (this.pipelineMode === 'data') {
       // Open local Data Pipeline Wizard dialog
       const dialogRef = this.dialog.open(DataPipelineWizardLocalComponent, {
@@ -1024,10 +1005,11 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
   /**
    * Switch to specific pipeline mode - simplified method
    */
-  switchToPipelineMode(mode: 'agent' | 'mcp' | 'app' | 'pipeline' | 'data' | 'training'): void {
+  switchToPipelineMode(mode: 'agent' | 'mcp' | 'app' | 'pipeline' | 'data' | 'training' | 'mtaas'): void {
     
     if (this.pipelineMode !== mode) {
       this.pipelineMode = mode;
+      this.filt = '';
       
       
       // Reset pagination when switching modes

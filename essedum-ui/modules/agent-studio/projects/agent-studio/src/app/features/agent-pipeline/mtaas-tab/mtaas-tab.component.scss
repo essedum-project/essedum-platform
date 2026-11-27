@@ -1,0 +1,192 @@
+:host { display: block; width: 100%; min-width: 0; box-sizing: border-box; }
+
+.mtaas-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 0 40px;
+  color: #e2e8f0;
+}
+
+:host-context(body.header-light-theme) .mtaas-tab { color: #0f172a; }
+
+// ── Sub-header (title + Browse templates), same row rhythm as Skills ──────────
+.mtaas-subbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+
+  &__title {
+    font-size: 15px;
+    font-weight: 600;
+  }
+}
+
+.mtaas-browse-btn {
+  font-size: 13px;
+  border-color: rgba(68, 128, 245, 0.35) !important;
+  color: #7eb8ff !important;
+}
+
+:host-context(body.header-light-theme) .mtaas-browse-btn {
+  color: #4f46e5 !important;
+  border-color: rgba(79, 70, 229, 0.3) !important;
+}
+
+// ── Filter panel (visual parity with the shared "Filter by:" bar) ─────────────
+.filter-panel {
+  border: 1px solid rgba(68, 128, 245, 0.2);
+  border-radius: 10px;
+  background: rgba(22, 32, 51, 0.5);
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 44px;
+    padding: 0 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  &__icon,
+  &__toggle-icon {
+    color: #6e8ea8;
+    font-size: 20px;
+    transition: transform 0.2s ease;
+  }
+
+  &__toggle-icon--rotated { transform: rotate(180deg); }
+
+  &__title {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #9fb3cc;
+  }
+
+  &__toggle-container { margin-left: auto; display: flex; }
+
+  &__content { padding: 4px 14px 14px; }
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-group {
+  min-width: 200px;
+  flex: 1 1 200px;
+
+  &--actions {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+}
+
+:host-context(body.header-light-theme) .filter-panel {
+  border-color: rgba(99, 102, 241, 0.2);
+  background: #ffffff;
+
+  .filter-panel__title { color: #475569; }
+  .filter-panel__icon,
+  .filter-panel__toggle-icon { color: #64748b; }
+}
+
+.mtaas-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 8px;
+  color: #f87171;
+}
+
+// Wrapper only; the grid itself is the shared aip-grid (same look as Skills).
+.mtaas-table {
+  width: 100%;
+  min-width: 0;
+}
+
+// ── Dynamic cell + menu styles (rendered inside aip-grid's view scope) ────────
+::ng-deep {
+  .mtaas-text {
+    font-size: 12px;
+    color: #9fb3cc;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+  }
+
+  .mtaas-date { font-size: 12px; color: #6e8ea8; }
+
+  .mtaas-state-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 10px;
+    padding: 2px 8px;
+    white-space: nowrap;
+
+    &.state-queued    { background: rgba(251, 191, 36, 0.14); color: #fde68a; }
+    &.state-running   { background: rgba(79, 142, 247, 0.16); color: #7eb8ff; }
+    &.state-succeeded { background: rgba(16, 185, 129, 0.14); color: #34d399; }
+    &.state-failed    { background: rgba(239, 68, 68, 0.14);  color: #f87171; }
+    &.state-cancelled { background: rgba(148, 163, 184, 0.16); color: #cbd5e1; }
+    &.state-pending   { background: rgba(168, 85, 247, 0.14); color: #c084fc; }
+  }
+
+  .mtaas-icon-view  { color: #4480f5 !important; }
+  .mtaas-icon-clone { color: #34d399 !important; }
+
+  .mtaas-actions-menu {
+    background: #162033 !important;
+    border: 1px solid rgba(68, 128, 245, 0.2) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+
+    .mat-mdc-menu-item {
+      color: #c9d8f0 !important;
+      font-size: 13px !important;
+      min-height: 40px !important;
+      mat-icon { color: #6e8ea8; font-size: 18px; width: 18px; height: 18px; margin-right: 8px; }
+      &:hover { background: rgba(68, 128, 245, 0.1) !important; }
+    }
+  }
+}
+
+:host-context(body.header-light-theme) ::ng-deep {
+  .mtaas-text { color: #475569; }
+  .mtaas-date { color: #64748b; }
+
+  .mtaas-state-badge {
+    &.state-queued    { background: rgba(217, 119, 6, 0.1);  color: #b45309; }
+    &.state-running   { background: rgba(79, 70, 229, 0.1);  color: #4338ca; }
+    &.state-succeeded { background: rgba(5, 150, 105, 0.1);  color: #047857; }
+    &.state-failed    { background: rgba(220, 38, 38, 0.08); color: #b91c1c; }
+    &.state-cancelled { background: rgba(100, 116, 139, 0.12); color: #475569; }
+    &.state-pending   { background: rgba(124, 58, 237, 0.08); color: #7c3aed; }
+  }
+
+  .mtaas-actions-menu {
+    background: #ffffff !important;
+    border: 1px solid rgba(99, 102, 241, 0.15) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+
+    .mat-mdc-menu-item {
+      color: #1e293b !important;
+      mat-icon { color: #64748b !important; }
+      &:hover { background: rgba(99, 102, 241, 0.06) !important; }
+    }
+  }
+}

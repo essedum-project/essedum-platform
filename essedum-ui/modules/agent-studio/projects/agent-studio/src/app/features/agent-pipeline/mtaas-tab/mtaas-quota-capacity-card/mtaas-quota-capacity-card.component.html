@@ -1,0 +1,44 @@
+<div class="quota-card">
+  <div class="quota-card__header">
+    <h3>Project quota &amp; capacity</h3>
+    <span class="muted" *ngIf="quota">{{ quota.queuedRuns }} run(s) queued</span>
+  </div>
+
+  <ng-container *ngIf="quota; else noQuota">
+    <div class="quota-row">
+      <div class="quota-row__head"><span>CPU</span><span>{{ cpuLabel }}</span></div>
+      <mat-progress-bar mode="determinate" [value]="cpuPercent"></mat-progress-bar>
+    </div>
+    <div class="quota-row">
+      <div class="quota-row__head"><span>Memory</span><span>{{ memoryLabel }}</span></div>
+      <mat-progress-bar mode="determinate" [value]="memoryPercent"></mat-progress-bar>
+    </div>
+    <div class="quota-row">
+      <div class="quota-row__head"><span>GPU</span><span>{{ gpuLabel }}</span></div>
+      <mat-progress-bar mode="determinate" [value]="gpuPercent"></mat-progress-bar>
+    </div>
+
+    <div class="quota-stats">
+      <div class="stat">
+        <div class="stat__label">Priority ceiling</div>
+        <div class="stat__value">{{ quota.priorityCeiling }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat__label">Queued runs</div>
+        <div class="stat__value">{{ quota.queuedRuns }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat__label">Est. wait</div>
+        <div class="stat__value">{{ estimatedWait ?? '-' }} min</div>
+      </div>
+      <div class="stat" *ngIf="queuePosition !== undefined && queuePosition !== null">
+        <div class="stat__label">Your queue position</div>
+        <div class="stat__value">#{{ queuePosition }}</div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #noQuota>
+    <p class="muted">Quota information is not available yet.</p>
+  </ng-template>
+</div>

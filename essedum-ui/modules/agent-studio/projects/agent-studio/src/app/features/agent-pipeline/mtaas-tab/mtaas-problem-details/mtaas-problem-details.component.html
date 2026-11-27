@@ -1,0 +1,12 @@
+<div class="problem" role="alert" *ngIf="problem">
+  <mat-icon aria-hidden="true">error_outline</mat-icon>
+  <div class="problem__body">
+    <div class="problem__title">{{ problem.title || 'Something went wrong' }}</div>
+    <div class="problem__detail" *ngIf="problem.detail">{{ problem.detail }}</div>
+    <span class="problem__reason" *ngIf="problem.reason">{{ problem.reason }}</span>
+    <ul *ngIf="fieldErrors.length">
+      <li *ngFor="let e of fieldErrors"><strong>{{ e.field }}</strong>: {{ e.messages.join(', ') }}</li>
+    </ul>
+    <button *ngIf="retryable" mat-stroked-button type="button" (click)="retry.emit()">Retry</button>
+  </div>
+</div>

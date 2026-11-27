@@ -1,0 +1,32 @@
+<div class="catalog">
+  <div class="catalog-toolbar">
+    <button mat-stroked-button type="button" class="catalog-back" (click)="back.emit()">
+      <mat-icon>arrow_back</mat-icon> Back to runs
+    </button>
+    <span class="catalog-title">Training templates</span>
+    <mat-form-field appearance="fill" subscriptSizing="dynamic" class="framework-filter">
+      <mat-label>Framework</mat-label>
+      <mat-select [(value)]="framework">
+        <mat-option value="">All</mat-option>
+        <mat-option *ngFor="let f of frameworks" [value]="f">{{ f }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <app-aip-loading *ngIf="loading"></app-aip-loading>
+  <app-mtaas-problem-details [problem]="problem" [retryable]="true" (retry)="load()"></app-mtaas-problem-details>
+
+  <p class="catalog-empty" *ngIf="!loading && !problem && visibleTemplates.length === 0">No templates match.</p>
+
+  <div class="aip-card-container" *ngIf="visibleTemplates.length > 0" aria-label="Training template cards">
+    <div class="aip-card-wrapper" *ngFor="let t of visibleTemplates; trackBy: trackById"
+      [class.template-disabled]="!t.enabled"
+      [attr.title]="t.enabled ? null : 'Disabled template'">
+      <app-aip-card
+        servicev1="pipelineagent"
+        [card]="cardFor(t)"
+        (viewDetails)="details.emit(t)">
+      </app-aip-card>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,45 @@
+.problem {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  margin: 8px 0;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+}
+
+.problem mat-icon {
+  flex-shrink: 0;
+}
+
+.problem__title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.problem__detail {
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.problem__reason {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+}
+
+button {
+  margin-top: 10px;
+}

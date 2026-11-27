@@ -1,0 +1,31 @@
+<div class="schema-form" [formGroup]="form">
+  <div class="schema-form__field" *ngFor="let f of fields">
+    <ng-container [ngSwitch]="f.type">
+      <mat-checkbox *ngSwitchCase="'boolean'" [formControlName]="f.key">{{ f.label }}</mat-checkbox>
+
+      <mat-form-field *ngSwitchCase="'enum'" appearance="fill">
+        <mat-label>{{ f.label }}</mat-label>
+        <mat-select [formControlName]="f.key">
+          <mat-option *ngFor="let opt of f.options" [value]="opt.value">{{ opt.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field *ngSwitchCase="'number'" appearance="fill">
+        <mat-label>{{ f.label }}</mat-label>
+        <input matInput type="number" [formControlName]="f.key" [placeholder]="f.placeholder" />
+      </mat-form-field>
+
+      <mat-form-field *ngSwitchDefault appearance="fill">
+        <mat-label>{{ f.label }}</mat-label>
+        <input matInput type="text" [formControlName]="f.key" [placeholder]="f.placeholder" />
+      </mat-form-field>
+    </ng-container>
+
+    <div class="schema-form__meta">
+      <span class="required-mark" *ngIf="f.required">* required</span>
+      <span *ngIf="f.description">{{ f.description }}</span>
+      <span *ngIf="f.constraints">({{ f.constraints }})</span>
+    </div>
+    <div class="field-error" *ngFor="let msg of errorsFor(f.key)">{{ msg }}</div>
+  </div>
+</div>

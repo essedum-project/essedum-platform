@@ -164,6 +164,13 @@
         type="button">
         Training Pipelines
       </button>
+      <button 
+        class="toggle-button" 
+        [class.active]="pipelineMode === 'mtaas'"
+        (click)="switchToPipelineMode('mtaas')"
+        type="button">
+        MTaaS
+      </button>
     </div>
 
     <!-- Last refreshed + refresh icon -->
@@ -186,8 +193,12 @@
     <app-aip-loading></app-aip-loading>
   </div>
 
+  <ng-container *ngIf="!loading && pipelineMode === 'mtaas'">
+    <app-mtaas-tab [search]="filt"></app-mtaas-tab>
+  </ng-container>
+
   <!-- Content Area (only shown when not loading) -->
-  <ng-container *ngIf="!loading">
+  <ng-container *ngIf="!loading && pipelineMode !== 'mtaas'">
 
     <!-- Cards container -->
     <div *ngIf="paginatedCards.length > 0" class="aip-card-container lfx-u-pad-b-40" id="containerDivForScroll"

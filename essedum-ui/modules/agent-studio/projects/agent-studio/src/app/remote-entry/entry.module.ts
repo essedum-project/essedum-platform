@@ -28,6 +28,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatNativeDateModule } from '@angular/material/core';
 
 // CDK
@@ -79,6 +80,17 @@ import { PipelineCreateComponent } from '../features/pipeline/pipeline-create/pi
 // Local wizard components (lightweight versions of integration-hub wizards)
 import { DataPipelineWizardLocalComponent } from '../features/agent-pipeline/wizard/data-pipeline-wizard/data-pipeline-wizard.component';
 import { TrainingPipelineWizardLocalComponent } from '../features/agent-pipeline/wizard/training-pipeline-wizard/training-pipeline-wizard.component';
+import { MtaasTabComponent } from '../features/agent-pipeline/mtaas-tab/mtaas-tab.component';
+import { MtaasWizardComponent } from '../features/agent-pipeline/mtaas-tab/mtaas-wizard/mtaas-wizard.component';
+import { MtaasService } from '../features/agent-pipeline/mtaas-tab/mtaas.service';
+import { MtaasRunDetailComponent } from '../features/agent-pipeline/mtaas-tab/mtaas-run-detail/mtaas-run-detail.component';
+import { MtaasTemplateCatalogComponent } from '../features/agent-pipeline/mtaas-tab/mtaas-template-catalog/mtaas-template-catalog.component';
+import { MtaasTemplateDetailComponent } from '../features/agent-pipeline/mtaas-tab/mtaas-template-detail/mtaas-template-detail.component';
+import { MtaasSchemaFormComponent } from '../features/agent-pipeline/mtaas-tab/mtaas-schema-form/mtaas-schema-form.component';
+import { MtaasQuotaCapacityCardComponent } from '../features/agent-pipeline/mtaas-tab/mtaas-quota-capacity-card/mtaas-quota-capacity-card.component';
+import { MtaasStatusBadgeComponent } from '../features/agent-pipeline/mtaas-tab/mtaas-status-badge/mtaas-status-badge.component';
+import { MtaasResourceSummaryComponent } from '../features/agent-pipeline/mtaas-tab/mtaas-resource-summary/mtaas-resource-summary.component';
+import { MtaasProblemDetailsComponent } from '../features/agent-pipeline/mtaas-tab/mtaas-problem-details/mtaas-problem-details.component';
 import { GitLinkStepLocalComponent } from '../features/agent-pipeline/wizard/shared/git-link-step.component';
 
 // Migrated from legacy aip-app-ui (2026-05-25): LLM ops + observability iframe wrappers
@@ -148,6 +160,16 @@ import { environment } from '../../environments/environment';
     DataPipelineWizardLocalComponent,
     TrainingPipelineWizardLocalComponent,
     GitLinkStepLocalComponent,
+    MtaasTabComponent,
+    MtaasWizardComponent,
+    MtaasRunDetailComponent,
+    MtaasTemplateCatalogComponent,
+    MtaasTemplateDetailComponent,
+    MtaasSchemaFormComponent,
+    MtaasQuotaCapacityCardComponent,
+    MtaasStatusBadgeComponent,
+    MtaasResourceSummaryComponent,
+    MtaasProblemDetailsComponent,
     // migrated from legacy aip-app-ui
     LitellmComponent,
     LangfuseComponent,
@@ -195,7 +217,7 @@ import { environment } from '../../environments/environment';
     MatSnackBarModule,
     MatTabsModule,
     MatProgressSpinnerModule,
-    MatNativeDateModule,
+    MatProgressBarModule,
     // CDK
     ScrollingModule,
     CdkDragDropModule,
@@ -230,6 +252,7 @@ import { environment } from '../../environments/environment';
     { provide: 'sbx',      useFactory: (cfg: ApiConfig) => cfg.sandboxUrl,  deps: [API_CONFIG] },
     Services,
     DatasetServices,
+    MtaasService,
     AdapterServices,
     EventsService,
     RaiservicesService,

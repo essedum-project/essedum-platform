@@ -1,0 +1,99 @@
+<div class="mtaas-tab">
+
+  <!-- Runs view: same header/filter/grid/pagination pattern as the Skills page -->
+  <ng-container *ngIf="view === 'runs'">
+
+    <div class="mtaas-subbar">
+      <span class="mtaas-subbar__title">Training runs</span>
+      <button mat-stroked-button type="button" class="mtaas-browse-btn" (click)="showTemplates()">
+        <mat-icon>dashboard_customize</mat-icon> Browse templates
+      </button>
+    </div>
+
+    <!-- Filter panel (collapsible, mirrors the shared "Filter by:" bar) -->
+    <div class="filter-panel">
+      <div class="filter-panel__header"
+        [class.filter-panel__header--expanded]="filterExpanded"
+        [class.filter-panel__header--collapsed]="!filterExpanded"
+        (click)="toggleFilter()">
+        <div class="filter-panel__icon-container">
+          <mat-icon class="filter-panel__icon">filter_list</mat-icon>
+        </div>
+        <div class="filter-panel__title-container">
+          <h3 class="filter-panel__title">Filter by:</h3>
+        </div>
+        <div class="filter-panel__toggle-container">
+          <mat-icon class="filter-panel__toggle-icon" [class.filter-panel__toggle-icon--rotated]="filterExpanded">keyboard_arrow_down</mat-icon>
+        </div>
+      </div>
+
+      <div class="filter-panel__content" *ngIf="filterExpanded">
+        <div class="filter-options">
+          <div class="filter-group">
+            <mat-form-field appearance="fill" class="w-100">
+              <mat-label>State</mat-label>
+              <mat-select [value]="stateFilter" (selectionChange)="stateFilter = $event.value; reload()">
+                <mat-option value="">All</mat-option>
+                <mat-option *ngFor="let s of states" [value]="s">{{ s | titlecase }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="filter-group">
+            <mat-form-field appearance="fill" class="w-100">
+              <mat-label>Project ID</mat-label>
+              <input matInput type="number" [value]="projectFilter"
+                (input)="projectFilter = $any($event.target).value"
+                (keyup.enter)="reload()" (blur)="reload()">
+            </mat-form-field>
+          </div>
+          <div class="filter-group filter-group--actions">
+            <button mat-button type="button" [disabled]="!hasActiveFilters" (click)="clearFilters()">Clear filters</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="error && !loading" class="mtaas-error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>Unable to load training runs.</span>
+      <button mat-button type="button" (click)="reload()">Retry</button>
+    </div>
+
+    <div class="mtaas-table">
+      <app-aip-grid
+        [columns]="gridColumns"
+        [rows]="gridRows"
+        [loading]="loading"
+        loadingMessage="Loading training runs…"
+        emptyIcon="model_training"
+        emptyMessage="No training runs yet. Click “+” to submit one."
+        [gridTemplateColumns]="GRID_TEMPLATE"
+        [headerPadding]="'10px 0'"
+        [headerMarginTop]="'12px'"
+        [rowPadding]="'11px 0'"
+        [actions]="gridActions"
+        actionsLabel="Actions"
+        actionMenuCssClass="mtaas-actions-menu"
+        [pageNumber]="page + 1"
+        [noOfPages]="totalPages"
+        [pageArr]="pageArr"
+        [startIndex]="0"
+        [endIndex]="totalPages"
+        [hoverStates]="hoverStates"
+        (actionClick)="onGridAction($event)"
+        (rowClick)="viewRun($event.run)"
+        (prevPage)="prevPage()"
+        (nextPage)="nextPage()"
+        (changePage)="goToPage($event)">
+      </app-aip-grid>
+    </div>
+  </ng-container>
+
+  <!-- Templates view: agent-pipeline style cards -->
+  <app-mtaas-template-catalog
+    *ngIf="view === 'templates'"
+    [search]="search"
+    (details)="viewTemplate($event)"
+    (back)="showRuns()">
+  </app-mtaas-template-catalog>
+</div>

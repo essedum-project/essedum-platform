@@ -1,0 +1,49 @@
+:host { display: block; width: 100%; min-width: 0; }
+
+.catalog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #e2e8f0;
+}
+
+:host-context(body.header-light-theme) .catalog { color: #0f172a; }
+
+.catalog-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 4px;
+
+  .catalog-title {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .framework-filter {
+    width: 180px;
+    margin-left: auto;
+  }
+}
+
+.catalog-empty {
+  opacity: 0.65;
+  margin: 8px 0;
+}
+
+// Same card grid rhythm as the agent-pipeline dashboard.
+.aip-card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  padding-bottom: 24px;
+}
+
+.aip-card-wrapper {
+  min-width: 0;
+
+  &.template-disabled {
+    opacity: 0.55;
+  }
+}

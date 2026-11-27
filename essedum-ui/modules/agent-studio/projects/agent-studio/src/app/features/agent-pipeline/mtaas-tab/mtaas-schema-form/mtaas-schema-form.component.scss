@@ -1,0 +1,26 @@
+.schema-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 4px 16px;
+}
+
+.schema-form__field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.schema-form__meta {
+  font-size: 11px;
+  opacity: 0.7;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.required-mark,
+.field-error {
+  color: #ef4444;
+  font-size: 12px;
+}

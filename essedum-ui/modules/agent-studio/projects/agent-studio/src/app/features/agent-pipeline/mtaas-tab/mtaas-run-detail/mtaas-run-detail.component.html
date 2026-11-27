@@ -1,0 +1,66 @@
+<header class="wizard-header">
+  <div class="title">
+    <mat-icon class="sparkle">hub</mat-icon>
+    <div>
+      <h2>{{ run?.displayName || data.runId }}</h2>
+      <p>{{ data.runId }}</p>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button mat-icon-button (click)="load()" aria-label="Refresh" matTooltip="Refresh"><mat-icon>refresh</mat-icon></button>
+    <button mat-icon-button class="close" (click)="close()" aria-label="Close"><mat-icon>close</mat-icon></button>
+  </div>
+</header>
+
+<div class="wizard-shell detail-body" mat-dialog-content>
+  <app-aip-loading *ngIf="loading"></app-aip-loading>
+  <app-mtaas-problem-details [problem]="problem" [retryable]="true" (retry)="load()"></app-mtaas-problem-details>
+
+  <ng-container *ngIf="run && !loading">
+    <h4>Overview</h4>
+    <div class="info-grid">
+      <div class="info"><span class="label">Status</span><app-mtaas-status-badge [state]="run.state" [queuePosition]="run.queuePosition"></app-mtaas-status-badge></div>
+      <div class="info"><span class="label">Template</span>{{ run.templateName }} v{{ run.templateVersion }}</div>
+      <div class="info"><span class="label">Dataset</span>{{ run.datasetId }} {{ run.datasetVersion }}</div>
+      <div class="info"><span class="label">Project</span>{{ run.projectId }}</div>
+      <div class="info"><span class="label">Compute target</span>{{ run.computeTargetName }}</div>
+      <div class="info"><span class="label">Priority</span>{{ run.priority }}</div>
+      <div class="info"><span class="label">Created</span>{{ run.createdAt | date: 'medium' }}</div>
+    </div>
+
+    <h4>Resources</h4>
+    <app-mtaas-resource-summary [resources]="resources"></app-mtaas-resource-summary>
+
+    <h4>Parameters</h4>
+    <table *ngIf="paramEntries.length; else noParams">
+      <tbody>
+        <tr *ngFor="let p of paramEntries"><td>{{ p.key }}</td><td>{{ p.value }}</td></tr>
+      </tbody>
+    </table>
+    <ng-template #noParams><p class="muted">No parameters recorded.</p></ng-template>
+
+    <h4>Attempts</h4>
+    <table *ngIf="run.attempts.length; else noAttempts">
+      <thead>
+        <tr><th>#</th><th>State</th><th>Started</th><th>Finished</th><th>Message</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of run.attempts">
+          <td>{{ a.attempt }}</td>
+          <td><app-mtaas-status-badge [state]="a.state"></app-mtaas-status-badge></td>
+          <td>{{ a.startedAt | date: 'medium' }}</td>
+          <td>{{ a.finishedAt ? (a.finishedAt | date: 'medium') : '-' }}</td>
+          <td>{{ a.message || '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noAttempts><p class="muted">No attempts yet - the run has not started.</p></ng-template>
+  </ng-container>
+</div>
+
+<div class="detail-actions" mat-dialog-actions>
+  <button mat-button type="button" (click)="close()">Close</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="!run" (click)="clone()">
+    <mat-icon>content_copy</mat-icon>&nbsp;Clone as new run
+  </button>
+</div>

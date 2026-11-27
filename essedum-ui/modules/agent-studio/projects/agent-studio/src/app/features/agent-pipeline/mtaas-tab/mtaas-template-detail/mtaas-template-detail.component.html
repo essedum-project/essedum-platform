@@ -1,0 +1,43 @@
+<header class="wizard-header">
+  <div class="title">
+    <mat-icon class="sparkle">category</mat-icon>
+    <div>
+      <h2>{{ template.name }} <span class="ver">v{{ template.version }}</span></h2>
+      <p>{{ template.framework }} · {{ template.enabled ? 'Enabled' : 'Disabled' }}</p>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button mat-icon-button class="close" (click)="close()" aria-label="Close"><mat-icon>close</mat-icon></button>
+  </div>
+</header>
+
+<div class="wizard-shell detail-body" mat-dialog-content>
+  <p class="desc">{{ template.description }}</p>
+
+  <h4>Default resources</h4>
+  <app-mtaas-resource-summary [resources]="resources"></app-mtaas-resource-summary>
+
+  <h4>Parameters</h4>
+  <table *ngIf="fields.length; else noParams">
+    <thead>
+      <tr><th>Field</th><th>Type</th><th>Required</th><th>Default</th><th>Constraints</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let f of fields">
+        <td>{{ f.label }}</td>
+        <td>{{ f.type }}</td>
+        <td>{{ f.required ? 'Yes' : 'No' }}</td>
+        <td>{{ f.defaultValue }}</td>
+        <td>{{ f.constraints || '-' }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <ng-template #noParams><p class="muted">This template declares no parameters.</p></ng-template>
+</div>
+
+<div class="detail-actions" mat-dialog-actions>
+  <button mat-button type="button" (click)="close()">Close</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="!template.enabled" (click)="startRun()">
+    Start run
+  </button>
+</div>

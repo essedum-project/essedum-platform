@@ -1,0 +1,9 @@
+@use '../../wizard/wizard-shared' as *;
+
+.two-col > * { flex: 1; min-width: 0; }
+.three-col > * { flex: 1; min-width: 0; }
+
+.type-card.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
