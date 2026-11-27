@@ -1,20 +1,16 @@
-import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
-import { Observable, Subscription, interval } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Services } from '../../legacy/services/service';
 import { DeploymentMonitorService } from './deployment-monitor.service';
 import {
   ApiErrorDto,
   CheckpointDto,
   DeploymentEventDto,
-  DeploymentState,
   DeploymentStatusDto,
   MetricSeriesDto,
   OperationAcceptedDto,
 } from './deployment-monitor.models';
 
-const POLL_INTERVAL_MS = 3000;
-const TERMINAL_STATES: DeploymentState[] = ['COMPLETED', 'FAILED', 'STOPPED'];
 const RECENT_EVENT_LIMIT = 6;
 export const NO_RECORDS = 'No records available';
 
@@ -24,7 +20,7 @@ export const NO_RECORDS = 'No records available';
   styleUrls: ['./deployment-monitor.component.scss'],
   standalone: false,
 })
-export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
+export class DeploymentMonitorComponent implements OnChanges {
   @Input() deploymentId = '';
   /** True when the host pipeline reports a successful container deployment. */
   @Input() deployed = false;
@@ -43,16 +39,11 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
   private lastVersion = -1;
   private lastSequence = 0;
   private fetching = false;
-  private pollSub: Subscription | null = null;
 
   constructor(private monitor: DeploymentMonitorService, private services: Services) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['deploymentId']) this.start();
-  }
-
-  ngOnDestroy(): void {
-    this.pollSub?.unsubscribe();
   }
 
   get hasId(): boolean {
@@ -71,10 +62,6 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
   get idLabel(): string {
     if (this.hasId) return this.deploymentId;
     return this.deployed ? 'Active, waiting for deployment ID' : 'No active deployment';
-  }
-
-  get isTerminal(): boolean {
-    return !!this.status && TERMINAL_STATES.includes(this.status.state);
   }
 
   get canStop(): boolean {
@@ -148,9 +135,8 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
     this.runAction(this.monitor.retryRegistration(this.deploymentId), 'Retrying Models registration');
   }
 
+  /** Loads the deployment once when the id is set. Further loads happen only on Refresh or an explicit action. */
   private start(): void {
-    this.pollSub?.unsubscribe();
-    this.pollSub = null;
     this.clearData();
     this.loadError = null;
     this.lastVersion = -1;
@@ -159,10 +145,6 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
 
     this.loading = true;
     this.fetchStatus();
-    // Keeps polling while the deployment is not yet known to the backend, so data appears once the API is up.
-    this.pollSub = interval(POLL_INTERVAL_MS)
-      .pipe(filter(() => this.hasId && !this.busy && !this.isTerminal))
-      .subscribe(() => this.fetchStatus());
   }
 
   private fetchStatus(): void {
