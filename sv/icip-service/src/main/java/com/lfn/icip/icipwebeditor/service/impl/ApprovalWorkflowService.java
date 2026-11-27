@@ -72,7 +72,10 @@ public class ApprovalWorkflowService {
 	 * Status: PENDING_PROJECT_APPROVAL -> PROJECT_APPROVED
 	 * Resource becomes visible to ALL users of same project
 	 */
-	public ICIPStreamingServices approveProjectApproval(Integer resourceId, Integer projectId, String currentUserRank) {
+	public ICIPStreamingServices approveProjectApproval(Integer resourceId, Integer projectId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[Approval] Project Admin approving resource {} for project {}, rank: {}", resourceId, projectId, currentUserRank);
 
 		if (!"2".equals(currentUserRank)) {
@@ -100,6 +103,7 @@ public class ApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PROJECT_APPROVED");
+		resource.setComments(comments);
 		ICIPStreamingServices saved = streamingServicesRepository.save(resource);
 		logger.info("[Approval] Resource approved - cid={}, newStatus={}, projectId in DB={}",
 				saved.getCid(), saved.getApprovalStatus(), saved.getProjectId());
@@ -115,7 +119,10 @@ public class ApprovalWorkflowService {
 		return rejectProjectApproval(resourceId, currentUserRank, null);
 	}
 
-	public ICIPStreamingServices rejectProjectApproval(Integer resourceId, String currentUserRank, String reason) {
+	public ICIPStreamingServices rejectProjectApproval(Integer resourceId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[Approval] Project Admin rejecting resource {}", resourceId);
 
 		if (!"2".equals(currentUserRank)) {
@@ -128,9 +135,8 @@ public class ApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PROJECT_REJECTED");
-		if (reason != null && !reason.isBlank()) {
-			resource.setRejectionReason(reason);
-		}
+		resource.setComments(comments);
+		resource.setRejectionReason(comments);
 		return streamingServicesRepository.save(resource);
 	}
 
@@ -166,7 +172,10 @@ public class ApprovalWorkflowService {
 	 * submission by the Org Admin to the Platform Admin before it becomes
 	 * globally PUBLISHED.
 	 */
-	public ICIPStreamingServices approveOrgApproval(Integer resourceId, String currentUserRank, String orgName, Integer portfolioOrgId) {
+	public ICIPStreamingServices approveOrgApproval(Integer resourceId, String currentUserRank, String orgName, Integer portfolioOrgId, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[Approval] Org Admin approving resource {} at org level, portfolioOrgId={}", resourceId, portfolioOrgId);
 
 		if (!"3".equals(currentUserRank)) {
@@ -193,6 +202,7 @@ public class ApprovalWorkflowService {
 			resource.setApprovedOrganizationId(portfolioOrgId);
 			logger.info("[Approval] Normalized approvedOrganizationId to portfolioOrgId={}", portfolioOrgId);
 		}
+		resource.setComments(comments);
 		ICIPStreamingServices saved = streamingServicesRepository.save(resource);
 
 		logger.info("[Approval] After org-approve - resource: id={}, name={}, status={}, approvedOrgId={}",
@@ -231,7 +241,10 @@ public class ApprovalWorkflowService {
 	 * Platform Admin approves and publishes resource globally
 	 * Status: PENDING_PLATFORM_APPROVAL -> PUBLISHED (approvedOrganizationId cleared = global visibility)
 	 */
-	public ICIPStreamingServices approvePlatformApproval(Integer resourceId, String currentUserRank) {
+	public ICIPStreamingServices approvePlatformApproval(Integer resourceId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[Approval] Platform Admin publishing resource {} globally", resourceId);
 
 		if (!"4".equals(currentUserRank)) {
@@ -249,6 +262,7 @@ public class ApprovalWorkflowService {
 
 		resource.setApprovalStatus("PUBLISHED");
 		resource.setApprovedOrganizationId(null);
+		resource.setComments(comments);
 		ICIPStreamingServices saved = streamingServicesRepository.save(resource);
 		logger.info("[Approval] Resource {} published globally by Platform Admin - status={}", resourceId, saved.getApprovalStatus());
 		return saved;
@@ -262,7 +276,10 @@ public class ApprovalWorkflowService {
 		return rejectPlatformApproval(resourceId, currentUserRank, null);
 	}
 
-	public ICIPStreamingServices rejectPlatformApproval(Integer resourceId, String currentUserRank, String reason) {
+	public ICIPStreamingServices rejectPlatformApproval(Integer resourceId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[Approval] Platform Admin rejecting resource {}", resourceId);
 
 		if (!"4".equals(currentUserRank)) {
@@ -275,9 +292,8 @@ public class ApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PLATFORM_REJECTED");
-		if (reason != null && !reason.isBlank()) {
-			resource.setRejectionReason(reason);
-		}
+		resource.setComments(comments);
+		resource.setRejectionReason(comments);
 		return streamingServicesRepository.save(resource);
 	}
 
@@ -290,7 +306,10 @@ public class ApprovalWorkflowService {
 		return rejectOrgApproval(resourceId, currentUserRank, null);
 	}
 
-	public ICIPStreamingServices rejectOrgApproval(Integer resourceId, String currentUserRank, String reason) {
+	public ICIPStreamingServices rejectOrgApproval(Integer resourceId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[Approval] Org Admin rejecting org approval for resource {}", resourceId);
 
 		if (!"3".equals(currentUserRank)) {
@@ -303,9 +322,8 @@ public class ApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("ORG_REJECTED");
-		if (reason != null && !reason.isBlank()) {
-			resource.setRejectionReason(reason);
-		}
+		resource.setComments(comments);
+		resource.setRejectionReason(comments);
 		return streamingServicesRepository.save(resource);
 	}
 

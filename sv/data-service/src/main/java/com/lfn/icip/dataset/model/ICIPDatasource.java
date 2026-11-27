@@ -1,13 +1,13 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -44,7 +44,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 // TODO: Auto-generated Javadoc
-// 
+//
 /**
  * The Class ICIPDatasource.
  *
@@ -72,7 +72,7 @@ import lombok.Setter;
  *
  * @return the category
  */
-	@Getter
+@Getter
 
 /**
  * Sets the organization.
@@ -139,16 +139,16 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
-	
-	
+
+
 	public ICIPDatasource(Integer id, String name, String description, String type, String salt, String organization,
-            String dshashcode, Timestamp activetime, String category, String interfacetype,
-            Boolean fordataset, Boolean forruntime, Boolean foradapter, Boolean formodel,
-            Boolean forpromptprovider, Boolean forendpoint, Boolean forapp,
-            String lastmodifiedby, Timestamp lastmodifieddate, String alias,
-            String approvalStatus, Integer projectId, Integer approvedOrganizationId) {
-		
-        this.id = id;
+	                      String dshashcode, Timestamp activetime, String category, String interfacetype,
+	                      Boolean fordataset, Boolean forruntime, Boolean foradapter, Boolean formodel,
+	                      Boolean forpromptprovider, Boolean forendpoint, Boolean forapp,
+	                      String lastmodifiedby, Timestamp lastmodifieddate, String alias,
+	                      String approvalStatus, Integer projectId, Integer approvedOrganizationId) {
+
+		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.type = type;
@@ -171,7 +171,7 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 		this.approvalStatus = approvalStatus;
 		this.projectId = projectId;
 		this.approvedOrganizationId = approvedOrganizationId;
-}
+	}
 
 
 	/** The id. */
@@ -208,31 +208,31 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 
 	/** The category. */
 	private String category;
-	
+
 	/** The extras. */
 	private String extras;
-	
+
 	/** The interfacetype. */
 	private String interfacetype;
-	
+
 	/** The fordataset.  */
 	private Boolean fordataset;
-	
+
 	/** The forruntime.  */
 	private Boolean forruntime;
-	
+
 	/** The foradapter.  */
 	private Boolean foradapter;
-	
+
 	/** The formodel.  */
 	private Boolean formodel;
-	
+
 	/** The forpromptprovider.  */
 	private Boolean forpromptprovider;
-	
+
 	/** The forendpoint.  */
 	private Boolean forendpoint;
-	
+
 	private Boolean forapp;
 
 	/**
@@ -246,6 +246,11 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 	@com.fasterxml.jackson.annotation.JsonProperty("approval_status")
 	private String approvalStatus = "DRAFT";
 
+	/** Admin comment captured when a resource is approved or rejected */
+	@Column(name = "comments", columnDefinition = "TEXT")
+	@com.fasterxml.jackson.annotation.JsonProperty("comments")
+	private String comments;
+
 	/** The project the connection was submitted to for project level approval. */
 	@Column(name = "project_id")
 	@com.fasterxml.jackson.annotation.JsonProperty("project_id")
@@ -255,6 +260,11 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 	@Column(name = "approved_organization_id")
 	@com.fasterxml.jackson.annotation.JsonProperty("approved_organization_id")
 	private Integer approvedOrganizationId;
+
+	/** The user who originally created this connection. Never updated after first insert. */
+	@Column(name = "created_by", length = 50, updatable = false)
+	@com.fasterxml.jackson.annotation.JsonProperty("created_by")
+	private String createdBy;
 
 	/**
 	 * Clone.
@@ -289,6 +299,7 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 		ds.setApprovalStatus(approvalStatus);
 		ds.setProjectId(projectId);
 		ds.setApprovedOrganizationId(approvedOrganizationId);
+		ds.setCreatedBy(createdBy);
 		ds.setAlias(alias);
 		ds.setLastmodifiedby(lastmodifiedby);
 		ds.setLastmodifieddate(lastmodifieddate);

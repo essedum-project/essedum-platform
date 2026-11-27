@@ -1,13 +1,13 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -88,17 +88,17 @@ public class ICIPDatasourceController {
 	/** The i ICIP datasource service. */
 	@Autowired
 	private IICIPDatasourceService iICIPDatasourceService;
-	
+
 	@Autowired
 	private ConstantsService dashConstantService;
 
 	/** The datasource plugin servce. */
 	@Autowired
 	private IICIPDatasourcePluginsService datasourcePluginServce;
-	
+
 	@Autowired
 	private InternalJobEventService jobEvtService;
-	
+
 	@Autowired
 	private InternalEventPublisher eventService;
 
@@ -109,7 +109,7 @@ public class ICIPDatasourceController {
 	/** The claim. */
 	@Value("${security.claim:#{null}}")
 	private String claim;
-	
+
 	/** The scheduler status. */
 	@EssedumProperty("icip.scheduler.pause.status")
 	private String schedulerPauseStatus;
@@ -147,7 +147,7 @@ public class ICIPDatasourceController {
 	 */
 	@GetMapping("/search/{name}")
 	public ResponseEntity<List<ICIPDatasource>> getDatasources(@PathVariable("name") String name,
-			@RequestParam(required = true) String org) {
+	                                                           @RequestParam(required = true) String org) {
 		List<ICIPDatasource> datasources = iICIPDatasourceService.searchDatasources(name, org);
 		return new ResponseEntity<>(datasources, new HttpHeaders(), HttpStatus.OK);
 	}
@@ -161,7 +161,7 @@ public class ICIPDatasourceController {
 	 */
 	@GetMapping("/all/{group}")
 	public ResponseEntity<List<ICIPDatasource>> getDatasourcesByGroup(@PathVariable(name = "group") String group,
-			@RequestParam(required = true) String org) {
+	                                                                  @RequestParam(required = true) String org) {
 		logger.info("Fetching datasource from getDatasourcesByGroup");
 		List<ICIPDatasource> datasources = iICIPDatasourceService.getDatasourcesByGroupAndOrg(org, group);
 		return new ResponseEntity<>(datasources, new HttpHeaders(), HttpStatus.OK);
@@ -176,7 +176,7 @@ public class ICIPDatasourceController {
 	 */
 	@GetMapping("/{nameStr}/{org}")
 	public ResponseEntity<ICIPPartialDatasource> getDatasource(@PathVariable(name = "nameStr") String name,
-			@PathVariable(name = "org") String org) {
+	                                                           @PathVariable(name = "org") String org) {
 		logger.info("Fetching datasource ");
 		ICIPPartialDatasource datasource = iICIPDatasourceService.getPartialDatasource(name, org);
 		datasource.setConnectionDetails("{}");
@@ -184,7 +184,7 @@ public class ICIPDatasourceController {
 	}
 	@GetMapping("/get/{nameStr}/{org}")
 	public ResponseEntity<ICIPPartialDatasource> getDatasourceObject(@PathVariable(name = "nameStr") String name,
-			@PathVariable(name = "org") String org) {
+	                                                                 @PathVariable(name = "org") String org) {
 		logger.info("Fetching datasource ");
 		ICIPPartialDatasource datasource = iICIPDatasourceService.getPartialDatasource(name, org);
 		return new ResponseEntity<>(datasource, new HttpHeaders(), HttpStatus.OK);
@@ -211,7 +211,7 @@ public class ICIPDatasourceController {
 	 */
 	@GetMapping("/type/{type}")
 	public ResponseEntity<List<ICIPDatasource>> getDatasourceByType(@PathVariable(name = "type") String type,
-			@RequestParam(name = "org") String org) {
+	                                                                @RequestParam(name = "org") String org) {
 		logger.info("Fetching datasource by type : {}", type);
 		List<ICIPDatasource> datasource = iICIPDatasourceService.getDatasourceByType(type, org);
 		return new ResponseEntity<>(datasource, new HttpHeaders(), HttpStatus.OK);
@@ -229,11 +229,11 @@ public class ICIPDatasourceController {
 	 */
 	@GetMapping("/type/paginated/{type}")
 	public ResponseEntity<List<ICIPDatasource>> getPaginatedDatasourceByType(@PathVariable(name = "type") String type,
-			@RequestParam(name = "org") String org,
-			@RequestParam(name = "interfacetype") String interfacetype,
-			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
-			@RequestParam(name = "size", defaultValue = "12", required = false) String size,
-			@RequestParam(name = "search", required = false) String search) {
+	                                                                         @RequestParam(name = "org") String org,
+	                                                                         @RequestParam(name = "interfacetype") String interfacetype,
+	                                                                         @RequestParam(name = "page", defaultValue = "0", required = false) String page,
+	                                                                         @RequestParam(name = "size", defaultValue = "12", required = false) String size,
+	                                                                         @RequestParam(name = "search", required = false) String search) {
 		logger.info("Fetching datasource by type : {}", type);
 		List<ICIPDatasource> datasource = iICIPDatasourceService.getPaginatedDatasourceByTypeAndSearch(type, org,
 				interfacetype, search, Integer.parseInt(page), Integer.parseInt(size));
@@ -250,7 +250,7 @@ public class ICIPDatasourceController {
 	 */
 	@GetMapping("/type/count/{type}")
 	public ResponseEntity<Long> getDatasourceCountByType(@PathVariable(name = "type") String type,
-			@RequestParam(name = "org") String org, @RequestParam(name = "search", required = false) String search) {
+	                                                     @RequestParam(name = "org") String org, @RequestParam(name = "search", required = false) String search) {
 		logger.info("Fetching datasource count by type : {}", type);
 		Long datasource = iICIPDatasourceService.getDatasourceCountByType(type, org, search);
 		return new ResponseEntity<>(datasource, new HttpHeaders(), HttpStatus.OK);
@@ -265,7 +265,7 @@ public class ICIPDatasourceController {
 	 */
 	@GetMapping("/interfacetype/count/{type}/{interfacetype}")
 	public ResponseEntity<Long> getDatasourceCountByInterfacetype(@PathVariable(name = "type") String type,@PathVariable(name = "interfacetype") String interfacetype,
-			@RequestParam(name = "org") String org, @RequestParam(name = "search", required = false) String search) {
+	                                                              @RequestParam(name = "org") String org, @RequestParam(name = "search", required = false) String search) {
 		logger.info("Fetching datasource count by interfacetype : {}", interfacetype);
 		Long datasource = iICIPDatasourceService.getDatasourceCountByInterfacetype(type,interfacetype, org, search);
 		return new ResponseEntity<>(datasource, new HttpHeaders(), HttpStatus.OK);
@@ -281,7 +281,7 @@ public class ICIPDatasourceController {
 	 */
 	@GetMapping("/type/search/count/{name}/{type}")
 	public ResponseEntity<Long> getDatasourceCountByNameAndType(@PathVariable(name = "name") String name,
-			@PathVariable(name = "type") String type, @RequestParam(name = "org") String org) {
+	                                                            @PathVariable(name = "type") String type, @RequestParam(name = "org") String org) {
 		logger.info("Fetching datasource count by type : {}", type);
 		Long datasource = iICIPDatasourceService.getDatasourceCountByNameAndType(name, type, org);
 		return new ResponseEntity<>(datasource, new HttpHeaders(), HttpStatus.OK);
@@ -299,9 +299,9 @@ public class ICIPDatasourceController {
 	 */
 	@GetMapping("/type/search/{name}/{type}")
 	public ResponseEntity<List<ICIPDatasource>> getDatasourceByNameSearch(@PathVariable(name = "name") String name,
-			@PathVariable(name = "type") String type, @RequestParam(name = "org") String org,
-			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
-			@RequestParam(name = "size", defaultValue = "12", required = false) String size) {
+	                                                                      @PathVariable(name = "type") String type, @RequestParam(name = "org") String org,
+	                                                                      @RequestParam(name = "page", defaultValue = "0", required = false) String page,
+	                                                                      @RequestParam(name = "size", defaultValue = "12", required = false) String size) {
 		List<ICIPDatasource> datasource = iICIPDatasourceService.getDatasourceByNameSearch(name, org, type,
 				Integer.parseInt(page), Integer.parseInt(size));
 		return new ResponseEntity<>(datasource, new HttpHeaders(), HttpStatus.OK);
@@ -328,6 +328,7 @@ public class ICIPDatasourceController {
 		datasourceDTO.setOrganization(org);
 		datasourceDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
 		datasourceDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
+		datasourceDTO.setCreatedBy(ICIPUtils.getUser(claim));
 		logger.debug("loading modelmapper");
 		ModelMapper modelmapper = new ModelMapper();
 		ICIPDatasource datasource = modelmapper.map(datasourceDTO, ICIPDatasource.class);
@@ -351,7 +352,7 @@ public class ICIPDatasourceController {
 		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityCreationAlert(ENTITY_NAME, datasource.getName()))
 				.body(datasource);
 	}
-	
+
 	private String checkStatus(String key, String org) {
 		String resVal = "false";
 		DashConstant res = dashConstantService.getByKeys(key,org);
@@ -360,15 +361,17 @@ public class ICIPDatasourceController {
 		}
 		return resVal;
 	}
-	
+
 	@PostMapping("/save/{idOrName}")
 	public ResponseEntity<ICIPDatasource> saveDatasource(@PathVariable(name = "idOrName") String idOrName,
-			@RequestBody ICIPDatasourceDTO datasourceDTO) throws NoSuchAlgorithmException {
+	                                                     @RequestBody ICIPDatasourceDTO datasourceDTO) throws NoSuchAlgorithmException {
 		String org = datasourceDTO.getOrganization();
 		logger.info("saving datasource ");
 		datasourceDTO.setOrganization(org);
 		datasourceDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
 		datasourceDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
+		// Never trust a client-supplied creator on save; the service keeps the stored value.
+		datasourceDTO.setCreatedBy(null);
 		logger.debug("loading modelmapper");
 		ModelMapper modelmapper = new ModelMapper();
 		ICIPDatasource datasource = modelmapper.map(datasourceDTO, ICIPDatasource.class);
@@ -427,7 +430,7 @@ public class ICIPDatasourceController {
 	/** POST /approval/project/approve/{id}?projectId=X&rank=2 — Project Admin approves. */
 	@PostMapping("/approval/project/approve/{id}")
 	public ResponseEntity<?> approveDatasourceProjectApproval(@PathVariable Integer id,
-			@RequestParam(required = false) Integer projectId, @RequestParam(required = false) String rank) {
+	                                                          @RequestParam(required = false) Integer projectId, @RequestParam(required = false) String rank) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
@@ -466,7 +469,7 @@ public class ICIPDatasourceController {
 	/** POST /approval/org/submit — Project Admin submits PROJECT_APPROVED datasource to Org Admin. */
 	@PostMapping("/approval/org/submit")
 	public ResponseEntity<?> submitDatasourceForOrgApproval(@RequestBody java.util.Map<String, Object> request,
-			@RequestParam(required = false) String rank) {
+	                                                        @RequestParam(required = false) String rank) {
 		try {
 			Integer resourceId = (Integer) request.get("resourceId");
 			Object orgObj = request.get("organizationId");
@@ -531,7 +534,7 @@ public class ICIPDatasourceController {
 	/** POST /approval/platform/submit — Org Admin submits ORG_APPROVED datasource to Platform Admin. */
 	@PostMapping("/approval/platform/submit")
 	public ResponseEntity<?> submitDatasourceForPlatformApproval(@RequestBody java.util.Map<String, Object> request,
-			@RequestParam(required = false) String rank) {
+	                                                             @RequestParam(required = false) String rank) {
 		try {
 			Integer resourceId = (Integer) request.get("resourceId");
 			if (resourceId == null) {
@@ -765,10 +768,14 @@ public class ICIPDatasourceController {
 	 * @return the response entity
 	 */
 	@DeleteMapping("/delete/{nameStr}/{org}")
-	public ResponseEntity<Void> deleteDatasource(@PathVariable(name = "nameStr") String name,
+	public ResponseEntity<?> deleteDatasource(@PathVariable(name = "nameStr") String name,
 			@PathVariable(name = "org") String org) {
 		logger.info("deleting datasource ");
-		iICIPDatasourceService.delete(name, org);
+		try {
+			iICIPDatasourceService.delete(name, org);
+		} catch (org.springframework.security.access.AccessDeniedException e) {
+			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
+		}
 		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityDeletionAlert(ENTITY_NAME, name)).build();
 	}
 
@@ -814,7 +821,7 @@ public class ICIPDatasourceController {
 	 */
 	@GetMapping("/types/{name}/{org}")
 	public ResponseEntity<List<ICIPDatasource>> getTypesByName(@PathVariable(name = "name") String name,
-			@PathVariable(name = "org") String org) {
+	                                                           @PathVariable(name = "org") String org) {
 		List<ICIPDatasource> datasource=iICIPDatasourceService.getDatasourcesByOrgAndName(org, name);
 		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
 				.body(datasource);
@@ -855,7 +862,7 @@ public class ICIPDatasourceController {
 	 */
 	@GetMapping("/getDocs/{pluginType}/{org}")
 	public String getDocs(@PathVariable(name = "pluginType") String pluginType,
-			@PathVariable(name = "org") String org) {
+	                      @PathVariable(name = "org") String org) {
 		ICIPDatasource plugin = new ICIPDatasource();
 		plugin.setType(pluginType);
 		plugin.setConnectionDetails("");
@@ -868,11 +875,11 @@ public class ICIPDatasourceController {
 		}
 		return doc;
 	}
-	
+
 	@PostMapping("/syncDatasets/{datasourceType}")
-	public void runSyncDatasetsjob(@RequestBody String body, 
-			@PathVariable(name = "datasourceType") String datasourceType) {
-		
+	public void runSyncDatasetsjob(@RequestBody String body,
+	                               @PathVariable(name = "datasourceType") String datasourceType) {
+
 		String jobName = null;
 		String userName = ICIPUtils.getUser(claim);
 		Gson gson = new Gson();
@@ -880,45 +887,45 @@ public class ICIPDatasourceController {
 		String organization = bodyElement.get("org").toString();
 		Map<String, String> reqParamMap = new HashMap<>();
 		JsonArray datasourceNames = new JsonArray();
-		
+
 		try {
-			
+
 			List<ICIPDatasource> datasources = iICIPDatasourceService.getDatasourceByType(datasourceType, organization);
-			
+
 			if(datasources!=null && datasources.size()>0) {
-				
+
 				ICIPDatasource sampleDs = iICIPDatasourceService.getDatasource("LEOSNWWQ57786", organization);
-				
+
 				datasources.forEach( datasource -> {
 					datasourceNames.add(datasource.getName());
 				});
-			
+
 				bodyElement.add("datasourceNames", datasourceNames);
 				bodyElement.addProperty("submittedBy", userName);
 				jobName = datasourcePluginServce.getDataSourceService(sampleDs).getSyncDatasetJobName(sampleDs);
-				
+
 				jobEvtService.runInternalJob(body, "SyncDatasets", Class.forName(jobName) , reqParamMap);
 			}
 		}catch(ClassNotFoundException ex) {
 			logger.error("Internal job not found : "+ jobName);
 		}
-		
+
 	}
-	
+
 	@GetMapping("/get/adapterTypes")
 	public ResponseEntity<List<String>> getAdapterTypes() {
 		logger.info("Fetching adapter datasource ");
 		List<String> adapterTypes = iICIPDatasourceService.getAdapterTypes();
 		return new ResponseEntity<>(adapterTypes, new HttpHeaders(), HttpStatus.OK);
 	}
-	
+
 	@GetMapping("/getadapters/{org}")
 	public ResponseEntity<List<ICIPDatasource>> getAdaptersByOrg(@PathVariable(name = "org") String org) {
 		logger.info("Fetching adapter datasource ");
 		List<ICIPDatasource> adapterTypes = iICIPDatasourceService.getAdaptersByOrg(org);
 		return new ResponseEntity<>(adapterTypes, new HttpHeaders(), HttpStatus.OK);
 	}
-	
+
 	@GetMapping("/getpromptsprovider/{org}")
 	public ResponseEntity<List<ICIPDatasoureNameAliasTypeDTO>> getPromptsProviderByOrg(@PathVariable(name = "org") String org) {
 		logger.info("Fetching prompt providers");

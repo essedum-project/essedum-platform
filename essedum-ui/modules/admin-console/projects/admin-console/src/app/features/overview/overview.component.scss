@@ -1,4 +1,7 @@
-﻿:host {
+﻿/* Pull Material Icons into the shadow root (not inherited from document). */
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+:host {
   display: block !important;
   width: 100% !important;
 
@@ -90,6 +93,8 @@
   line-height: 1 !important;
   margin-bottom: 8px !important;
   color: var(--ac-text) !important;
+  transition: opacity 0.2s ease !important;
+  &.stat-loading { opacity: 0.3 !important; }
 }
 
 .stat-label {
@@ -135,6 +140,7 @@
 
   ::ng-deep .mat-mdc-cell {
     color: #e2e8f0 !important;
+    font-size: 0.9rem !important;
     padding: 14px 16px !important;
     border-bottom: 1px solid var(--ac-border) !important;
   }
@@ -205,27 +211,141 @@ mat-paginator .mat-mdc-icon-button .mat-icon,
 mat-paginator .mat-mdc-icon-button[disabled],
 .mat-mdc-paginator .mat-mdc-icon-button[disabled] { opacity: 0.35; }
 
-body.header-light-theme mat-paginator,
-body.header-light-theme .mat-mdc-paginator {
+:host(.light-theme) mat-paginator,
+:host(.light-theme) .mat-mdc-paginator {
   --mat-paginator-container-background-color: #f1f5f9;
   background: #f1f5f9 !important;
   background-color: #f1f5f9 !important;
   color: #64748b !important;
   border-top: 1px solid rgba(15, 23, 42, 0.12);
 }
-body.header-light-theme mat-paginator .mat-mdc-paginator-outer-container,
-body.header-light-theme mat-paginator .mat-mdc-paginator-container,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-outer-container,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-container { background: #f1f5f9 !important; }
-body.header-light-theme mat-paginator .mat-mdc-paginator-range-label,
-body.header-light-theme mat-paginator .mat-mdc-paginator-page-size-label,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-range-label,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #64748b !important; }
-body.header-light-theme mat-paginator .mat-mdc-select-value,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-select-value { color: #1e293b !important; }
-body.header-light-theme mat-paginator .mat-mdc-icon-button,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b !important; }
-body.header-light-theme mat-paginator .mat-mdc-icon-button svg,
-body.header-light-theme mat-paginator .mat-mdc-icon-button .mat-icon,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button svg,
-body.header-light-theme .mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #64748b !important; fill: #64748b !important; }
+:host(.light-theme) mat-paginator .mat-mdc-paginator-outer-container,
+:host(.light-theme) mat-paginator .mat-mdc-paginator-container,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-paginator-outer-container,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-paginator-container { background: #f1f5f9 !important; }
+:host(.light-theme) mat-paginator .mat-mdc-paginator-range-label,
+:host(.light-theme) mat-paginator .mat-mdc-paginator-page-size-label,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-paginator-range-label,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-paginator-page-size-label { color: #64748b !important; }
+:host(.light-theme) mat-paginator .mat-mdc-select-value,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-select-value { color: #1e293b !important; }
+:host(.light-theme) mat-paginator .mat-mdc-icon-button,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-icon-button { color: #64748b !important; --mdc-icon-button-icon-color: #64748b !important; }
+:host(.light-theme) mat-paginator .mat-mdc-icon-button svg,
+:host(.light-theme) mat-paginator .mat-mdc-icon-button .mat-icon,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-icon-button svg,
+:host(.light-theme) .mat-mdc-paginator .mat-mdc-icon-button .mat-icon { color: #64748b !important; fill: #64748b !important; }
+
+/* ── Audit badge styles (mirrored from audit.component.scss) ─────────────── */
+.audit-date-text        { font-size: 0.9rem;  color: var(--ac-text-muted); }
+.audit-actor-text       { font-size: 0.9rem;  color: var(--ac-text); }
+.audit-details-text     { font-size: 0.9rem;  color: var(--ac-text-muted); max-width: 260px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.audit-correlation-text { font-size: 0.8rem;  color: var(--ac-text-muted); font-family: monospace; max-width: 140px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.audit-na               { opacity: 0.4; }
+
+.audit-entity-badge,
+.audit-action-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* Entity colours */
+.audit-entity-badge {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  &.entity-connection  { background: rgba(14, 165, 233, 0.15); color: #7dd3fc; }
+  &.entity-dataset     { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
+  &.entity-model       { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
+  &.entity-agent       { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; }
+  &.entity-pipeline    { background: rgba(236, 72, 153, 0.15); color: #f9a8d4; }
+  &.entity-user        { background: rgba(248, 113, 113, 0.15); color: #fca5a5; }
+  &.entity-role        { background: rgba(251, 191, 36, 0.15); color: #fde68a; }
+  &.entity-project     { background: rgba(52, 211, 153, 0.15); color: #6ee7b7; }
+  &.entity-organization{ background: rgba(96, 165, 250, 0.15); color: #93c5fd; }
+}
+
+/* Action colours */
+.audit-action-badge {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--ac-text-muted);
+  &.action-create  { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
+  &.action-update  { background: rgba(59, 130, 246, 0.15); color: #93c5fd; }
+  &.action-delete  { background: rgba(239, 68, 68, 0.15);  color: #fca5a5; }
+  &.action-login   { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
+  &.action-logout  { background: rgba(107, 114, 128, 0.15);color: #d1d5db; }
+  &.action-approve { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
+  &.action-reject  { background: rgba(239, 68, 68, 0.15);  color: #fca5a5; }
+  &.action-publish { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
+}
+
+/* Light theme overrides for badges */
+:host(.light-theme) {
+  .audit-date-text  { color: #64748b; }
+  .audit-actor-text { color: #1e293b; }
+  .audit-entity-badge {
+    background: rgba(99, 102, 241, 0.10);  color: #4f46e5;
+    &.entity-connection  { background: rgba(14, 165, 233, 0.10); color: #0284c7; }
+    &.entity-dataset     { background: rgba(16, 185, 129, 0.10); color: #059669; }
+    &.entity-model       { background: rgba(245, 158, 11, 0.10); color: #d97706; }
+    &.entity-agent       { background: rgba(139, 92, 246, 0.10); color: #7c3aed; }
+    &.entity-pipeline    { background: rgba(236, 72, 153, 0.10); color: #db2777; }
+    &.entity-user        { background: rgba(248, 113, 113, 0.10);color: #dc2626; }
+    &.entity-role        { background: rgba(251, 191, 36, 0.10); color: #b45309; }
+    &.entity-project     { background: rgba(52, 211, 153, 0.10); color: #047857; }
+    &.entity-organization{ background: rgba(96, 165, 250, 0.10); color: #1d4ed8; }
+  }
+  .audit-action-badge {
+    background: rgba(100, 116, 139, 0.10); color: #475569;
+    &.action-create  { background: rgba(16, 185, 129, 0.10); color: #047857; }
+    &.action-update  { background: rgba(59, 130, 246, 0.10); color: #1d4ed8; }
+    &.action-delete  { background: rgba(239, 68, 68, 0.10);  color: #dc2626; }
+    &.action-login   { background: rgba(99, 102, 241, 0.10); color: #4f46e5; }
+    &.action-logout  { background: rgba(107, 114, 128, 0.10);color: #374151; }
+    &.action-approve { background: rgba(16, 185, 129, 0.10); color: #047857; }
+    &.action-reject  { background: rgba(239, 68, 68, 0.10);  color: #dc2626; }
+    &.action-publish { background: rgba(245, 158, 11, 0.10); color: #b45309; }
+  }
+}
+
+/* Loading spinner */
+.overview-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 0 24px;
+}
+.overview-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--ac-border);
+  border-top-color: var(--ac-accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.overview-loading-text { font-size: 0.9rem; color: var(--ac-text-muted); }
+
+/* Empty state */
+.audit-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 0 32px;
+  gap: 8px;
+}
+.audit-empty-icon  { font-size: 2.5rem; width: 2.5rem; height: 2.5rem; color: #94a3b8; }
+.audit-empty-title { margin: 0; font-size: 1rem; font-weight: 600; color: #94a3b8; }
+.audit-empty-sub   { margin: 0; font-size: 0.85rem; color: #64748b; }
+
+:host(.light-theme) {
+  .audit-empty-icon  { color: #94a3b8; }
+  .audit-empty-title { color: #64748b; }
+  .audit-empty-sub   { color: #94a3b8; }
+}

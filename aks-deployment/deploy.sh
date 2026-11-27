@@ -11,6 +11,12 @@
 #   ./deploy.sh one-touch    — one command: build + push + deploy
 #   ./deploy.sh one-touch frontend  — build only frontend images, then deploy
 #
+# Build cache control (passed through to build-and-push.sh):
+#   BUILD_NO_CACHE=true ./deploy.sh one-touch all           — clean build of everything
+#   BUILD_NO_CACHE_SERVICES="frontend-shell" ./deploy.sh one-touch all
+#                                                           — cached build, except the
+#                                                             listed services
+#
 # How environment-agnostic works:
 #   1. Set ENVIRONMENT, KUBE_CONTEXT, KUBE_NAMESPACE, INGRESS_HOST, etc. in .env
 #   2. Run ./deploy.sh — script handles context switching, namespace creation,
@@ -66,7 +72,22 @@ load_env() {
   VIBE_APPS_NAMESPACE="${VIBE_APPS_NAMESPACE:-vibe-apps}"
   VIBE_MCP_NAMESPACE="${VIBE_MCP_NAMESPACE:-vibe-mcp}"
   VIBE_AGENTS_NAMESPACE="${VIBE_AGENTS_NAMESPACE:-vibe-agents}"
+  VIBE_PIPELINES_NAMESPACE="${VIBE_PIPELINES_NAMESPACE:-vibe-pipelines}"
+  VIBE_TRAINING_NAMESPACE="${VIBE_TRAINING_NAMESPACE:-vibe-training}"
   INGRESS_CLASS="${INGRESS_CLASS:-nginx}"
+
+  # Container-pipeline runtime wiring consumed by icip-service. These must be
+  # absolute URLs — a blank value makes the deploy call fail with
+  # "Target host is not specified".
+  CONTAINER_PYJOB_URL="${CONTAINER_PYJOB_URL:-http://pyjob-executor-service.${KUBE_NAMESPACE}.svc.cluster.local:80}"
+  CONTAINER_DEPLOYER_URL="${CONTAINER_DEPLOYER_URL:-http://adk-code-builder-deployer.${KUBE_NAMESPACE}.svc.cluster.local:5000}"
+  CONTAINER_REGISTRY_PREFIX="${CONTAINER_REGISTRY_PREFIX:-${DOCKER_REGISTRY:-}/}"
+  # envsubst does not understand "${VAR:-default}", so defaults must be set here.
+  ADK_DEPLOYER_IMAGE="${ADK_DEPLOYER_IMAGE:-adk-code-builder-deployer}"
+  FRONTEND_ADMIN_CONSOLE_IMAGE="${FRONTEND_ADMIN_CONSOLE_IMAGE:-essedum-frontend-admin-console}"
+  export VIBE_PIPELINES_NAMESPACE VIBE_TRAINING_NAMESPACE \
+    CONTAINER_PYJOB_URL CONTAINER_DEPLOYER_URL CONTAINER_REGISTRY_PREFIX \
+    ADK_DEPLOYER_IMAGE FRONTEND_ADMIN_CONSOLE_IMAGE
 }
 
 # ─── Validate required variables ─────────────────────────────────────────────
@@ -268,6 +289,7 @@ deploy() {
   apply "essedum-frontend-data-ops"           "essedum-frontend-data-ops.yaml"
   apply "essedum-frontend-integration"        "essedum-frontend-integration.yaml"
   apply "essedum-frontend-vibe-studio"        "essedum-frontend-vibe-studio.yaml"
+  apply "essedum-frontend-admin-console"      "essedum-frontend-admin-console.yaml"
 
   wait_for "essedum-frontend-shell"           "${KUBE_NAMESPACE}"
   wait_for "essedum-frontend-agent"           "${KUBE_NAMESPACE}"
@@ -275,18 +297,26 @@ deploy() {
   wait_for "essedum-frontend-data-ops"        "${KUBE_NAMESPACE}"
   wait_for "essedum-frontend-integration"     "${KUBE_NAMESPACE}"
   wait_for "essedum-frontend-vibe-studio"     "${KUBE_NAMESPACE}"
+  wait_for "essedum-frontend-admin-console"   "${KUBE_NAMESPACE}"
 
   info "--- [5c/9] Supporting services ---"
   apply "pyjob-executor"     "pyjob-executor.yaml"
   apply "proxy"              "proxy-deployment.yml"
   apply "builder-rbac"       "builder-rbac.yml"
+  apply "vibe-pipelines-ns"  "vibe-pipelines-namespace.yaml"
+  apply "vibe-pipelines-rbac" "vibe-pipelines-rbac.yaml"
   apply "builder"            "builder-deployment.yml"
   apply "goosed"             "goosed-deployment.yaml"
   apply "goose-ui"           "goose-ui-deployment.yaml"
   apply "vibe-configmap"     "vibe-code-builder-configmap.yml"
   apply "vibe-builder"       "vibe-code-builder-deployment.yml"
+  apply "agent-designer-backend" "agent-designer-backend.yaml"
+  apply "vibe-pod-watcher-rbac"  "vibe-pod-watcher-rbac.yaml"
+  apply "vibe-pod-watcher"       "vibe-pod-watcher-deployment.yaml"
 
   wait_for "pyjob-executor" "${KUBE_NAMESPACE}"
+  wait_for "agent-designer-backend" "${KUBE_NAMESPACE}"
+  wait_for "vibe-pod-watcher"       "${KUBE_NAMESPACE}"
 
   # ── [6/9] HPA ────────────────────────────────────────────────────────────
   info "--- [6/9] Horizontal Pod Autoscalers ---"
@@ -304,11 +334,12 @@ deploy() {
   apply "main-ingress"            "ingress.yaml"
   apply "goose-ingress"        "goose-ingress.yaml"
   apply "vibe-builder-ingress" "vibe-code-builder-ingress.yaml"
+  apply "vibe-pod-watcher-ingress" "vibe-pod-watcher-ingress.yaml"
 
   success "====== Deployment Complete ======"
   echo ""
   info "  Platform URL : https://${INGRESS_HOST}"
-  info "  Keycloak URL : https://${KEYCLOAK_INGRESS_HOST:-login.${INGRESS_HOST}}"
+  info "  Keycloak URL : https://${INGRESS_HOST}/admin/master/console/"
   info "  Namespace    : ${KUBE_NAMESPACE}"
   info "  Environment  : ${ENVIRONMENT}"
   echo ""

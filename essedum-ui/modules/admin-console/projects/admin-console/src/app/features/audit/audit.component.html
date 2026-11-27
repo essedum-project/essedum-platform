@@ -23,9 +23,9 @@
   <table mat-table [dataSource]="auditDataSource" class="admin-console-table">
 
     <ng-container matColumnDef="occurredAt">
-      <th mat-header-cell *matHeaderCellDef>When</th>
+      <th mat-header-cell *matHeaderCellDef>Date</th>
       <td mat-cell *matCellDef="let row">
-        <span class="audit-date-text">{{ row.occurredAt | date: 'medium' }}</span>
+        <span class="audit-date-text">{{ row.occurredAt | date: 'dd-MM-yyyy' }}</span>
       </td>
     </ng-container>
 
@@ -46,16 +46,23 @@
     </ng-container>
 
     <ng-container matColumnDef="actorName">
-      <th mat-header-cell *matHeaderCellDef>Actor</th>
+      <th mat-header-cell *matHeaderCellDef>Done By</th>
       <td mat-cell *matCellDef="let row">
         <span class="audit-actor-text">{{ row.actorName }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="targetUserName">
+      <th mat-header-cell *matHeaderCellDef>Affected User</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="audit-actor-text" [class.audit-na]="!row.targetUserName">{{ row.targetUserName || '—' }}</span>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="details">
       <th mat-header-cell *matHeaderCellDef>Details</th>
       <td mat-cell *matCellDef="let row">
-        <span class="audit-details-text">{{ row.details }}</span>
+        <span class="audit-details-text">{{ cleanDetails(row.details) }}</span>
       </td>
     </ng-container>
 
@@ -69,5 +76,13 @@
     <tr mat-header-row *matHeaderRowDef="columns"></tr>
     <tr mat-row *matRowDef="let row; columns: columns"></tr>
   </table>
-  <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && events.length === 0" class="audit-empty-state">
+    <mat-icon class="audit-empty-icon">history</mat-icon>
+    <p class="audit-empty-title">No logs available</p>
+    <p class="audit-empty-sub">No audit events found for the current context.</p>
+  </div>
+
+  <mat-paginator *ngIf="events.length > 0" [pageSize]="10" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
 </div>

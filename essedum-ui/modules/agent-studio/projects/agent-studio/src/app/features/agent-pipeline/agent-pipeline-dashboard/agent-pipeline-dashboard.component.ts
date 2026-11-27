@@ -173,61 +173,6 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges, OnDes
     this.resolveUserContext();    
   }
 
-  /**
-   * Remove all GitHub-related data cached in this browser session
-   * (username, session id, and any previously selected repo/branch).
-   */
-  private clearGitSessionData(): void {
-    this.githubService.clearClientGitSession();
-  }
-
-  toggleGitDropdown(event: Event): void {
-    event.stopPropagation();
-    this.showGitDropdown = !this.showGitDropdown;
-  }
-
-  @HostListener('document:click')
-  closeGitDropdown(): void {
-    this.showGitDropdown = false;
-  }
-
-  gitLogin(): void {
-    this.isGitLoading = true;
-    this.githubService.initiateOAuthFlow().subscribe({
-      next: (status) => {
-        this.isGitLoading = false;
-        this.isGitAuthenticated = true;
-        this.githubService.cacheClientAuth(status);
-        this.gitUsername = status.githubUsername || status.username || '';
-        this.service.message('Git login success', 'success');
-        this.changeDetectionRef.detectChanges();
-      },
-      error: () => {
-        this.isGitLoading = false;
-        this.changeDetectionRef.detectChanges();
-      }
-    });
-  }
-
-  gitLogout(): void {
-    this.showGitDropdown = false;
-    this.isGitLoading = true;
-    this.githubService.logout().subscribe({
-      next: () => {
-        this.isGitAuthenticated = false;
-        this.gitUsername = '';
-        this.isGitLoading = false;
-        this.clearGitSessionData();
-        this.service.message('Logout successful', 'success');
-        this.changeDetectionRef.detectChanges();
-      },
-      error: () => {
-        this.isGitLoading = false;
-        this.changeDetectionRef.detectChanges();
-      }
-    });
-  }
-
   gitLogin(): void {
     this.isGitLoading = true;
     this.githubService.initiateOAuthFlow().subscribe({

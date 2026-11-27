@@ -37,6 +37,7 @@
                   </mat-icon>
                   <span class="status-label">{{ approvalStatus }}</span>
                 </div>
+                <span *ngIf="hasApprovalComments()" class="pipeline-approval-comments" [title]="getApprovalComments()">Comments: {{ getApprovalComments() }}</span>
 
                 <!-- Submit for Approval Button -->
                 <div class="approval-button-container" *ngIf="isOwnPipeline()">

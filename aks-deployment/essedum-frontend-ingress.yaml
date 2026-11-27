@@ -60,3 +60,10 @@ spec:
             name: essedum-frontend-vibe-studio-service
             port:
               number: 80
+      - path: /mfe/admin-console(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: essedum-frontend-admin-console-service
+            port:
+              number: 80

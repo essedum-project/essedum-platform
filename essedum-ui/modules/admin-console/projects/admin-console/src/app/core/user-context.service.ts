@@ -27,6 +27,7 @@ export class UserContextService {
   readonly projectId$: Observable<number | null> = defer(() => of(this.resolveProjectIdFromSession()));
   readonly orgId$: Observable<number | null> = defer(() => of(this.resolveOrgIdFromSession()));
   readonly roleId$: Observable<number | null> = defer(() => of(this.resolveRoleIdFromSession()));
+  readonly selectedRoleRank$: Observable<number | null> = defer(() => of(this.resolveSelectedRoleRankFromSession()));
 
   setUserId(userId: number): void {
     this.userId$.next(userId);
@@ -90,6 +91,20 @@ export class UserContextService {
       const obj = JSON.parse(raw);
       const id = Number(obj?.id);
       return Number.isFinite(id) && id > 0 ? id : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private resolveSelectedRoleRankFromSession(): number | null {
+    try {
+      const roleName = sessionStorage.getItem('_rbac_sidebar_role');
+      if (!roleName) return null;
+      const mapRaw = sessionStorage.getItem('_rbac_role_rank_map');
+      if (!mapRaw) return null;
+      const entries: [string, number][] = JSON.parse(mapRaw);
+      const rank = new Map(entries).get(roleName.toLowerCase());
+      return rank != null ? rank : null;
     } catch {
       return null;
     }

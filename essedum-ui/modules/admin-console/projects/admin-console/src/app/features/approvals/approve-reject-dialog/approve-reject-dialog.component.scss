@@ -20,11 +20,6 @@
     padding: 8px 24px 16px !important;
   }
 
-  .mat-mdc-dialog-actions {
-    padding: 8px 24px 20px !important;
-    gap: 10px;
-  }
-
   .mat-mdc-form-field {
     width: 100%;
 
@@ -51,15 +46,42 @@
     }
   }
 
-  button[mat-raised-button][color="primary"] {
-    background: #4f46e5 !important;
-    color: #fff !important;
-    border-radius: 8px !important;
-    font-weight: 500 !important;
+  .mat-mdc-dialog-actions {
+    padding: 8px 24px 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px;
   }
 
-  button[mat-button] {
-    color: #94a3b8 !important;
+  .mat-mdc-dialog-actions .dialog-btn {
+    height: 40px;
+    min-width: 104px;
+    padding: 0 20px !important;
     border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 40px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    margin: 0 !important;
+  }
+
+  .mat-mdc-dialog-actions .btn-cancel {
+    background: transparent !important;
+    color: #cbd5e1 !important;
+    border: 1px solid rgba(148, 163, 184, 0.4) !important;
+  }
+
+  .mat-mdc-dialog-actions .btn-submit {
+    background: #4f46e5 !important;
+    color: #ffffff !important;
+    border: 1px solid #4f46e5 !important;
+  }
+
+  .mat-mdc-dialog-actions .btn-submit[disabled] {
+    opacity: 0.5 !important;
+    color: #ffffff !important;
   }
 }

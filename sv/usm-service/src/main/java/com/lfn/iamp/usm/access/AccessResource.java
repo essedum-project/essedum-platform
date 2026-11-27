@@ -51,9 +51,15 @@ public class AccessResource {
 		return ResponseEntity.ok(accessContextService.resolve(userId));
 	}
 
+	/**
+	 * With actorUserId the list is capped to the roles that actor may see
+	 * (platform admin: all; org admin: AI Engineer/Project Admin/Org Admin;
+	 * project admin: AI Engineer/Project Admin). Without it: unchanged.
+	 */
 	@GetMapping("/roles")
-	public ResponseEntity<List<UnifiedRole>> listRoles() {
-		return ResponseEntity.ok(accessContextService.listRoles());
+	public ResponseEntity<List<UnifiedRole>> listRoles(@RequestParam(required = false) Integer actorUserId) {
+		return ResponseEntity.ok(actorUserId == null ? accessContextService.listRoles()
+				: accessContextService.listVisibleRoles(actorUserId));
 	}
 
 	/**
@@ -93,24 +99,74 @@ public class AccessResource {
 		return login != null && !login.isEmpty() ? login : "User #" + u.getId();
 	}
 
+	/**
+	 * Lists active role assignments visible to the acting user, optionally
+	 * narrowed by user, organization and/or project. The actor-based scoping
+	 * (platform admins see all; everyone else sees only their own grants plus
+	 * grants inside their reachable projects/organizations) is always applied
+	 * first, so the optional filters can never widen visibility.
+	 */
 	@GetMapping("/access/role-assignments")
-	public ResponseEntity<List<RoleAssignment>> listRoleAssignments(@RequestParam Integer actorUserId) {
+	public ResponseEntity<List<RoleAssignment>> listRoleAssignments(
+			@RequestParam Integer actorUserId,
+			@RequestParam(required = false) Integer userId,
+			@RequestParam(required = false) Integer organizationId,
+			@RequestParam(required = false) Integer projectId) {
 		if (actorUserId == null) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "actorUserId required");
 		}
 		AccessContext ctx = accessContextService.resolve(actorUserId);
 		List<RoleAssignment> all = accessContextService.listActive();
+
+		java.util.stream.Stream<RoleAssignment> scoped;
 		if (ctx.getHighestRank() >= PLATFORM_ADMIN) {
-			return ResponseEntity.ok(all);
+			scoped = all.stream();
+		} else {
+			List<Integer> projectIds = ctx.getReachableProjectIds();
+			List<Integer> orgIds = ctx.getReachableOrganizationIds();
+			scoped = all.stream()
+					.filter(a -> actorUserId.equals(a.getUserId())
+							|| (a.getProjectId() != null && projectIds.contains(a.getProjectId()))
+							|| (a.getOrganizationId() != null && orgIds.contains(a.getOrganizationId())));
 		}
-		List<Integer> projectIds = ctx.getReachableProjectIds();
-		List<Integer> orgIds = ctx.getReachableOrganizationIds();
-		List<RoleAssignment> scoped = all.stream()
-				.filter(a -> actorUserId.equals(a.getUserId())
-						|| (a.getProjectId() != null && projectIds.contains(a.getProjectId()))
-						|| (a.getOrganizationId() != null && orgIds.contains(a.getOrganizationId())))
-				.collect(Collectors.toList());
-		return ResponseEntity.ok(scoped);
+
+		// Optional narrowing filters — never widen the actor-based scope above.
+		if (userId != null) {
+			scoped = scoped.filter(a -> userId.equals(a.getUserId()));
+		}
+		// organizationId / projectId narrow to a scope. A role assignment is scoped
+		// to at most one of organization/project (or neither for a platform-wide
+		// grant), so requiring both would always match nothing — treat them as a
+		// union: keep rows scoped to the given organization OR the given project.
+		if (organizationId != null || projectId != null) {
+			scoped = scoped.filter(a ->
+					(organizationId != null && organizationId.equals(a.getOrganizationId()))
+					|| (projectId != null && projectId.equals(a.getProjectId())));
+		}
+
+		return ResponseEntity.ok(scoped.collect(Collectors.toList()));
+	}
+
+	/**
+	 * Paged Members &amp; Roles list. Scope and visible roles depend on the actor's
+	 * rank (see AccessContextService#pageAssignments); filters can only narrow.
+	 */
+	@GetMapping("/access/role-assignments/page")
+	public ResponseEntity<PagedResponse<RoleAssignmentView>> pageRoleAssignments(
+			@RequestParam Integer actorUserId,
+			@RequestParam(required = false) List<Integer> roleId,
+			@RequestParam(required = false) Integer projectId,
+			@RequestParam(required = false) Integer activeProjectId,
+			@RequestParam(required = false) Integer activeRoleRank,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size) {
+		if (actorUserId == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "actorUserId required");
+		}
+		int safePage = Math.max(page, 0);
+		int safeSize = Math.min(Math.max(size, 1), 50);
+		return ResponseEntity.ok(accessContextService.pageAssignments(actorUserId, roleId, projectId,
+				activeProjectId, activeRoleRank, safePage, safeSize));
 	}
 
 	/**
@@ -159,7 +215,7 @@ public class AccessResource {
 		}
 		try {
 			RoleAssignment saved = accessContextService.grant(request.getUserId(), request.getRoleId(),
-					request.getOrganizationId(), request.getProjectId(), isLegacyRole);
+					request.getOrganizationId(), request.getProjectId(), isLegacyRole, request.getActorUserId());
 			return ResponseEntity.ok(saved);
 		} catch (ResponseStatusException ex) {
 			if (ex.getStatusCode() == HttpStatus.CONFLICT) {
@@ -196,7 +252,7 @@ public class AccessResource {
 						"Cannot revoke a role outside your own projects/organizations");
 			}
 		}
-		accessContextService.revoke(id);
+		accessContextService.revoke(id, actorUserId);
 		return ResponseEntity.noContent().build();
 	}
 

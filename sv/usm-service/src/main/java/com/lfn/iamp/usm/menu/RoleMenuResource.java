@@ -149,8 +149,8 @@ public class RoleMenuResource {
 		}
 		dc.setValue(writeValue(node));
 		DashConstant saved = dashConstantRepository.save(dc);
-		auditService.record("role_menu", "created", actorUserId, "User #" + actorUserId,
-				"menu '" + body.getLabel() + "' added to " + item + " / " + body.getProject() + " for user " + actorUserId);
+		auditService.record("role_menu", "created", actorUserId, null,
+				"menu '" + body.getLabel() + "' added to " + item + " / " + body.getProject());
 		return ResponseEntity.ok(toDto(saved, body.getRole()));
 	}
 
@@ -158,9 +158,9 @@ public class RoleMenuResource {
 	public ResponseEntity<Void> delete(@PathVariable Integer id, @RequestParam Integer actorUserId) {
 		requirePlatformAdmin(actorUserId);
 		dashConstantRepository.findById(id).ifPresent(dc -> {
-			auditService.record("role_menu", "deleted", actorUserId,
-					"User #" + actorUserId, "menu row " + id + " removed from " + dc.getKeys() + " / " + dc.getProject_name());
+			String label = dc.getKeys() + " / " + dc.getProject_name();
 			dashConstantRepository.deleteById(id);
+			auditService.record("role_menu", "deleted", actorUserId, null, "menu row removed from " + label);
 		});
 		return ResponseEntity.noContent().build();
 	}
