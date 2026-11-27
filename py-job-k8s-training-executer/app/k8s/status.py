@@ -47,7 +47,8 @@ def map_status(s: JobSnapshot) -> TaskStatus:
     return TaskStatus.PENDING
 
 
-def _newest_pod(pods: List[dict]) -> Optional[dict]:
+def newest_pod(pods: List[dict]) -> Optional[dict]:
+    """The most recently created pod of a Job (retries of a Job reuse the name)."""
     if not pods:
         return None
     return max(pods, key=lambda p: p.get("metadata", {}).get("creationTimestamp", ""))
@@ -57,7 +58,7 @@ def snapshot_from_k8s(job: dict, pods: List[dict]) -> JobSnapshot:
     """Build a snapshot from Kubernetes JSON dicts (as returned by the gateway)."""
     status = job.get("status", {}) or {}
     annotations = job.get("metadata", {}).get("annotations", {}) or {}
-    pod = _newest_pod(pods)
+    pod = newest_pod(pods)
     pod_status = (pod or {}).get("status", {}) or {}
     init_statuses = pod_status.get("initContainerStatuses", []) or []
     return JobSnapshot(

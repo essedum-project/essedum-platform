@@ -3,7 +3,7 @@
 Everything else depends on the small KubernetesGateway interface, so tests use an
 in-memory fake (tests/fakes.py) and never need a cluster.
 """
-from typing import List, Optional
+from typing import Iterator, List, Optional
 
 from kubernetes import client, config
 from kubernetes.client.exceptions import ApiException
@@ -64,6 +64,34 @@ class KubernetesGateway:
         except ApiException as e:
             if e.status != 409:
                 raise
+
+    def list_nodes(self) -> List[dict]:
+        return [self._dict(n) for n in self._core.list_node().items]
+
+    def list_all_pods(self) -> List[dict]:
+        """Pods in every namespace. Needed because GPUs on a node are shared with other workloads."""
+        return [self._dict(p) for p in self._core.list_pod_for_all_namespaces().items]
+
+    def read_pod_log(self, namespace: str, pod: str, container: str, tail: int) -> str:
+        return self._core.read_namespaced_pod_log(
+            pod, namespace, container=container, tail_lines=tail)
+
+    def stream_pod_log(self, namespace: str, pod: str, container: str, tail: int) -> Iterator[str]:
+        """Yield log lines as they are written, until the container exits."""
+        resp = self._core.read_namespaced_pod_log(
+            pod, namespace, container=container, tail_lines=tail,
+            follow=True, _preload_content=False)
+        buffer = b""
+        try:
+            for chunk in resp.stream(decode_content=True):
+                buffer += chunk
+                while b"\n" in buffer:
+                    line, buffer = buffer.split(b"\n", 1)
+                    yield line.decode("utf-8", "replace") + "\n"
+            if buffer:
+                yield buffer.decode("utf-8", "replace")
+        finally:
+            resp.release_conn()
 
     def delete_job(self, namespace: str, name: str) -> None:
         try:

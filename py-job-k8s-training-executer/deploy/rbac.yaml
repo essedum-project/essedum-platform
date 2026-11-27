@@ -1,5 +1,6 @@
-# Namespace-scoped permissions for the executor (no cluster-wide rights).
-# Node/capacity read access (PY-03) is a separate ClusterRole and is added then.
+# Permissions for the executor.
+# Jobs, pods, logs and secrets are namespace-scoped (Role).
+# Node and cluster-wide pod reads are needed for GPU capacity (PY-03) and are read-only (ClusterRole).
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -34,6 +35,31 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: essedum-training-executor
+subjects:
+  - kind: ServiceAccount
+    name: essedum-training-executor
+    namespace: essedum-training
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: essedum-training-capacity-reader
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]          # cluster-wide, to count GPUs in use by any workload
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: essedum-training-capacity-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: essedum-training-capacity-reader
 subjects:
   - kind: ServiceAccount
     name: essedum-training-executor

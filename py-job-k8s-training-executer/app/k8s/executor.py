@@ -3,14 +3,16 @@
 Create / get / stop. No database: the Job object holds all state.
 """
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Iterator, Optional, Tuple
 
 from app.config import Settings
+from app.k8s.capacity import get_capacity
 from app.k8s.gateway import Conflict, KubernetesGateway
 from app.k8s.job_builder import build_callback_secret, build_job
+from app.k8s.logs import follow_logs, tail_logs
 from app.k8s.names import ANNOTATION_STOP, LABEL_ATTEMPT, LABEL_RUN, job_name
 from app.k8s.status import TERMINAL, map_status, snapshot_from_k8s, timestamps
-from app.models import CreateTaskRequest, FailureType, TaskResponse, TaskStatus
+from app.models import CapacityResponse, CreateTaskRequest, FailureType, TaskResponse, TaskStatus
 
 
 def _parse(value: Optional[str]) -> Optional[datetime]:
@@ -64,6 +66,21 @@ class TrainingExecutor:
         self.gateway.annotate_job(ns, task_id, {ANNOTATION_STOP: "true"})
         self.gateway.delete_pods(ns, task_id)
         return self.get(task_id)
+
+    def logs(self, task_id: str, tail: int) -> Optional[str]:
+        """Last `tail` lines of the trainer. None if the task does not exist."""
+        if self.gateway.get_job(self.settings.namespace, task_id) is None:
+            return None
+        return tail_logs(self.gateway, self.settings.namespace, task_id, tail)
+
+    def follow(self, task_id: str, tail: int) -> Optional[Iterator[str]]:
+        """Stream the trainer's log lines. None if the task does not exist."""
+        if self.gateway.get_job(self.settings.namespace, task_id) is None:
+            return None
+        return follow_logs(self.gateway, self.settings.namespace, task_id, tail)
+
+    def capacity(self) -> CapacityResponse:
+        return get_capacity(self.gateway, self.settings.gpu_resource_name)
 
     def _to_response(self, job: dict) -> TaskResponse:
         ns = self.settings.namespace

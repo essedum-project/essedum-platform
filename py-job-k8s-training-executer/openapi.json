@@ -34,7 +34,7 @@
           "capacity"
         ],
         "summary": "Capacity",
-        "description": "Allocatable vs. used GPU capacity per pool/type. Stub until PY-03.",
+        "description": "Allocatable, used and available GPUs per pool and GPU type.",
         "operationId": "capacity_api_v1_capacity_get",
         "parameters": [
           {
@@ -237,6 +237,7 @@
           "tasks"
         ],
         "summary": "Task Logs",
+        "description": "Trainer output. With follow=true the response streams until the container exits.\nIf the trainer has not started yet, the response is empty.",
         "operationId": "task_logs_api_v1_tasks__task_id__logs_get",
         "parameters": [
           {
@@ -268,11 +269,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Stream new lines (implemented in PY-03)",
+              "description": "Keep the connection open and stream new lines",
               "default": false,
               "title": "Follow"
             },
-            "description": "Stream new lines (implemented in PY-03)"
+            "description": "Keep the connection open and stream new lines"
           },
           {
             "name": "X-Service-Token",
@@ -510,6 +511,12 @@
           "used": {
             "type": "integer",
             "title": "Used"
+          },
+          "available": {
+            "type": "integer",
+            "title": "Available",
+            "description": "allocatable minus used, never negative",
+            "default": 0
           }
         },
         "type": "object",

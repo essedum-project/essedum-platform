@@ -1,13 +1,13 @@
 """ESSEDUM Kubernetes Training Executor - contract v1.
 
 PY-02: create / status / stop map onto batch/v1 Jobs.
-Logs and capacity remain stubs until PY-03.
+PY-03: logs (tail and follow) read the trainer pod; capacity reports GPUs per pool/type.
 """
 from functools import lru_cache
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config import Settings
@@ -66,9 +66,9 @@ def health() -> HealthResponse:
 
 @app.get("/api/v1/capacity", response_model=CapacityResponse, tags=["capacity"],
          dependencies=[Depends(require_service_token)])
-def capacity() -> CapacityResponse:
-    """Allocatable vs. used GPU capacity per pool/type. Stub until PY-03."""
-    return CapacityResponse()
+def capacity(executor: TrainingExecutor = Depends(get_executor)) -> CapacityResponse:
+    """Allocatable, used and available GPUs per pool and GPU type."""
+    return executor.capacity()
 
 
 @app.post("/api/v1/tasks", response_model=TaskResponse, status_code=202, tags=["tasks"],
@@ -106,8 +106,16 @@ def stop_task(task_id: str, executor: TrainingExecutor = Depends(get_executor)) 
          dependencies=[Depends(require_service_token)])
 def task_logs(task_id: str,
               tail: int = Query(200, ge=1, le=10000, description="Last N lines"),
-              follow: bool = Query(False, description="Stream new lines (implemented in PY-03)"),
-              executor: TrainingExecutor = Depends(get_executor)) -> str:
-    if executor.get(task_id) is None:
+              follow: bool = Query(False, description="Keep the connection open and stream new lines"),
+              executor: TrainingExecutor = Depends(get_executor)):
+    """Trainer output. With follow=true the response streams until the container exits.
+    If the trainer has not started yet, the response is empty."""
+    if follow:
+        lines = executor.follow(task_id, tail)
+        if lines is None:
+            raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+        return StreamingResponse(lines, media_type="text/plain")
+    text = executor.logs(task_id, tail)
+    if text is None:
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
-    return ""
+    return PlainTextResponse(text)

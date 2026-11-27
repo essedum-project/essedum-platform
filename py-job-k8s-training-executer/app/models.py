@@ -79,10 +79,7 @@ class GpuCapacity(BaseModel):
     gpuType: str
     allocatable: int
     used: int
-
-    @property
-    def available(self) -> int:
-        return self.allocatable - self.used
+    available: int = Field(0, description="allocatable minus used, never negative")
 
 
 class CapacityResponse(BaseModel):
