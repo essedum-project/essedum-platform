@@ -118,7 +118,10 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
           return forkJoin({
             orgs:          this.api.getOrganisations().pipe(catchError(() => of([] as any[]))),
             projects:      this.api.getProjects().pipe(catchError(() => of([] as any[]))),
-            members:       this.api.getRoleAssignments(userId).pipe(catchError(() => of([] as any[]))),
+            // Same query, role cap and scope as the Members & Roles list, so the card matches its "N items".
+            members:       this.api.getRoleAssignmentsPage(userId, {
+                             activeProjectId: projectId, activeRoleRank: roleRank, page: 0, size: 1,
+                           }).pipe(map(p => p.totalElements), catchError(() => of(0))),
             approvalsCount: this.countApprovals(orgId, projectId, roleRank).pipe(catchError(() => of(0))),
             audit:         this.api.getAuditEvents(userId, scopedOrgId, scopedProjectId).pipe(catchError(() => of([] as AuditEvent[]))),
           }).pipe(
@@ -136,14 +139,7 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
                     )
                   );
 
-              const members = isPlatformAdmin
-                ? res.members
-                : res.members.filter((m: any) =>
-                    (orgId == null     || m.organizationId == null || Number(m.organizationId) === Number(orgId)) &&
-                    (projectId == null || m.projectId == null      || Number(m.projectId)      === Number(projectId))
-                  );
-
-              return { orgs, projects, members, approvalsCount: res.approvalsCount, audit: res.audit };
+              return { orgs, projects, members: res.members, approvalsCount: res.approvalsCount, audit: res.audit };
             }),
             catchError(() => of(null)),
           );
@@ -152,11 +148,11 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(data => {
         if (!data) { this.loading = false; return; }
         this.lastLoadedAt = Date.now();
-        console.log('[OVERVIEW] Data loaded — orgs:', data.orgs.length, 'projects:', data.projects.length, 'members:', data.members.length, 'approvals:', data.approvalsCount);
+        console.log('[OVERVIEW] Data loaded — orgs:', data.orgs.length, 'projects:', data.projects.length, 'members:', data.members, 'approvals:', data.approvalsCount);
         // Non-platform-admins are scoped to the one org selected in the thumbnail.
         this.cards[0].count = this.isPlatformAdminView ? data.orgs.length : (this.scopedOrgId != null ? 1 : data.orgs.length);
         this.cards[1].count = data.projects.length;
-        this.cards[2].count = data.members.length;
+        this.cards[2].count = data.members;
         this.cards[3].count = data.approvalsCount;
         this.recentAudit.data = (data.audit || []).slice(0, 8);
         this.loading = false;

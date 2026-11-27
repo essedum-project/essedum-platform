@@ -28,17 +28,19 @@ final class RoleAssignmentSpecs {
 	/**
 	 * @param scopes     null = no scope restriction (platform admin); otherwise a row is visible if it
 	 *                   belongs to ownUserId, or matches any scope
-	 * @param ownUserId  the viewer; their own rows are always visible when scopes is non-null
+	 * @param ownUserId  the viewer; their own rows are visible when scopes is non-null
+	 * @param ownRowsInScopeOnly true when listing for a selected org/project: the viewer's own rows
+	 *                   then count only inside the scopes (not from other orgs/projects)
 	 */
-	static Specification<RoleAssignment> build(List<RowScope> scopes, Integer ownUserId, Integer roleId,
-			Integer projectId) {
+	static Specification<RoleAssignment> build(List<RowScope> scopes, Integer ownUserId, boolean ownRowsInScopeOnly,
+			Integer roleId, Integer projectId) {
 		return (root, query, cb) -> {
 			List<Predicate> and = new ArrayList<>();
 			and.add(cb.isNull(root.get("revokedAt")));
 
 			if (scopes != null) {
 				List<Predicate> or = new ArrayList<>();
-				if (ownUserId != null) {
+				if (ownUserId != null && !ownRowsInScopeOnly) {
 					or.add(cb.equal(root.get("userId"), ownUserId));
 				}
 				for (RowScope s : scopes) {
@@ -59,6 +61,11 @@ final class RoleAssignmentSpecs {
 								: root.get("roleId").in(s.roleIds()));
 					}
 					or.add(match);
+					if (ownUserId != null && ownRowsInScopeOnly) {
+						// The viewer's own rows count only inside this scope and under the same role cap, so a
+						// higher role they hold (e.g. Platform Admin) stays hidden when a lower role is selected.
+						or.add(cb.and(cb.equal(root.get("userId"), ownUserId), match));
+					}
 				}
 				and.add(or.isEmpty() ? cb.disjunction() : cb.or(or.toArray(new Predicate[0])));
 			}
