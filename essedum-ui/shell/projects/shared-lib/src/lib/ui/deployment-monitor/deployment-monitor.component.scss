@@ -121,6 +121,16 @@
   color: var(--dm-muted);
 }
 
+.dm-spin {
+  display: inline-block;
+  animation: dm-spin 0.8s linear infinite;
+}
+
+.dm-message--hint {
+  color: var(--dm-muted);
+  line-height: 1.5;
+}
+
 .dm-chip {
   display: inline-flex;
   align-items: center;

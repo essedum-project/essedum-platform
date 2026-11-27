@@ -446,6 +446,12 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     const base = (environment as any).langfuseUrl ?? '/langfuse';
     return `${base.replace(/\/$/, '')}/trace/${this.lastLangfuseTraceId}`;
   }
+  /** Real deployment id once BE sends it; until then the pipeline cname, so the monitor calls the API after a successful deploy. */
+  get monitorDeploymentId(): string {
+    if (this.containerDeploymentId) return this.containerDeploymentId;
+    return this.deploymentStatus === 'success' ? this.currentCname : '';
+  }
+
   /** Deployment id for the Monitor tab, taken from the live pipeline_status event. */
   containerDeploymentId = '';
   appPort = ''; // Store app port from deployment

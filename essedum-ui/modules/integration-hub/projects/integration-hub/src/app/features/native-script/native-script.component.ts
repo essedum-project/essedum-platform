@@ -952,6 +952,12 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     return this.appLogs.some(l => /traceback|syntaxerror|nameerror|typeerror|valueerror|importerror|\berror\b|\bexception\b/i.test(l));
   }
 
+  /** Real deployment id once BE sends it; until then the deployment name, so the monitor calls the API after a successful deploy. */
+  get monitorDeploymentId(): string {
+    if (this.containerDeploymentId) return this.containerDeploymentId;
+    return this.containerDeployStatus === 'success' ? this.containerDeploymentName : '';
+  }
+
   /** Mirrors the sanitisation the deployer applies to deployment names. */
   private get containerDeploymentName(): string {
     const source =

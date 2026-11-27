@@ -26,6 +26,8 @@ export const NO_RECORDS = 'No records available';
 })
 export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
   @Input() deploymentId = '';
+  /** True when the host pipeline reports a successful container deployment. */
+  @Input() deployed = false;
 
   readonly noRecords = NO_RECORDS;
   status: DeploymentStatusDto | null = null;
@@ -36,6 +38,7 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
   loadError: ApiErrorDto | null = null;
   loading = false;
   busy = false;
+  refreshing = false;
 
   private lastVersion = -1;
   private lastSequence = 0;
@@ -54,6 +57,20 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
 
   get hasId(): boolean {
     return !!this.deploymentId;
+  }
+
+  /** Why the monitor has no deployment id to query, shown to the user instead of a generic message. */
+  get unavailableReason(): string {
+    if (this.hasId) return '';
+    return this.deployed
+      ? 'The deployment is active, but the backend has not sent a deployment ID yet. ' +
+        'The monitor APIs need that ID, so no request was made. Expected: pipeline_status includes "deploymentId".'
+      : 'No active deployment. Use "Deploy as Container" to start a deployment and monitor it here.';
+  }
+
+  get idLabel(): string {
+    if (this.hasId) return this.deploymentId;
+    return this.deployed ? 'Active, waiting for deployment ID' : 'No active deployment';
   }
 
   get isTerminal(): boolean {
@@ -107,6 +124,12 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
   }
 
   refresh(): void {
+    if (!this.hasId) {
+      this.services.message(this.unavailableReason, 'error');
+      return;
+    }
+    this.refreshing = true;
+    this.services.message('Refreshing deployment status...', 'success');
     this.fetchStatus();
   }
 
@@ -149,10 +172,12 @@ export class DeploymentMonitorComponent implements OnChanges, OnDestroy {
     this.monitor.getStatus(id).subscribe({
       next: s => {
         this.fetching = false;
+        this.refreshing = false;
         if (id === this.deploymentId) this.applyStatus(s);
       },
       error: (e: ApiErrorDto) => {
         this.fetching = false;
+        this.refreshing = false;
         if (id === this.deploymentId) this.onLoadError(e);
       },
     });

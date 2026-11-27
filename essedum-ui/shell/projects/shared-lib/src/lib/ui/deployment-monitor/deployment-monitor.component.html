@@ -4,7 +4,7 @@
       <mat-icon class="dm-title-icon">monitor_heart</mat-icon>
       <div>
         <h3>Deployment monitor</h3>
-        <span class="dm-id">{{ hasId ? deploymentId : 'Deployment ID not available yet' }}</span>
+        <span class="dm-id">{{ idLabel }}</span>
       </div>
     </div>
     <div class="dm-header-actions">
@@ -23,8 +23,8 @@
           Resume
         </button>
       </ng-container>
-      <button mat-icon-button class="dm-icon-btn" matTooltip="Refresh" [disabled]="!hasId" (click)="refresh()" aria-label="Refresh status">
-        <mat-icon>refresh</mat-icon>
+      <button mat-icon-button class="dm-icon-btn" matTooltip="Refresh status" [disabled]="refreshing" (click)="refresh()" aria-label="Refresh status">
+        <mat-icon [class.dm-spin]="refreshing">refresh</mat-icon>
       </button>
     </div>
   </header>
@@ -39,7 +39,7 @@
     <span>Loading deployment status...</span>
   </div>
 
-  <p class="dm-message">{{ status?.message || noRecords }}</p>
+  <p class="dm-message" [class.dm-message--hint]="!hasId">{{ hasId ? (status?.message || noRecords) : unavailableReason }}</p>
 
   <div *ngIf="status?.failureReason" class="dm-alert dm-alert--error" role="alert">
     <mat-icon>report_problem</mat-icon>

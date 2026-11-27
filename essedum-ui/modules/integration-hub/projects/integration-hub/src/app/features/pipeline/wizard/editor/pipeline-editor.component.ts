@@ -339,6 +339,12 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     return this.containerDeployStatus === 'deploying' || this.isDeletingContainer;
   }
 
+  /** Real deployment id once BE sends it; until then the deployment name, so the monitor calls the API after a successful deploy. */
+  get monitorDeploymentId(): string {
+    if (this.containerDeploymentId) return this.containerDeploymentId;
+    return this.containerDeployStatus === 'success' ? this.containerDeploymentName : '';
+  }
+
   private get containerDeploymentName(): string {
     const source = this.containerLastDeploymentName || (this.model ? this.model.alias || this.model.name : '');
     return String(source).toLowerCase()
