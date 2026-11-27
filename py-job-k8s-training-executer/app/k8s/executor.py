@@ -8,7 +8,7 @@ from typing import Optional, Tuple
 from app.config import Settings
 from app.k8s.gateway import Conflict, KubernetesGateway
 from app.k8s.job_builder import build_callback_secret, build_job
-from app.k8s.names import ANNOTATION_STOP, LABEL_ATTEMPT, LABEL_RUN, POD_JOB_LABEL, job_name
+from app.k8s.names import ANNOTATION_STOP, LABEL_ATTEMPT, LABEL_RUN, job_name
 from app.k8s.status import TERMINAL, map_status, snapshot_from_k8s, timestamps
 from app.models import CreateTaskRequest, FailureType, TaskResponse, TaskStatus
 
