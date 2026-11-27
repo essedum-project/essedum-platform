@@ -334,6 +334,11 @@ mat-paginator ::ng-deep .mat-mdc-icon-button[disabled] { opacity: 0.35; }
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  .comment-value {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 // ── Card actions ──────────────────────────────────────────────────────────────

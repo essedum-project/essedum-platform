@@ -3,10 +3,12 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 export interface ApproveRejectDialogData {
   action: 'approved' | 'rejected';
+  resourceType?: string;
+  resourceName?: string;
 }
 
 export interface ApproveRejectDialogResult {
-  note: string;
+  comments: string;
 }
 
 @Component({
@@ -16,7 +18,7 @@ export interface ApproveRejectDialogResult {
   standalone: false,
 })
 export class ApproveRejectDialogComponent {
-  note = '';
+  comments = '';
 
   constructor(
     private readonly ref: MatDialogRef<ApproveRejectDialogComponent>,
@@ -24,22 +26,21 @@ export class ApproveRejectDialogComponent {
   ) {}
 
   get title(): string {
-    return this.data.action === 'approved' ? 'Approve Asset' : 'Reject Asset';
-  }
-
-  get label(): string {
-    return this.data.action === 'approved' ? 'Approval' : 'Rejection';
+    const verb = this.data.action === 'approved' ? 'Approve' : 'Reject';
+    const type = this.data.resourceType || 'Asset';
+    const name = this.data.resourceName ? ` "${this.data.resourceName}"` : '';
+    return `${verb} ${type}${name}`;
   }
 
   get valid(): boolean {
-    return this.note.trim().length > 0;
+    return this.comments.trim().length > 0;
   }
 
   submit(): void {
     if (!this.valid) {
       return;
     }
-    this.ref.close({ note: this.note.trim() } as ApproveRejectDialogResult);
+    this.ref.close({ comments: this.comments.trim() } as ApproveRejectDialogResult);
   }
 
   cancel(): void {

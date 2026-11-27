@@ -25,6 +25,22 @@
     &.ds-status-published      { background-color: rgba(5, 150, 105, 0.2);   color: #10b981; }
     &.ds-status-rejected       { background-color: rgba(239, 68, 68, 0.2);   color: #f87171; }
   }
+
+  .ds-approval-comments {
+    display: inline-flex;
+    align-items: center;
+    max-width: 320px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #cbd5e1;
+    background: rgba(148, 163, 184, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .ds-approval-button-container {

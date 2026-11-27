@@ -10,18 +10,31 @@
 #   Groups:
 #     frontend  — agent-designer + all frontend MFEs
 #     backend   — api-gateway usm-service icip-service data-service vibe-service
-#     services  — agent-designer-backend pyjob-executer proxy-service
-#                 vibe-code-builder adk-deployer goosed-base goosed
+#     services  — agent-designer-backend pyjob-executer proxy-services#                 vibe-code-builder adk-deployer vibe-pod-watcher goosed-base goosed
 #
 #   Individual services:
 #     api-gateway | usm-service | icip-service | data-service | vibe-service |
 #     agent-designer | agent-designer-backend | frontend-shell | frontend-agent |
 #     frontend-data-ops | frontend-integration | frontend-vibe-studio |
+#     frontend-admin-console |
 #     pyjob-executer | proxy-service | vibe-code-builder | adk-deployer |
-#     goosed-base | goosed
+#     vibe-pod-watcher | goosed-base | goosed
 #
 #   goosed target builds goosed-base first, then the wrapper (required order).
 #   goose-ui has no local Dockerfile — skipped (external image).
+#
+# Build cache control (for accurate baseline / branch comparison timing):
+#   BUILD_NO_CACHE=true ./build-and-push.sh backend   — full clean build, no cache
+#   BUILD_NO_CACHE=true ./deploy.sh one-touch backend  — clean build + deploy
+#   Omit BUILD_NO_CACHE (default) to use Docker layer cache (faster incremental).
+#
+#   Per-service clean builds — cache everything except the listed services:
+#     BUILD_NO_CACHE_SERVICES="frontend-shell" ./deploy.sh one-touch all
+#   Space- or comma-separated. Each entry is matched as a substring of the image
+#   name, so "frontend-shell" matches essedum-frontend-shell. Beware that a
+#   prefix such as "frontend-agent" also matches essedum-frontend-agent-designer;
+#   use the full image name when you need an exact single service.
+#   BUILD_NO_CACHE=true overrides this list and cleans every service.
 #
 # Environments: AKS | 5G | LFN — same script, different .env values.
 # =============================================================================
@@ -159,6 +172,31 @@ configure_npm() {
   fi
 }
 
+# ─── Build timing accumulator (populated per service) ───────────────────────
+declare -A BUILD_TIMES
+
+# ─── Cache flag — set BUILD_NO_CACHE=true for a full clean build ─────────────
+NO_CACHE_FLAG=""
+[[ "${BUILD_NO_CACHE:-false}" == "true" ]] && NO_CACHE_FLAG="--no-cache"
+BUILD_NO_CACHE_SERVICES="${BUILD_NO_CACHE_SERVICES:-}"
+
+# Resolves the cache flag for one service. BUILD_NO_CACHE_SERVICES lets a build
+# stay cached overall while a few named services are rebuilt from scratch.
+service_cache_flag() {
+  local label="$1"
+  if [[ -n "${NO_CACHE_FLAG}" ]]; then
+    echo "--no-cache"
+    return
+  fi
+  local entry
+  for entry in ${BUILD_NO_CACHE_SERVICES//,/ }; do
+    if [[ -n "${entry}" && "${label}" == *"${entry}"* ]]; then
+      echo "--no-cache"
+      return
+    fi
+  done
+}
+
 # ─── Build + push with retry ─────────────────────────────────────────────────
 build_and_push() {
   local image="$1"
@@ -166,6 +204,15 @@ build_and_push() {
   local dockerfile="$3"
   local attempt=1
   local is_frontend_build="false"
+  local svc_start svc_end svc_elapsed
+  svc_start=$(date +%s)
+
+  local svc_label
+  svc_label="${image##*/}"           # strip registry prefix
+  svc_label="${svc_label%%:*}"       # strip tag
+
+  local cache_flag
+  cache_flag="$(service_cache_flag "${svc_label}")"
 
   if [[ "${dockerfile}" == essedum-ui/* || "${context}" == *"/essedum-ui/agent-designer-frontend" ]]; then
     is_frontend_build="true"
@@ -177,9 +224,11 @@ build_and_push() {
       clean_npm_lockfiles
     fi
 
-    info "Build [${attempt}/${MAX_RETRIES}]: ${image}"
+    info "Build [${attempt}/${MAX_RETRIES}]: ${image}${cache_flag:+  (--no-cache)}"
+    # shellcheck disable=SC2086
     if docker build \
         --progress=plain \
+        ${cache_flag} \
         --build-arg DOCKER_REGISTRY="${DOCKER_REGISTRY}" \
         --build-arg IMAGE_TAG="${IMAGE_TAG}" \
         --build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-}" \
@@ -193,7 +242,13 @@ build_and_push() {
         "${context}"; then
       info "Pushing: ${image}"
       if docker push "${image}"; then
-        success "✓  ${image}"
+        svc_end=$(date +%s)
+        svc_elapsed=$(( svc_end - svc_start ))
+        BUILD_TIMES["${svc_label}"]="${svc_elapsed}"
+        # Write to disk so parallel subshells can report time back to the parent
+        [[ -n "${_BUILD_TIMES_DIR:-}" ]] && \
+          echo "${svc_elapsed}" > "${_BUILD_TIMES_DIR}/${svc_label}"
+        success "✓  ${image}  [$(printf '%dm %02ds' $((svc_elapsed/60)) $((svc_elapsed%60)))]"
         return 0
       fi
     fi
@@ -289,6 +344,13 @@ build_frontend_vibe_studio() {
     "essedum-ui/Dockerfile.vibe-studio"
 }
 
+build_frontend_admin_console() {
+  build_and_push \
+    "${DOCKER_REGISTRY}/${FRONTEND_ADMIN_CONSOLE_IMAGE:-essedum-frontend-admin-console}:${IMAGE_TAG}" \
+    "${REPO_ROOT}" \
+    "essedum-ui/Dockerfile.admin-console"
+}
+
 build_pyjob_executer() {
   build_and_push \
     "${DOCKER_REGISTRY}/${PYJOB_IMAGE:-py-job-executer}:${IMAGE_TAG}" \
@@ -314,6 +376,13 @@ build_adk_deployer() {
   build_and_push \
     "${DOCKER_REGISTRY}/${ADK_DEPLOYER_IMAGE:-adk-code-builder-deployer}:${IMAGE_TAG}" \
     "${REPO_ROOT}/adk-code-builder-deployer" \
+    "Dockerfile"
+}
+
+build_vibe_pod_watcher() {
+  build_and_push \
+    "${DOCKER_REGISTRY}/vibe-pod-watcher:${IMAGE_TAG}" \
+    "${REPO_ROOT}/vibe-pod-watcher" \
     "Dockerfile"
 }
 
@@ -366,10 +435,12 @@ case "${TARGET}" in
     build_frontend_data_ops
     build_frontend_integration
     build_frontend_vibe_studio
+    build_frontend_admin_console
     build_pyjob_executer
     build_proxy_service
     build_vibe_code_builder
     build_adk_deployer
+    build_vibe_pod_watcher
     build_goosed_base
     build_goosed_wrapper
     warn "goose-ui has no local Dockerfile — skipping (external image)."
@@ -381,13 +452,57 @@ case "${TARGET}" in
     build_frontend_data_ops
     build_frontend_integration
     build_frontend_vibe_studio
+    build_frontend_admin_console
     ;;
   backend)
+    BACKEND_GROUP_START=$(date +%s)
+    # Temp dir lets parallel subshells write build times back to the parent
+    _BUILD_TIMES_DIR=$(mktemp -d)
+    export _BUILD_TIMES_DIR
+
+    # Phase 1: api-gateway must complete before usm-service (table schema dependency)
+    info "── Phase 1/3: api-gateway (sequential) ──"
     build_api_gateway
-    build_usm_service
-    build_icip_service
-    build_data_service
-    build_vibe_service
+
+    # Phase 2: usm-service unblocked; vibe-service is independent — run in parallel
+    info "── Phase 2/3: usm-service + vibe-service (parallel) ──"
+    build_usm_service  & _PID_USM=$!
+    build_vibe_service & _PID_VIBE=$!
+    # Wait for each PID independently — bash 'wait pid1 pid2' only returns the last PID's exit code
+    _RC=0
+    wait $_PID_USM  || _RC=1
+    wait $_PID_VIBE || _RC=1
+    (( _RC == 0 )) || error "Phase 2 parallel build failed (usm-service or vibe-service)"
+
+    # Phase 3: heaviest pair — run in parallel (max 2 concurrent on this 4-vCPU/16GB host)
+    info "── Phase 3/3: icip-service + data-service (parallel) ──"
+    build_icip_service & _PID_ICIP=$!
+    build_data_service & _PID_DATA=$!
+    _RC=0
+    wait $_PID_ICIP || _RC=1
+    wait $_PID_DATA || _RC=1
+    (( _RC == 0 )) || error "Phase 3 parallel build failed (icip-service or data-service)"
+
+    BACKEND_GROUP_END=$(date +%s)
+    BACKEND_GROUP_ELAPSED=$(( BACKEND_GROUP_END - BACKEND_GROUP_START ))
+    # Merge temp-file times (from subshells) into BUILD_TIMES
+    for f in "${_BUILD_TIMES_DIR}"/*; do
+      [[ -f "${f}" ]] && BUILD_TIMES["$(basename "${f}")"]="$(cat "${f}")"
+    done
+    rm -rf "${_BUILD_TIMES_DIR}"
+    echo ""
+    info "===== Backend Build Time Summary ====="
+    for svc in api-gateway usm-service icip-service data-service vibe-service; do
+      # Match by suffix since image names may have prefixes
+      for key in "${!BUILD_TIMES[@]}"; do
+        if [[ "${key}" == *"${svc}"* ]]; then
+          t=${BUILD_TIMES["${key}"]}
+          info "  ${key}: $(printf '%dm %02ds' $((t/60)) $((t%60)))"
+        fi
+      done
+    done
+    info "  ─────────────────────────────────"
+    info "  Total backend: $(printf '%dm %02ds' $((BACKEND_GROUP_ELAPSED/60)) $((BACKEND_GROUP_ELAPSED%60)))"
     ;;
   services)
     build_agent_designer_backend
@@ -395,6 +510,7 @@ case "${TARGET}" in
     build_proxy_service
     build_vibe_code_builder
     build_adk_deployer
+    build_vibe_pod_watcher
     build_goosed_base
     build_goosed_wrapper
     ;;
@@ -410,18 +526,20 @@ case "${TARGET}" in
   frontend-data-ops)        build_frontend_data_ops      ;;
   frontend-integration)     build_frontend_integration   ;;
   frontend-vibe-studio)     build_frontend_vibe_studio   ;;
+  frontend-admin-console)   build_frontend_admin_console ;;
   pyjob-executer)           build_pyjob_executer         ;;
   proxy-service)            build_proxy_service          ;;
   vibe-code-builder)        build_vibe_code_builder      ;;
   adk-deployer)             build_adk_deployer           ;;
+  vibe-pod-watcher)         build_vibe_pod_watcher       ;;
   goosed-base)              build_goosed_base            ;;
   goosed)                   build_goosed_base && build_goosed_wrapper ;;
   *)
     error "Unknown target '${TARGET}'. Valid: all | frontend | backend | services | \
 api-gateway | usm-service | icip-service | data-service | vibe-service | \
 agent-designer | agent-designer-backend | frontend-shell | frontend-agent | \
-frontend-data-ops | frontend-integration | frontend-vibe-studio | \
-pyjob-executer | proxy-service | vibe-code-builder | adk-deployer | goosed-base | goosed"
+frontend-data-ops | frontend-integration | frontend-vibe-studio | frontend-admin-console | \
+pyjob-executer | proxy-service | vibe-code-builder | adk-deployer | vibe-pod-watcher | goosed-base | goosed"
     ;;
 esac
 

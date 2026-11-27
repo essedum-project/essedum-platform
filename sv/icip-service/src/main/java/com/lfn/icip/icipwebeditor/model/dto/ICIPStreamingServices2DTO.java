@@ -128,4 +128,11 @@ public interface ICIPStreamingServices2DTO {
 	 */
 	Integer getApprovedOrganizationId();
 
+	/**
+	 * The admin approval/rejection comment captured for this pipeline.
+	 *
+	 * @return the comments
+	 */
+	String getComments();
+
 }

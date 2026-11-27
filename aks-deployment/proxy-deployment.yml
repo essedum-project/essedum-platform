@@ -24,6 +24,8 @@ spec:
         env:
         - name: TARGET_NAMESPACE
           value: "vibe-apps"
+        - name: APP_NAMESPACES
+          value: "vibe-apps,vibe-agents,vibe-mcp,aipns"
         # Optional allowlist: uncomment to restrict services
         # - name: ALLOWLIST
         #   value: "runner-service,tunner-service,abc-service"

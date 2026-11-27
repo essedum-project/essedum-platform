@@ -59,7 +59,10 @@ public class ModelApprovalWorkflowService {
 	}
 
 	/** Project Admin approves model. PENDING_PROJECT_APPROVAL -> PROJECT_APPROVED */
-	public ICIPMLFederatedModel approveProjectApproval(Integer id, Integer projectId, String currentUserRank) {
+	public ICIPMLFederatedModel approveProjectApproval(Integer id, Integer projectId, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[ModelApproval] Project Admin approving model {} for project {}", id, projectId);
 
 		if (!"2".equals(currentUserRank)) {
@@ -80,11 +83,15 @@ public class ModelApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PROJECT_APPROVED");
+		resource.setComments(comments);
 		return modelRepository.save(resource);
 	}
 
 	/** Project Admin rejects model. PENDING_PROJECT_APPROVAL -> PROJECT_REJECTED */
-	public ICIPMLFederatedModel rejectProjectApproval(Integer id, String currentUserRank) {
+	public ICIPMLFederatedModel rejectProjectApproval(Integer id, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[ModelApproval] Project Admin rejecting model {}", id);
 
 		if (!"2".equals(currentUserRank)) {
@@ -97,6 +104,7 @@ public class ModelApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PROJECT_REJECTED");
+		resource.setComments(comments);
 		return modelRepository.save(resource);
 	}
 
@@ -123,7 +131,10 @@ public class ModelApprovalWorkflowService {
 	}
 
 	/** Org Admin approves org-level publishing. PENDING_ORG_APPROVAL -> ORG_APPROVED */
-	public ICIPMLFederatedModel approveOrgApproval(Integer id, String currentUserRank) {
+	public ICIPMLFederatedModel approveOrgApproval(Integer id, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[ModelApproval] Org Admin approving model {} at org level", id);
 
 		if (!"3".equals(currentUserRank)) {
@@ -140,11 +151,15 @@ public class ModelApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("ORG_APPROVED");
+		resource.setComments(comments);
 		return modelRepository.save(resource);
 	}
 
 	/** Org Admin rejects organization publishing. PENDING_ORG_APPROVAL -> ORG_REJECTED */
-	public ICIPMLFederatedModel rejectOrgApproval(Integer id, String currentUserRank) {
+	public ICIPMLFederatedModel rejectOrgApproval(Integer id, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[ModelApproval] Org Admin rejecting org approval for model {}", id);
 
 		if (!"3".equals(currentUserRank)) {
@@ -157,6 +172,7 @@ public class ModelApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("ORG_REJECTED");
+		resource.setComments(comments);
 		return modelRepository.save(resource);
 	}
 
@@ -182,7 +198,10 @@ public class ModelApprovalWorkflowService {
 	}
 
 	/** Platform Admin publishes model globally. PENDING_PLATFORM_APPROVAL -> PUBLISHED */
-	public ICIPMLFederatedModel approvePlatformApproval(Integer id, String currentUserRank) {
+	public ICIPMLFederatedModel approvePlatformApproval(Integer id, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[ModelApproval] Platform Admin publishing model {} globally", id);
 
 		if (!"4".equals(currentUserRank)) {
@@ -200,11 +219,15 @@ public class ModelApprovalWorkflowService {
 
 		resource.setApprovalStatus("PUBLISHED");
 		resource.setApprovedOrganizationId(null);
+		resource.setComments(comments);
 		return modelRepository.save(resource);
 	}
 
 	/** Platform Admin rejects model submitted for global publishing. PENDING_PLATFORM_APPROVAL -> PLATFORM_REJECTED */
-	public ICIPMLFederatedModel rejectPlatformApproval(Integer id, String currentUserRank) {
+	public ICIPMLFederatedModel rejectPlatformApproval(Integer id, String currentUserRank, String comments) {
+		if (comments == null || comments.isBlank()) {
+			throw new IllegalArgumentException("Comments are required");
+		}
 		logger.info("[ModelApproval] Platform Admin rejecting model {}", id);
 
 		if (!"4".equals(currentUserRank)) {
@@ -217,6 +240,7 @@ public class ModelApprovalWorkflowService {
 		}
 
 		resource.setApprovalStatus("PLATFORM_REJECTED");
+		resource.setComments(comments);
 		return modelRepository.save(resource);
 	}
 

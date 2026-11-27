@@ -1,18 +1,18 @@
 <h2 mat-dialog-title>{{ title }}</h2>
 <div mat-dialog-content>
   <mat-form-field appearance="fill" class="full-width">
-    <mat-label>{{ label }} Note</mat-label>
+    <mat-label>Comments</mat-label>
     <textarea
       matInput
-      [(ngModel)]="note"
-      name="note"
+      [(ngModel)]="comments"
+      name="comments"
       rows="5"
-      [placeholder]="'Enter ' + label.toLowerCase() + ' note...'">
+      placeholder="Enter comments...">
     </textarea>
   </mat-form-field>
 </div>
 <div mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="submit()" [disabled]="!valid">Submit</button>
+  <button mat-button class="dialog-btn btn-cancel" (click)="cancel()">Cancel</button>
+  <button mat-raised-button class="dialog-btn btn-submit" (click)="submit()" [disabled]="!valid">Submit</button>
 </div>
 

@@ -1,13 +1,13 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -83,6 +83,9 @@ public class ICIPUtils {
 
 	public static String getUser(String claim) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		logger.info("[ICIPUtils.getUser] claim={} authType={} isJwtCred={}", claim,
+				authentication == null ? "null" : authentication.getClass().getSimpleName(),
+				authentication != null && authentication.getCredentials() instanceof Jwt);
 		if (claim != null && authentication!=null && authentication.getCredentials() instanceof Jwt) {
 			String[] claimArr = claim.split("\\|\\|");
 			String user = (String) ((Jwt) (authentication.getCredentials())).getClaim(claimArr[0]);
@@ -92,15 +95,14 @@ public class ICIPUtils {
 			 */
 			if (user == null && claimArr.length > 1)
 				user = claimArr[1];
+			logger.info("[ICIPUtils.getUser] JWT path claimName={} result={}", claimArr[0], user);
 			return user;
 		}
-		if (authentication != null && authentication.getName() != null) {
-			return authentication.getName();
-		} else {
-			return "Anonymous";
-		}
+		String result = (authentication != null && authentication.getName() != null) ? authentication.getName() : "Anonymous";
+		logger.info("[ICIPUtils.getUser] non-JWT path result={}", result);
+		return result;
 	}
-	
+
 	public static String getUserFromToken(String token, String claim) {
 		if(token != null && !token.isEmpty()) {
 			String[] chunks = token.split("\\.");
@@ -241,18 +243,18 @@ public class ICIPUtils {
 	/*
 	 * 1. Generate Random String %randomstring - with its length, say 5
 	 * %randomstring#5!
-	 * 
+	 *
 	 * 2. Generate Random Number %randomdigit - with its length, say 3
 	 * %randomdigit#3!
-	 * 
+	 *
 	 * 3. Use Parameter %parameter_ - with its index, say 1 (first parameter)
 	 * %parameter_1 - with its length, say 2 %parameter_1#2!
-	 * 
+	 *
 	 * 4. Hardcoded text (say INC) INC
 	 *
 	 * e.g., INC%parameter_1#2!%parameter_2#3!%randomdigit#3!%randomstring#5! output
 	 * : INCABXYZ202nFICi
-	 * 
+	 *
 	 */
 	public static String randomStringGenerator(String regex, String... parameters) throws EssedumException {
 		try {
@@ -298,7 +300,7 @@ public class ICIPUtils {
 	}
 
 	private static void appendCharacters(boolean[] flags, StringBuilder hardcodedString, String[] currentElements,
-			char current) {
+	                                     char current) {
 		if (flags[IS_KEYWORD_ACTIVE]) {
 			currentElements[IS_KEYWORD_ACTIVE] = currentElements[IS_KEYWORD_ACTIVE] + String.valueOf(current);
 		} else {
@@ -477,14 +479,14 @@ public class ICIPUtils {
 			if (generatedkeys.last())
 				return generatedkeys.getInt(1);
 			return 0;
-			
+
 		}
 		catch(Exception e) {
 			if (generatedkeys.next())
 				return generatedkeys.getInt(1);
 			return 0;
 		}
-		
+
 	}
 
 	@AllArgsConstructor
@@ -499,7 +501,7 @@ public class ICIPUtils {
 	public static String sanitizeRole(String role) {
 		return role.toLowerCase().replaceAll("[^a-zA-Z0-9]", "");
 	}
-	
+
 	public static String sanitizeEntity(String role) {
 		return role.toLowerCase().replaceAll("[^a-zA-Z0-9.@_]", "");
 	}

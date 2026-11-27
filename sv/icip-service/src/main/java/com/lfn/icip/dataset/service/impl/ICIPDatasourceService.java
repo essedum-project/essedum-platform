@@ -358,6 +358,10 @@ public class ICIPDatasourceService implements IICIPDatasourceService, IICIPSearc
 			iCIPDatasource.setApprovedOrganizationId(fetched.getApprovedOrganizationId());
 		}
 
+		// Creator is fixed at creation time. On edit keep the stored creator; on create take it from the request
+		// (set server-side by the controller from the JWT), never from a client-supplied value on an existing row.
+		iCIPDatasource.setCreatedBy(fetched != null ? fetched.getCreatedBy() : iCIPDatasource2Save.getCreatedBy());
+
 		logger.info("saving datasource ");
 		iCIPDatasource = datasourceRepository.save(iCIPDatasource);
 		ExecutorService executor = Executors.newFixedThreadPool(1);

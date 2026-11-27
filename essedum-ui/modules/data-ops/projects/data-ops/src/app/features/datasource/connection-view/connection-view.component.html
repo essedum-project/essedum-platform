@@ -25,6 +25,7 @@
                         </div>
                         <div class="d-flex align-items-center gap-8">
                             <span *ngIf="hasApprovalStatus()" class="conn-approval-badge conn-approval-badge--{{ getApprovalStatusClass() }}">{{ getApprovalStatusLabel() }}</span>
+                            <span *ngIf="hasApprovalComments()" class="conn-approval-comments" [title]="getApprovalComments()">Comments: {{ getApprovalComments() }}</span>
                             <button *ngIf="showSubmitButton()" class="conn-submit-approval-btn" (click)="submitForApproval()">Submit for Approval</button>
                         </div>
                     </div>
@@ -49,6 +50,7 @@
                     </div>
                     <div class="d-flex align-items-center gap-8">
                         <span *ngIf="hasApprovalStatus()" class="conn-approval-badge conn-approval-badge--{{ getApprovalStatusClass() }}">{{ getApprovalStatusLabel() }}</span>
+                        <span *ngIf="hasApprovalComments()" class="conn-approval-comments" [title]="getApprovalComments()">Comments: {{ getApprovalComments() }}</span>
                         <button *ngIf="showSubmitButton()" class="conn-submit-approval-btn" (click)="submitForApproval()">Submit for Approval</button>
                     </div>
                 </div>

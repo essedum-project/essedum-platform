@@ -4,6 +4,7 @@ import { forkJoin } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { ApiService } from '../../../core/api.service';
+import { UserContextService } from '../../../core/user-context.service';
 import { RoleNameUtil } from '../../../core/role-name.util';
 import type { RbacRole, LegacyOrganisation, LegacyProject, LegacyPortfolio, UserOption } from '../../../core/api-models';
 
@@ -45,10 +46,11 @@ export class GrantRoleDialogComponent implements OnInit {
   constructor(
     private readonly ref: MatDialogRef<GrantRoleDialogComponent>,
     private readonly api: ApiService,
+    private readonly userContext: UserContextService,
   ) {}
 
   ngOnInit(): void {
-    this.api.getRoles().subscribe(roles => {
+    this.api.getRoles(this.userContext.userId$.value).subscribe(roles => {
       // Only the 5 new RBAC roles (rank defined), sorted lowest → highest rank
       this.roles = roles
         .filter(r => r.rank != null)

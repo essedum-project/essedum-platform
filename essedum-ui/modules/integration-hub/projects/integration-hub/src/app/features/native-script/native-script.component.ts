@@ -1941,6 +1941,21 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Check if creator is allowed to submit for approval (must be in DRAFT status)
    */
+  /**
+   * Admin approval/rejection comment, shown beside the status badge for every
+   * status except DRAFT and PENDING_PROJECT_APPROVAL (where no comment exists yet).
+   */
+  getApprovalComments(): string {
+    const status = this.approvalStatus;
+    if (!status || status === 'DRAFT' || status === 'PENDING_PROJECT_APPROVAL') return '';
+    const item: any = this.streamItem || {};
+    return (item.comments || item.approval_comments || '').toString().trim();
+  }
+
+  hasApprovalComments(): boolean {
+    return !!this.getApprovalComments();
+  }
+
   canSubmitForApproval(): boolean {
     const isOwn = this.isOwnPipeline();
     const isDraft = this.approvalStatus === 'DRAFT';

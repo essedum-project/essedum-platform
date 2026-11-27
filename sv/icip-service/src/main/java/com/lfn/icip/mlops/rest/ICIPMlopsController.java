@@ -1356,16 +1356,26 @@ public class ICIPMlopsController {
 		}
 	}
 
+	/** Extract the mandatory admin comment from the JSON body, falling back to the supplied value. */
+	private String extractComments(java.util.Map<String, Object> body, String fallback) {
+		if (body != null && body.get("comments") != null && !String.valueOf(body.get("comments")).isBlank()) {
+			return String.valueOf(body.get("comments"));
+		}
+		return fallback;
+	}
+
 	/** POST /models/approval/project/approve/{id}?projectId=X&rank=2 — Project Admin approves. */
 	@PostMapping("/models/approval/project/approve/{id}")
 	public ResponseEntity<?> approveModelProjectApproval(@PathVariable Integer id,
-			@RequestParam(required = false) Integer projectId, @RequestParam(required = false) String rank) {
+			@RequestParam(required = false) Integer projectId, @RequestParam(required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPMLFederatedModel result = modelApprovalWorkflowService.approveProjectApproval(id, projectId, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+			String comments = extractComments(body, null);
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.approveProjectApproval(id, projectId, rank, comments);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus(), "comments", result.getComments() != null ? result.getComments() : ""));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
 		} catch (IllegalStateException | IllegalArgumentException e) {
@@ -1378,13 +1388,15 @@ public class ICIPMlopsController {
 
 	/** POST /models/approval/project/reject/{id}?rank=2 — Project Admin rejects. */
 	@PostMapping("/models/approval/project/reject/{id}")
-	public ResponseEntity<?> rejectModelProjectApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> rejectModelProjectApproval(@PathVariable Integer id, @RequestParam(required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPMLFederatedModel result = modelApprovalWorkflowService.rejectProjectApproval(id, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+			String comments = extractComments(body, null);
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.rejectProjectApproval(id, rank, comments);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus(), "comments", result.getComments() != null ? result.getComments() : ""));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
 		} catch (IllegalStateException | IllegalArgumentException e) {
@@ -1425,13 +1437,15 @@ public class ICIPMlopsController {
 
 	/** POST /models/approval/org/approve/{id}?rank=3 — Org Admin approves (-> ORG_APPROVED). */
 	@PostMapping("/models/approval/org/approve/{id}")
-	public ResponseEntity<?> approveModelOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> approveModelOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPMLFederatedModel result = modelApprovalWorkflowService.approveOrgApproval(id, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+			String comments = extractComments(body, null);
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.approveOrgApproval(id, rank, comments);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus(), "comments", result.getComments() != null ? result.getComments() : ""));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
 		} catch (IllegalStateException | IllegalArgumentException e) {
@@ -1444,13 +1458,15 @@ public class ICIPMlopsController {
 
 	/** POST /models/approval/org/reject/{id}?rank=3 — Org Admin rejects. */
 	@PostMapping("/models/approval/org/reject/{id}")
-	public ResponseEntity<?> rejectModelOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> rejectModelOrgApproval(@PathVariable Integer id, @RequestParam(required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPMLFederatedModel result = modelApprovalWorkflowService.rejectOrgApproval(id, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+			String comments = extractComments(body, null);
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.rejectOrgApproval(id, rank, comments);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus(), "comments", result.getComments() != null ? result.getComments() : ""));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
 		} catch (IllegalStateException | IllegalArgumentException e) {
@@ -1488,13 +1504,15 @@ public class ICIPMlopsController {
 
 	/** POST /models/approval/platform/approve/{id}?rank=4 — Platform Admin approves (-> PUBLISHED). */
 	@PostMapping("/models/approval/platform/approve/{id}")
-	public ResponseEntity<?> approveModelPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> approveModelPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPMLFederatedModel result = modelApprovalWorkflowService.approvePlatformApproval(id, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+			String comments = extractComments(body, null);
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.approvePlatformApproval(id, rank, comments);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus(), "comments", result.getComments() != null ? result.getComments() : ""));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
 		} catch (IllegalStateException | IllegalArgumentException e) {
@@ -1507,13 +1525,15 @@ public class ICIPMlopsController {
 
 	/** POST /models/approval/platform/reject/{id}?rank=4 — Platform Admin rejects. */
 	@PostMapping("/models/approval/platform/reject/{id}")
-	public ResponseEntity<?> rejectModelPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank) {
+	public ResponseEntity<?> rejectModelPlatformApproval(@PathVariable Integer id, @RequestParam(required = false) String rank,
+			@RequestBody(required = false) java.util.Map<String, Object> body) {
 		try {
 			if (rank == null || rank.isEmpty()) {
 				return ResponseEntity.status(403).body(java.util.Map.of("error", "Missing rank parameter"));
 			}
-			ICIPMLFederatedModel result = modelApprovalWorkflowService.rejectPlatformApproval(id, rank);
-			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus()));
+			String comments = extractComments(body, null);
+			ICIPMLFederatedModel result = modelApprovalWorkflowService.rejectPlatformApproval(id, rank, comments);
+			return ResponseEntity.ok(java.util.Map.of("success", true, "resourceId", id, "status", result.getApprovalStatus(), "comments", result.getComments() != null ? result.getComments() : ""));
 		} catch (IllegalAccessError e) {
 			return ResponseEntity.status(403).body(java.util.Map.of("error", e.getMessage()));
 		} catch (IllegalStateException | IllegalArgumentException e) {
