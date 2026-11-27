@@ -334,6 +334,9 @@ public class ICIPDatasourceService implements IICIPDatasourceService, IICIPSearc
 		iCIPDatasource.setSalt(iCIPDatasource2Save.getSalt());
 		iCIPDatasource.setDshashcode(iCIPDatasource2Save.getDshashcode());
 		iCIPDatasource.setLastmodifiedby(iCIPDatasource2Save.getLastmodifiedby());
+		// Creator is fixed at creation time. On edit keep the stored creator; on create take it from the request
+		// (set server-side by the controller from the JWT), never from a client-supplied value on an existing row.
+		iCIPDatasource.setCreatedBy(fetched != null ? fetched.getCreatedBy() : iCIPDatasource2Save.getCreatedBy());
 		iCIPDatasource.setLastmodifieddate(iCIPDatasource2Save.getLastmodifieddate());
 		iCIPDatasource.setExtras(iCIPDatasource2Save.getExtras());
 		iCIPDatasource
