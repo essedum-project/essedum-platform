@@ -53,13 +53,13 @@ export class ApiService {
   getRoleAssignmentsPage(
     actorUserId: number,
     filters: {
-      roleId?: number | null; projectId?: number | null;
+      roleIds?: number[] | null; projectId?: number | null;
       activeProjectId?: number | null; activeRoleRank?: number | null;
       page?: number; size?: number;
     } = {},
   ): Observable<PagedResponse<RoleAssignmentView>> {
     const params: Record<string, string> = { actorUserId: String(actorUserId) };
-    if (filters.roleId != null) params['roleId'] = String(filters.roleId);
+    if (filters.roleIds?.length) params['roleId'] = filters.roleIds.join(',');
     if (filters.projectId != null) params['projectId'] = String(filters.projectId);
     // Profile-switcher context: the server scopes the list to this project's org/project.
     if (filters.activeProjectId != null) params['activeProjectId'] = String(filters.activeProjectId);

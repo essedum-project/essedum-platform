@@ -154,7 +154,7 @@ public class AccessResource {
 	@GetMapping("/access/role-assignments/page")
 	public ResponseEntity<PagedResponse<RoleAssignmentView>> pageRoleAssignments(
 			@RequestParam Integer actorUserId,
-			@RequestParam(required = false) Integer roleId,
+			@RequestParam(required = false) List<Integer> roleId,
 			@RequestParam(required = false) Integer projectId,
 			@RequestParam(required = false) Integer activeProjectId,
 			@RequestParam(required = false) Integer activeRoleRank,

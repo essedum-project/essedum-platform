@@ -14,9 +14,9 @@
   <div class="role-filter-bar">
     <mat-form-field appearance="fill" class="filter-field">
       <mat-label>Role</mat-label>
-      <mat-select [(ngModel)]="selectedRoleId" (ngModelChange)="applyFilters()" name="selectedRoleId">
+      <mat-select [(ngModel)]="selectedRoleKey" (ngModelChange)="applyFilters()" name="selectedRoleKey">
         <mat-option [value]="null">All roles</mat-option>
-        <mat-option *ngFor="let r of roles" [value]="r.id">{{ getDisplayRoleName(r.name) }}</mat-option>
+        <mat-option *ngFor="let r of roleOptions" [value]="r.key">{{ r.label }}</mat-option>
       </mat-select>
     </mat-form-field>
 

@@ -33,7 +33,7 @@ final class RoleAssignmentSpecs {
 	 *                   then count only inside the scopes (not from other orgs/projects)
 	 */
 	static Specification<RoleAssignment> build(List<RowScope> scopes, Integer ownUserId, boolean ownRowsInScopeOnly,
-			Integer roleId, Integer projectId) {
+			List<Integer> roleIds, Integer projectId) {
 		return (root, query, cb) -> {
 			List<Predicate> and = new ArrayList<>();
 			and.add(cb.isNull(root.get("revokedAt")));
@@ -69,8 +69,8 @@ final class RoleAssignmentSpecs {
 				}
 				and.add(or.isEmpty() ? cb.disjunction() : cb.or(or.toArray(new Predicate[0])));
 			}
-			if (roleId != null) {
-				and.add(cb.equal(root.get("roleId"), roleId));
+			if (roleIds != null && !roleIds.isEmpty()) {
+				and.add(root.get("roleId").in(roleIds));
 			}
 			if (projectId != null) {
 				and.add(cb.equal(root.get("projectId"), projectId));

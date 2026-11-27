@@ -15,6 +15,14 @@ interface RoleAssignmentRow extends RoleAssignmentView {
   scopeLabel: string;
 }
 
+/** One entry of the Role filter: ranks 0 and 1 both display as "AI Engineer", so ids can be several. */
+interface RoleFilterOption {
+  /** Normalised rank (0/1 collapse to 1) — also the select value. */
+  key: number;
+  label: string;
+  roleIds: number[];
+}
+
 @Component({
   selector: 'app-access',
   templateUrl: './access.component.html',
@@ -28,10 +36,12 @@ export class AccessComponent implements OnInit {
 
   /** Filter dropdown sources. */
   roles: RbacRole[] = [];
+  /** Deduplicated, non-legacy roles the current profile-switcher role may filter by. */
+  roleOptions: RoleFilterOption[] = [];
   projects: LegacyProject[] = [];
 
   /** Current filter selections; null = "All". Both narrow the server-side query. */
-  selectedRoleId: number | null = null;
+  selectedRoleKey: number | null = null;
   selectedProjectId: number | null = null;
 
   /** Server-side paging state. */
@@ -52,7 +62,7 @@ export class AccessComponent implements OnInit {
   get canCreateRole(): boolean { return this.rank >= 4; }
 
   get hasActiveFilter(): boolean {
-    return this.selectedRoleId != null || this.selectedProjectId != null;
+    return this.selectedRoleKey != null || this.selectedProjectId != null;
   }
 
   getDisplayRoleName(roleName: string): string {
@@ -63,10 +73,16 @@ export class AccessComponent implements OnInit {
     const actorUserId = this.userContext.userId$.value;
 
     this.api.getAccessContext(actorUserId)
-      .subscribe(ctx => (this.rank = ctx?.highestRank ?? 0));
+      .subscribe(ctx => {
+        this.rank = ctx?.highestRank ?? 0;
+        this.refreshRoleOptions();
+      });
 
     // Role dropdown: the server returns only the roles this actor may see.
-    this.api.getRoles(actorUserId).subscribe(roles => (this.roles = roles));
+    this.api.getRoles(actorUserId).subscribe(roles => {
+      this.roles = roles;
+      this.refreshRoleOptions();
+    });
     // Project filter: only projects of the organisation selected in the profile switcher.
     this.api.getProjects().subscribe(projects => {
       const activeId = this.activeProjectId();
@@ -77,6 +93,35 @@ export class AccessComponent implements OnInit {
     this.loadPage();
   }
 
+  /**
+   * Builds the Role dropdown: RBAC roles only (legacy usm_role entries have no rank), one entry per
+   * display name, capped by the role selected in the profile thumbnail (falling back to the actor's
+   * highest rank): platform admin → all four, org admin → up to Org Admin, project admin → up to
+   * Project Admin, AI Engineer → AI Engineer only.
+   */
+  private refreshRoleOptions(): void {
+    const cap = Math.max(this.activeRoleRank() ?? this.rank, 1);
+    const byKey = new Map<number, RoleFilterOption>();
+    for (const r of this.roles) {
+      if (r.rank == null || r.rank > cap) {
+        continue;
+      }
+      const key = Math.max(r.rank, 1);
+      const opt = byKey.get(key)
+        ?? { key, label: RoleNameUtil.getDisplayNameByRank(key), roleIds: [] };
+      opt.roleIds.push(r.id);
+      byKey.set(key, opt);
+    }
+    this.roleOptions = [...byKey.values()].sort((a, b) => a.key - b.key);
+    if (this.selectedRoleKey != null && !byKey.has(this.selectedRoleKey)) {
+      this.selectedRoleKey = null;
+    }
+  }
+
+  private selectedRoleIds(): number[] | null {
+    return this.roleOptions.find(o => o.key === this.selectedRoleKey)?.roleIds ?? null;
+  }
+
   /** A filter change always returns to the first page and re-queries. */
   applyFilters(): void {
     this.pageIndex = 0;
@@ -84,7 +129,7 @@ export class AccessComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.selectedRoleId = null;
+    this.selectedRoleKey = null;
     this.selectedProjectId = null;
     this.applyFilters();
   }
@@ -126,10 +171,11 @@ export class AccessComponent implements OnInit {
   private loadPage(): void {
     const actorUserId = this.userContext.userId$.value;
     this.loading = true;
+    this.refreshRoleOptions();
     this.api.getRoleAssignmentsPage(actorUserId, {
       activeProjectId: this.activeProjectId(),
       activeRoleRank: this.activeRoleRank(),
-      roleId: this.selectedRoleId,
+      roleIds: this.selectedRoleIds(),
       projectId: this.selectedProjectId,
       page: this.pageIndex,
       size: this.pageSize,

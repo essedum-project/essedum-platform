@@ -479,12 +479,15 @@ public class AccessContextService {
 	 * @param activeRoleRank  rank of the role currently selected in the profile switcher; can only lower
 	 *                        the visible-role cap, never raise it
 	 */
-	public PagedResponse<RoleAssignmentView> pageAssignments(Integer actorUserId, Integer roleId, Integer projectId,
+	public PagedResponse<RoleAssignmentView> pageAssignments(Integer actorUserId, List<Integer> filterRoleIds, Integer projectId,
 			Integer activeProjectId, Integer activeRoleRank, int page, int size) {
 		// Legacy role ids (>= LEGACY_ROLE_ID_OFFSET) are not filterable here. Stripping the
 		// offset would match RBAC rows that share the same numeric role_id, so return an
 		// empty page for every actor. The role dropdown no longer offers legacy roles.
-		if (roleId != null && roleId >= LEGACY_ROLE_ID_OFFSET) {
+		if (filterRoleIds != null && filterRoleIds.isEmpty()) {
+			filterRoleIds = null;
+		}
+		if (filterRoleIds != null && filterRoleIds.stream().anyMatch(id -> id != null && id >= LEGACY_ROLE_ID_OFFSET)) {
 			return new PagedResponse<>(Collections.emptyList(), page, size, 0, 0);
 		}
 
@@ -544,7 +547,7 @@ public class AccessContextService {
 		}
 
 		org.springframework.data.jpa.domain.Specification<RoleAssignment> spec =
-				RoleAssignmentSpecs.build(scopes, platformWide ? null : actorUserId, contextual, roleId, projectId);
+				RoleAssignmentSpecs.build(scopes, platformWide ? null : actorUserId, contextual, filterRoleIds, projectId);
 
 		org.springframework.data.domain.Page<RoleAssignment> result = roleAssignmentRepository.findAll(spec,
 				org.springframework.data.domain.PageRequest.of(page, size,
