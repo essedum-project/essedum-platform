@@ -1,9 +1,11 @@
-"""PY-01 contract tests: health, auth, task lifecycle shape, RFC 7807 errors."""
+"""Contract tests: health, auth, endpoint shapes, RFC 7807 errors (no cluster needed)."""
 import pytest
 from fastapi.testclient import TestClient
 
-from app import store
-from app.main import app
+from app.config import Settings
+from app.k8s.executor import TrainingExecutor
+from app.main import app, get_executor
+from tests.fakes import FakeGateway
 
 TOKEN = "test-token"
 AUTH = {"X-Service-Token": TOKEN}
@@ -20,7 +22,11 @@ BODY = {
 @pytest.fixture(autouse=True)
 def _setup(monkeypatch):
     monkeypatch.setenv("EXECUTOR_SERVICE_TOKEN", TOKEN)
-    store.clear()
+    gateway = FakeGateway()
+    executor = TrainingExecutor(gateway, Settings())
+    app.dependency_overrides[get_executor] = lambda: executor
+    yield gateway
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
@@ -59,21 +65,22 @@ def test_capacity_shape(client):
     assert "gpus" in r.json()
 
 
-def test_create_returns_202_with_task_id(client):
+def test_create_returns_202_with_job_name_as_task_id(client):
     r = client.post("/api/v1/tasks", json=BODY, headers=AUTH)
     assert r.status_code == 202
     data = r.json()
-    assert data["taskId"].startswith("task-")
+    assert data["taskId"].startswith("tr-run-1-")
     assert data["runId"] == "run-1"
     assert data["attempt"] == 1
     assert data["status"] == "Pending"
 
 
-def test_create_is_idempotent_per_run_and_attempt(client):
+def test_create_is_idempotent_per_run_and_attempt(client, _setup):
     first = client.post("/api/v1/tasks", json=BODY, headers=AUTH)
     second = client.post("/api/v1/tasks", json=BODY, headers=AUTH)
     assert second.status_code == 200
     assert second.json()["taskId"] == first.json()["taskId"]
+    assert len(_setup.jobs) == 1
     third = client.post("/api/v1/tasks", json={**BODY, "attempt": 2}, headers=AUTH)
     assert third.status_code == 202
     assert third.json()["taskId"] != first.json()["taskId"]
@@ -85,6 +92,11 @@ def test_create_validation_error_is_rfc7807(client):
     assert r.headers["content-type"].startswith("application/problem+json")
     body = r.json()
     assert body["status"] == 422 and body["errors"]
+
+
+def test_run_id_must_be_dns_safe(client):
+    r = client.post("/api/v1/tasks", json={**BODY, "runId": "Bad_Run"}, headers=AUTH)
+    assert r.status_code == 422
 
 
 def test_status_and_unknown_task(client):

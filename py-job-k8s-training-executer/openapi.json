@@ -78,7 +78,7 @@
           "tasks"
         ],
         "summary": "Create Task",
-        "description": "Create a training task. Idempotent per (runId, attempt): a repeat returns\nthe existing task with 200 instead of creating a second Job.",
+        "description": "Create a training Job. Idempotent per (runId, attempt): a repeat returns\nthe existing task with 200 instead of creating a second Job.",
         "operationId": "create_task_api_v1_tasks_post",
         "parameters": [
           {
@@ -184,7 +184,7 @@
           "tasks"
         ],
         "summary": "Stop Task",
-        "description": "Cancel a task. Idempotent.",
+        "description": "Cancel a task. Idempotent. Finished tasks keep their final status.",
         "operationId": "stop_task_api_v1_tasks__task_id__stop_post",
         "parameters": [
           {
@@ -351,10 +351,14 @@
         "properties": {
           "runId": {
             "type": "string",
+            "maxLength": 40,
+            "pattern": "^[a-z0-9]([-a-z0-9]{0,38}[a-z0-9])?$",
             "title": "Runid"
           },
           "projectId": {
             "type": "string",
+            "maxLength": 63,
+            "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$",
             "title": "Projectid"
           },
           "attempt": {
@@ -397,17 +401,6 @@
           },
           "resources": {
             "$ref": "#/components/schemas/Resources"
-          },
-          "namespace": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Namespace"
           },
           "nodeSelector": {
             "additionalProperties": {
@@ -477,7 +470,7 @@
           "token": {
             "type": "string",
             "title": "Token",
-            "description": "Per-run token for the callback; never logged"
+            "description": "Per-run token; stored in a Kubernetes Secret, never logged"
           }
         },
         "type": "object",
@@ -598,7 +591,8 @@
         "properties": {
           "taskId": {
             "type": "string",
-            "title": "Taskid"
+            "title": "Taskid",
+            "description": "Kubernetes Job name; use it for status, stop and logs"
           },
           "runId": {
             "type": "string",

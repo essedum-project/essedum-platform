@@ -8,6 +8,11 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+# Kubernetes DNS-label style identifiers. runId is embedded in Job names (max 63 chars),
+# so it is capped at 40. projectId is used as a label value (max 63 chars).
+RUN_ID_PATTERN = r"^[a-z0-9]([-a-z0-9]{0,38}[a-z0-9])?$"
+PROJECT_ID_PATTERN = r"^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+
 
 class TaskStatus(str, Enum):
     PENDING = "Pending"
@@ -37,12 +42,12 @@ class Resources(BaseModel):
 
 class EventCallback(BaseModel):
     url: str = Field(..., description="ICIP internal event endpoint the SDK posts to")
-    token: str = Field(..., description="Per-run token for the callback; never logged")
+    token: str = Field(..., description="Per-run token; stored in a Kubernetes Secret, never logged")
 
 
 class CreateTaskRequest(BaseModel):
-    runId: str
-    projectId: str
+    runId: str = Field(..., pattern=RUN_ID_PATTERN, max_length=40)
+    projectId: str = Field(..., pattern=PROJECT_ID_PATTERN, max_length=63)
     attempt: int = Field(1, ge=1)
     image: str = Field(..., description="Trainer container image")
     command: List[str] = Field(default_factory=list)
@@ -50,7 +55,6 @@ class CreateTaskRequest(BaseModel):
     env: Dict[str, str] = Field(default_factory=dict)
     params: Dict[str, object] = Field(default_factory=dict, description="Template parameters")
     resources: Resources = Field(default_factory=Resources)
-    namespace: Optional[str] = None
     nodeSelector: Dict[str, str] = Field(default_factory=dict)
     inputs: List[str] = Field(default_factory=list, description="Input URIs staged by the init container")
     checkpointBaseUri: Optional[str] = Field(None, description="Where the SDK writes checkpoints")
@@ -59,7 +63,7 @@ class CreateTaskRequest(BaseModel):
 
 
 class TaskResponse(BaseModel):
-    taskId: str
+    taskId: str = Field(..., description="Kubernetes Job name; use it for status, stop and logs")
     runId: str
     attempt: int
     status: TaskStatus

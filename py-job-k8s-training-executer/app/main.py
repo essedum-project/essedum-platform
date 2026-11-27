@@ -1,14 +1,17 @@
-"""ESSEDUM Kubernetes Training Executor - contract v1 (PY-01 skeleton).
+"""ESSEDUM Kubernetes Training Executor - contract v1.
 
-Endpoints return contract-shaped responses. Kubernetes behaviour arrives in
-PY-02 (Jobs) and PY-03 (logs, capacity).
+PY-02: create / status / stop map onto batch/v1 Jobs.
+Logs and capacity remain stubs until PY-03.
 """
+from functools import lru_cache
+
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app import store
+from app.config import Settings
+from app.k8s.executor import TrainingExecutor
 from app.models import CapacityResponse, CreateTaskRequest, HealthResponse, TaskResponse
 from app.security import require_service_token
 
@@ -21,6 +24,13 @@ app = FastAPI(
 PROBLEM_JSON = "application/problem+json"
 _TITLES = {400: "Bad Request", 401: "Unauthorized", 404: "Not Found",
            422: "Validation Failed", 503: "Service Unavailable"}
+
+
+@lru_cache(maxsize=1)
+def get_executor() -> TrainingExecutor:
+    """Production wiring. Tests replace this via app.dependency_overrides."""
+    from app.k8s.gateway import KubernetesGateway
+    return TrainingExecutor(KubernetesGateway(), Settings.from_env())
 
 
 # ---- RFC 7807 error handling (shared contract with ICIP / UI) ---------------
@@ -63,10 +73,11 @@ def capacity() -> CapacityResponse:
 
 @app.post("/api/v1/tasks", response_model=TaskResponse, status_code=202, tags=["tasks"],
           dependencies=[Depends(require_service_token)])
-def create_task(req: CreateTaskRequest, response: Response) -> TaskResponse:
-    """Create a training task. Idempotent per (runId, attempt): a repeat returns
+def create_task(req: CreateTaskRequest, response: Response,
+                executor: TrainingExecutor = Depends(get_executor)) -> TaskResponse:
+    """Create a training Job. Idempotent per (runId, attempt): a repeat returns
     the existing task with 200 instead of creating a second Job."""
-    task, created = store.create(req)
+    task, created = executor.create(req)
     if not created:
         response.status_code = 200
     return task
@@ -74,8 +85,8 @@ def create_task(req: CreateTaskRequest, response: Response) -> TaskResponse:
 
 @app.get("/api/v1/tasks/{task_id}", response_model=TaskResponse, tags=["tasks"],
          dependencies=[Depends(require_service_token)])
-def get_task(task_id: str) -> TaskResponse:
-    task = store.get(task_id)
+def get_task(task_id: str, executor: TrainingExecutor = Depends(get_executor)) -> TaskResponse:
+    task = executor.get(task_id)
     if task is None:
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
     return task
@@ -83,9 +94,9 @@ def get_task(task_id: str) -> TaskResponse:
 
 @app.post("/api/v1/tasks/{task_id}/stop", response_model=TaskResponse, tags=["tasks"],
           dependencies=[Depends(require_service_token)])
-def stop_task(task_id: str) -> TaskResponse:
-    """Cancel a task. Idempotent."""
-    task = store.stop(task_id)
+def stop_task(task_id: str, executor: TrainingExecutor = Depends(get_executor)) -> TaskResponse:
+    """Cancel a task. Idempotent. Finished tasks keep their final status."""
+    task = executor.stop(task_id)
     if task is None:
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
     return task
@@ -95,7 +106,8 @@ def stop_task(task_id: str) -> TaskResponse:
          dependencies=[Depends(require_service_token)])
 def task_logs(task_id: str,
               tail: int = Query(200, ge=1, le=10000, description="Last N lines"),
-              follow: bool = Query(False, description="Stream new lines (implemented in PY-03)")) -> str:
-    if store.get(task_id) is None:
+              follow: bool = Query(False, description="Stream new lines (implemented in PY-03)"),
+              executor: TrainingExecutor = Depends(get_executor)) -> str:
+    if executor.get(task_id) is None:
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
     return ""

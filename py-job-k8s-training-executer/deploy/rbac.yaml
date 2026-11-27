@@ -1,0 +1,40 @@
+# Namespace-scoped permissions for the executor (no cluster-wide rights).
+# Node/capacity read access (PY-03) is a separate ClusterRole and is added then.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: essedum-training-executor
+  namespace: essedum-training
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: essedum-training-executor
+  namespace: essedum-training
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch", "create", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: essedum-training-executor
+  namespace: essedum-training
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: essedum-training-executor
+subjects:
+  - kind: ServiceAccount
+    name: essedum-training-executor
+    namespace: essedum-training
