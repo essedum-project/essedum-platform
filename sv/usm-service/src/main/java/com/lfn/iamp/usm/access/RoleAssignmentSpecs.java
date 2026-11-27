@@ -43,7 +43,6 @@ final class RoleAssignmentSpecs {
 				if (ownUserId != null && !ownRowsInScopeOnly) {
 					or.add(cb.equal(root.get("userId"), ownUserId));
 				}
-				List<Predicate> allLocations = new ArrayList<>();
 				for (RowScope s : scopes) {
 					List<Predicate> location = new ArrayList<>();
 					if (!s.orgIds().isEmpty()) {
@@ -56,17 +55,17 @@ final class RoleAssignmentSpecs {
 						continue;
 					}
 					Predicate match = cb.or(location.toArray(new Predicate[0]));
-					allLocations.add(match);
 					if (s.roleIds() != null) {
 						match = cb.and(match, s.roleIds().isEmpty()
 								? cb.disjunction()
 								: root.get("roleId").in(s.roleIds()));
 					}
 					or.add(match);
-				}
-				if (ownUserId != null && ownRowsInScopeOnly && !allLocations.isEmpty()) {
-					or.add(cb.and(cb.equal(root.get("userId"), ownUserId),
-							cb.or(allLocations.toArray(new Predicate[0]))));
+					if (ownUserId != null && ownRowsInScopeOnly) {
+						// The viewer's own rows count only inside this scope and under the same role cap, so a
+						// higher role they hold (e.g. Platform Admin) stays hidden when a lower role is selected.
+						or.add(cb.and(cb.equal(root.get("userId"), ownUserId), match));
+					}
 				}
 				and.add(or.isEmpty() ? cb.disjunction() : cb.or(or.toArray(new Predicate[0])));
 			}
